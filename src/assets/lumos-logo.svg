@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="120" viewBox="0 0 440 120" role="img" aria-labelledby="lumosTitle lumosDesc">
+  <title id="lumosTitle">Quoted Lumos Building Automation Pvt. Ltd. logo</title>
+  <desc id="lumosDesc">Lumos logo with cyan dot grid and quoted company name on a black background.</desc>
+  <rect width="440" height="120" rx="16" fill="#000000"/>
+  <g fill="#4ac6e2">
+    <circle cx="34" cy="28" r="7"/>
+    <circle cx="52" cy="28" r="7"/>
+    <circle cx="70" cy="28" r="7"/>
+    <circle cx="88" cy="28" r="7"/>
+    <circle cx="34" cy="46" r="7"/>
+    <circle cx="52" cy="46" r="7"/>
+    <circle cx="70" cy="46" r="7"/>
+    <circle cx="88" cy="46" r="7"/>
+    <circle cx="34" cy="64" r="7"/>
+    <circle cx="52" cy="64" r="7"/>
+    <circle cx="70" cy="64" r="7"/>
+    <circle cx="88" cy="64" r="7"/>
+    <circle cx="34" cy="82" r="7"/>
+    <circle cx="52" cy="82" r="7"/>
+    <circle cx="70" cy="82" r="7"/>
+    <circle cx="88" cy="82" r="7"/>
+  </g>
+  <rect x="112" y="18" width="2" height="84" fill="#8aa5b4"/>
+  <text x="132" y="57" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="38" letter-spacing="1.5">&quot;LUMOS&quot;</text>
+  <text x="132" y="83" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="18">Building Automation Pvt. Ltd.</text>
+</svg>

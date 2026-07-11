@@ -1,0 +1,233 @@
+.table-container {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  max-width: 100%;
+  min-width: 0;
+  border: 1px solid #b7d4b0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 10px 22px rgba(53, 88, 44, 0.08);
+}
+
+.table-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  height: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.table-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.48);
+}
+
+.table-container::-webkit-scrollbar {
+  height: 12px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #f4f4ea 0%, #e7ebd9 100%);
+  border-radius: 999px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid #f2f4e8;
+  background: linear-gradient(180deg, #9fb367 0%, #768a3f 100%);
+}
+
+.table {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: max(100%, calc(var(--table-column-count, 4) * 9rem));
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+}
+
+.table-header {
+  background: transparent;
+}
+
+.table-header-cell {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0.78rem 0.82rem;
+  text-align: left;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid #5f834f;
+  border-right: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(180deg, #73b45f 0%, #4d8f3d 100%);
+  line-height: 1.28;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -1px 0 rgba(58, 71, 22, 0.28);
+  vertical-align: middle;
+}
+
+.table-header-cell:first-child {
+  border-top-left-radius: 16px;
+}
+
+.table-header-cell:last-child {
+  border-top-right-radius: 16px;
+  border-right: none;
+}
+
+.table-body {
+  background: transparent;
+}
+
+.table-row {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.table-striped .table-row:nth-child(odd) {
+  background: #ffffff;
+}
+
+.table-striped .table-row:nth-child(even) {
+  background: #f6fbf3;
+}
+
+.table-hoverable .table-row:hover {
+  background: #edf7e8;
+  box-shadow:
+    inset 5px 0 0 #5f9b4a,
+    inset 0 1px 0 rgba(255, 255, 255, 0.64);
+  cursor: pointer;
+}
+
+.table-cell {
+  max-width: none;
+  padding: 0.72rem 0.78rem 0.7rem;
+  font-size: 0.79rem;
+  color: #244224;
+  vertical-align: middle;
+  border-bottom: 1px solid #d9e8d2;
+  border-right: 1px solid #e1ecdb;
+  overflow-wrap: anywhere;
+  min-width: 0;
+  background: transparent;
+  line-height: 1.35;
+}
+
+.table-row .table-cell:first-child {
+  font-weight: 700;
+  color: #315d31;
+}
+
+.table-row:last-child .table-cell {
+  border-bottom: none;
+}
+
+.table-row .table-cell:last-child {
+  border-right: none;
+}
+
+.table-loading,
+.table-empty {
+  position: relative;
+  z-index: 1;
+  padding: 4rem 1.5rem 3.2rem;
+  text-align: center;
+  color: #4f7898;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.table-container input[type='search'],
+.table-container input[type='text'],
+.table-container input[type='email'],
+.table-container input[type='number'],
+.table-container select,
+.table-container textarea {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #a6c99b;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: none;
+  padding: 0.55rem 0.8rem;
+  color: #274227;
+  font: inherit;
+  font-weight: 500;
+  font-size: 0.78rem;
+}
+
+.table-container textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+
+.table-container input::placeholder,
+.table-container textarea::placeholder {
+  color: #6f866d;
+  opacity: 1;
+}
+
+.table-container input:focus,
+.table-container select:focus,
+.table-container textarea:focus {
+  outline: none;
+  border-color: #5f9b4a;
+  box-shadow: 0 0 0 3px rgba(95, 155, 74, 0.16);
+}
+
+.table-container input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: #5f9b4a;
+}
+
+@media (max-width: 720px) {
+  .table-container {
+    border-radius: 18px;
+    scroll-snap-type: x proximity;
+  }
+
+  .table-container::before {
+    inset: 8px 8px auto;
+    height: 66px;
+    border-radius: 14px;
+  }
+
+  .table-header-cell,
+  .table-cell {
+    padding: 0.68rem 0.64rem;
+    font-size: 0.75rem;
+  }
+
+  .table-cell {
+    max-width: none;
+  }
+
+  .table-container input[type='search'],
+  .table-container input[type='text'],
+  .table-container input[type='email'],
+  .table-container input[type='number'],
+  .table-container select,
+  .table-container textarea {
+    min-height: 38px;
+    border-radius: 14px;
+  }
+}
