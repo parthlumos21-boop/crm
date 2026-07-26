@@ -55,7 +55,7 @@
 
 .category-tab {
   padding: 8px 16px;
-  border: 1px solid var(--border-color, #ddd);
+  border: 1px solid var(--border-color, var(--border-subtle));
   border-radius: 4px;
   background-color: var(--bg-primary, #fff);
   color: var(--text-primary, #1a1a1a);
@@ -66,21 +66,21 @@
 }
 
 .category-tab:hover {
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
   background-color: var(--bg-hover, #f0f4f8);
 }
 
 .category-tab.active {
   background-color: var(--primary-color, #007bff);
   color: #fff;
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
 }
 
 /* Textarea Styling */
 .remark-textarea,
 .reminder-textarea {
   padding: 12px;
-  border: 1px solid var(--border-color, #ddd);
+  border: 1px solid var(--border-color, var(--border-subtle));
   border-radius: 4px;
   font-family: inherit;
   font-size: 14px;
@@ -93,7 +93,7 @@
 .remark-textarea:focus,
 .reminder-textarea:focus {
   outline: none;
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
@@ -153,7 +153,7 @@
 
 .quick-date-btn {
   padding: 6px 12px;
-  border: 1px solid var(--border-color, #ddd);
+  border: 1px solid var(--border-color, var(--border-subtle));
   border-radius: 4px;
   background-color: var(--bg-primary, #fff);
   color: var(--text-primary, #1a1a1a);
@@ -164,14 +164,14 @@
 }
 
 .quick-date-btn:hover {
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
   background-color: var(--bg-hover, #f0f4f8);
 }
 
 .quick-date-btn.active {
   background-color: var(--primary-color, #007bff);
   color: #fff;
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
 }
 
 /* Date/Time Picker Styling */
@@ -185,7 +185,7 @@
 .date-picker,
 .time-picker {
   padding: 8px;
-  border: 1px solid var(--border-color, #ddd);
+  border: 1px solid var(--border-color, var(--border-subtle));
   border-radius: 4px;
   font-size: 14px;
   background-color: var(--bg-primary, #fff);
@@ -196,7 +196,7 @@
 .date-picker:focus,
 .time-picker:focus {
   outline: none;
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
 }
 
 /* Time Buttons */
@@ -208,7 +208,7 @@
 
 .time-btn {
   padding: 6px;
-  border: 1px solid var(--border-color, #ddd);
+  border: 1px solid var(--border-color, var(--border-subtle));
   border-radius: 4px;
   background-color: var(--bg-primary, #fff);
   color: var(--text-primary, #1a1a1a);
@@ -219,14 +219,14 @@
 }
 
 .time-btn:hover {
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
   background-color: var(--bg-hover, #f0f4f8);
 }
 
 .time-btn.active {
   background-color: var(--primary-color, #007bff);
   color: #fff;
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
 }
 
 .reminder-action-buttons {
@@ -242,7 +242,7 @@
 .reminder-action-btn {
   min-height: 34px;
   padding: 7px 12px;
-  border: 1px solid var(--border-color, #ddd);
+  border: 1px solid var(--border-color, var(--border-subtle));
   border-radius: 4px;
   background-color: var(--bg-primary, #fff);
   color: var(--text-primary, #1a1a1a);
@@ -255,14 +255,14 @@
 }
 
 .reminder-action-btn:hover {
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
   background-color: var(--bg-hover, #f0f4f8);
 }
 
 .reminder-action-btn.active {
   background-color: var(--primary-color, #007bff);
   color: #fff;
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
   box-shadow: 0 6px 14px rgba(0, 123, 255, 0.18);
 }
 
@@ -280,14 +280,14 @@
 
 .reminder-radio-card {
   min-height: 34px;
-  border: 1px solid var(--border-color, #ddd);
+  border: 1px solid var(--border-color, var(--border-subtle));
   border-radius: 4px;
   padding: 7px 10px;
   background: var(--bg-primary, #fff);
 }
 
 .reminder-radio-card:has(input:checked) {
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
   background: rgba(0, 123, 255, 0.08);
   color: var(--primary-color, #007bff);
 }
@@ -298,10 +298,10 @@
   justify-content: center;
   width: fit-content;
   min-height: 34px;
-  border: 1px solid #f1c36b;
+  border: 1px solid var(--border-subtle);
   border-radius: 999px;
   padding: 7px 16px;
-  background: #fff8e8;
+  background: var(--surface-card);
   color: #946200;
   font-size: 12px;
   font-weight: 800;
@@ -318,7 +318,7 @@
 
 .assign-user-select {
   padding: 8px;
-  border: 1px solid var(--border-color, #ddd);
+  border: 1px solid var(--border-color, var(--border-subtle));
   border-radius: 4px;
   font-size: 14px;
   background-color: var(--bg-primary, #fff);
@@ -329,7 +329,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border: 1px solid var(--border-color, #d8dde6);
+  border: 1px solid var(--border-color, var(--border-subtle));
   border-radius: 6px;
   padding: 12px;
   background: linear-gradient(180deg, rgba(248, 251, 255, 0.96) 0%, rgba(239, 246, 252, 0.86) 100%);
@@ -347,14 +347,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border: 1px solid #d7e1ec;
+  border: 1px solid var(--border-subtle);
   border-radius: 5px;
   padding: 8px;
-  background: #fff;
+  background: var(--surface-card);
 }
 
 .assignment-mode-row > span {
-  color: #263343;
+  color: var(--text-primary);
   font-size: 12px;
   font-weight: 700;
 }
@@ -363,9 +363,9 @@
   flex: 0 0 auto;
   display: inline-flex;
   overflow: hidden;
-  border: 1px solid #c8d5e4;
+  border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  background: #eef4fa;
+  background: var(--surface-muted);
 }
 
 .assignment-toggle button {
@@ -373,7 +373,7 @@
   height: 28px;
   border: 0;
   background: transparent;
-  color: #5f6e80;
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 11px;
   font-weight: 800;
@@ -399,7 +399,7 @@
   min-height: 30px;
   border-radius: 5px;
   padding: 5px 6px;
-  color: #2f3b4c;
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
@@ -407,14 +407,14 @@
 }
 
 .assignment-checkbox-option:hover {
-  background: #eef6fc;
+  background: var(--surface-muted);
 }
 
 .assignment-checkbox-option input {
   flex: 0 0 auto;
   width: 16px;
   height: 16px;
-  accent-color: #2fa74d;
+  accent-color: var(--text-primary);
 }
 
 .assignment-checkbox-option span {
@@ -423,7 +423,7 @@
 }
 
 .assignment-checkbox-option-strong {
-  color: #203044;
+  color: var(--text-primary);
   font-weight: 800;
 }
 
@@ -435,9 +435,9 @@
 
 .assignment-group-box {
   min-width: 0;
-  border: 1px solid #c8d8e8;
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
-  background: #fff;
+  background: var(--surface-card);
   padding: 10px;
 }
 
@@ -447,14 +447,14 @@
 
 .assignment-group-box h4 {
   margin: 0 0 8px;
-  color: #364456;
+  color: var(--text-primary);
   font-size: 13px;
   font-weight: 800;
 }
 
 .assignment-empty {
   margin: 0;
-  color: #7a8797;
+  color: var(--text-primary);
   font-size: 12px;
   font-weight: 600;
 }
@@ -476,7 +476,7 @@
   justify-content: flex-end;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid var(--border-color, #ddd);
+  border-top: 1px solid var(--border-color, var(--border-subtle));
 }
 
 .form-actions button {
@@ -493,7 +493,7 @@
 [data-theme="dark"] .assignment-mode-row,
 [data-theme="dark"] .assignment-group-box {
   background-color: var(--bg-primary, #1a1a1a);
-  border-color: var(--border-color, #444);
+  border-color: var(--border-color, var(--border-subtle));
 }
 
 [data-theme="dark"] .assignment-mode-row > span,
@@ -514,16 +514,16 @@
 [data-theme="dark"] .reminder-textarea {
   background-color: var(--bg-primary, #1a1a1a);
   color: var(--text-primary, #fff);
-  border-color: var(--border-color, #444);
+  border-color: var(--border-color, var(--border-subtle));
 }
 
 [data-theme="dark"] .reminder-radio-card:has(input:checked) {
-  border-color: var(--primary-color, #007bff);
+  border-color: var(--primary-color, var(--border-subtle));
   background: rgba(0, 123, 255, 0.18);
 }
 
 [data-theme="dark"] .reminder-status-pill {
-  border-color: #8a6a25;
+  border-color: var(--text-primary);
   background: rgba(241, 195, 107, 0.14);
   color: #ffd27a;
 }
@@ -564,4 +564,63 @@
   .form-actions button {
     width: 100%;
   }
+}
+
+[data-theme="dark"] :where(
+  .remarks-modal,
+  .remarks-modal-content,
+  .remarks-modal-body,
+  .remarks-form,
+  .remarks-section,
+  .remarks-card,
+  .feedback-section,
+  .general-section,
+  .reminder-section,
+  .assignment-section,
+  .form-group,
+  .form-actions
+) {
+  background: #17232d !important;
+  border-color: var(--text-primary) !important;
+  color: #f0fffd !important;
+}
+
+[data-theme="dark"] :where(
+  .remarks-modal-header,
+  .remarks-modal-title,
+  .remarks-modal-content h1,
+  .remarks-modal-content h2,
+  .remarks-modal-content h3,
+  .remarks-modal-content p,
+  .remarks-modal-content span,
+  .remarks-modal-content label,
+  .remarks-modal-content strong
+):not(button):not([class*="btn"]):not([class*="badge"]) {
+  color: #f0fffd !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] :where(
+  .remarks-modal-content input,
+  .remarks-modal-content select,
+  .remarks-modal-content textarea,
+  .form-input,
+  .form-select,
+  .form-textarea
+) {
+  background: #1b2c37 !important;
+  border-color: var(--text-primary) !important;
+  color: #f0fffd !important;
+}
+
+[data-theme="dark"] :where(
+  .quick-date-btn,
+  .reminder-action-btn,
+  .reminder-type-btn,
+  .remarks-modal-close
+) {
+  border-color: var(--text-primary) !important;
+  background: #1d2b36 !important;
+  color: #f0fffd !important;
+  opacity: 1 !important;
 }

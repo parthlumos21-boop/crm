@@ -25,30 +25,31 @@
   min-height: 2.5rem;
   height: 2.5rem;
   padding: 0 1.05rem;
-  border: 1px solid #1d7f49;
+  border: 1px solid #1e663e;
   border-radius: 0.65rem;
-  background: linear-gradient(180deg, #2fbe6b 0%, #1f8b4f 100%);
+  background: #217346;
   color: #ffffff;
   font-size: 0.86rem;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(31, 139, 79, 0.18);
-  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease, opacity 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+  box-shadow: none;
+  transition: transform 0.14s ease, filter 0.14s ease, opacity 0.14s ease, background 0.14s ease, border-color 0.14s ease;
 }
 
 .excel-export-button:hover:not(:disabled),
 .excel-export-menu-item:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(31, 139, 79, 0.24);
+  background: #1e663e;
+  box-shadow: none;
   filter: brightness(1.04);
 }
 
 .excel-export-button:focus-visible,
 .excel-export-menu-item:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(47, 190, 107, 0.32), 0 6px 16px rgba(31, 139, 79, 0.2);
+  box-shadow: 0 0 0 3px rgba(33, 115, 70, 0.32);
 }
 
 .excel-export-button:active:not(:disabled),
@@ -72,19 +73,19 @@
 }
 
 .excel-export-button--menu-open {
-  box-shadow: 0 0 0 3px rgba(47, 190, 107, 0.22), 0 10px 22px rgba(31, 139, 79, 0.24);
+  box-shadow: 0 0 0 3px rgba(33, 115, 70, 0.22);
 }
 
 .excel-export-button--success,
 .excel-export-menu-item--success {
-  border-color: #177042;
-  background: linear-gradient(180deg, #25965a 0%, #176f42 100%);
+  border-color: #176f42;
+  background: #25965a;
 }
 
 .excel-export-button--loading,
 .excel-export-menu-item--loading {
-  border-color: #2e7f9f;
-  background: linear-gradient(180deg, #45a8cf 0%, #28779b 100%);
+  border-color: #28779b;
+  background: #28779b;
   cursor: progress;
 }
 
@@ -129,9 +130,9 @@
   min-width: min(320px, calc(100vw - 1rem));
   max-width: min(360px, calc(100vw - 1rem));
   padding: 0.55rem;
-  border: 1px solid #d6e3ed;
+  border: 1px solid var(--border-subtle);
   border-radius: 0.85rem;
-  background: #ffffff;
+  background: var(--surface-card);
   box-shadow: 0 18px 36px rgba(15, 23, 42, 0.16);
   z-index: 2500;
   display: grid;
@@ -150,12 +151,12 @@
 
 .excel-export-menu-group + .excel-export-menu-group {
   padding-top: 0.2rem;
-  border-top: 1px solid #eef3f7;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .excel-export-menu-group__label {
   padding: 0.1rem 0.2rem 0;
-  color: #65798b;
+  color: var(--text-primary);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -168,9 +169,9 @@
   min-height: 2.6rem;
   justify-content: space-between;
   padding: 0.65rem 0.9rem;
-  border-color: #d6e3ed;
-  background: #f7fbf8;
-  color: #1f2937;
+  border-color:  var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-primary);
   box-shadow: none;
 }
 
@@ -178,18 +179,18 @@
  * than a generic dark file glyph (which is how it renders if it inherits the
  * dark text color). Loading/success states still use white for contrast. */
 .excel-export-menu-item .excel-export-menu-item__icon {
-  color: #1f8b4f;
+  color: var(--text-primary);
 }
 
 .excel-export-menu-item:hover:not(:disabled) {
-  background: #eef7f1;
+  background: var(--surface-muted);
   filter: none;
   transform: none;
   box-shadow: none;
 }
 
 .excel-export-menu-item:hover:not(:disabled) .excel-export-menu-item__icon {
-  color: #176f42;
+  color: var(--text-primary);
 }
 
 .excel-export-menu-item--loading,
@@ -228,8 +229,8 @@
   min-height: 1.45rem;
   padding: 0 0.55rem;
   border-radius: 999px;
-  background: #e4f3e9;
-  color: #197142;
+  background: var(--surface-muted);
+  color: var(--text-primary);
   font-size: 0.69rem;
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -238,7 +239,7 @@
 
 .excel-export-menu-item--loading .excel-export-menu-item__badge,
 .excel-export-menu-item--success .excel-export-menu-item__badge {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--surface-card);
   color: #ffffff;
 }
 

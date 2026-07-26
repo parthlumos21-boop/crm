@@ -4,10 +4,10 @@ import {
   FaArrowLeft,
   FaBell,
   FaBriefcase,
-  FaBullhorn,
   FaCog,
   FaCreditCard,
   FaDesktop,
+  FaEnvelope,
   FaHandsHelping,
   FaImages,
   FaMapMarkerAlt,
@@ -15,6 +15,8 @@ import {
   FaSearch,
   FaSignOutAlt,
   FaStar,
+  FaMoon,
+  FaSun,
   FaTh,
   FaThumbsUp,
   FaUserCircle,
@@ -24,6 +26,7 @@ import {
 import { FiBell, FiChevronDown } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
+import { useTheme } from '../../context/ThemeContext'
 import { getAdminReminders } from '../../features/adminReminders/getAdminReminders'
 import { getAdminReminderStates, subscribeAdminReminderStates } from '../../features/adminReminders/reminderStorage'
 import { getAdminBookmarks, saveAdminBookmarks, subscribeAdminBookmarks } from '../../features/adminBookmarks/adminBookmarkStorage'
@@ -43,6 +46,7 @@ const ADMIN_USER_MENU = [
   { label: 'Settings', icon: FaCog, route: '/admin/settings' },
   { label: 'Quotation Summary', icon: FaCreditCard, route: '/admin/reports/quotation-summary' },
   { label: 'Geo Tracking', icon: FaMapMarkerAlt, route: '/admin/reports/customer-map' },
+  { label: 'Connect Outlook', icon: FaEnvelope, action: 'CONNECT_OUTLOOK' },
 ]
 
 const STANDARD_USER_MENU = [
@@ -50,6 +54,7 @@ const STANDARD_USER_MENU = [
   { label: 'Accounts', icon: FaBriefcase, route: '/accounts' },
   { label: 'Deals', icon: FaThumbsUp, route: '/deals' },
   { label: 'Custom Reports', icon: FaUserCog, route: '/reports/custom' },
+  { label: 'Connect Outlook', icon: FaEnvelope, action: 'CONNECT_OUTLOOK' },
 ]
 
 const ADD_REMINDER_ACTION = '__add_reminder__'
@@ -64,19 +69,19 @@ const ADMIN_QUICK_ADD_ITEMS = [
 ]
 
 const STANDARD_QUICK_ADD_ITEMS = [
-  { label: 'Add Account', icon: FaBriefcase, route: '/accounts/new' },
-  { label: 'Add Support Request', icon: FaHandsHelping, route: '/support-requests/add' },
   { label: 'Add Reminder', icon: FiBell, action: ADD_REMINDER_ACTION },
   { label: 'Image Gallery', icon: FaImages, route: '/image-gallery' },
 ]
 
 const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => {
   const { user } = useAuth()
+  const { toggleTheme, isDark } = useTheme()
   const {
     accounts,
     deals,
     supportRequests,
     tasks,
+    reminders: mongoReminders,
     messages,
     addNotification,
   } = useData()
@@ -122,9 +127,7 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
   }
 
   const reminderCount = useMemo(() => {
-    if (!isAdmin) return 0
-
-    const reminders = getAdminReminders({
+    const legacyReminders = getAdminReminders({
       accounts,
       deals,
       user,
@@ -132,8 +135,15 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
       reminderStatesById,
     })
 
-    return reminders.filter((reminder) => reminder.status === 'active').length
-  }, [accounts, deals, isAdmin, reminderStatesById, user])
+    const legacyReminderCount = legacyReminders.filter((reminder) => reminder.status === 'active').length
+    const mongoReminderCount = (mongoReminders || []).filter((reminder) => {
+      if (reminder.status === 'closed') return false
+      if (isAdmin) return true
+      return String(reminder.assignedTo || reminder.createdBy || '') === String(user?.id || '')
+    }).length
+
+    return legacyReminderCount + mongoReminderCount
+  }, [accounts, deals, isAdmin, mongoReminders, reminderStatesById, user])
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -162,7 +172,16 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
     return () => document.removeEventListener('mousedown', handleOutsideClick)
   }, [])
 
-  const handleMenuNav = (route) => {
+  const handleMenuNav = async (route, action) => {
+    if (action === 'CONNECT_OUTLOOK') {
+      setMenuOpen(false)
+      closeHeaderPanels()
+      addNotification('info', 'Connecting to Outlook', 'Please wait while we redirect you to Microsoft...')
+      const returnUrl = encodeURIComponent(window.location.href)
+      window.location.href = `/api/auth/microsoft/login?returnUrl=${returnUrl}`
+      return
+    }
+
     navigate(route)
     setMenuOpen(false)
     closeHeaderPanels()
@@ -175,17 +194,8 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
   }
 
   const handleOpenReminderPanel = () => {
-    if (!isAdmin) {
-      closeHeaderPanels()
-      navigate('/reminders')
-      return
-    }
-
-    setMenuOpen(false)
-    setQuickAddOpen(false)
-    setSearchPanelOpen(false)
-    setMessagePanelOpen(false)
-    setReminderPanelOpen((previous) => !previous)
+    closeHeaderPanels()
+    navigate(isAdmin ? '/admin/reminders/my' : '/reminders/my')
   }
 
   const handleOpenQuickAdd = () => {
@@ -341,20 +351,6 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
     <>
       <header className={`header ${isAdmin ? 'header--admin' : 'header--user'}`}>
         <div className="header-panel header-panel--center">
-          <div className="header-center-copy">
-            <button type="button" className="header-brand-badge" onClick={handleBrandNavigate} title="LaunchPad">
-              {showCenteredLogo ? (
-                <img
-                  src={swatiLogo}
-                  alt={`${APP_NAME} logo`}
-                  className="header-brand-badge-logo"
-                  onError={() => setShowCenteredLogo(false)}
-                />
-              ) : (
-                <span className="header-brand-badge-fallback" aria-hidden="true">{APP_NAME}</span>
-              )}
-            </button>
-          </div>
         </div>
 
         <div className="header-panel header-panel--actions">
@@ -366,7 +362,7 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
                 onClick={handleOpenReminderPanel}
               >
                 <span className="hdr-badge">{reminderCount}</span>
-                <FaBullhorn />
+                <FaBell />
               </button>
 
               {isAdmin && reminderPanelOpen && (
@@ -451,7 +447,7 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
             <div className="hdr-message-wrap" ref={messageWrapRef}>
               <button className="hdr-icon-btn hdr-icon-btn--blue" title="Messages" onClick={handleOpenMessagePanel}>
                 <span className="hdr-badge">{messages.length}</span>
-                <FaBell />
+                <FaEnvelope />
               </button>
 
               {messagePanelOpen && (
@@ -475,6 +471,18 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
               )}
             </div>
 
+            <button
+              type="button"
+              className={`hdr-theme-toggle ${isDark ? 'hdr-theme-toggle--night' : 'hdr-theme-toggle--day'}`}
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to Light' : 'Switch to Dark'}
+              aria-label={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
+              aria-pressed={isDark}
+            >
+              {isDark ? <FaMoon /> : <FaSun />}
+              <span>{isDark ? 'Dark' : 'Light'}</span>
+            </button>
+
             <div className="hdr-user-menu-wrap" ref={menuWrapRef}>
               <button className="hdr-user-btn" onClick={() => setMenuOpen((previous) => !previous)}>
                 <FaUserCircle className="hdr-avatar-icon" />
@@ -485,17 +493,20 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
               {menuOpen && (
                 <div className="hdr-dropdown">
                   <div className="hdr-dropdown-name">{displayName}</div>
-                  {dropdownItems.map(({ label, icon: Icon, route }) => (
-                    <button
-                      key={label}
+                  {dropdownItems.map((item) => {
+                    const { label, icon: Icon, route } = item
+                    return (
+                      <button
+                        key={label}
                       type="button"
                       className="hdr-dropdown-item"
-                      onClick={() => handleMenuNav(route)}
+                      onClick={() => handleMenuNav(route, item.action)}
                     >
                       <Icon className="hdr-dropdown-icon" />
                       <span>{label}</span>
                     </button>
-                  ))}
+                    )
+                  })}
                   {isAdmin && (
                     <>
                       <button
@@ -568,6 +579,7 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
         onClose={() => setAddReminderOpen(false)}
         createdBy={user?.name || ''}
       />
+
     </>
   )
 }

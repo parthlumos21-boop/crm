@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { FaHandshake } from 'react-icons/fa'
+import { FaHandshake, FaRocket, FaUserTie } from 'react-icons/fa'
 import { useAuth } from '../../../context/AuthContext'
 import Header from '../../../components/layout/Header'
 import RightPanel from '../../../components/layout/RightPanel'
@@ -12,6 +12,7 @@ import {
 import { adminModules } from '../../../features/adminLaunchpad/adminModules'
 import { buildAdminDealCustomViewUrl } from '../../../features/adminDeals/config/adminDealViews'
 import { getAdminDealCustomViews, subscribeAdminDealCustomViews } from '../../../features/adminDeals/customViews/dealCustomViewStorage'
+import swatiLogo from '../../../assets/swati-logo.png'
 import './AdminLaunchpad.css'
 
 const chunkModules = (modules, chunkSize) => (
@@ -19,6 +20,13 @@ const chunkModules = (modules, chunkSize) => (
     modules.slice(index * chunkSize, index * chunkSize + chunkSize)
   ))
 )
+
+const isKevalVShah = (user = {}) => {
+  const v = String(user?.name || user?.email || '').trim().toLowerCase()
+  return v === 'keval v shah'
+    || v.includes('keval v shah')
+    || v === 'keval@swatiswitchgears.com'
+}
 
 const cardMotion = {
   hidden: { opacity: 0, y: 52, scale: 0.94, filter: 'blur(10px)' },
@@ -38,6 +46,7 @@ const cardMotion = {
 const AdminLaunchpad = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const isKeval = isKevalVShah(user)
   const [defaultRoute, setDefaultRoute] = useState(() => getAdminDefaultModuleRoute(user))
   const [dealCustomViews, setDealCustomViews] = useState(() => getAdminDealCustomViews())
 
@@ -80,10 +89,12 @@ const AdminLaunchpad = () => {
 
       <div className="lp-body">
         <main className="lp-main">
+          
           <div className="lp-content lp-content--modules-only">
             <section className="lp-modules-shell">
               <div className="lp-modules-header">
-                <div className="lp-modules-copy">
+                <div className="lp-modules-copy" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <img src={swatiLogo} alt="Swati Logo" style={{ height: '120px', marginBottom: '24px' }} />
                   <span className="lp-modules-kicker">Admin Workspace</span>
                   <h1 className="lp-modules-title">LaunchPad</h1>
                   <p className="lp-modules-subtitle">
@@ -122,12 +133,12 @@ const AdminLaunchpad = () => {
                         onClick={() => navigate(module.route)}
                       >
                         <span className="lp-card-icon"><Icon /></span>
-                        <span className="lp-card-title">{module.title}</span>
+                        <span className={`lp-card-title${isKeval ? ' lp-card-title--full' : ''}`}>{module.title}</span>
                       </button>
 
                       <button
                         type="button"
-                        className={`lp-card-footer ${isDefault ? 'lp-card-footer--active' : ''}`}
+                        className={`lp-card-footer${isDefault ? ' lp-card-footer--active' : ''}`}
                         onClick={() => handleDefaultSelection(module.route)}
                       >
                         Set As Default Module
@@ -160,12 +171,12 @@ const AdminLaunchpad = () => {
                             onClick={() => navigate(module.route)}
                           >
                             <span className="lp-card-icon"><Icon /></span>
-                            <span className="lp-card-title">{module.title}</span>
+                            <span className={`lp-card-title${isKeval ? ' lp-card-title--full' : ''}`}>{module.title}</span>
                           </button>
 
                           <button
                             type="button"
-                            className={`lp-card-footer ${isDefault ? 'lp-card-footer--active' : ''}`}
+                            className={`lp-card-footer${isDefault ? ' lp-card-footer--active' : ''}`}
                             onClick={() => handleDefaultSelection(module.route)}
                           >
                             Set As Default Module
@@ -179,7 +190,6 @@ const AdminLaunchpad = () => {
             </section>
           </div>
 
-          {/* Footer notice */}
           <div className="lp-expiry-bar">
             <span>Your CRM account has expired. Kindly process the payment.</span>
             {' '}

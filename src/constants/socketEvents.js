@@ -39,6 +39,9 @@ export const SOCKET_EVENTS = {
   TASK_CREATED: 'task:created',
   TASK_UPDATED: 'task:updated',
   TASK_DELETED: 'task:deleted',
+  REMINDER_CREATED: 'reminder:created',
+  REMINDER_UPDATED: 'reminder:updated',
+  REMINDER_DELETED: 'reminder:deleted',
   SUPPORT_REQUEST_CREATE: 'support-request:create',
   SUPPORT_REQUEST_UPDATE: 'support-request:update',
   SUPPORT_REQUEST_CREATED: 'support-request:created',
@@ -57,6 +60,7 @@ export const SOCKET_ENTITY_TYPES = {
   DEAL: 'deal',
   CONVERTED_DEAL: 'converted-deal',
   TASK: 'task',
+  REMINDER: 'reminder',
   SUPPORT_REQUEST: 'support-request',
   MESSAGE: 'message',
 }

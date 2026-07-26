@@ -5,7 +5,7 @@ const { supportRequest } = require('../validation/schemas')
 
 const DEFAULT_SR_NUMBER_START = 1
 
-const buildSupportRequestNumber = (sequence) => `SR${String(sequence).padStart(5, '0')}`
+const buildSupportRequestNumber = (sequence) => `SR${String(sequence).padStart(6, '0')}`
 
 const parseSupportRequestNumber = (srNumber = '') => {
   const match = String(srNumber || '').match(/(\d+)$/)
@@ -31,9 +31,7 @@ const buildPayload = async (body, actor, existing) => {
   const subject = body.subject ?? existing?.subject
   if (!subject) throw new AppError('Subject is required.', 400)
   const srNumber = (
-    body.srNumber
-    || body.data?.srNumber
-    || existing?.srNumber
+    existing?.srNumber
     || existing?.data?.srNumber
     || await getNextSupportRequestNumber(actor)
   )
@@ -62,6 +60,32 @@ const base = createCrudService({
   buildPayload,
 })
 
+const { sendEmail } = require('./emailService')
+
+const originalCreate = base.create
+const create = async (actor, body) => {
+  const record = await originalCreate(actor, body)
+
+  const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:3000'
+  const link = `${frontendUrl}/admin/tickets`
+
+  sendEmail({
+    to: 'parth21082002@gmail.com',
+    subject: `New CRM Support Request: ${record.srNumber || 'Untitled'}`,
+    html: `
+      <h2>New Support Request Detected</h2>
+      <p><strong>Subject:</strong> ${record.subject || 'N/A'}</p>
+      <p><strong>Priority:</strong> ${record.priority || 'normal'}</p>
+      <br/>
+      <p><a href="${link}" style="display:inline-block;padding:10px 20px;background:#007bff;color:#fff;text-decoration:none;border-radius:4px;">Open Support Requests</a></p>
+    `,
+  }).catch((err) => {
+    console.error('Failed to send email notification for support request:', err)
+  })
+
+  return record
+}
+
 const bulkUpdate = async (actor, body) => {
   const ids = (body?.ids || []).map((id) => Number.parseInt(id, 10)).filter(Boolean)
   if (ids.length === 0) throw new AppError('No ids provided.', 400)
@@ -84,7 +108,22 @@ const bulkDelete = async (actor, body) => {
   return { removed }
 }
 
-module.exports = { ...base, bulkUpdate, bulkDelete }
+const originalList = base.list
+const list = async (actor) => {
+  const records = await originalList(actor)
+  const twoDaysAgo = new Date()
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
+
+  return records.filter((record) => {
+    if ((record.status || '').toLowerCase() === 'closed') {
+      const recordDate = new Date(record.updatedAt || record.createdAt || 0)
+      if (recordDate < twoDaysAgo) return false
+    }
+    return true
+  })
+}
+
+module.exports = { ...base, create, list, bulkUpdate, bulkDelete }
 module.exports.validation = {
   create: supportRequest,
   update: supportRequest,

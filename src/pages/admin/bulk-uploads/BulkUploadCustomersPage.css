@@ -1,13 +1,13 @@
 .bulk-customers-page {
   min-height: 100vh;
-  background: #f6f6f6;
+  background: var(--surface-card);
 }
 
 .bulk-customers-header {
   padding: 14px 30px;
-  border-top: 1px solid #d9d9d9;
-  border-bottom: 1px solid #d9d9d9;
-  background: linear-gradient(to bottom, #fafafa, #ededed);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .bulk-customers-header-row {
@@ -21,11 +21,11 @@
   margin: 0;
   font-size: 19px;
   font-weight: 700;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .bulk-customers-help-link {
-  color: #1f78bd;
+  color: var(--text-primary);
   font-size: 14px;
   text-decoration: none;
 }
@@ -40,8 +40,8 @@
 
 .bulk-customers-card {
   min-height: calc(100vh - 132px);
-  border: 1px solid #d2d2d2;
-  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
   box-shadow: inset 0 0 0 1px #f7f7f7;
   padding: 8px 14px 0;
   display: flex;
@@ -72,9 +72,9 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  border: 1px solid #c3c3c3;
-  background: linear-gradient(to bottom, #fafafa, #e7e7e7);
-  color: #555555;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-app);
+  color: var(--text-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -84,7 +84,7 @@
 
 .bulk-customers-step-number--active,
 .bulk-customers-step-number--completed {
-  border-color: #2ea2d4;
+  border-color: var(--text-primary);
   background: linear-gradient(to bottom, #4ac2f4, #2ea2d4);
   color: #ffffff;
 }
@@ -97,12 +97,12 @@
 
 .bulk-customers-step-label--active,
 .bulk-customers-step-label--completed {
-  color: #2a86c9;
+  color: var(--text-primary);
 }
 
 .bulk-customers-divider {
   margin: 8px 0 0;
-  border-top: 1px solid #cfcfcf;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .bulk-customers-content {
@@ -127,7 +127,7 @@
 }
 
 .bulk-customers-label {
-  color: #111111;
+  color: var(--text-primary);
   font-size: 16px;
   font-weight: 700;
   text-align: right;
@@ -143,11 +143,11 @@
 .bulk-customers-file-display {
   width: 215px;
   min-height: 32px;
-  border: 1px solid #c0c0c0;
+  border: 1px solid var(--border-subtle);
   border-right: 0;
-  background: #f5f5f5;
+  background: var(--surface-card);
   padding: 7px 10px;
-  color: #555555;
+  color: var(--text-primary);
   font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -157,9 +157,9 @@
 .bulk-customers-file-button {
   min-height: 32px;
   padding: 7px 12px;
-  border: 1px solid #c0c0c0;
-  background: linear-gradient(to bottom, #ffffff, #ececec);
-  color: #222222;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-app);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 14px;
   display: inline-flex;
@@ -167,7 +167,7 @@
 }
 
 .bulk-customers-file-button:hover {
-  background: linear-gradient(to bottom, #ffffff, #e3e3e3);
+  background: var(--surface-app);
 }
 
 .bulk-customers-file-input {
@@ -186,7 +186,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #1e64a6;
+  color: var(--text-primary);
   font-size: 15px;
   cursor: pointer;
 }
@@ -203,15 +203,15 @@
 .bulk-customers-select {
   width: 324px;
   min-height: 34px;
-  border: 1px solid #c7c7c7;
-  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
   padding: 6px 12px;
   font-size: 14px;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .bulk-customers-placeholder {
-  color: #777777;
+  color: var(--text-primary);
   font-size: 16px;
   text-align: center;
 }
@@ -221,7 +221,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px 14px;
-  border-top: 1px solid #d2d2d2;
+  border-top: 1px solid var(--border-subtle);
   margin-top: auto;
 }
 
@@ -243,19 +243,19 @@
 
 .bulk-customers-btn--cancel {
   background: linear-gradient(to bottom, #ef5f5f, #cf3434);
-  border-color: #b02c2c;
+  border-color: var(--border-subtle);
   color: #ffffff;
 }
 
 .bulk-customers-btn--secondary {
-  background: linear-gradient(to bottom, #fafafa, #e4e4e4);
-  border-color: #bdbdbd;
-  color: #333333;
+  background: var(--surface-app);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
 }
 
 .bulk-customers-btn--primary {
   background: linear-gradient(to bottom, #4b9adb, #2d74b9);
-  border-color: #2a67a1;
+  border-color: var(--text-primary);
   color: #ffffff;
 }
 

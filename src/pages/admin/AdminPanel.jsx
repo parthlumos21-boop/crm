@@ -198,6 +198,7 @@ const AdminPanel = () => {
   const [tabDraft, setTabDraft] = useState(buildEmptyTabDraft)
   const [editingTabId, setEditingTabId] = useState('')
   const [bookmarks, setBookmarks] = useState(() => getAdminBookmarks(user))
+  const [selectedPerformanceMetric, setSelectedPerformanceMetric] = useState('won')
   const [collapsedMyCrmCards, setCollapsedMyCrmCards] = useState([])
   const menuRef = useClickOutside(() => setOpenMenuState(null))
   const customers = useMemo(() => customerService.getCustomers(), [])
@@ -661,52 +662,246 @@ const AdminPanel = () => {
     )
   }
 
-  const renderPerformanceCards = () => {
-    const summary = buildPerformanceSummary(accounts, deals, activeTab?.viewKey || 'salesDashboard', user)
+  const isWonDealLocal = (deal) => {
+    const normalized = String(deal.status || '').trim().toLowerCase()
+    return normalized === 'won' || normalized === 'closed won' || normalized === 'converted' || normalized === 'order received' || normalized === 'convert to po'
+  }
 
-    const handleCardClick = (card) => {
-      if (!card?.route) return
-      navigate(card.route, {
-        state: card.filterKey ? {
-          dashboardDealDrilldown: {
-            sourceTabName: activeTab?.name || 'Sales Dashboard',
-            statusType: card.filterKey,
-            cardLabel: card.label,
-          },
-        } : undefined,
+  const isLostDealLocal = (deal) => {
+    const normalized = String(deal.status || '').trim().toLowerCase()
+    return normalized === 'lost' || normalized === 'closed lost' || normalized === 'rejected' || normalized === 'order lost'
+  }
+
+  const isOpenDealLocal = (deal) => {
+    return !isWonDealLocal(deal) && !isLostDealLocal(deal)
+  }
+
+  const buildMonthlyPerformanceData = (summary, metricKey) => {
+    const currentMonth = new Date()
+    const monthEntries = Array.from({ length: 12 }, (_, index) => {
+      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - (11 - index), 1)
+      return {
+        key: getDashboardDrilldownMonthKey(date),
+        label: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+        value: 0,
+      }
+    })
+
+    const monthLookup = monthEntries.reduce((lookup, entry) => {
+      lookup[entry.key] = entry
+      return lookup
+    }, {})
+
+    if (metricKey === 'won') {
+      summary.scopedDeals.filter(isWonDealLocal).forEach((deal) => {
+        const sourceDate = deal.closeDate || deal.updatedAt || deal.createdAt
+        const parsedDate = sourceDate ? new Date(sourceDate) : null
+        if (parsedDate && !Number.isNaN(parsedDate.getTime())) {
+          const monthEntry = monthLookup[getDashboardDrilldownMonthKey(parsedDate)]
+          if (monthEntry) {
+            monthEntry.value += 1
+          }
+        }
       })
+    } else if (metricKey === 'open') {
+      summary.scopedDeals.filter(isOpenDealLocal).forEach((deal) => {
+        const sourceDate = deal.createdAt || deal.updatedAt
+        const parsedDate = sourceDate ? new Date(sourceDate) : null
+        if (parsedDate && !Number.isNaN(parsedDate.getTime())) {
+          const monthEntry = monthLookup[getDashboardDrilldownMonthKey(parsedDate)]
+          if (monthEntry) {
+            monthEntry.value += 1
+          }
+        }
+      })
+    } else if (metricKey === 'accounts') {
+      summary.scopedAccounts.forEach((account) => {
+        const sourceDate = account.createdAt || account.updatedAt
+        const parsedDate = sourceDate ? new Date(sourceDate) : null
+        if (parsedDate && !Number.isNaN(parsedDate.getTime())) {
+          const monthEntry = monthLookup[getDashboardDrilldownMonthKey(parsedDate)]
+          if (monthEntry) {
+            monthEntry.value += 1
+          }
+        }
+      })
+    } else if (metricKey === 'pipeline') {
+      summary.scopedDeals.forEach((deal) => {
+        const sourceDate = deal.createdAt || deal.updatedAt
+        const parsedDate = sourceDate ? new Date(sourceDate) : null
+        if (parsedDate && !Number.isNaN(parsedDate.getTime())) {
+          const monthEntry = monthLookup[getDashboardDrilldownMonthKey(parsedDate)]
+          if (monthEntry) {
+            monthEntry.value += Number(deal.value) || 0
+          }
+        }
+      })
+    }
+
+    return monthEntries
+  }
+
+  const handlePerformanceBarClick = (summary, entry, metricKey) => {
+    if (metricKey === 'won' || metricKey === 'open' || metricKey === 'pipeline') {
+      const matchingDeals = summary.scopedDeals.filter((deal) => {
+        const parsedDate = deal.closeDate || deal.updatedAt || deal.createdAt ? new Date(deal.closeDate || deal.updatedAt || deal.createdAt) : null
+        if (!parsedDate || Number.isNaN(parsedDate.getTime())) return false
+        if (getDashboardDrilldownMonthKey(parsedDate) !== entry.key) return false
+
+        if (metricKey === 'won') return isWonDealLocal(deal)
+        if (metricKey === 'open') return isOpenDealLocal(deal)
+        return true // For pipeline value
+      })
+
+      navigate('/admin/deals/view', {
+        state: {
+          dashboardDealDrilldown: {
+            monthLabel: entry.label,
+            statusType: metricKey === 'won' ? 'won' : metricKey === 'open' ? 'open' : 'all',
+            sourceTabName: activeTab?.name || 'Sales Performance',
+            dealIds: matchingDeals.map((deal) => deal.id),
+          },
+        },
+      })
+    } else if (metricKey === 'accounts') {
+      const matchingAccounts = summary.scopedAccounts.filter((account) => {
+        const parsedDate = account.createdAt || account.updatedAt ? new Date(account.createdAt || account.updatedAt) : null
+        if (!parsedDate || Number.isNaN(parsedDate.getTime())) return false
+        return getDashboardDrilldownMonthKey(parsedDate) === entry.key
+      })
+
+      navigate('/admin/accounts', {
+        state: {
+          dashboardAccountDrilldown: {
+            monthLabel: entry.label,
+            sourceTabName: activeTab?.name || 'Sales Performance',
+            accountIds: matchingAccounts.map((acc) => acc.id),
+          },
+        },
+      })
+    }
+  }
+
+  const renderPerformanceGraph = () => {
+    const summary = buildPerformanceSummary(accounts, deals, activeTab?.viewKey || 'salesDashboard', user)
+    const monthEntries = buildMonthlyPerformanceData(summary, selectedPerformanceMetric)
+    const maxValue = Math.max(...monthEntries.map((entry) => entry.value), 1)
+
+    const gridValues = [
+      maxValue,
+      Math.round(maxValue * 0.75),
+      Math.round(maxValue * 0.5),
+      Math.round(maxValue * 0.25),
+      0
+    ]
+
+    const getBarColor = (metric) => {
+      switch (metric) {
+        case 'won':
+          return 'linear-gradient(180deg, #ffd875 0%, #e9b528 100%)' // Yellow/Gold like won deals
+        case 'open':
+          return 'linear-gradient(180deg, #5dade2 0%, #2980b9 100%)' // Blue for open
+        case 'accounts':
+          return 'linear-gradient(180deg, #af7ac5 0%, #7d3c98 100%)' // Purple for accounts
+        case 'pipeline':
+          return 'linear-gradient(180deg, #f8c471 0%, #d35400 100%)' // Orange/Amber for pipeline value
+        default:
+          return 'linear-gradient(180deg, #5dade2 0%, #2980b9 100%)'
+      }
+    }
+
+    const formatGridValue = (value) => {
+      if (selectedPerformanceMetric !== 'pipeline') return value
+      if (value >= 10000000) return `Rs ${(value / 10000000).toFixed(1)} Cr`
+      if (value >= 100000) return `Rs ${(value / 100000).toFixed(1)} L`
+      if (value >= 1000) return `Rs ${(value / 1000).toFixed(1)} K`
+      return `Rs ${value}`
     }
 
     return (
       <div className="ap-dashboard-shell">
         <div className="ap-dashboard-card">
-          <div className="ap-dashboard-card-header">
+          <div className="ap-dashboard-card-header ap-dashboard-card-header--performance" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
             <button
               type="button"
               className="ap-dashboard-card-title ap-dashboard-card-title-link"
-              onClick={() => navigate('/admin/deals/view')}
-              title="Open Sales Board"
+              onClick={() => {
+                if (selectedPerformanceMetric === 'accounts') {
+                  navigate('/admin/accounts')
+                } else {
+                  navigate('/admin/deals/view')
+                }
+              }}
+              title="Open CRM Board"
             >
               {summary.scope.title}
             </button>
+            <div className="ap-dashboard-header-dropdown-wrap">
+              <span className="ap-performance-select-label">Metric:</span>
+              <select
+                className="ap-performance-select"
+                value={selectedPerformanceMetric}
+                onChange={(e) => setSelectedPerformanceMetric(e.target.value)}
+              >
+                <option value="won">Won Deals</option>
+                <option value="open">Open Deals</option>
+                <option value="accounts">Active Accounts</option>
+                <option value="pipeline">Pipeline Value</option>
+              </select>
+            </div>
           </div>
           <div className="ap-dashboard-card-body">
             <p className="ap-dashboard-subtitle">
-              Live team summary for {summary.scope.subtitleLabel}
+              Last 12 months performance tracking for {summary.scope.subtitleLabel} (metric: {selectedPerformanceMetric})
             </p>
-            <div className="ap-performance-grid">
-              {summary.cards.map((card) => (
-                <button
-                  type="button"
-                  key={card.id || card.label}
-                  className="ap-performance-card ap-performance-card-link"
-                  onClick={() => handleCardClick(card)}
-                  title={`Open ${card.label}`}
-                >
-                  <strong>{card.value}</strong>
-                  <span>{card.label}</span>
-                </button>
-              ))}
+            <div className="ap-dashboard-chart">
+              <div className="ap-dashboard-chart-grid">
+                {gridValues.map((value, i) => (
+                  <div key={i} className="ap-dashboard-grid-row">
+                    <span>
+                      {formatGridValue(value)}
+                    </span>
+                    <div />
+                  </div>
+                ))}
+              </div>
+
+              <div className="ap-dashboard-bars">
+                {monthEntries.map((entry) => {
+                  const val = entry.value
+                  const totalHeight = val === 0 ? 0 : (val / maxValue) * 240
+
+                  return (
+                    <div
+                      key={entry.label}
+                      className="ap-dashboard-bar-group ap-dashboard-bar-group--interactive"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handlePerformanceBarClick(summary, entry, selectedPerformanceMetric)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          handlePerformanceBarClick(summary, entry, selectedPerformanceMetric)
+                        }
+                      }}
+                      title={val > 0 ? `Open details for ${entry.label}` : `No records for ${entry.label}`}
+                    >
+                      <div className="ap-dashboard-bar-stack" style={{ height: `${totalHeight}px` }}>
+                        <div
+                          className="ap-dashboard-bar"
+                          style={{
+                            height: `${totalHeight}px`,
+                            width: '100%',
+                            borderRadius: '16px 16px 0 0',
+                            background: getBarColor(selectedPerformanceMetric)
+                          }}
+                        />
+                      </div>
+                      <span>{entry.label}</span>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -811,12 +1006,14 @@ const AdminPanel = () => {
       case 'salesDashboard':
         return renderSalesDashboard()
       case 'salesPerformanceA':
-        return renderPerformanceCards()
       case 'salesPerformanceB':
-        return renderPerformanceCards()
+        return renderPerformanceGraph()
       case 'myCrm':
         return renderMyCrmContent()
       default:
+        if (activeTab.viewKey && activeTab.viewKey.startsWith('salesPerformance')) {
+          return renderPerformanceGraph()
+        }
         return renderSalesDashboard()
     }
   }

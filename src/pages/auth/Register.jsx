@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Button from '../../components/common/Button'
@@ -15,6 +15,10 @@ const panelMotion = {
 
 const Register = () => {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'dark')
+  }, [])
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,6 +26,10 @@ const Register = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showLogoImage, setShowLogoImage] = useState(true)
+
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'dark')
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

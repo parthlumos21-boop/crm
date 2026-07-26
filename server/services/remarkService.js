@@ -20,16 +20,70 @@ const byLegacyId = (id) => {
 }
 const toNumber = toNumberOrNull
 
+const normalizeText = (value) => String(value || '').trim()
+const normalizeNameKey = (value) => normalizeText(value).toLowerCase().replace(/\s+/g, ' ')
+
+const normalizeReminderUserRefs = (reminder = {}) => {
+  const refs = []
+  const addRef = (ref) => {
+    if (!ref) return
+    if (typeof ref === 'object') {
+      const id = normalizeText(ref.id ?? ref.legacyId ?? ref.value)
+      const name = normalizeText(ref.name || ref.ownerDisplayName || ref.label || ref.username || ref.email)
+      const ownerCode = normalizeText(ref.ownerCode || ref.owner_code)
+      if (id || name || ownerCode) {
+        refs.push({
+          id,
+          name,
+          ownerCode,
+          username: normalizeText(ref.username),
+          email: normalizeText(ref.email),
+        })
+      }
+      return
+    }
+
+    const id = normalizeText(ref)
+    if (id) refs.push({ id, name: '', ownerCode: '', username: '', email: '' })
+  }
+
+  if (Array.isArray(reminder.assignedUsers)) {
+    reminder.assignedUsers.forEach(addRef)
+  }
+
+  if (Array.isArray(reminder.assignedUserIds)) {
+    reminder.assignedUserIds.forEach((id) => {
+      if (!refs.some((ref) => ref.id === normalizeText(id))) addRef(id)
+    })
+  }
+
+  addRef(reminder.assignedTo)
+
+  const seen = new Set()
+  return refs.filter((ref) => {
+    const key = ref.ownerCode ? `code:${ref.ownerCode}` : ref.id ? `id:${ref.id}` : `name:${normalizeNameKey(ref.name)}`
+    if (!key || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 const mapReminder = (reminder) => {
   if (!reminder) return null
   return {
     ...reminder,
     id: reminder.legacyId ?? reminder.id,
+    accountId: reminder.accountId,
+    account_id: reminder.accountId,
     remark_id: reminder.remarkId,
     remarkId: reminder.remarkId,
     reminder_date: reminder.reminderDate,
     reminder_time: reminder.reminderTime,
     assigned_to: reminder.assignedTo,
+    assignedOwnerName: reminder.assignedOwnerName,
+    assigned_owner_name: reminder.assignedOwnerName,
+    assignedOwnerCode: reminder.assignedOwnerCode,
+    assigned_owner_code: reminder.assignedOwnerCode,
     reminder_note: reminder.reminderNote,
     is_completed: Boolean(reminder.isCompleted),
     company_id: reminder.companyId,
@@ -168,24 +222,69 @@ class RemarkService {
       updatedAt: now,
     })
 
-    if (reminder && reminder.date && reminder.time && reminder.assignedTo) {
-      await RemarkReminder.create({
-        legacyId: await getNextLegacyId('remark_reminders'),
-        remarkId: legacyId,
-        reminderDate: reminder.date,
-        reminderTime: reminder.time,
-        assignedTo: toNumber(reminder.assignedTo),
-        reminderNote: this.formatReminderNote(reminder),
-        closeOldReminders: Boolean(reminder.closeOldReminders),
-        isCompleted: false,
-        createdBy,
-        companyId,
-        ownerUserId: toNumber(reminder.assignedTo || actor.id),
-        projectId: lead.projectId || null,
-        workflowId: remarkData.workflowId || lead.workflowId || null,
-        createdAt: now,
-        updatedAt: now,
-      })
+    const reminderUserRefs = reminder ? normalizeReminderUserRefs(reminder) : []
+
+    if (reminder && reminder.date && reminder.time && reminderUserRefs.length > 0) {
+      const numericUserIds = Array.from(new Set(reminderUserRefs.map((ref) => toNumber(ref.id)).filter((entry) => entry !== null)))
+      const ownerCodes = Array.from(new Set(reminderUserRefs.map((ref) => ref.ownerCode).filter(Boolean)))
+      const assignedUserFilters = []
+      if (numericUserIds.length > 0) {
+        assignedUserFilters.push({ legacyId: { $in: numericUserIds } }, { id: { $in: numericUserIds } })
+      }
+      if (ownerCodes.length > 0) {
+        assignedUserFilters.push({ ownerCode: { $in: ownerCodes } }, { owner_code: { $in: ownerCodes } })
+      }
+
+      const assignedUsers = assignedUserFilters.length > 0
+        ? await User.find({ $or: assignedUserFilters }).lean()
+        : []
+      const assignedUserById = new Map(assignedUsers.map((user) => [toNumber(user.legacyId || user.id), user]))
+      const assignedUserByOwnerCode = new Map(assignedUsers.flatMap((user) => {
+        const code = normalizeText(user.ownerCode || user.owner_code)
+        return code ? [[code, user]] : []
+      }))
+      const assignedUserByName = new Map(assignedUsers.flatMap((user) => {
+        const names = [user.name, user.username, user.email].map(normalizeNameKey).filter(Boolean)
+        return names.map((name) => [name, user])
+      }))
+
+      for (const reminderUserRef of reminderUserRefs) {
+        const numericRefId = toNumber(reminderUserRef.id)
+        const assignedUser = (
+          (numericRefId !== null ? assignedUserById.get(numericRefId) : null)
+          || (reminderUserRef.ownerCode ? assignedUserByOwnerCode.get(reminderUserRef.ownerCode) : null)
+          || assignedUserByName.get(normalizeNameKey(reminderUserRef.name))
+          || null
+        )
+        const assignedUserId = toNumber(assignedUser?.legacyId || assignedUser?.id)
+          ?? numericRefId
+          ?? reminderUserRef.id
+          ?? reminderUserRef.ownerCode
+          ?? reminderUserRef.name
+        const assignedOwnerName = assignedUser?.name || reminderUserRef.name || reminderUserRef.username || reminderUserRef.email || ''
+        const assignedOwnerCode = assignedUser?.ownerCode || assignedUser?.owner_code || reminderUserRef.ownerCode || null
+
+        await RemarkReminder.create({
+          legacyId: await getNextLegacyId('remark_reminders'),
+          remarkId: legacyId,
+          accountId: toNumber(accountId),
+          reminderDate: reminder.date,
+          reminderTime: reminder.time,
+          assignedTo: assignedUserId,
+          assignedOwnerName,
+          assignedOwnerCode,
+          reminderNote: this.formatReminderNote(reminder),
+          closeOldReminders: Boolean(reminder.closeOldReminders),
+          isCompleted: false,
+          createdBy,
+          companyId,
+          ownerUserId: assignedUserId,
+          projectId: lead.projectId || null,
+          workflowId: remarkData.workflowId || lead.workflowId || null,
+          createdAt: now,
+          updatedAt: now,
+        })
+      }
     }
 
     await this.logAudit({
@@ -198,6 +297,61 @@ class RemarkService {
     })
 
     return mapRemark(remark.toObject())
+  }
+
+  canSeeReminder(actor, reminder) {
+    if (!actor) return false
+    if (isPrivilegedRole(actor.role)) return true
+    const actorId = toNumber(actor.id)
+    return (
+      reminder.ownerUserId === actorId
+      || reminder.assignedTo === actorId
+      || reminder.createdBy === actorId
+    )
+  }
+
+  async listRemarkReminders(actor) {
+    const companyId = actor.companyId || 1
+    const baseFilter = { companyId }
+
+    if (!isPrivilegedRole(actor.role)) {
+      const actorId = toNumber(actor.id)
+      baseFilter.$or = [
+        { assignedTo: actorId },
+        { ownerUserId: actorId },
+        { createdBy: actorId },
+      ]
+    }
+
+    const records = await RemarkReminder
+      .find(baseFilter)
+      .sort({ reminderDate: 1, reminderTime: 1, legacyId: 1 })
+      .lean()
+
+    const remarkIds = Array.from(new Set(records.map((record) => toNumber(record.remarkId)).filter(Boolean)))
+    const remarks = remarkIds.length
+      ? await Remark.find({ legacyId: { $in: remarkIds }, companyId }).lean()
+      : []
+    const remarkById = new Map(remarks.map((remark) => [toNumber(remark.legacyId), remark]))
+
+    return records
+      .filter((record) => this.canSeeReminder(actor, record))
+      .map((record) => {
+        const remark = remarkById.get(toNumber(record.remarkId)) || null
+        const mapped = mapReminder(record)
+        const accountId = mapped.accountId || remark?.accountId || ''
+        return {
+          ...mapped,
+          accountId,
+          account_id: accountId,
+          remarkContent: remark?.content || '',
+          category: remark?.category || '',
+          assignmentMode: remark?.assignmentMode || '',
+          assignedUserIds: remark?.assignedUserIds || [],
+          assignedUserTypes: remark?.assignedUserTypes || [],
+          assignedUserGroups: remark?.assignedUserGroups || [],
+        }
+      })
   }
 
   async getRemarksByAccount(accountId, actor) {
@@ -264,11 +418,17 @@ class RemarkService {
   }
 
   async createReminder(reminderId, updateData) {
-    const { actor, isCompleted } = updateData
+    const { actor, isCompleted, reminderDate, reminderTime, reminderNote } = updateData
     await this.getReminderById(reminderId, actor)
+    const updates = { updatedAt: new Date() }
+    if (isCompleted !== undefined) updates.isCompleted = Boolean(isCompleted)
+    if (reminderDate !== undefined) updates.reminderDate = reminderDate
+    if (reminderTime !== undefined) updates.reminderTime = reminderTime
+    if (reminderNote !== undefined) updates.reminderNote = reminderNote
+
     const updatedReminder = await RemarkReminder.findOneAndUpdate(
       { ...byLegacyId(reminderId), companyId: actor.companyId || 1 },
-      { $set: { isCompleted, updatedAt: new Date() } },
+      { $set: updates },
       { new: true }
     ).lean()
 

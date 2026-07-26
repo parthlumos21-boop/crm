@@ -1,6 +1,6 @@
 .kb-page {
   min-height: 100vh;
-  background: #fafafa;
+  background: var(--surface-card);
   display: flex;
   flex-direction: column;
 }
@@ -11,9 +11,9 @@
   justify-content: space-between;
   gap: 16px;
   padding: 11px 10px 11px 30px;
-  border-top: 1px solid #d9d9d9;
-  border-bottom: 1px solid #d9d9d9;
-  background: linear-gradient(to bottom, #fafafa, #ededed);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .kb-back-button {
@@ -22,7 +22,7 @@
   gap: 8px;
   border: none;
   background: transparent;
-  color: #333333;
+  color: var(--text-primary);
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
@@ -30,7 +30,7 @@
 }
 
 .kb-back-icon {
-  color: #2a86c9;
+  color: var(--text-primary);
   font-size: 15px;
 }
 
@@ -40,7 +40,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid #2a67a1;
+  border: 1px solid var(--border-subtle);
   background: linear-gradient(to bottom, #4b9adb, #2d74b9);
   color: #ffffff;
   font-size: 15px;
@@ -65,7 +65,7 @@
 
 .kb-empty-message {
   margin: 0 0 22px;
-  color: #2f92de;
+  color: var(--text-primary);
   font-size: 23px;
   line-height: 1.35;
 }
@@ -88,7 +88,7 @@
   justify-content: center;
   gap: 2px;
   padding: 8px 16px;
-  background: #f36b37;
+  background: var(--surface-card);
   color: #ffffff;
   font-size: 16px;
   text-align: center;
@@ -98,7 +98,7 @@
 .kb-footer-strip button {
   border: 0;
   background: transparent;
-  color: #0f27ff;
+  color: var(--text-primary);
   text-decoration: underline;
   font: inherit;
   cursor: pointer;

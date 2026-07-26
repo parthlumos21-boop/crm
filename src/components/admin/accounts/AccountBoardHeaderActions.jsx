@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 import {
   FiCheck,
   FiChevronDown,
-  FiDownload,
   FiEdit3,
   FiFilter,
   FiGrid,
@@ -15,6 +14,7 @@ import {
 } from 'react-icons/fi'
 import { useClickOutside } from '../../../hooks'
 import { exportAccountsBoardWorkbook } from '../../../features/adminAccounts/utils/exportAccountsBoard'
+import { ExcelExportMenuButton } from '../../common/ExcelExportButton'
 import './AccountBoardHeaderActions.css'
 
 const AccountBoardHeaderActions = ({
@@ -197,16 +197,31 @@ const AccountBoardHeaderActions = ({
       ) : null}
 
       {actions.showExportIcon ? (
-          <button
-            type="button"
-            className="account-board-header-icon-btn account-board-header-icon-btn-export"
-            title="Export"
-            aria-label="Export"
-            onClick={() => handleExport('current-view', 'Current View', activeStageLabel, currentStageRows)}
-            disabled={!hasCurrentRows}
-          >
-            <FiDownload />
-          </button>
+        <ExcelExportMenuButton
+          label="Export"
+          title="Export accounts"
+          disabled={!hasCurrentRows}
+          compact
+          responsiveHideLabel
+          className="account-board-header-export-dropdown"
+          buttonClassName="account-board-header-icon-btn account-board-header-icon-btn-export account-board-header-export-trigger"
+          menuClassName="admin-accounts-export-menu"
+          items={[
+            {
+              key: 'current-view-excel',
+              label: 'Current View',
+              badge: 'XLSX',
+              onClick: () => handleExport('current-view', 'Current View', activeStageLabel, currentStageRows),
+            },
+            {
+              key: 'all-visible-excel',
+              label: 'All Visible Rows',
+              badge: 'XLSX',
+              disabled: !allRows.length,
+              onClick: () => handleExport('all-visible', 'All Visible Rows', 'All Visible Rows', allRows),
+            },
+          ]}
+        />
       ) : null}
 
       {actions.showColumnsIcon ? (

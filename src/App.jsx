@@ -1,4 +1,4 @@
-import React from 'react'
+  import React from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import ProtectedRoute from './components/common/ProtectedRoute'
@@ -37,7 +37,9 @@ import SupportRequestView from './pages/admin/support-requests/SupportRequestVie
 import TicketPage from './pages/tickets/TicketPage'
 import AddTicketPage from './pages/tickets/AddTicketPage'
 import IntegrationQrPage from './pages/integrations/IntegrationQrPage'
+import OutlookMailPage from './pages/integrations/OutlookMailPage'
 import Login from './pages/auth/Login'
+import AdminLogin from './pages/auth/AdminLogin'
 import Logout from './pages/auth/Logout'
 import Register from './pages/auth/Register'
 import Deals from './pages/deals/Deals'
@@ -120,7 +122,7 @@ function App() {
               <Route
                 path="/admin/login"
                 element={(
-                  <Navigate to="/login" replace />
+                  <AdminLogin />
                 )}
               />
               <Route path="/logout" element={<Logout />} />
@@ -223,9 +225,12 @@ function App() {
                 <Route path="data-manager/knowledge-base" element={<KnowledgeBasePage basePath="/data-manager" />} />
                 <Route path="data-manager/knowledge-base/add" element={<AddKnowledgeBasePage basePath="/data-manager" />} />
                 <Route path="image-gallery" element={<ImageGalleryPage />} />
+                <Route path="integrations/outlook" element={<Navigate to="/settings" replace />} />
                 <Route path="integrations" element={<IntegrationQrPage />} />
                 <Route path="integrations/:channel" element={<IntegrationQrPage />} />
+                <Route path="outlook" element={<OutlookMailPage />} />
                 <Route path="messages" element={<AdminMessagesPage />} />
+                <Route path="settings" element={<AdminSettingsPage />} />
               </Route>
 
               <Route
@@ -333,8 +338,10 @@ function App() {
                 <Route path="user-management/manage-user-groups" element={<AdminUserManagementPage />} />
                 <Route path="user-management/manage-user-types" element={<AdminUserManagementPage />} />
                 <Route path="messages" element={<AdminMessagesPage />} />
+                <Route path="integrations/outlook" element={<Navigate to="/admin/settings" replace />} />
                 <Route path="integrations" element={<IntegrationQrPage />} />
                 <Route path="integrations/:channel" element={<IntegrationQrPage />} />
+                <Route path="outlook" element={<OutlookMailPage />} />
                 <Route path="settings" element={<AdminSettingsPage />} />
                 <Route path="data-manager" element={<DataManagerPage />} />
                 <Route path="data-manager/image-gallery" element={<ImageGalleryPage />} />

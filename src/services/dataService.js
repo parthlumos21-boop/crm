@@ -10,7 +10,7 @@ import {
 
 const DEFAULT_DEAL_NUMBER_START = 2871
 const DEFAULT_SR_NUMBER_START = 1
-const DEFAULT_QUOTATION_NUMBER_START = 30182
+const DEFAULT_QUOTATION_NUMBER_START = 1001
 const DEFAULT_PROJECT_NUMBER_START = 1
 
 const normalizeMarketingValue = (value = '') => {
@@ -161,7 +161,7 @@ class DataService {
   }
 
   buildSupportRequestNumber(sequence) {
-    return `SR${String(sequence).padStart(5, '0')}`
+    return `SR${String(sequence).padStart(6, '0')}`
   }
 
   parseSupportRequestNumber(srNumber = '') {
@@ -178,9 +178,17 @@ class DataService {
     return maxSequence + 1
   }
 
-  buildQuotationNumber(sequence) {
-    const year = new Date().getFullYear()
-    return `SSIPL/${year}/${String(sequence).padStart(5, '0')}`
+  getQuotationSequenceMonth(referenceDate = new Date()) {
+    const date = new Date(referenceDate || Date.now())
+    const validDate = Number.isNaN(date.getTime()) ? new Date() : date
+    const year = validDate.getFullYear()
+    const month = String(validDate.getMonth() + 1).padStart(2, '0')
+    return `${year}-${month}`
+  }
+
+  buildQuotationNumber(sequence, referenceDate = new Date()) {
+    const year = new Date(referenceDate || Date.now()).getFullYear()
+    return `SSIPL/${year}/${String(sequence).padStart(4, '0')}`
   }
 
   parseQuotationNumber(quotationNumber = '') {
@@ -206,10 +214,14 @@ class DataService {
     return maxSequence + 1
   }
 
-  getNextQuotationSequence(existingQuotations = this.getFromStorage('quotations')) {
+  getNextQuotationSequence(existingQuotations = this.getFromStorage('quotations'), referenceDate = new Date()) {
+    const sequenceMonth = this.getQuotationSequenceMonth(referenceDate)
     const maxSequence = existingQuotations.reduce((currentMax, quotation) => {
-      const parsedValue = this.parseQuotationNumber(quotation.quotationNumber)
-      return Number.isFinite(parsedValue) ? Math.max(currentMax, parsedValue) : currentMax
+      const quotationMonth = quotation.quotationSequenceMonth || quotation.data?.quotationSequenceMonth || this.getQuotationSequenceMonth(quotation.quotationDate || quotation.createdAt)
+      const parsedValue = this.parseQuotationNumber(quotation.quotationNumber || quotation.quoteNumber || quotation.data?.quotationNumber)
+      return quotationMonth === sequenceMonth && Number.isFinite(parsedValue) && parsedValue >= DEFAULT_QUOTATION_NUMBER_START && parsedValue < 10000
+        ? Math.max(currentMax, parsedValue)
+        : currentMax
     }, DEFAULT_QUOTATION_NUMBER_START - 1)
 
     return maxSequence + 1

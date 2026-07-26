@@ -8,7 +8,6 @@ import {
   FaUsers,
 } from 'react-icons/fa'
 import Badge from '../../components/common/Badge'
-import Card from '../../components/common/Card'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 import {
@@ -17,7 +16,7 @@ import {
   getPriorityColor,
   getStatusColor,
 } from '../../utils/helpers'
-import '../admin/SalesDashboard.css'
+import './UserDashboardPage.css'
 
 const UserDashboardPage = () => {
   const navigate = useNavigate()
@@ -68,163 +67,136 @@ const UserDashboardPage = () => {
   ), [notifications])
 
   return (
-    <div className="sales-dashboard">
-      <div className="sales-header-wrapper">
-        <div className="sales-header">
-          <div className="sales-header-content">
-            <h1>Dashboard</h1>
-            <p>Welcome back, {user?.name || 'User'}! Here&apos;s your live work summary.</p>
-          </div>
-        </div>
+    <div className="ud-page">
+      <div className="ud-header">
+        <h1>Dashboard</h1>
+        <p>Welcome back, {user?.name || 'User'}! Here&apos;s your live work summary.</p>
       </div>
 
-      <div className="sales-stats-grid">
-        <div className="sales-stat-card">
-          <div className="stat-icon stat-icon-blue">
+      <div className="ud-stats-grid">
+        <div className="ud-stat-card">
+          <div className="ud-stat-icon ud-stat-icon--blue">
             <FaUsers />
           </div>
-          <div className="stat-details">
-            <div className="stat-value">{stats.accounts}</div>
-            <div className="stat-label">Accounts</div>
-            <div className="stat-subtext">Assigned to you</div>
+          <div className="ud-stat-details">
+            <div className="ud-stat-value">{stats.accounts}</div>
+            <div className="ud-stat-label">Accounts</div>
+            <div className="ud-stat-subtext">Assigned to you</div>
           </div>
         </div>
 
-        <div className="sales-stat-card">
-          <div className="stat-icon stat-icon-green">
+        <div className="ud-stat-card">
+          <div className="ud-stat-icon ud-stat-icon--green">
             <FaHandshake />
           </div>
-          <div className="stat-details">
-            <div className="stat-value">{stats.openDeals}</div>
-            <div className="stat-label">Open Deals</div>
-            <div className="stat-subtext">{formatCurrency(stats.dealValue)} pipeline</div>
+          <div className="ud-stat-details">
+            <div className="ud-stat-value">{stats.openDeals}</div>
+            <div className="ud-stat-label">Open Deals</div>
+            <div className="ud-stat-subtext">{formatCurrency(stats.dealValue)} pipeline</div>
           </div>
         </div>
 
-        <div className="sales-stat-card">
-          <div className="stat-icon stat-icon-red">
+        <div className="ud-stat-card">
+          <div className="ud-stat-icon ud-stat-icon--red">
             <FaClipboardList />
           </div>
-          <div className="stat-details">
-            <div className="stat-value">{stats.pendingTasks}</div>
-            <div className="stat-label">Pending Tasks</div>
-            <div className="stat-subtext">{stats.tasks} total tasks</div>
+          <div className="ud-stat-details">
+            <div className="ud-stat-value">{stats.pendingTasks}</div>
+            <div className="ud-stat-label">Pending Tasks</div>
+            <div className="ud-stat-subtext">{stats.tasks} total tasks</div>
           </div>
         </div>
 
-        <div className="sales-stat-card">
-          <div className="stat-icon stat-icon-purple">
+        <div className="ud-stat-card">
+          <div className="ud-stat-icon ud-stat-icon--purple">
             <FaBell />
           </div>
-          <div className="stat-details">
-            <div className="stat-value">{stats.notifications}</div>
-            <div className="stat-label">Notifications</div>
-            <div className="stat-subtext">{stats.openSupportRequests} active support requests</div>
+          <div className="ud-stat-details">
+            <div className="ud-stat-value">{stats.notifications}</div>
+            <div className="ud-stat-label">Notifications</div>
+            <div className="ud-stat-subtext">{stats.openSupportRequests} active support requests</div>
           </div>
         </div>
       </div>
 
-      <div className="sales-content-grid">
-        <Card className="sales-card" padding={false}>
-          <div className="card-header">
+      <div className="ud-content-grid">
+        <div className="ud-card">
+          <div className="ud-card-header">
             <h3>Recent Deals</h3>
-            <button type="button" className="view-all-btn" onClick={() => navigate('/deals')}>
-              View All {'->'}
+            <button type="button" className="ud-view-all-btn" onClick={() => navigate('/deals')}>
+              View All &rarr;
             </button>
           </div>
-          <div className="deals-table">
-            <div className="table-header">
-              <div className="col-name">Deal Name</div>
-              <div className="col-value">Value</div>
-              <div className="col-stage">Stage</div>
-              <div className="col-date">Date</div>
-            </div>
+          <div className="ud-list">
             {recentDeals.length > 0 ? recentDeals.map((deal) => (
-              <div key={deal.id} className="table-row">
-                <div className="col-name">{deal.name || '-'}</div>
-                <div className="col-value">{formatCurrency(deal.value || 0)}</div>
-                <div className="col-stage">
-                  <Badge variant={getStatusColor(deal.status)}>
-                    {deal.status || '-'}
-                  </Badge>
+              <div key={deal.id} className="ud-list-item">
+                <div className="ud-item-info">
+                  <div className="ud-item-title">{deal.name || '-'}</div>
+                  <div className="ud-item-desc">
+                    <Badge variant={getStatusColor(deal.status)}>
+                      {deal.status || '-'}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="col-date">{formatDate(deal.createdAt)}</div>
+                <div className="ud-item-meta">
+                  <div className="ud-item-value">{formatCurrency(deal.value || 0)}</div>
+                  <div className="ud-item-date">{formatDate(deal.createdAt)}</div>
+                </div>
               </div>
             )) : (
-              <div className="empty-state">No deals available</div>
+              <div className="ud-empty-state">No deals available</div>
             )}
           </div>
-        </Card>
+        </div>
 
-        <Card className="sales-card" padding={false}>
-          <div className="card-header">
+        <div className="ud-card">
+          <div className="ud-card-header">
             <h3>Upcoming Tasks</h3>
-            <button type="button" className="view-all-btn" onClick={() => navigate('/tasks')}>
-              View All {'->'}
-            </button>
           </div>
-          <div className="high-value-deals">
+          <div className="ud-list">
             {upcomingTasks.length > 0 ? upcomingTasks.map((task) => (
-              <div key={task.id} className="high-value-item">
-                <div className="deal-info">
-                  <div className="deal-name">{task.title}</div>
-                  <div className="deal-account">{task.description || 'No description'}</div>
+              <div key={task.id} className="ud-list-item">
+                <div className="ud-item-info">
+                  <div className="ud-item-title">{task.title}</div>
+                  <div className="ud-item-desc">{task.description || 'No description'}</div>
                 </div>
-                <div className="deal-middle">
+                <div className="ud-item-meta">
                   <Badge variant={getPriorityColor(task.priority)}>
                     {task.priority || 'medium'}
                   </Badge>
-                </div>
-                <div className="deal-value">
-                  <div className="value">{task.status || '-'}</div>
-                  <div className="date">{task.dueDate ? formatDate(task.dueDate) : '-'}</div>
+                  <div className="ud-item-date">{task.dueDate ? formatDate(task.dueDate) : '-'}</div>
                 </div>
               </div>
             )) : (
-              <div className="empty-state">No upcoming tasks</div>
+              <div className="ud-empty-state">No upcoming tasks</div>
             )}
           </div>
-        </Card>
+        </div>
       </div>
 
-      <Card className="sales-card full-width" padding={false}>
-        <div className="card-header">
+      <div className="ud-card">
+        <div className="ud-card-header">
           <h3>Live Notifications</h3>
-          <span className="deal-count">{latestNotifications.length} items</span>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{latestNotifications.length} items</span>
         </div>
-        <div className="high-value-deals">
+        <div className="ud-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
           {latestNotifications.length > 0 ? latestNotifications.map((notification) => (
-            <div key={notification.id} className="high-value-item">
-              <div className="deal-info">
-                <div className="deal-name">{notification.title || 'Notification'}</div>
-                <div className="deal-account">{notification.message || '-'}</div>
+            <div key={notification.id} className="ud-list-item">
+              <div className="ud-item-info">
+                <div className="ud-item-title">{notification.title || 'Notification'}</div>
+                <div className="ud-item-desc">{notification.message || '-'}</div>
               </div>
-              <div className="deal-middle">
+              <div className="ud-item-meta">
                 <Badge variant={getStatusColor(notification.type === 'error' ? 'lost' : notification.type)}>
                   {notification.type || 'info'}
                 </Badge>
-              </div>
-              <div className="deal-value">
-                <div className="value">{notification.type || 'info'}</div>
-                <div className="date">{formatDate(notification.timestamp)}</div>
+                <div className="ud-item-date">{formatDate(notification.timestamp)}</div>
               </div>
             </div>
           )) : (
-            <div className="empty-state">No notifications yet</div>
+            <div className="ud-empty-state" style={{ gridColumn: '1 / -1' }}>No notifications yet</div>
           )}
         </div>
-      </Card>
-
-      <div className="quick-actions">
-        <button type="button" className="action-btn action-btn-primary" onClick={() => navigate('/accounts/new')}>
-          <FaChartLine /> Add Account
-        </button>
-        <button type="button" className="action-btn action-btn-secondary" onClick={() => navigate('/support-requests/add')}>
-          <FaBell /> Add Support Request
-        </button>
-        <button type="button" className="action-btn action-btn-secondary" onClick={() => navigate('/quotation-manager/view')}>
-          <FaClipboardList /> View Quotations
-        </button>
       </div>
     </div>
   )

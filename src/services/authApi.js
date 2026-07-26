@@ -10,6 +10,17 @@ export const authApi = {
     })
   },
 
+  async getMicrosoftLoginUrl(returnUrl = '') {
+    return apiClient.get('/auth/microsoft/url', {
+      params: returnUrl ? { returnUrl } : {},
+    })
+  },
+
+  getMicrosoftLoginRedirectUrl(returnUrl = '') {
+    const params = returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''
+    return `/api/auth/microsoft/login${params}`
+  },
+
   async getCurrentUser() {
     return apiClient.get('/auth/me')
   },

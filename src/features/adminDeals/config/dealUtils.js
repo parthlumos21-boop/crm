@@ -4,10 +4,8 @@ export const DEAL_LIFECYCLE_STATUS_OPTIONS = [
   { value: 'Order Received', label: 'Order Received' },
   { value: 'Convert To PO', label: 'Convert To PO' },
   { value: 'Order Lost', label: 'Order Lost' },
-  { value: 'Converted', label: 'Converted' },
   { value: 'Rejected', label: 'Rejected' },
   { value: 'Contracted', label: 'Contracted' },
-  { value: 'Closed', label: 'Closed' },
 ]
 
 export const CUSTOMER_QUOTATION_STATUS_OPTIONS = [

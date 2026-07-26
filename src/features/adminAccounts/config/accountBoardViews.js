@@ -15,14 +15,16 @@ export const ADMIN_ACCOUNTS_BOARD_VIEWS = {
     defaultStage: 'new',
     hiddenStageKeys: ['rejected'],
     showStageTabs: false,
-    rowActionMenuEnabled: true,
+    rowActionMenuEnabled: false,
     rowActions: [
       ACCOUNT_ACTION_MAP['view-account'],
       ACCOUNT_ACTION_MAP['converted-deal'],
+      ACCOUNT_ACTION_MAP['view-linked-deal'],
     ],
     showAddAccountButton: true,
     titlebarActions: {
       showBulk: true,
+      showExportIcon: true,
     },
   },
   myGroup: {
@@ -58,7 +60,7 @@ export const ADMIN_ACCOUNTS_BOARD_VIEWS = {
     defaultStage: 'new',
     showStageTabs: true,
     rowActionMenuEnabled: false,
-    showAddAccountButton: true,
+    showAddAccountButton: false,
     showRefreshButton: false,
     showExportButton: false,
     titlebarActions: {
@@ -66,7 +68,6 @@ export const ADMIN_ACCOUNTS_BOARD_VIEWS = {
       showBulk: true,
       showExportIcon: true,
       showFilterIcon: true,
-      showColumnsIcon: true,
     },
   },
   searchAccount: {
@@ -85,15 +86,15 @@ export const ADMIN_ACCOUNTS_BOARD_VIEWS = {
     showStageTabs: false,
     showRefreshButton: false,
     showExportButton: false,
-    rowActionMenuEnabled: true,
+    rowActionMenuEnabled: false,
     rowActions: [
       ACCOUNT_ACTION_MAP['view-account'],
       ACCOUNT_ACTION_MAP['converted-deal'],
+      ACCOUNT_ACTION_MAP['view-linked-deal'],
     ],
     showAddAccountButton: true,
     titlebarActions: {
       showBulk: true,
-      showColumnsIcon: true,
       showFilterIcon: true,
     },
   },

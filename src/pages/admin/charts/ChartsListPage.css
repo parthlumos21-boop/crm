@@ -1,10 +1,7 @@
 .cl-page {
-  margin: -1rem -1.25rem 0;
+  margin: 0;
   min-height: 100%;
-  background:
-    radial-gradient(circle at top left, rgba(255, 253, 248, 0.98), rgba(247, 241, 231, 0.98)),
-    radial-gradient(circle at bottom right, rgba(93, 116, 136, 0.1), transparent 26%),
-    linear-gradient(180deg, #fbf7f0 0%, #f2e9dc 100%);
+  background: var(--surface-app);
   display: flex;
   flex-direction: column;
 }
@@ -128,13 +125,13 @@
 }
 
 .cl-row-expanded {
-  background: linear-gradient(180deg, #fff8eb 0%, var(--surface-muted) 100%);
+  background: var(--surface-app) 100%);
 }
 
 .cl-row-details {
   padding: 0.75rem 1rem 0.9rem;
   border-top: 1px solid var(--border-subtle);
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--surface-card);
 }
 
 .cl-row-detail-grid {
@@ -244,7 +241,7 @@
 }
 
 .cl-action--check {
-  color: #7d8792;
+  color: var(--text-primary);
 }
 
 .cl-action--check-active {
@@ -319,15 +316,15 @@
 }
 
 .cl-status-success {
-  background: #e7f7e3;
-  color: #2c6c2c;
-  border: 1px solid #b6e0a8;
+  background: var(--surface-muted);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
 }
 
 .cl-status-info {
-  background: #eaf3fb;
-  color: #1d4b78;
-  border: 1px solid #b9d4ea;
+  background: var(--surface-muted);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
 }
 
 @keyframes cl-status-in {

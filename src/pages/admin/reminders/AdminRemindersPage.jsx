@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { FaChevronDown, FaFilter, FaHandPointRight, FaUser } from 'react-icons/fa'
+import { FaCheck, FaChevronDown, FaFilter, FaHandPointRight, FaPlus, FaRedo, FaTimes, FaUser } from 'react-icons/fa'
 import { ExcelExportActionButton } from '../../../components/common/ExcelExportButton'
 import { useAuth } from '../../../context/AuthContext'
 import { useData } from '../../../context/DataContext'
@@ -11,6 +11,7 @@ import { getCanonicalCrmUserName, normalizeCrmUserName } from '../../../features
 import { formatShortDate } from '../support-requests/SupportRequestShared'
 import { authService } from '../../../services/authService'
 import { customerService } from '../../../services/customerService'
+import { remarkApi } from '../../../services/remarkApi'
 import { exportExcelWorkbook } from '../../../utils/excelExport'
 import '../support-requests/SupportRequestAdmin.css'
 import './AdminRemindersPage.css'
@@ -62,18 +63,18 @@ const formatActiveReminderFilterSummary = (filterState) => {
 }
 
 const ACTIVE_REMINDERS_EXCEL_COLUMNS = [
-  { key: '__serialNumber', label: 'Sr. No.', align: 'center', width: 9 },
-  { key: 'ownerName', label: 'User', width: 22 },
-  { key: 'sourceLabel', label: 'Module', align: 'center', width: 14 },
-  { key: 'sourceNumber', label: 'Reference No.', width: 18 },
-  { key: 'filterStatusLabel', label: 'Status', align: 'center', width: 18 },
-  { key: 'accountStatus', label: 'Account Status', align: 'center', width: 18 },
-  { key: 'dueBucket', label: 'Due Type', align: 'center', width: 14 },
-  { key: 'daysFromToday', label: 'Days', type: 'integer', align: 'center', width: 10 },
-  { key: 'name', label: 'Name', width: 30 },
-  { key: 'reminderDate', label: 'Reminder Date', type: 'date', align: 'center', width: 15 },
-  { key: 'reminderMode', label: 'Reminder Mode', width: 18 },
-  { key: 'note', label: 'Note', width: 34 },
+  { key: 'context', label: 'Context', align: 'center', width: 12 },
+  { key: 'dealNumber', label: 'Deal Number', width: 16 },
+  { key: 'reminderOwner', label: 'Reminder Owner', width: 20 },
+  { key: 'reminderDateOnly', label: 'Reminder Date', align: 'center', width: 15 },
+  { key: 'reminderTime', label: 'Reminder Time', align: 'center', width: 15 },
+  { key: 'reminderNotes', label: 'Reminder Notes', width: 58 },
+  { key: 'reminderAddedBy', label: 'Reminder Added By', width: 22 },
+  { key: 'dealName', label: 'Deal Name', width: 48 },
+  { key: 'customerNumber', label: 'Customer Number', width: 18 },
+  { key: 'customerName', label: 'Customer Name', width: 24 },
+  { key: 'dealOwner', label: 'Deal Owner', width: 20 },
+  { key: 'dealStatus', label: 'Deal Status', width: 16 },
 ]
 
 const MY_REMINDER_TABS = [
@@ -108,8 +109,8 @@ const DATE_PRESET_OPTIONS = [
 const MODULE_STATUS_OPTIONS = {
   deal: ['New', 'Quotation Sent', 'Quotation Revision', 'Closed-Won', 'Closed-Lost'],
   sr: ['Active', 'Attending', 'On Site', 'In Progress', 'On Hold', 'Postponed'],
-  customer: ['New', 'Active', 'Future Prospect', 'Rejected', 'Advance Payment Received', 'Converted', 'OLD', 'Closed'],
-  account: ['New', 'Follow-up', 'Technical Offer', 'Priority 1', 'Commercial Offer', 'Priority 2', 'Quotation Sent', 'Quote Revision', 'Order Received', 'Convert To PO', 'Order Lost', 'Converted', 'Rejected', 'Contracted', 'Closed'],
+  customer: ['New', 'Active', 'Future Prospect', 'Rejected', 'Converted', 'OLD', 'Closed'],
+  account: ['New', 'Follow-up', 'Technical Offer', 'Priority 1', 'Commercial Offer', 'Priority 2', 'Quotation Sent', 'Quote Revision', 'Order Received', 'Convert To PO', 'Order Lost', 'Converted', 'Rejected', 'Contacted', 'Closed'],
 }
 
 const ACCOUNT_STAGE_LABEL_MAP = getVisibleAccountStages().reduce((lookup, stage) => {
@@ -151,6 +152,12 @@ const getDateKey = (value) => {
   return `${year}-${month}-${day}`
 }
 
+const getTomorrowDateInputValue = () => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return getDateKey(tomorrow)
+}
+
 const getDayDifferenceFromToday = (value) => {
   const valueKey = getDateKey(value)
   if (!valueKey) return ''
@@ -161,6 +168,24 @@ const getDayDifferenceFromToday = (value) => {
   target.setHours(0, 0, 0, 0)
 
   return Math.round((target.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
+}
+
+const formatReminderExportDate = (value) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value || '-'
+  return date.toLocaleDateString('en-GB').replace(/\//g, '-')
+}
+
+const formatReminderExportTime = (value, fallback = '') => {
+  const normalizedFallback = String(fallback || '').trim()
+  if (normalizedFallback && normalizedFallback !== '-') return normalizedFallback
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleTimeString('en-IN', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
 }
 
 const getDueBucket = (value) => {
@@ -313,7 +338,91 @@ const resolveOwnerName = (value) => {
   return canonicalName || String(value || 'Unassigned').trim() || 'Unassigned'
 }
 
-const buildActiveOwnerFilterRecords = ({ accounts = [], deals = [], supportRequests = [] }) => {
+const resolveUserNameById = (users = [], userId = '') => {
+  const normalizedUserId = String(userId || '').trim()
+  if (!normalizedUserId) return ''
+  const matchedUser = users.find((entry) => String(entry.id || entry.legacyId || '').trim() === normalizedUserId)
+  return matchedUser?.name || matchedUser?.username || matchedUser?.email || ''
+}
+
+const buildRemarkReminderRecords = ({ accounts = [], remarkReminders = [], users = [] }) => {
+  const accountLookup = getAccountsBoardData(accounts).records.reduce((lookup, account) => {
+    lookup[String(account.raw?.id || account.id || '').trim()] = account
+    return lookup
+  }, {})
+
+  return remarkReminders.map((reminder) => {
+    const accountId = String(reminder.accountId || '').trim()
+    const account = accountLookup[accountId] || {}
+    const assignedUserName = resolveUserNameById(users, reminder.assignedTo) || reminder.assignedOwnerName
+    const createdByName = resolveUserNameById(users, reminder.createdBy)
+    const status = reminder.isCompleted ? 'closed' : 'active'
+    const reminderDateDisplay = formatShortDate(reminder.reminderDate)
+    const note = reminder.reminderNote || reminder.remarkContent || '-'
+
+    return {
+      id: `remark-reminder-${reminder.id}`,
+      sourceType: 'remark-reminder',
+      sourceId: reminder.id,
+      sourceLabel: 'Account',
+      sourceNumber: account.accountNumber || account.accountNo || account.id || accountId || '',
+      ownerName: resolveOwnerName(assignedUserName || account.accountOwner || 'Unassigned'),
+      name: account.name || account.accountName || account.accountNumber || `Account ${accountId || reminder.id}`,
+      dealName: account.name || account.accountName || account.accountNumber || `Account ${accountId || reminder.id}`,
+      customerNumber: account.customerNumber || account.customerRefNo || '-',
+      customerName: account.customerName || account.name || account.accountName || '-',
+      reminderAddedBy: resolveOwnerName(createdByName || account.addedBy || account.accountOwner || 'Unassigned'),
+      reminderDate: reminder.reminderDate,
+      reminderTime: reminder.reminderTime,
+      reminderDateDisplay,
+      reminderMode: reminder.reminderTime || '-',
+      accountStatus: getAccountFilterStatus(account),
+      note,
+      filterStatusLabel: getAccountFilterStatus(account),
+      actionable: true,
+      moduleKey: 'account',
+      status,
+      closedOnDisplay: '-',
+      isMongoRemarkReminder: true,
+    }
+  })
+}
+
+const buildMongoReminderRecords = ({ reminders = [], users = [] }) => reminders.map((reminder) => {
+  const assignedUserName = resolveUserNameById(users, reminder.assignedTo)
+  const createdByName = resolveUserNameById(users, reminder.createdBy)
+  const reminderDate = reminder.reminderDate || String(reminder.remindAt || '').slice(0, 10)
+  const reminderTime = reminder.reminderTime || String(reminder.remindAt || '').slice(11, 16) || '09:00'
+  const status = reminder.status === 'closed' ? 'closed' : 'active'
+
+  return {
+    id: `mongo-reminder-${reminder.id}`,
+    sourceType: 'mongo-reminder',
+    sourceId: reminder.id,
+    sourceLabel: reminder.relatedEntityType ? titleize(reminder.relatedEntityType) : 'Reminder',
+    sourceNumber: reminder.relatedEntityId || '',
+    ownerName: resolveOwnerName(assignedUserName || createdByName || 'Unassigned'),
+    name: reminder.title || 'Reminder',
+    dealName: reminder.title || 'Reminder',
+    customerNumber: '-',
+    customerName: '-',
+    reminderAddedBy: resolveOwnerName(createdByName || assignedUserName || 'Unassigned'),
+    reminderDate,
+    reminderTime,
+    reminderDateDisplay: formatShortDate(reminderDate),
+    reminderMode: reminder.reminderMode || reminderTime || 'Follow Up',
+    accountStatus: status === 'closed' ? 'Closed' : 'Active',
+    note: reminder.note || reminder.message || '-',
+    filterStatusLabel: status === 'closed' ? 'Closed' : 'Active',
+    actionable: true,
+    moduleKey: 'reminder',
+    status,
+    closedOnDisplay: status === 'closed' ? formatShortDate(reminder.updatedAt || reminder.closedOn) : '-',
+    isMongoReminder: true,
+  }
+})
+
+const buildActiveOwnerFilterRecords = ({ accounts = [], deals = [], supportRequests = [], remarkReminders = [], users = [] }) => {
   const accountRecords = getAccountsBoardData(accounts).records
     .filter((account) => account.reminderDate)
     .map((account) => ({
@@ -324,6 +433,10 @@ const buildActiveOwnerFilterRecords = ({ accounts = [], deals = [], supportReque
       sourceNumber: account.accountNumber || account.id || '',
       ownerName: resolveOwnerName(account.accountOwner || account.addedBy || 'Unassigned'),
       name: account.name || account.accountNumber || 'Untitled Account',
+      dealName: account.name || account.accountNumber || 'Untitled Account',
+      customerNumber: account.customerNumber || account.customerRefNo || '-',
+      customerName: account.customerName || account.name || '-',
+      reminderAddedBy: resolveOwnerName(account.reminderAddedBy || account.addedBy || account.accountOwner || 'Unassigned'),
       reminderDate: account.reminderDate,
       reminderDateDisplay: formatShortDate(account.reminderDate),
       reminderMode: account.reminderMode || '-',
@@ -344,6 +457,10 @@ const buildActiveOwnerFilterRecords = ({ accounts = [], deals = [], supportReque
       sourceNumber: deal.dealNumber || deal.id || '',
       ownerName: resolveOwnerName(deal.dealOwner || deal.ownerName || 'Unassigned'),
       name: deal.name || deal.dealNumber || 'Untitled Deal',
+      dealName: deal.name || deal.projectName || deal.title || deal.dealNumber || 'Untitled Deal',
+      customerNumber: deal.customerNumber || deal.customerNo || deal.accountNumber || deal.accountNo || '-',
+      customerName: deal.customerName || deal.companyName || deal.accountName || '-',
+      reminderAddedBy: resolveOwnerName(deal.reminderAddedBy || deal.addedByName || deal.addedBy || deal.dealOwner || deal.ownerName || 'Unassigned'),
       reminderDate: deal.reminderDate,
       reminderDateDisplay: formatShortDate(deal.reminderDate),
       reminderMode: titleize(deal.reminderMode || '') || '-',
@@ -364,6 +481,10 @@ const buildActiveOwnerFilterRecords = ({ accounts = [], deals = [], supportReque
       sourceNumber: customer.customerNumber || customer.id || '',
       ownerName: resolveOwnerName(customer.customerOwner || 'Unassigned'),
       name: customer.customerName || customer.customerNumber || 'Untitled Customer',
+      dealName: customer.projectName || customer.customerName || customer.customerNumber || 'Untitled Customer',
+      customerNumber: customer.customerNumber || customer.id || '-',
+      customerName: customer.customerName || '-',
+      reminderAddedBy: resolveOwnerName(customer.reminderAddedBy || customer.addedBy || customer.customerOwner || 'Unassigned'),
       reminderDate: customer.reminderDate,
       reminderDateDisplay: formatShortDate(customer.reminderDate),
       reminderMode: titleize(customer.reminderMode || '') || '-',
@@ -375,8 +496,11 @@ const buildActiveOwnerFilterRecords = ({ accounts = [], deals = [], supportReque
     }))
 
   const supportRequestRecords = supportRequests
-    .filter((supportRequest) => supportRequest.srDate)
-    .map((supportRequest) => ({
+    .filter((supportRequest) => supportRequest.reminderDate || supportRequest.srDate)
+    .map((supportRequest) => {
+      const reminderDate = supportRequest.reminderDate || supportRequest.srDate
+
+      return ({
       id: `sr-${supportRequest.id}`,
       sourceType: 'sr',
       sourceId: supportRequest.id,
@@ -384,21 +508,27 @@ const buildActiveOwnerFilterRecords = ({ accounts = [], deals = [], supportReque
       sourceNumber: supportRequest.srNumber || supportRequest.ticketNumber || supportRequest.id || '',
       ownerName: resolveOwnerName(supportRequest.ownerName || supportRequest.addedByName || 'Unassigned'),
       name: supportRequest.title || supportRequest.customerName || supportRequest.srNumber || 'Untitled SR',
-      reminderDate: supportRequest.srDate,
-      reminderDateDisplay: formatShortDate(supportRequest.srDate),
-      reminderMode: titleize(supportRequest.requestType || '') || '-',
+      dealName: supportRequest.title || supportRequest.projectName || supportRequest.srNumber || 'Untitled SR',
+      customerNumber: supportRequest.customerNumber || supportRequest.customerNo || '-',
+      customerName: supportRequest.customerName || '-',
+      reminderAddedBy: resolveOwnerName(supportRequest.reminderAddedBy || supportRequest.addedByName || supportRequest.ownerName || 'Unassigned'),
+      reminderDate,
+      reminderDateDisplay: formatShortDate(reminderDate),
+      reminderMode: titleize(supportRequest.reminderMode || supportRequest.requestType || '') || '-',
       accountStatus: '-',
-      note: supportRequest.notes || supportRequest.description || '-',
+      note: supportRequest.reminderNote || supportRequest.notes || supportRequest.description || '-',
       filterStatusLabel: getSupportRequestFilterStatus(supportRequest),
       actionable: false,
       moduleKey: 'sr',
-    }))
+      })
+    })
 
   return [
     ...accountRecords,
     ...dealRecords,
     ...customerRecords,
     ...supportRequestRecords,
+    ...buildRemarkReminderRecords({ accounts, remarkReminders, users }).filter((reminder) => reminder.status === 'active'),
   ].sort((left, right) => new Date(left.reminderDate || 0).getTime() - new Date(right.reminderDate || 0).getTime())
 }
 
@@ -448,6 +578,18 @@ const buildDetailTabData = (rows) => {
 
 const normalizeActiveReminderExportRows = (rows = []) => rows.map((row) => ({
   ...row,
+  context: String(row.sourceLabel || row.sourceType || '-').toUpperCase(),
+  dealNumber: row.sourceNumber || row.sourceId || '-',
+  reminderOwner: row.ownerName || '-',
+  reminderDateOnly: formatReminderExportDate(row.reminderDate),
+  reminderTime: formatReminderExportTime(row.reminderDate, row.reminderTime || row.reminderMode),
+  reminderNotes: row.note || '-',
+  reminderAddedBy: row.reminderAddedBy || row.ownerName || '-',
+  dealName: row.dealName || row.name || '-',
+  customerNumber: row.customerNumber || '-',
+  customerName: row.customerName || '-',
+  dealOwner: row.ownerName || '-',
+  dealStatus: row.filterStatusLabel || row.accountStatus || (row.status === 'closed' ? 'Closed' : 'Active'),
   sourceNumber: row.sourceNumber || row.sourceId || '-',
   filterStatusLabel: row.filterStatusLabel || (row.status === 'closed' ? 'Closed' : 'Active'),
   accountStatus: row.accountStatus || '-',
@@ -459,8 +601,20 @@ const normalizeActiveReminderExportRows = (rows = []) => rows.map((row) => ({
 }))
 
 const AdminRemindersPage = ({ variantKey = 'active' }) => {
-  const { accounts, deals, supportRequests, notifications, clearNotification } = useData()
-  const { user } = useAuth()
+  const {
+    accounts,
+    deals,
+    supportRequests,
+    reminders: mongoReminders,
+    notifications,
+    clearNotification,
+    addNotification,
+    updateAccount,
+    updateDeal,
+    updateReminder,
+    updateSupportRequest,
+  } = useData()
+  const { user, isAdmin } = useAuth()
   const [reminderStatesById, setReminderStatesById] = useState(() => getAdminReminderStates())
   const [filters, setFilters] = useState(() => (
     columns.reduce((lookup, column) => ({ ...lookup, [column.key]: '' }), {})
@@ -472,8 +626,28 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
   const [draftActiveFilter, setDraftActiveFilter] = useState(() => createDefaultActiveFilterState())
   const [appliedActiveFilter, setAppliedActiveFilter] = useState(null)
+  const [remarkReminders, setRemarkReminders] = useState([])
 
   useEffect(() => subscribeAdminReminderStates(setReminderStatesById), [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadRemarkReminders = async () => {
+      try {
+        const records = await remarkApi.getRemarkReminders()
+        if (isMounted) setRemarkReminders(records)
+      } catch (error) {
+        if (isMounted) setRemarkReminders([])
+      }
+    }
+
+    loadRemarkReminders()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const availableUsers = useMemo(() => (
     Array.from(
@@ -486,14 +660,53 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
     )
   ), [])
 
+  const activeReminderUsers = useMemo(() => {
+    if (isAdmin) return availableUsers
+    const currentUserName = resolveOwnerName(user?.name || user?.username || '')
+    return currentUserName ? [currentUserName] : []
+  }, [availableUsers, isAdmin, user?.name, user?.username])
+
+  const dbRemarkReminderRows = useMemo(() => {
+    const rows = buildRemarkReminderRecords({
+      accounts,
+      remarkReminders,
+      users: authService.getAvailableUsers(),
+    })
+    const currentUserName = normalizeCrmUserName(user?.name || user?.username || '')
+
+    return rows.filter((row) => {
+      if (variantKey === 'closed') return row.status === 'closed'
+      if (variantKey === 'my') return row.status === 'active' && (isAdmin || normalizeCrmUserName(row.ownerName) === currentUserName)
+      if (!isAdmin && normalizeCrmUserName(row.ownerName) !== currentUserName) return false
+      return row.status === 'active'
+    })
+  }, [accounts, isAdmin, remarkReminders, user?.name, user?.username, variantKey])
+
+  const dbMongoReminderRows = useMemo(() => {
+    const rows = buildMongoReminderRecords({
+      reminders: mongoReminders,
+      users: authService.getAvailableUsers(),
+    })
+    const currentUserName = normalizeCrmUserName(user?.name || user?.username || '')
+
+    return rows.filter((row) => {
+      if (variantKey === 'closed') return row.status === 'closed'
+      if (variantKey === 'my') return row.status === 'active' && (isAdmin || normalizeCrmUserName(row.ownerName) === currentUserName)
+      if (!isAdmin && normalizeCrmUserName(row.ownerName) !== currentUserName) return false
+      return row.status === 'active'
+    })
+  }, [isAdmin, mongoReminders, user?.name, user?.username, variantKey])
+
   const reminders = useMemo(() => getAdminReminders({
-    accounts,
-    deals,
-    supportRequests,
-    user,
-    variantKey,
-    reminderStatesById,
-  }), [accounts, deals, reminderStatesById, supportRequests, user, variantKey])
+      accounts,
+      deals,
+      supportRequests,
+      user,
+      variantKey,
+      reminderStatesById,
+      isAdmin,
+    }).concat(dbRemarkReminderRows, dbMongoReminderRows),
+  [accounts, dbMongoReminderRows, dbRemarkReminderRows, deals, isAdmin, reminderStatesById, supportRequests, user, variantKey])
 
   const filteredRows = useMemo(() => (
     reminders.filter((reminder) => (
@@ -517,7 +730,27 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
     setCurrentPage(1)
   }
 
-  const handleCloseReminder = (reminder) => {
+  const handleCloseReminder = async (reminder) => {
+    if (reminder.sourceType === 'mongo-reminder') {
+      const result = await updateReminder(reminder.sourceId, { status: 'closed' })
+      if (!result.success) {
+        addNotification?.('error', 'Close Reminder', result.message || 'Unable to close this reminder.')
+      }
+      return
+    }
+
+    if (reminder.sourceType === 'remark-reminder') {
+      try {
+        const updatedReminder = await remarkApi.updateRemarkReminder(reminder.sourceId, { isCompleted: true })
+        setRemarkReminders((currentRecords) => currentRecords.map((record) => (
+          String(record.id) === String(updatedReminder.id) ? updatedReminder : record
+        )))
+      } catch (error) {
+        addNotification?.('error', 'Close Reminder', error.response?.data?.message || error.message || 'Unable to close this reminder.')
+      }
+      return
+    }
+
     closeAdminReminder({
       sourceType: reminder.sourceType,
       sourceId: reminder.sourceId,
@@ -525,18 +758,103 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
     })
   }
 
-  const handleReopenReminder = (reminder) => {
+  const handleReopenReminder = async (reminder) => {
+    if (reminder.sourceType === 'mongo-reminder') {
+      const result = await updateReminder(reminder.sourceId, { status: 'scheduled' })
+      if (!result.success) {
+        addNotification?.('error', 'Reopen Reminder', result.message || 'Unable to reopen this reminder.')
+      }
+      return
+    }
+
+    if (reminder.sourceType === 'remark-reminder') {
+      try {
+        const updatedReminder = await remarkApi.updateRemarkReminder(reminder.sourceId, { isCompleted: false })
+        setRemarkReminders((currentRecords) => currentRecords.map((record) => (
+          String(record.id) === String(updatedReminder.id) ? updatedReminder : record
+        )))
+      } catch (error) {
+        addNotification?.('error', 'Reopen Reminder', error.response?.data?.message || error.message || 'Unable to reopen this reminder.')
+      }
+      return
+    }
+
     reopenAdminReminder({
       sourceType: reminder.sourceType,
       sourceId: reminder.sourceId,
     })
   }
 
+  const handleUpdateReminderDate = async (reminder, actionLabel = 'Reschedule') => {
+    const nextDate = window.prompt(`${actionLabel} reminder date (YYYY-MM-DD)`, getTomorrowDateInputValue())
+    const normalizedDate = String(nextDate || '').trim()
+    if (!normalizedDate) return
+
+    const updates = {
+      reminderDate: normalizedDate,
+      reminderMode: reminder.reminderMode === '-' ? 'Follow Up' : reminder.reminderMode,
+      reminderNote: reminder.note === '-' ? '' : reminder.note,
+    }
+
+    let result = { success: true }
+
+    if (reminder.sourceType === 'remark-reminder') {
+      try {
+        const updatedReminder = await remarkApi.updateRemarkReminder(reminder.sourceId, {
+          reminderDate: normalizedDate,
+          reminderTime: reminder.reminderTime && reminder.reminderTime !== '-' ? reminder.reminderTime : '09:00',
+          reminderNote: reminder.note === '-' ? '' : reminder.note,
+          isCompleted: false,
+        })
+        setRemarkReminders((currentRecords) => currentRecords.map((record) => (
+          String(record.id) === String(updatedReminder.id) ? updatedReminder : record
+        )))
+      } catch (error) {
+        result = { success: false, message: error.response?.data?.message || error.message }
+      }
+    } else if (reminder.sourceType === 'mongo-reminder') {
+      const reminderTime = reminder.reminderTime && reminder.reminderTime !== '-' ? reminder.reminderTime : '09:00'
+      result = await updateReminder(reminder.sourceId, {
+        status: 'scheduled',
+        remindAt: `${normalizedDate}T${reminderTime}:00`,
+        reminderDate: normalizedDate,
+        reminderTime,
+        reminderMode: reminder.reminderMode === '-' ? 'Follow Up' : reminder.reminderMode,
+        message: reminder.note === '-' ? '' : reminder.note,
+      })
+    } else if (reminder.sourceType === 'account') {
+      result = await updateAccount(reminder.sourceId, updates)
+    } else if (reminder.sourceType === 'deal') {
+      result = await updateDeal(reminder.sourceId, updates)
+    } else if (reminder.sourceType === 'sr') {
+      result = await updateSupportRequest(reminder.sourceId, updates)
+    } else if (reminder.sourceType === 'customer') {
+      const customer = customerService.getCustomerById(reminder.sourceId)
+      if (!customer) {
+        result = { success: false, message: 'Customer was not found.' }
+      } else {
+        await customerService.saveCustomer({ ...customer, ...updates })
+        result = { success: true }
+      }
+    }
+
+    if (!result?.success) {
+      addNotification?.('error', `${actionLabel} Reminder`, result?.message || 'Unable to update this reminder.')
+      return
+    }
+
+    reopenAdminReminder({
+      sourceType: reminder.sourceType,
+      sourceId: reminder.sourceId,
+    })
+    addNotification?.('success', `${actionLabel} Reminder`, `Reminder moved to ${normalizedDate}.`)
+  }
+
   const userGroups = useMemo(() => {
     if (variantKey !== 'active') return []
 
     const groups = new Map(
-      availableUsers.map((ownerName) => [
+      activeReminderUsers.map((ownerName) => [
         normalizeCrmUserName(ownerName),
         { name: ownerName, count: 0, items: [] },
       ])
@@ -555,17 +873,29 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
       groups.set(ownerKey, existingGroup)
     })
 
+    const currentUserName = normalizeCrmUserName(user?.name || user?.username || '')
+
     return Array.from(groups.values())
-      .sort((leftGroup, rightGroup) => leftGroup.name.localeCompare(rightGroup.name))
-  }, [availableUsers, reminders, variantKey])
+      .sort((leftGroup, rightGroup) => {
+        const leftIsCurrentUser = normalizeCrmUserName(leftGroup.name) === currentUserName
+        const rightIsCurrentUser = normalizeCrmUserName(rightGroup.name) === currentUserName
+        if (leftIsCurrentUser !== rightIsCurrentUser) return leftIsCurrentUser ? -1 : 1
+        return leftGroup.name.localeCompare(rightGroup.name)
+      })
+  }, [activeReminderUsers, reminders, user?.name, user?.username, variantKey])
 
   useEffect(() => {
     if (variantKey !== 'active') return
 
+    if (!isAdmin && userGroups.length > 0 && selectedOwner !== userGroups[0].name) {
+      setSelectedOwner(userGroups[0].name)
+      return
+    }
+
     if (!userGroups.some((group) => group.name === selectedOwner)) {
       setSelectedOwner(null)
     }
-  }, [selectedOwner, userGroups, variantKey])
+  }, [isAdmin, selectedOwner, userGroups, variantKey])
 
   useEffect(() => {
     if (variantKey !== 'active') return
@@ -585,7 +915,9 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
     accounts,
     deals,
     supportRequests,
-  }), [accounts, deals, supportRequests])
+    remarkReminders,
+    users: authService.getAvailableUsers(),
+  }), [accounts, deals, remarkReminders, supportRequests])
 
   const appliedFilteredOwnerRows = useMemo(() => {
     if (!selectedOwner || !appliedActiveFilter) return []
@@ -624,7 +956,15 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
     }
 
     const todayKey = getDateKey(new Date())
-    const activeReminders = reminders.filter((reminder) => reminder.status === 'active')
+    const currentUserName = normalizeCrmUserName(user?.name || user?.username || '')
+    const activeReminders = reminders
+      .filter((reminder) => reminder.status === 'active')
+      .sort((left, right) => {
+        const leftIsCurrentUser = normalizeCrmUserName(left.ownerName) === currentUserName
+        const rightIsCurrentUser = normalizeCrmUserName(right.ownerName) === currentUserName
+        if (leftIsCurrentUser !== rightIsCurrentUser) return leftIsCurrentUser ? -1 : 1
+        return new Date(left.reminderDate || 0).getTime() - new Date(right.reminderDate || 0).getTime()
+      })
     const notificationRows = notifications
       .slice()
       .sort((left, right) => new Date(right.timestamp || 0).getTime() - new Date(left.timestamp || 0).getTime())
@@ -641,7 +981,7 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
       }),
       notifications: notificationRows,
     }
-  }, [notifications, reminders, variantKey])
+  }, [notifications, reminders, user?.name, user?.username, variantKey])
 
   const handleOpenFilterPanel = () => {
     setDraftActiveFilter(
@@ -689,32 +1029,40 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
       return
     }
 
-    exportExcelWorkbook({
-      filename: String(filename || 'active-reminders.xlsx').replace(/\.(xls|xlsx)$/i, '.xlsx'),
-      title,
-      subtitle,
-      sheetName: 'Active Reminders',
-      metadata: [
-        ...metadata,
-        { label: 'Total Records', value: rows.length },
-        { label: 'Downloaded On', value: new Date().toLocaleString('en-IN') },
-      ],
-      columns: ACTIVE_REMINDERS_EXCEL_COLUMNS,
-      rows: normalizeActiveReminderExportRows(rows),
-      summary: [
-        { label: 'Total Reminders', value: rows.length, type: 'integer' },
-      ],
-    })
+    try {
+      exportExcelWorkbook({
+        filename: String(filename || 'active-reminders.xlsx').replace(/\.(xls|xlsx|csv)$/i, '.xlsx'),
+        title,
+        subtitle,
+        sheetName: 'Active Reminders',
+        metadata: [
+          ...metadata,
+          { label: 'Total Records', value: rows.length },
+          { label: 'Downloaded On', value: new Date().toLocaleString('en-IN') },
+        ],
+        columns: ACTIVE_REMINDERS_EXCEL_COLUMNS,
+        rows: normalizeActiveReminderExportRows(rows),
+        summary: [
+          { label: 'Total Reminders', value: rows.length, type: 'integer' },
+        ],
+      })
+      addNotification?.('success', 'Active Reminder Export', `${rows.length} reminder(s) exported to Excel.`)
+    } catch (error) {
+      addNotification?.('error', 'Active Reminder Export', error?.message || 'Unable to download active reminders Excel.')
+      throw error
+    }
   }
 
   const handleExportAllActiveRows = () => {
     handleExportActiveReminderRows({
       rows: reminders,
-      filename: `all-active-reminders-${buildExportDateStamp()}.xlsx`,
-      title: 'All Active Reminders',
-      subtitle: `${reminders.length} active reminder(s) across all users`,
+      filename: `${isAdmin ? 'all' : 'my'}-active-reminders-${buildExportDateStamp()}.xlsx`,
+      title: isAdmin ? 'All Active Reminders' : 'My Active Reminders',
+      subtitle: isAdmin
+        ? `${reminders.length} active reminder(s) across all users`
+        : `${reminders.length} active reminder(s) assigned to ${resolveOwnerName(user?.name || user?.username || 'me')}`,
       metadata: [
-        { label: 'Scope', value: 'All Users' },
+        { label: 'Scope', value: isAdmin ? 'All Users' : 'My Reminders' },
         { label: 'View', value: 'Active Reminders' },
       ],
     })
@@ -783,13 +1131,26 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
                       <p>{notification.message || '-'}</p>
                       <span>{notification.timestamp ? new Date(notification.timestamp).toLocaleString('en-IN') : '-'}</span>
                     </div>
-                    <button
-                      type="button"
-                      className="admin-my-reminders-item-action admin-my-reminders-item-action-secondary"
-                      onClick={() => clearNotification(notification.id)}
-                    >
-                      Clear
-                    </button>
+                    <div className="admin-my-reminders-notification-actions">
+                      <button
+                        type="button"
+                        className="admin-my-reminders-icon-action admin-my-reminders-icon-action-check"
+                        title="Mark as done"
+                        aria-label="Mark notification as done"
+                        onClick={() => clearNotification(notification.id)}
+                      >
+                        <FaCheck />
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-my-reminders-icon-action admin-my-reminders-icon-action-close"
+                        title="Close"
+                        aria-label="Close notification"
+                        onClick={() => clearNotification(notification.id)}
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
                   </article>
                 )) : activeTabRows.map((reminder) => (
                   <article key={reminder.id} className="admin-my-reminders-item">
@@ -833,25 +1194,6 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
               disabled={reminders.length === 0}
             />
           </header>
-
-          <div className="active-reminders-summary-grid" aria-label="Active reminder summary">
-            <div className="active-reminders-summary-card">
-              <span>Total</span>
-              <strong>{activeReminderStats.total}</strong>
-            </div>
-            <div className="active-reminders-summary-card">
-              <span>Today</span>
-              <strong>{activeReminderStats.today}</strong>
-            </div>
-            <div className="active-reminders-summary-card">
-              <span>Pending</span>
-              <strong>{activeReminderStats.pending}</strong>
-            </div>
-            <div className="active-reminders-summary-card">
-              <span>Scheduled</span>
-              <strong>{activeReminderStats.scheduled}</strong>
-            </div>
-          </div>
 
           <div className="active-reminders-layout">
             <div className="active-reminders-users-panel">
@@ -1038,20 +1380,49 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
                             <article key={reminder.id} className="active-reminders-detail-item">
                               <div className="active-reminders-detail-item-main">
                                 <strong>{reminder.name}</strong>
-                                <p>{reminder.sourceLabel} | {reminder.reminderMode} | {reminder.accountStatus || '-'} | {reminder.reminderDateDisplay}</p>
+                                <p>
+                                  <span>{String(reminder.sourceLabel || reminder.sourceType || '-').toUpperCase()}</span>
+                                  <span>{reminder.sourceNumber || '-'}</span>
+                                  <span>{reminder.reminderDateDisplay}</span>
+                                  <span>{formatReminderExportTime(reminder.reminderDate, reminder.reminderTime || reminder.reminderMode)}</span>
+                                </p>
+                                <p>
+                                  <span>{reminder.customerNumber || '-'}</span>
+                                  <span>{reminder.customerName || '-'}</span>
+                                  <span>{reminder.ownerName || '-'}</span>
+                                  <span>{reminder.filterStatusLabel || reminder.accountStatus || '-'}</span>
+                                </p>
                                 <span>{reminder.note !== '-' ? reminder.note : ''}</span>
                               </div>
-                              {reminder.actionable !== false ? (
+                              <div className="active-reminders-item-actions" aria-label="Reminder actions">
                                 <button
                                   type="button"
-                                  className="admin-reminders-action-button admin-reminders-action-button-close"
+                                  className="active-reminders-item-action active-reminders-item-action-close"
+                                  title="Close reminder"
+                                  aria-label="Close reminder"
                                   onClick={() => handleCloseReminder(reminder)}
                                 >
-                                  Close
+                                  <FaCheck />
                                 </button>
-                              ) : (
-                                <div className="admin-reminders-action-spacer" />
-                              )}
+                                <button
+                                  type="button"
+                                  className="active-reminders-item-action active-reminders-item-action-add"
+                                  title="Add reminder"
+                                  aria-label="Add reminder"
+                                  onClick={() => handleUpdateReminderDate(reminder, 'Add')}
+                                >
+                                  <FaPlus />
+                                </button>
+                                <button
+                                  type="button"
+                                  className="active-reminders-item-action active-reminders-item-action-reschedule"
+                                  title="Reschedule reminder"
+                                  aria-label="Reschedule reminder"
+                                  onClick={() => handleUpdateReminderDate(reminder, 'Reschedule')}
+                                >
+                                  <FaRedo />
+                                </button>
+                              </div>
                             </article>
                           ))}
                         </div>

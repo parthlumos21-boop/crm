@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fa'
 import ContactIntegrationActions from '../../../components/integrations/ContactIntegrationActions'
 import { getCrmOwnerDisplay } from '../../../features/users/crmUserDirectory'
+import { calendarApi } from '../../../services/calendarApi'
 import './CustomerDetailsDrawer.css'
 
 const CUSTOMER_STATUS_OPTIONS = [
@@ -25,9 +26,7 @@ const CUSTOMER_STATUS_OPTIONS = [
   { value: 'Active', label: 'Active' },
   { value: 'Future Prospect', label: 'Future Prospect' },
   { value: 'Rejected', label: 'Rejected' },
-  { value: 'Converted', label: 'Converted' },
   { value: 'OLD', label: 'OLD' },
-  { value: 'Closed', label: 'Closed' },
 ]
 const REMINDER_MODES = [
   { value: '', label: 'Select' },
@@ -96,6 +95,21 @@ const formatDateTimeValue = (value) => {
 }
 
 const isMissing = (value) => !String(value || '').trim()
+const getTodayDateValue = () => new Date().toISOString().slice(0, 10)
+
+const createCustomerCalendarReminder = async (customer, { reminderDate, reminderMode }) => {
+  if (!customer?.id || !reminderDate) return
+
+  await calendarApi.createEvent({
+    title: `${customer.customerName || 'Customer'} reminder`,
+    description: reminderMode ? `Reminder mode: ${reminderMode}` : '',
+    startAt: `${reminderDate}T09:00:00`,
+    category: 'Reminder',
+    relatedEntityType: 'customer',
+    relatedEntityId: customer.id,
+    assignedTo: customer.assignedTo || customer.ownerUserId || customer.customerOwner || customer.customerOwnerName || '',
+  }).catch(() => null)
+}
 
 const CustomerDetailsDrawer = ({
   customer,
@@ -173,7 +187,7 @@ const CustomerDetailsDrawer = ({
     if (!customer) return
 
     setRemarkValue(customer.remark || '')
-    setReminderDate(customer.reminderDate || '')
+    setReminderDate(customer.reminderDate || getTodayDateValue())
     setReminderMode(customer.reminderMode || '')
     setStatusValue(customer.customerStatus || '')
     setOwnerValue(customer.customerOwner || availableOwnerOptions[0]?.value || '')
@@ -399,7 +413,7 @@ const CustomerDetailsDrawer = ({
     ), document.body)
     : null
 
-  const handleSaveAction = (event) => {
+  const handleSaveAction = async (event) => {
     event.preventDefault()
     setErrorMessage('')
     setSuccessMessage('')
@@ -410,7 +424,7 @@ const CustomerDetailsDrawer = ({
         return
       }
 
-      onSaveCustomerUpdates(customer.id, { remark: remarkValue.trim() })
+      await onSaveCustomerUpdates(customer.id, { remark: remarkValue.trim() })
       setSuccessMessage('Customer remark updated.')
       return
     }
@@ -426,7 +440,8 @@ const CustomerDetailsDrawer = ({
         return
       }
 
-      onSaveCustomerUpdates(customer.id, { reminderDate, reminderMode })
+      await onSaveCustomerUpdates(customer.id, { reminderDate, reminderMode })
+      await createCustomerCalendarReminder(customer, { reminderDate, reminderMode })
       setSuccessMessage('Customer reminder updated.')
       return
     }
@@ -437,7 +452,7 @@ const CustomerDetailsDrawer = ({
         return
       }
 
-      onSaveCustomerUpdates(customer.id, { customerStatus: statusValue })
+      await onSaveCustomerUpdates(customer.id, { customerStatus: statusValue })
       setSuccessMessage('Customer status updated.')
       return
     }
@@ -448,7 +463,7 @@ const CustomerDetailsDrawer = ({
         return
       }
 
-      onSaveCustomerUpdates(customer.id, { customerOwner: ownerValue })
+      await onSaveCustomerUpdates(customer.id, { customerOwner: ownerValue })
       setSuccessMessage('Customer owner updated.')
       return
     }
@@ -460,7 +475,7 @@ const CustomerDetailsDrawer = ({
         return
       }
 
-      onSaveCustomerUpdates(customer.id, {
+      await onSaveCustomerUpdates(customer.id, {
         documents: [
           ...savedDocuments,
           {

@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AddRemarksModal from '../../../components/common/AddRemarksModal'
 import Button from '../../../components/common/Button'
 import { useData } from '../../../context/DataContext'
-import { authService } from '../../../services/authService'
 import { remarkApi } from '../../../services/remarkApi'
 import { reminderApi } from '../../../services/reminderApi'
 import { calendarApi } from '../../../services/calendarApi'
 import { ACCOUNT_ACTION_MAP } from '../../../features/adminAccounts/config/accountActions'
+import { getAccountOwnerOptionLabel, getCachedAccountOwnerOptions, loadAccountOwnerOptions } from '../../../features/adminAccounts/utils/accountOwnerOptions'
 import {
   ACCOUNT_ORDER_STATUS_OPTIONS,
   ACCOUNT_QUOTATION_STATUS_OPTIONS,
@@ -20,11 +20,24 @@ import './MyGroupAccounts.css'
 const reminderModes = ['Call', 'Email', 'Meeting', 'Visit', 'WhatsApp', 'Follow Up']
 const documentTypes = ['Proposal', 'Quotation', 'PO', 'Drawing', 'Site Photo', 'Other']
 const reminderTimes = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
+const getTodayInputValue = () => new Date().toISOString().slice(0, 10)
+const ACTION_CHANGE_STATUS_OPTIONS = ACCOUNT_CHANGE_STATUS_OPTIONS.filter((entry) => (
+  !['converted', 'closed', 'contacted', 'order_lost'].includes(entry.value)
+)).map((entry) => ({
+  ...entry,
+  label: entry.value === 'convert_to_po' ? 'PO Converted' : entry.label,
+}))
+const getAllowedActionStatusOption = (value) => {
+  const selectedOption = getAccountChangeStatusOption(value)
+  return ACTION_CHANGE_STATUS_OPTIONS.some((entry) => entry.value === selectedOption.value)
+    ? selectedOption
+    : ACTION_CHANGE_STATUS_OPTIONS[0]
+}
 
 const AccountActionModal = ({ account, actionKey, onClose, onSaved }) => {
   const { addNotification, updateAccount } = useData()
   const action = ACCOUNT_ACTION_MAP[actionKey]
-  const [reminderDate, setReminderDate] = useState('')
+  const [reminderDate, setReminderDate] = useState(getTodayInputValue)
   const [reminderTime, setReminderTime] = useState('')
   const [reminderMode, setReminderMode] = useState(reminderModes[0])
   const [reminderNote, setReminderNote] = useState('')
@@ -44,22 +57,32 @@ const AccountActionModal = ({ account, actionKey, onClose, onSaved }) => {
   const [emailMessage, setEmailMessage] = useState('')
   const [formError, setFormError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [ownerOptions, setOwnerOptions] = useState(getCachedAccountOwnerOptions)
 
-  const ownerOptions = useMemo(() => (
-    authService
-      .getAvailableUsers()
-      .filter((entry) => entry.name !== 'System Administrator')
-      .sort((left, right) => left.name.localeCompare(right.name))
-  ), [])
+  useEffect(() => {
+    let isMounted = true
+
+    loadAccountOwnerOptions()
+      .then((options) => {
+        if (isMounted) setOwnerOptions(options)
+      })
+      .catch(() => {
+        if (isMounted) setOwnerOptions(getCachedAccountOwnerOptions())
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!account) return
 
-    setReminderDate(account.reminderDate || '')
+    setReminderDate(account.reminderDate || getTodayInputValue())
     setReminderTime(account.raw?.reminderTime || '')
     setReminderMode(account.reminderMode || reminderModes[0])
     setReminderNote(account.raw?.reminderNote || '')
-    setStage(getAccountChangeStatusOption(account.status || account.stage)?.value || ACCOUNT_CHANGE_STATUS_OPTIONS[0]?.value || 'new')
+    setStage(getAllowedActionStatusOption(account.status || account.stage)?.value || ACTION_CHANGE_STATUS_OPTIONS[0]?.value || 'new')
     setStatusNote('')
     setPoValue(account.poValue || '')
     setOrderReceivedStatus(account.statusAsPerOrderReceived || '')
@@ -292,7 +315,7 @@ const AccountActionModal = ({ account, actionKey, onClose, onSaved }) => {
             <label className="admin-accounts-bulk-field">
               Account Status
               <select value={stage} onChange={(event) => setStage(event.target.value)}>
-                {ACCOUNT_CHANGE_STATUS_OPTIONS.map((entry) => <option key={entry.value} value={entry.value}>{entry.label}</option>)}
+                {ACTION_CHANGE_STATUS_OPTIONS.map((entry) => <option key={entry.value} value={entry.value}>{entry.label}</option>)}
               </select>
             </label>
             <label className="admin-accounts-bulk-field admin-accounts-action-field-full">
@@ -354,7 +377,7 @@ const AccountActionModal = ({ account, actionKey, onClose, onSaved }) => {
           <label className="admin-accounts-bulk-field admin-accounts-action-field-full">
             Account Owner
             <select value={ownerName} onChange={(event) => setOwnerName(event.target.value)}>
-              {ownerOptions.map((owner) => <option key={owner.id} value={owner.name}>{owner.ownerDisplayName || owner.name}</option>)}
+              {ownerOptions.map((owner) => <option key={owner.id} value={owner.name}>{getAccountOwnerOptionLabel(owner)}</option>)}
             </select>
           </label>
         </div>

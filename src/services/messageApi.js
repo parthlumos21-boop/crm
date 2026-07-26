@@ -1,15 +1,33 @@
 import apiClient from './apiClient'
 
-const normalizeMessage = (message = {}) => ({
-  id: message.id,
-  senderId: message.senderId || '',
-  senderName: message.senderName || '',
-  recipientUserIds: message.recipientUserIds || [],
-  recipientUserNames: message.recipientUserNames || [],
-  recipientCount: message.recipientCount ?? (message.recipientUserIds?.length || 0),
-  body: message.body || '',
-  createdAt: message.createdAt || new Date().toISOString(),
-})
+const toArray = (value) => {
+  if (Array.isArray(value)) return value
+  if (value === null || value === undefined || value === '') return []
+  return [value]
+}
+
+const normalizeMessage = (message = {}) => {
+  const recipientUserIds = toArray(message.recipientUserIds || message.receiverId).map((value) => String(value || '')).filter(Boolean)
+  const recipientUserNames = toArray(message.recipientUserNames || message.receiverName).map((value) => String(value || '')).filter(Boolean)
+  const targetNames = toArray(message.targetNames).length > 0
+    ? toArray(message.targetNames).map((value) => String(value || '')).filter(Boolean)
+    : recipientUserNames
+
+  return {
+    id: message.id,
+    senderId: String(message.senderId || ''),
+    senderName: message.senderName || '',
+    receiverId: String(message.receiverId || ''),
+    receiverName: message.receiverName || '',
+    targetNames,
+    recipientUserIds,
+    recipientUserNames,
+    recipientCount: message.recipientCount ?? recipientUserIds.length,
+    body: message.body || message.message || '',
+    message: message.message || message.body || '',
+    createdAt: message.createdAt || new Date().toISOString(),
+  }
+}
 
 export const messageApi = {
   async getMessages() {

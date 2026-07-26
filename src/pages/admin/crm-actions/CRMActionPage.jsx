@@ -24,6 +24,7 @@ import Button from '../../../components/common/Button'
 import { useAuth } from '../../../context/AuthContext'
 import { useData } from '../../../context/DataContext'
 import { getAccountsBoardData } from '../../../features/adminAccounts/selectors/getAccountsBoardData'
+import { ACCOUNT_CHANGE_STATUS_OPTIONS, getAccountChangeStatusOption } from '../../../features/adminAccounts/config/accountStages'
 import { getCrmOwnerDisplay } from '../../../features/users/crmUserDirectory'
 import { authService } from '../../../services/authService'
 import { customerService } from '../../../services/customerService'
@@ -61,8 +62,26 @@ const QUOTATION_STATUSES = [
 const CURRENCY_OPTIONS = ['INR', 'USD', 'EUR', 'GBP']
 const REMINDER_DATES = ['Today', 'Tomorrow', 'Next 7 Days', 'Custom Date']
 const BUSINESS_TIME_SLOTS = ['09:30', '10:30', '11:30', '14:00', '15:00', '16:00', 'Custom Time']
+const REASSIGN_TIME_OPTIONS = [
+  { value: '09:00', label: '09:00 AM' },
+  { value: '10:00', label: '10:00 AM' },
+  { value: '11:00', label: '11:00 AM' },
+  { value: '12:00', label: '12:00 PM' },
+  { value: '13:00', label: '01:00 PM' },
+  { value: '14:00', label: '02:00 PM' },
+  { value: '15:00', label: '03:00 PM' },
+  { value: '16:00', label: '04:00 PM' },
+  { value: '17:00', label: '05:00 PM' },
+]
 const MAX_QUOTE_FILE_SIZE = 5 * 1024 * 1024
 const ALLOWED_QUOTE_EXTENSIONS = ['pdf', 'xls', 'xlsx', 'doc', 'docx']
+const HIDDEN_DEAL_CHANGE_STATUS_VALUES = new Set(['converted', 'closed', 'contacted'])
+const DEAL_CHANGE_STATUS_OPTIONS = ACCOUNT_CHANGE_STATUS_OPTIONS
+  .filter((option) => !HIDDEN_DEAL_CHANGE_STATUS_VALUES.has(option.value))
+  .map((option) => ({
+    ...option,
+    label: option.value === 'convert_to_po' ? 'PO Converted' : option.label,
+  }))
 
 const readStoredRows = (key) => {
   try {
@@ -85,11 +104,26 @@ const appendStoredRow = (key, row) => {
 }
 
 const getTodayKey = () => new Date().toISOString().slice(0, 10)
+const getCurrentTimeKey = () => {
+  const date = new Date()
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
 
 const addDays = (days) => {
   const date = new Date()
   date.setDate(date.getDate() + days)
   return date.toISOString().slice(0, 10)
+}
+
+const formatReassignDateLabel = (value) => {
+  if (!value) return ''
+  const parsedDate = new Date(`${value}T00:00:00`)
+  if (Number.isNaN(parsedDate.getTime())) return value
+  return parsedDate.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+  }).toUpperCase()
 }
 
 const normalizeNumberId = (value) => {
@@ -296,13 +330,18 @@ const CRMActionPage = () => {
     department: '',
     role: '',
     addReminder: true,
-    reminderTiming: 'Now',
-    reminderDatePreset: 'Today',
+    reminderTiming: 'Different Time',
+    reminderDatePreset: getTodayKey(),
     customDate: '',
-    reminderTimeSlot: '09:30',
+    reminderTimeSlot: '09:00',
     customTime: '',
-    message: '',
+    message: 'Deal has been assigned to you',
     internalComments: '',
+  })
+
+  const [statusForm, setStatusForm] = useState({
+    status: '',
+    note: '',
   })
 
   const [quotationForm, setQuotationForm] = useState({
@@ -385,9 +424,17 @@ const CRMActionPage = () => {
     [...new Set(availableUsers.map(getUserRole))].map((entry) => ({ value: entry, label: entry }))
   ), [availableUsers])
 
+  const reassignDateOptions = useMemo(() => (
+    Array.from({ length: 5 }, (_, index) => {
+      const value = addDays(index)
+      return { value, label: formatReassignDateLabel(value) }
+    })
+  ), [])
+
   const pageTitle = useMemo(() => {
     if (actionKey === 'send-mail') return `Send Mail To ${selectedEntity ? getEntityLabel(selectedEntity) : '[Account/Deal Name]'}`
     if (actionKey === 're-assign-deal') return 'Re-Assign Deal'
+    if (actionKey === 'change-status' && recordModule === 'deal') return 'Change Status'
     if (actionKey === 'upload-deal-quotation') return 'Upload Deal Quotation'
     const titles = {
       'deal-activity-history': 'Deal Activity History',
@@ -437,6 +484,15 @@ const CRMActionPage = () => {
       navigate('/admin/reminders/active', { replace: true })
     }
   }, [actionKey, navigate])
+
+  useEffect(() => {
+    if (actionKey !== 'change-status' || recordModule !== 'deal' || !selectedDeal) return
+    const selectedStatus = getAccountChangeStatusOption(selectedDeal.status || selectedDeal.stage || '')
+    setStatusForm({
+      status: selectedStatus.value,
+      note: '',
+    })
+  }, [actionKey, recordModule, selectedDeal])
 
   const appendAudit = (actionType, remarks, moduleName = recordModule, entity = selectedEntity) => {
     const row = {
@@ -515,9 +571,11 @@ const CRMActionPage = () => {
   }
 
   const getReminderDate = () => {
+    if (reassignForm.reminderTiming === 'Now') return getTodayKey()
     if (reassignForm.reminderDatePreset === 'Tomorrow') return addDays(1)
     if (reassignForm.reminderDatePreset === 'Next 7 Days') return addDays(7)
-    if (reassignForm.reminderDatePreset === 'Custom Date') return reassignForm.customDate
+    if (reassignForm.reminderDatePreset === 'Custom Date' || reassignForm.reminderDatePreset === 'Other') return reassignForm.customDate
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(reassignForm.reminderDatePreset))) return reassignForm.reminderDatePreset
     return getTodayKey()
   }
 
@@ -526,10 +584,11 @@ const CRMActionPage = () => {
     const nextErrors = {}
     if (!selectedDeal?.id) nextErrors.record = 'Please select a deal.'
     if (!reassignForm.newOwnerId) nextErrors.newOwnerId = 'New Deal Owner is required.'
-    if (reassignForm.addReminder && reassignForm.reminderDatePreset === 'Custom Date' && !reassignForm.customDate) {
+    const needsDifferentTime = reassignForm.addReminder && reassignForm.reminderTiming === 'Different Time'
+    if (needsDifferentTime && (reassignForm.reminderDatePreset === 'Custom Date' || reassignForm.reminderDatePreset === 'Other') && !reassignForm.customDate) {
       nextErrors.customDate = 'Custom reminder date is required.'
     }
-    if (reassignForm.addReminder && reassignForm.reminderTimeSlot === 'Custom Time' && !reassignForm.customTime) {
+    if (needsDifferentTime && (reassignForm.reminderTimeSlot === 'Custom Time' || reassignForm.reminderTimeSlot === 'Other') && !reassignForm.customTime) {
       nextErrors.customTime = 'Custom reminder time is required.'
     }
     setErrors(nextErrors)
@@ -538,15 +597,18 @@ const CRMActionPage = () => {
     const nextOwner = availableUsers.find((entry) => String(entry.id) === String(reassignForm.newOwnerId))
     const previousOwner = getDealOwnerLabel(selectedDeal)
     const nextOwnerName = nextOwner?.name || 'Unassigned'
+    const nextOwnerId = normalizeNumberId(nextOwner?.ownerCode || nextOwner?.id || reassignForm.newOwnerId)
     const reminderDate = getReminderDate()
-    const reminderTime = reassignForm.reminderTimeSlot === 'Custom Time' ? reassignForm.customTime : reassignForm.reminderTimeSlot
+    const reminderTime = reassignForm.reminderTiming === 'Now'
+      ? getCurrentTimeKey()
+      : (reassignForm.reminderTimeSlot === 'Custom Time' || reassignForm.reminderTimeSlot === 'Other') ? reassignForm.customTime : reassignForm.reminderTimeSlot
 
     const result = await updateDeal(selectedDeal.id, {
-      ownerUserId: String(nextOwner?.id || ''),
-      ownerId: String(nextOwner?.id || ''),
-      assignedTo: String(nextOwner?.id || ''),
-      assignedUserId: String(nextOwner?.id || ''),
-      userId: String(nextOwner?.id || ''),
+      ownerUserId: nextOwnerId,
+      ownerId: nextOwnerId,
+      assignedTo: nextOwnerId,
+      assignedUserId: nextOwnerId,
+      userId: nextOwnerId,
       dealOwner: nextOwnerName,
       ownerName: nextOwnerName,
       dealOwnerName: nextOwnerName,
@@ -589,6 +651,44 @@ const CRMActionPage = () => {
     appendAudit('Re-Assign Deal', `Deal owner changed from ${previousOwner} to ${nextOwnerName}.`, 'Deal', selectedDeal)
     addNotification('success', 'Re-Assign Deal', 'Deal reassigned, reminder/history/audit updated.')
     setSuccessMessage('Deal reassigned successfully. Notification, reminder, ownership history, and audit trail updated.')
+  }
+
+  const handleSaveDealStatus = async (event) => {
+    event.preventDefault()
+    const nextErrors = {}
+    if (!selectedDeal?.id) nextErrors.record = 'Please select a deal.'
+    if (!statusForm.status) nextErrors.status = 'Deal status is required.'
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) return
+
+    const statusOption = getAccountChangeStatusOption(statusForm.status)
+    const statusLabel = statusOption.value === 'convert_to_po' ? 'PO Converted' : statusOption.label
+    const result = await updateDeal(selectedDeal.id, {
+      status: statusOption.value,
+      dealStatus: statusOption.value,
+      statusLabel,
+      stage: statusOption.stageKey,
+      updatedAt: new Date().toISOString(),
+      statusChangeNote: statusForm.note.trim(),
+      dealTimeline: [
+        ...(Array.isArray(selectedDeal.dealTimeline) ? selectedDeal.dealTimeline : []),
+        {
+          type: 'status-changed',
+          title: `Status changed to ${statusLabel}`,
+          dateTime: new Date().toISOString(),
+          remarks: statusForm.note.trim(),
+        },
+      ],
+    })
+
+    if (!result.success) {
+      setErrors({ record: result.message || 'Unable to change deal status.' })
+      return
+    }
+
+    appendAudit('Change Status', `Deal status changed to ${statusLabel}.`, 'Deal', selectedDeal)
+    addNotification('success', 'Change Status', `Deal status changed to ${statusLabel}.`)
+    setSuccessMessage(`Deal status changed to ${statusLabel}.`)
   }
 
   const validateQuoteFile = (file) => {
@@ -736,6 +836,46 @@ const CRMActionPage = () => {
     )
   }
 
+  const renderDealChangeStatus = () => (
+    <form className="crm-action-form" onSubmit={handleSaveDealStatus}>
+      {renderRecordPicker(true)}
+      {renderContext(true)}
+
+      <section className="crm-action-section">
+        <h2>Change Status</h2>
+        <div className="crm-action-grid">
+          <SearchableSelect
+            label="Deal Status"
+            value={statusForm.status}
+            onChange={(value) => setStatusForm({ ...statusForm, status: value })}
+            options={DEAL_CHANGE_STATUS_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+            placeholder="Select status"
+            error={errors.status}
+            required
+          />
+          <label className="crm-action-field crm-action-field-full">
+            <span>Status Note</span>
+            <textarea
+              className="crm-action-input crm-action-textarea"
+              value={statusForm.note}
+              onChange={(event) => setStatusForm({ ...statusForm, note: event.target.value })}
+              placeholder="Add status note"
+            />
+          </label>
+        </div>
+      </section>
+
+      <div className="crm-action-reassign-footer">
+        <Button type="button" variant="outline" onClick={() => navigate(returnTo)}>
+          <FaTimes /> Close
+        </Button>
+        <Button type="submit">
+          <FaSave /> Save
+        </Button>
+      </div>
+    </form>
+  )
+
   const renderEmailHeader = () => (
     <section className="crm-action-email-header">
       <div className="crm-action-email-header-title">
@@ -863,66 +1003,145 @@ const CRMActionPage = () => {
   )
 
   const renderReassignDeal = () => (
-    <form className="crm-action-form" onSubmit={handleSaveReassign}>
-      <div className="crm-action-footer crm-action-footer-top">
-        <Button type="submit"><FaSave /> Save</Button>
-        <Button type="button" variant="outline" onClick={() => navigate(returnTo)}>Cancel</Button>
+    <form className="crm-action-reassign-form" onSubmit={handleSaveReassign}>
+      <div className="crm-action-reassign-title-row">
+        <h2>Re-Assign Deal</h2>
+        <button type="button" onClick={() => navigate(returnTo)} aria-label="Close re-assign deal">
+          <FaTimes />
+        </button>
       </div>
 
-      {renderRecordPicker(true)}
-      {renderContext(true)}
+      {errors.record ? <div className="crm-action-message crm-action-message-error">{errors.record}</div> : null}
 
-      <section className="crm-action-section">
-        <h2>Deal Ownership</h2>
-        <div className="crm-action-summary-row">
-          <div><span>Deal Name</span><strong>{selectedDeal?.name || '-'}</strong></div>
-          <div><span>Deal No.</span><strong>{selectedDeal?.dealNumber || '-'}</strong></div>
-          <div><span>Current Owner</span><strong>{selectedDeal ? getDealOwnerLabel(selectedDeal) : '-'}</strong></div>
-        </div>
-        <div className="crm-action-grid">
-          <SearchableSelect label="Department Filter" value={reassignForm.department} onChange={(value) => setReassignForm({ ...reassignForm, department: value, newOwnerId: '' })} options={departmentOptions} placeholder="All departments" />
-          <SearchableSelect label="Role Filter" value={reassignForm.role} onChange={(value) => setReassignForm({ ...reassignForm, role: value, newOwnerId: '' })} options={roleOptions} placeholder="All roles" />
-          <SearchableSelect label="New Deal Owner" value={reassignForm.newOwnerId} onChange={(value) => setReassignForm({ ...reassignForm, newOwnerId: value })} options={ownerOptions} placeholder="Searchable User List" error={errors.newOwnerId} required className="crm-action-field-full" />
-        </div>
-      </section>
+      <div className="crm-action-reassign-deal-name">
+        Deal Name: <strong>{selectedDeal?.name || selectedDeal?.dealName || selectedDeal?.label || '-'}</strong>
+      </div>
 
-      <section className="crm-action-section">
-        <h2>Reminder</h2>
-        <label className="crm-action-checkbox">
-          <input type="checkbox" checked={reassignForm.addReminder} onChange={(event) => setReassignForm({ ...reassignForm, addReminder: event.target.checked })} />
-          <span>Add Reminder To New Deal Owner</span>
+      <section className="crm-action-reassign-owner-panel">
+        <label>
+          <span>New Deal Owner</span>
+          <select
+            value={reassignForm.newOwnerId}
+            onChange={(event) => setReassignForm({ ...reassignForm, newOwnerId: event.target.value })}
+            className={errors.newOwnerId ? 'crm-action-input-error' : ''}
+          >
+            <option value="">Select</option>
+            {availableUsers.map((entry) => (
+              <option key={entry.id} value={String(entry.id)}>
+                {entry.ownerDisplayName || entry.name}
+              </option>
+            ))}
+          </select>
         </label>
-        {reassignForm.addReminder ? (
-          <div className="crm-action-grid">
-            <SearchableSelect label="Reminder Option" value={reassignForm.reminderTiming} onChange={(value) => setReassignForm({ ...reassignForm, reminderTiming: value })} options={['Now', 'Different Time'].map((entry) => ({ value: entry, label: entry }))} placeholder="Select option" />
-            <SearchableSelect label="Date Selection" value={reassignForm.reminderDatePreset} onChange={(value) => setReassignForm({ ...reassignForm, reminderDatePreset: value })} options={REMINDER_DATES.map((entry) => ({ value: entry, label: entry }))} placeholder="Select date" />
-            {reassignForm.reminderDatePreset === 'Custom Date' ? (
-              <label className="crm-action-field">
-                <span>Custom Date<em>*</em></span>
-                <input type="date" className={`crm-action-input${errors.customDate ? ' crm-action-input-error' : ''}`} value={reassignForm.customDate} onChange={(event) => setReassignForm({ ...reassignForm, customDate: event.target.value })} />
-                {errors.customDate ? <small className="crm-action-error-text">{errors.customDate}</small> : null}
+        {errors.newOwnerId ? <small className="crm-action-error-text">{errors.newOwnerId}</small> : null}
+      </section>
+
+      <label className="crm-action-reassign-check">
+        <input
+          type="checkbox"
+          checked={reassignForm.addReminder}
+          onChange={(event) => setReassignForm({ ...reassignForm, addReminder: event.target.checked })}
+        />
+        <span>Add a reminder to new Deal Owner?</span>
+      </label>
+
+      {reassignForm.addReminder ? (
+        <section className="crm-action-reassign-reminder-panel">
+          <div className="crm-action-reassign-radio-row">
+            {['Now', 'Different Time'].map((option) => (
+              <label key={option}>
+                <input
+                  type="radio"
+                  name="reassignReminderTiming"
+                  value={option}
+                  checked={reassignForm.reminderTiming === option}
+                  onChange={(event) => setReassignForm({ ...reassignForm, reminderTiming: event.target.value })}
+                />
+                <span>{option}</span>
               </label>
-            ) : null}
-            <SearchableSelect label="Time Selection" value={reassignForm.reminderTimeSlot} onChange={(value) => setReassignForm({ ...reassignForm, reminderTimeSlot: value })} options={BUSINESS_TIME_SLOTS.map((entry) => ({ value: entry, label: entry }))} placeholder="Business Hours Slots" />
-            {reassignForm.reminderTimeSlot === 'Custom Time' ? (
-              <label className="crm-action-field">
-                <span>Custom Time<em>*</em></span>
-                <input type="time" className={`crm-action-input${errors.customTime ? ' crm-action-input-error' : ''}`} value={reassignForm.customTime} onChange={(event) => setReassignForm({ ...reassignForm, customTime: event.target.value })} />
-                {errors.customTime ? <small className="crm-action-error-text">{errors.customTime}</small> : null}
-              </label>
-            ) : null}
+            ))}
           </div>
-        ) : null}
-      </section>
 
-      <section className="crm-action-section">
-        <h2>Notes</h2>
-        <div className="crm-action-grid">
-          <label className="crm-action-field crm-action-field-full"><span>Message Box</span><textarea className="crm-action-input crm-action-textarea" value={reassignForm.message} onChange={(event) => setReassignForm({ ...reassignForm, message: event.target.value })} /></label>
-          <label className="crm-action-field crm-action-field-full"><span>Internal Comments</span><textarea className="crm-action-input crm-action-textarea" value={reassignForm.internalComments} onChange={(event) => setReassignForm({ ...reassignForm, internalComments: event.target.value })} /></label>
-        </div>
-      </section>
+          {reassignForm.reminderTiming === 'Different Time' ? (
+            <>
+              <div className="crm-action-reassign-chip-row">
+                <span className="crm-action-reassign-chip-label">Date:</span>
+                <div className="crm-action-reassign-chip-group">
+                  {reassignDateOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`crm-action-reassign-chip${reassignForm.reminderDatePreset === option.value ? ' crm-action-reassign-chip-active' : ''}`}
+                      onClick={() => setReassignForm({ ...reassignForm, reminderDatePreset: option.value })}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={`crm-action-reassign-chip crm-action-reassign-chip-other${reassignForm.reminderDatePreset === 'Other' ? ' crm-action-reassign-chip-active' : ''}`}
+                    onClick={() => setReassignForm({ ...reassignForm, reminderDatePreset: 'Other' })}
+                  >
+                    Other
+                  </button>
+                </div>
+              </div>
+              {reassignForm.reminderDatePreset === 'Other' ? (
+                <label className="crm-action-reassign-custom">
+                  <span>Other Date</span>
+                  <input type="date" value={reassignForm.customDate} onChange={(event) => setReassignForm({ ...reassignForm, customDate: event.target.value })} />
+                  {errors.customDate ? <small className="crm-action-error-text">{errors.customDate}</small> : null}
+                </label>
+              ) : null}
 
+              <div className="crm-action-reassign-chip-row">
+                <span className="crm-action-reassign-chip-label">Time:</span>
+                <div className="crm-action-reassign-chip-group">
+                  {REASSIGN_TIME_OPTIONS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`crm-action-reassign-chip${reassignForm.reminderTimeSlot === option.value ? ' crm-action-reassign-chip-active' : ''}`}
+                      onClick={() => setReassignForm({ ...reassignForm, reminderTimeSlot: option.value })}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={`crm-action-reassign-chip crm-action-reassign-chip-other${reassignForm.reminderTimeSlot === 'Other' ? ' crm-action-reassign-chip-active' : ''}`}
+                    onClick={() => setReassignForm({ ...reassignForm, reminderTimeSlot: 'Other' })}
+                  >
+                    Other
+                  </button>
+                </div>
+              </div>
+              {reassignForm.reminderTimeSlot === 'Other' ? (
+                <label className="crm-action-reassign-custom">
+                  <span>Other Time</span>
+                  <input type="time" value={reassignForm.customTime} onChange={(event) => setReassignForm({ ...reassignForm, customTime: event.target.value })} />
+                  {errors.customTime ? <small className="crm-action-error-text">{errors.customTime}</small> : null}
+                </label>
+              ) : null}
+            </>
+          ) : null}
+
+          <textarea
+            className="crm-action-reassign-message"
+            value={reassignForm.message}
+            onChange={(event) => setReassignForm({ ...reassignForm, message: event.target.value, internalComments: event.target.value })}
+          />
+        </section>
+      ) : null}
+
+      <div className="crm-action-reassign-footer">
+        <Button type="button" variant="outline" onClick={() => navigate(returnTo)}>
+          <FaTimes /> Close
+        </Button>
+        <Button type="submit">
+          <FaSave /> Save
+        </Button>
+      </div>
     </form>
   )
 
@@ -1049,8 +1268,9 @@ const CRMActionPage = () => {
 
         {actionKey === 'send-mail' ? renderSendMail() : null}
         {actionKey === 're-assign-deal' ? renderReassignDeal() : null}
+        {actionKey === 'change-status' && recordModule === 'deal' ? renderDealChangeStatus() : null}
         {actionKey === 'upload-deal-quotation' ? renderUploadDealQuotation() : null}
-        {!['send-mail', 're-assign-deal', 'upload-deal-quotation'].includes(actionKey) ? renderUtilityPage() : null}
+        {!['send-mail', 're-assign-deal', 'upload-deal-quotation'].includes(actionKey) && !(actionKey === 'change-status' && recordModule === 'deal') ? renderUtilityPage() : null}
       </section>
     </div>
   )

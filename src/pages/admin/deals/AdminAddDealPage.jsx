@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { FaArrowLeft, FaArrowRight, FaListAlt, FaSearch, FaUserPlus } from 'react-icons/fa'
+import { FaArrowLeft, FaArrowRight, FaUserPlus } from 'react-icons/fa'
 import { useAuth } from '../../../context/AuthContext'
 import { useData } from '../../../context/DataContext'
 import { ACCOUNT_OWNER_OPTIONS } from '../../../features/accounts/config/accountDropdownOptions'
@@ -44,41 +44,45 @@ const normalizeConvertedCity = (value) => {
   return ''
 }
 
-const buildInitialFormData = () => ({
-  dealDate: new Date().toISOString().slice(0, 10),
-  dealName: '',
-  description: '',
-  poValue: '',
-  dealCoOwners: '',
-  value: '',
-  valueCurrency: 'INR',
-  dealScore: '',
-  consultantName: '',
-  customerRefNo: '',
-  projectName: '',
-  customerQuotationStatus: '',
-  dealType: '',
-  dealOwner: '',
-  dealSource: '',
-  dealSubsource: '',
-  address: '',
-  expectedClosureDate: '',
-  probability: '',
-  productCategory: '',
-  customerRefDate: '',
-  gstin: '',
-  jobNo: '',
-  customerOrderStatus: '',
-  status: 'new',
-  stage: '',
-  closeDate: '',
-  city: '',
-  contactPerson: '',
-  contactPhone: '',
-  contactMobile: '',
-  contactEmail: '',
-  contactDesignation: '',
-})
+const buildInitialFormData = () => {
+  const todayDate = new Date().toISOString().slice(0, 10)
+  
+  return {
+    dealDate: todayDate,
+    dealName: '',
+    description: '',
+    poValue: '',
+    dealCoOwners: '',
+    value: '',
+    valueCurrency: 'INR',
+    dealScore: '',
+    consultantName: '',
+    customerRefNo: '',
+    projectName: '',
+    customerQuotationStatus: '',
+    dealType: '',
+    dealOwner: '',
+    dealSource: '',
+    dealSubsource: '',
+    address: '',
+    expectedClosureDate: todayDate,
+    probability: '1',
+    productCategory: '',
+    customerRefDate: todayDate,
+    gstin: '',
+    jobNo: '',
+    customerOrderStatus: '',
+    status: 'new',
+    stage: '',
+    closeDate: todayDate,
+    city: '',
+    contactPerson: '',
+    contactPhone: '',
+    contactMobile: '',
+    contactEmail: '',
+    contactDesignation: '',
+  }
+}
 
 const getPrimaryContact = (customer) => customer?.contacts?.[0] || {}
 
@@ -147,8 +151,34 @@ const buildConvertedCustomerFallback = (convertedAccount) => {
   }
 }
 
+const buildCustomerFromAccount = (account = {}) => ({
+  id: `account-${account.id || account.accountId || account.accountNumber || account.accountNo || account.name}`,
+  sourceType: 'account',
+  accountId: account.id || account.accountId || '',
+  customerNumber: account.customerNumber || account.customerRefNo || account.accountNumber || account.accountNo || '',
+  customerName: account.customerName || account.accountName || account.name || account.company || '',
+  customerOwner: account.accountOwner || account.ownerName || account.assignedUserName || '',
+  customerOwnerDisplay: account.accountOwnerDisplay || getCrmOwnerDisplay(account.accountOwner || account.ownerName || ''),
+  customerCategory: account.customerCategory || account.accountCategory || account.category || '',
+  customerStatus: account.customerStatus || account.accountStatus || account.status || '',
+  address: account.address || '',
+  gstin: account.gstin || '',
+  consultantName: account.consultantName || '',
+  jobNo: account.jobNo || '',
+  projectName: account.projectName || '',
+  contacts: [
+    {
+      contactPerson: account.contactPerson || account.contactName || '',
+      phone: account.contactPhone || account.phone || '',
+      mobile: account.contactMobile || account.mobile || account.contactPhone || account.phone || '',
+      email: account.contactEmail || account.email || '',
+      designation: account.contactDesignation || account.designation || '',
+    },
+  ],
+})
+
 const buildDealPayload = ({ convertedAccount, resolvedCustomer, formData, user, dealContacts = [] }) => {
-  const resolvedAccountId = convertedAccount?.id || convertedAccount?.accountId || ''
+  const resolvedAccountId = convertedAccount?.id || convertedAccount?.accountId || resolvedCustomer?.accountId || ''
   const resolvedAccountName =
     convertedAccount?.accountName
     || convertedAccount?.name
@@ -156,6 +186,7 @@ const buildDealPayload = ({ convertedAccount, resolvedCustomer, formData, user, 
     || ''
   const resolvedAccountNumber =
     convertedAccount?.accountNumber
+    || resolvedCustomer?.accountNumber
     || resolvedCustomer?.customerNumber
     || ''
   const resolvedCustomerName =
@@ -285,7 +316,6 @@ const AdminAddDealPage = ({
   const normalizedBasePath = String(basePath || '/admin/deals').replace(/\/+$/, '')
   const normalizedCustomerBasePath = String(customerBasePath || '/admin/customers').replace(/\/+$/, '')
   const viewDealRoute = `${normalizedBasePath}/view`
-  const searchDealRoute = `${normalizedBasePath}/search`
   const convertedAccount = useMemo(() => {
     if (convertedAccountFromState?.id) {
       return convertedAccountFromState
@@ -314,9 +344,31 @@ const AdminAddDealPage = ({
     return unsubscribe
   }, [])
 
+  const customerOptions = useMemo(() => {
+    const customerRecords = customers.map((customer) => ({
+      ...customer,
+      sourceType: customer.sourceType || 'customer',
+    }))
+    const customerKeys = new Set(customerRecords.flatMap((customer) => [
+      String(customer.id || '').toLowerCase(),
+      String(customer.customerName || '').trim().toLowerCase(),
+      String(customer.customerNumber || '').trim().toLowerCase(),
+    ].filter(Boolean)))
+    const accountRecords = accounts
+      .map(buildCustomerFromAccount)
+      .filter((customer) => customer.customerName)
+      .filter((customer) => ![
+        String(customer.accountId || '').toLowerCase(),
+        String(customer.customerName || '').trim().toLowerCase(),
+        String(customer.customerNumber || '').trim().toLowerCase(),
+      ].some((key) => customerKeys.has(key)))
+
+    return [...customerRecords, ...accountRecords]
+  }, [accounts, customers])
+
   const selectedCustomer = useMemo(
-    () => customers.find((customer) => customer.id === selectedCustomerId) || null,
-    [customers, selectedCustomerId]
+    () => customerOptions.find((customer) => customer.id === selectedCustomerId) || null,
+    [customerOptions, selectedCustomerId]
   )
   const convertedCustomerFallback = useMemo(
     () => buildConvertedCustomerFallback(convertedAccount),
@@ -328,22 +380,42 @@ const AdminAddDealPage = ({
     const searchValue = customerSearch.trim().toLowerCase()
 
     if (!searchValue) {
-      return customers.slice(0, 8)
+      return []
     }
 
-    return customers
-      .filter((customer) => {
+    return customerOptions
+      .map((customer) => {
         const primaryContact = getPrimaryContact(customer)
-        return [
+        const searchableFields = [
           customer.customerName,
           customer.customerNumber,
           customer.customerOwner,
+          customer.customerCategory,
+          customer.customerStatus,
+          customer.address,
           primaryContact.email,
           primaryContact.mobile,
-        ].some((field) => String(field || '').toLowerCase().includes(searchValue))
+          primaryContact.phone,
+          primaryContact.contactPerson,
+        ].map((field) => String(field || '').toLowerCase())
+        const matched = searchableFields.some((field) => field.includes(searchValue))
+        const name = String(customer.customerName || '').toLowerCase()
+        const number = String(customer.customerNumber || '').toLowerCase()
+        const score = name === searchValue
+          ? 0
+          : name.startsWith(searchValue)
+            ? 1
+            : number.startsWith(searchValue)
+              ? 2
+              : 3
+
+        return { customer, matched, score }
       })
-      .slice(0, 8)
-  }, [customerSearch, customers])
+      .filter((entry) => entry.matched)
+      .sort((left, right) => left.score - right.score || String(left.customer.customerName || '').localeCompare(String(right.customer.customerName || '')))
+      .map((entry) => entry.customer)
+      .slice(0, 12)
+  }, [customerOptions, customerSearch])
 
   useEffect(() => {
     if (!customerIdFromQuery) {
@@ -422,6 +494,13 @@ const AdminAddDealPage = ({
       contactMobile: primaryContact.mobile || '',
       contactEmail: primaryContact.email || '',
       contactDesignation: primaryContact.designation || '',
+      address: currentValue.address || customer.address || '',
+      gstin: currentValue.gstin || customer.gstin || '',
+      consultantName: currentValue.consultantName || customer.consultantName || '',
+      jobNo: currentValue.jobNo || customer.jobNo || '',
+      projectName: currentValue.projectName || customer.projectName || '',
+      dealType: currentValue.dealType || customer.customerCategory || '',
+      productCategory: currentValue.productCategory || customer.customerCategory || '',
     }))
   }
 
@@ -530,8 +609,8 @@ const AdminAddDealPage = ({
         nextErrors.expectedClosureDate = 'Expected Closure Date should not be older than Deal Date.'
       }
       if (normalizeOptionalNumberInput(formData.value) === null) nextErrors.value = 'Deal Value is required.'
-      if (normalizedProbability !== null && (normalizedProbability < 0 || normalizedProbability > 100)) {
-        nextErrors.probability = 'Probability must be between 0 and 100.'
+      if (normalizedProbability !== null && (normalizedProbability < 1 || normalizedProbability > 100)) {
+        nextErrors.probability = 'Probability must be between 1 and 100.'
       }
       if (!formData.status) nextErrors.status = 'Status is required.'
     }
@@ -604,7 +683,7 @@ const AdminAddDealPage = ({
     if (result.success) {
       const createdDealNumber = result.data?.dealNumber || ''
       const successMessage = convertedAccount
-        ? `Deal${createdDealNumber ? ` ${createdDealNumber}` : ''} created from converted account — now visible in View Deal and Search Deal.`
+        ? `Deal${createdDealNumber ? ` ${createdDealNumber}` : ''} created from converted account - now visible in View Deal and Search Deal.`
         : 'Deal created successfully. It is now linked with View Deal and Search Deal.'
       addNotification('success', 'Success', successMessage)
       navigate(targetDealRoute, {
@@ -669,14 +748,17 @@ const AdminAddDealPage = ({
                 >
                   <span className="admin-add-deal-customer-option-name">{customer.customerName}</span>
                   <span className="admin-add-deal-customer-option-meta">
-                    {customer.customerNumber} | {customer.customerOwnerDisplay || getCrmOwnerDisplay(customer.customerOwner) || 'No owner'}
+                    <span className="admin-add-deal-customer-option-source">
+                      {customer.sourceType === 'account' ? 'Account' : 'Customer'}
+                    </span>
+                    {customer.customerNumber || 'No number'} | {customer.customerOwnerDisplay || getCrmOwnerDisplay(customer.customerOwner) || 'No owner'}
                   </span>
                 </button>
               ))}
             </div>
-          ) : (
+          ) : customerSearch.trim() ? (
             <div className="admin-add-deal-empty-results">No customers found for this search.</div>
-          )}
+          ) : null}
 
           {activeCustomer ? (
             <div className="admin-add-deal-selection-chip">
@@ -842,16 +924,17 @@ const AdminAddDealPage = ({
               <div className="admin-add-deal-detail-field-input admin-add-deal-detail-probability-row">
                 <input
                   id="deal-probability"
-                  type="number"
-                  min={0}
+                  type="range"
+                  min={1}
                   max={100}
+                  step={1}
                   value={formData.probability}
                   onChange={(event) => handleFormChange('probability', event.target.value)}
                   className="admin-add-deal-probability-slider"
-                  placeholder="Enter probability"
+                  aria-label="Deal probability"
                 />
                 <span className="admin-add-deal-probability-value">
-                  {formData.probability === '' ? 'Optional' : `${formData.probability}%`}
+                  {formData.probability === '' ? '1%' : `${formData.probability}%`}
                 </span>
               </div>
               {errors.probability ? <small className="admin-add-deal-field-error">{errors.probability}</small> : null}
@@ -993,24 +1076,6 @@ const AdminAddDealPage = ({
       <section className="admin-add-deal-card">
         <div className="admin-add-deal-header">
           <h1>Add Deal</h1>
-          <div className="admin-add-deal-header-actions" aria-label="Deal page links">
-            <button
-              type="button"
-              className="admin-add-deal-header-link"
-              onClick={() => navigate(viewDealRoute)}
-            >
-              <FaListAlt />
-              <span>View Deal</span>
-            </button>
-            <button
-              type="button"
-              className="admin-add-deal-header-link"
-              onClick={() => navigate(searchDealRoute)}
-            >
-              <FaSearch />
-              <span>Search Deal</span>
-            </button>
-          </div>
         </div>
 
         <div className="admin-add-deal-stepper">

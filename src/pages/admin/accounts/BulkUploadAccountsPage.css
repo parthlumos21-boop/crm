@@ -1,8 +1,6 @@
 .bulk-upload-page {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top right, rgba(93, 116, 136, 0.1), transparent 28%),
-    linear-gradient(180deg, #fbf7f0 0%, #f1e8db 100%);
+  background: var(--surface-app);
   padding: 2rem 1rem;
 }
 
@@ -92,7 +90,7 @@
 
 .bulk-upload-choose-btn:hover,
 .bulk-upload-change-btn:hover {
-  background-color: #ece4d8;
+  background-color: var(--surface-muted);
   border-color: var(--border-strong);
 }
 
@@ -247,9 +245,9 @@
 
 .mapping-csv-header {
   padding: 0.25rem 0.5rem;
-  background-color: #fed7d7;
+  background-color: var(--surface-card);
   border-radius: 3px;
-  color: #742a2a;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -259,9 +257,9 @@
 
 .mapping-field {
   padding: 0.25rem 0.5rem;
-  background-color: #c6f6d5;
+  background-color: var(--surface-muted);
   border-radius: 3px;
-  color: #22543d;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -370,7 +368,7 @@
 }
 
 .bulk-upload-btn-primary:disabled {
-  background-color: #d9d0c2;
+  background-color: var(--surface-muted);
   color: #9d9180;
   cursor: not-allowed;
 }
@@ -417,4 +415,115 @@
   .bulk-upload-mapping-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* Bulk upload night-theme completion. */
+[data-theme="dark"] :where(
+  .bulk-upload-page,
+  .bulk-upload-container,
+  .bulk-upload-header,
+  .bulk-upload-stepper-container,
+  .bulk-upload-content,
+  .bulk-upload-actions,
+  .bulk-upload-file-selected,
+  .bulk-upload-file-info,
+  .bulk-upload-mapping-label,
+  .bulk-upload-mapping-info,
+  .bulk-upload-verify-info,
+  .bulk-upload-verify-mappings,
+  .bulk-upload-preview-table-container
+) {
+  background: #12202a !important;
+  border-color: var(--text-primary) !important;
+  color: #f0fffd !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] :where(
+  .bulk-upload-title,
+  .bulk-upload-step-title,
+  .bulk-upload-verify-preview h3,
+  .bulk-upload-file-info strong,
+  .bulk-upload-verify-info strong,
+  .bulk-upload-verify-mappings strong
+) {
+  color: #f0fffd !important;
+}
+
+[data-theme="dark"] :where(
+  .bulk-upload-subtitle,
+  .bulk-upload-file-info p,
+  .bulk-upload-mapping-info p,
+  .bulk-upload-verify-info p,
+  .bulk-upload-verify-mappings h3,
+  .bulk-upload-preview-table td,
+  .mapping-arrow
+) {
+  color: #c7e6e5 !important;
+}
+
+[data-theme="dark"] :where(
+  .bulk-upload-choose-btn,
+  .bulk-upload-change-btn,
+  .bulk-upload-btn-secondary,
+  .bulk-upload-btn-cancel,
+  .bulk-upload-mapping-select
+) {
+  background: #1b2c37 !important;
+  border-color: var(--text-primary) !important;
+  color: #f0fffd !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] :where(
+  .bulk-upload-choose-btn:hover,
+  .bulk-upload-change-btn:hover,
+  .bulk-upload-btn-secondary:hover,
+  .bulk-upload-btn-cancel:hover
+) {
+  background: #223a49 !important;
+  border-color: var(--text-primary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .bulk-upload-preview-table {
+  background: #12202a !important;
+  color: #f0fffd !important;
+}
+
+[data-theme="dark"] .bulk-upload-preview-table thead,
+[data-theme="dark"] .bulk-upload-preview-table th {
+  background: linear-gradient(180deg, #2f6078 0%, #244b61 100%) !important;
+  border-color: var(--text-primary) !important;
+  color: #f4fbff !important;
+}
+
+[data-theme="dark"] .bulk-upload-preview-table td {
+  background: #17232d !important;
+  border-color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .bulk-upload-preview-table tbody tr:hover td {
+  background: #223a49 !important;
+}
+
+[data-theme="dark"] .bulk-upload-error {
+  background: rgba(239, 68, 68, 0.13) !important;
+  border-color: rgba(248, 113, 113, 0.45) !important;
+  color: #ffb4b4 !important;
+}
+
+[data-theme="dark"] .mapping-csv-header {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #ffb4b4 !important;
+}
+
+[data-theme="dark"] .mapping-field {
+  background: rgba(34, 197, 94, 0.16) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] :where(.bulk-upload-file-icon, .bulk-upload-page svg) {
+  color: var(--text-primary) !important;
+  opacity: 1 !important;
 }

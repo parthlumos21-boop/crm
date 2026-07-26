@@ -153,6 +153,8 @@ const SupportRequestView = () => {
     }, {})
   ), [filteredRequests])
 
+  const visibleColumns = STATUS_COLUMNS.filter((column) => selectedStatuses.includes(column.key))
+
   const toggleStatus = (statusKey) => {
     setSelectedStatuses((currentValues) => (
       currentValues.includes(statusKey)
@@ -212,7 +214,7 @@ const SupportRequestView = () => {
 
           <div ref={scrollRef} className="sr-status-board-scroll">
             <div className="sr-status-board-columns">
-              {STATUS_COLUMNS.filter((column) => selectedStatuses.includes(column.key)).map((column) => {
+              {visibleColumns.map((column) => {
                 const columnRequests = requestsByStatus[column.key] || []
 
                 return (

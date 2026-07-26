@@ -1,314 +1,323 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { FaCheckCircle, FaEnvelope, FaExternalLinkAlt, FaKey, FaQrcode, FaSyncAlt, FaTimesCircle } from 'react-icons/fa'
 import Button from '../../../components/common/Button'
-import Card from '../../../components/common/Card'
-import Select from '../../../components/common/Select'
-import DownloadAppButton from '../../../components/integrations/DownloadAppButton'
-import { useAuth } from '../../../context/AuthContext'
 import { useData } from '../../../context/DataContext'
-import { adminDefaultModuleOptions, getAdminModuleByRoute } from '../../../features/adminLaunchpad/adminModules'
 import integrationApi from '../../../services/integrationApi'
-import {
-  getAdminDefaultModuleRoute,
-  getAdminLaunchpadPreferences,
-  saveAdminLaunchpadPreferences,
-  setAdminDefaultModuleRoute
-} from '../../../features/adminLaunchpad/adminLaunchpadStorage'
 import './AdminSettingsPage.css'
 
+const formatDateTime = (value) => {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 const AdminSettingsPage = () => {
-  const { user } = useAuth()
   const { addNotification } = useData()
-  const [defaultModuleRoute, setDefaultModuleRouteState] = useState(() => {
-    const savedRoute = getAdminDefaultModuleRoute(user)
-    return savedRoute === '/admin' ? '' : savedRoute
-  })
-  const [preferences, setPreferences] = useState(() => getAdminLaunchpadPreferences(user))
+  const [searchParams, setSearchParams] = useSearchParams()
   const [integrationStatus, setIntegrationStatus] = useState(null)
-  const [isLoadingIntegrations, setIsLoadingIntegrations] = useState(false)
-  const [isSavingWhatsapp, setIsSavingWhatsapp] = useState(false)
-  const [whatsappDraft, setWhatsappDraft] = useState({
-    enabled: false,
-    provider: 'whatsapp_link',
-    businessPhoneNumber: '',
-    businessPhoneId: '',
-    accessToken: '',
-    verifyToken: '',
-    templates: '',
-  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [action, setAction] = useState('')
+  const [authUrl, setAuthUrl] = useState('')
+  const [error, setError] = useState('')
+  const [deviceCode, setDeviceCode] = useState(null)
 
-  const currentDefaultModule = useMemo(() => (
-    defaultModuleRoute ? getAdminModuleByRoute(defaultModuleRoute) : null
-  ), [defaultModuleRoute])
+  const outlook = integrationStatus?.outlook || {}
+  const connected = Boolean(outlook.connected)
+  const configured = Boolean(outlook.configured)
+  const shared = Boolean(outlook.shared)
+  const qrUrl = authUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=12&data=${encodeURIComponent(authUrl)}`
+    : ''
 
-  const loadIntegrations = async () => {
-    setIsLoadingIntegrations(true)
+  const returnUrl = () => `${window.location.origin}${window.location.pathname}`
+
+  const loadStatus = async ({ force = false } = {}) => {
+    setIsLoading(true)
     try {
-      const status = await integrationApi.getStatus()
+      const status = await integrationApi.getStatus({ force })
       setIntegrationStatus(status)
-      setWhatsappDraft((currentDraft) => ({
-        ...currentDraft,
-        enabled: Boolean(status.whatsapp?.enabled),
-        provider: status.whatsapp?.provider || 'whatsapp_link',
-        businessPhoneNumber: status.whatsapp?.businessPhoneNumber || '',
-        templates: Array.isArray(status.whatsapp?.templates) ? status.whatsapp.templates.join('\n') : '',
-      }))
-    } catch (_error) {
-      addNotification('error', 'Integration status unavailable', 'Unable to load WhatsApp or Outlook status.')
+    } catch (_err) {
+      addNotification('error', 'Outlook status unavailable', 'Unable to load Outlook connection status.')
     } finally {
-      setIsLoadingIntegrations(false)
+      setIsLoading(false)
     }
   }
 
   useEffect(() => {
-    loadIntegrations()
+    loadStatus({ force: ['connected', 'error'].includes(searchParams.get('outlook')) })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleSave = () => {
-    setAdminDefaultModuleRoute(user, defaultModuleRoute || null)
-    saveAdminLaunchpadPreferences(user, preferences)
-    addNotification('success', 'Settings saved', 'Admin launchpad preferences were updated.')
-  }
+  useEffect(() => {
+    const result = searchParams.get('outlook')
+    if (!['connected', 'error'].includes(result)) return
 
-  const handleReset = () => {
-    setDefaultModuleRouteState('')
-    setPreferences({
-      showTips: true,
-      compactCards: false
-    })
-  }
-
-  const handleWhatsappDraftChange = (key, value) => {
-    setWhatsappDraft((currentDraft) => ({ ...currentDraft, [key]: value }))
-  }
-
-  const handleSaveWhatsapp = async () => {
-    setIsSavingWhatsapp(true)
-    try {
-      const status = await integrationApi.saveWhatsappSettings({
-        ...whatsappDraft,
-        templates: String(whatsappDraft.templates || '').split('\n').map((entry) => entry.trim()).filter(Boolean),
-      })
-      setIntegrationStatus((currentStatus) => ({
-        ...(currentStatus || {}),
-        whatsapp: status,
-      }))
-      addNotification('success', 'WhatsApp settings saved', 'CRM WhatsApp configuration was updated.')
-    } catch (error) {
-      addNotification('error', 'WhatsApp settings failed', error?.response?.data?.message || 'Unable to save WhatsApp settings.')
-    } finally {
-      setIsSavingWhatsapp(false)
+    if (result === 'connected') {
+      const email = searchParams.get('outlookEmail') || ''
+      setError('')
+      addNotification('success', 'Outlook connected', email ? `CRM Outlook connected as ${email}.` : 'CRM Outlook connected.')
+      loadStatus({ force: true })
+    } else {
+      const message = searchParams.get('outlookError') || 'Microsoft Outlook authorization failed.'
+      setError(message)
+      addNotification('error', 'Outlook connection failed', message)
     }
-  }
 
-  const handleConnectOutlook = async () => {
-    try {
-      const result = await integrationApi.connectOutlook()
-      if (result.authUrl) {
-        window.open(result.authUrl, '_blank', 'noopener,noreferrer')
-        addNotification('success', 'Outlook connect started', 'Complete the Microsoft sign-in in the new tab.')
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete('outlook')
+    nextParams.delete('outlookEmail')
+    nextParams.delete('outlookError')
+    setSearchParams(nextParams, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, setSearchParams])
+
+  useEffect(() => {
+    if (!deviceCode?.pending || connected) return undefined
+
+    let stopped = false
+    const intervalMs = Math.max(5, Number(deviceCode.interval || 5)) * 1000
+    const timerId = window.setInterval(async () => {
+      if (stopped) return
+      try {
+        const result = await integrationApi.completeOutlookDeviceCode()
+        if (result.connected) {
+          stopped = true
+          window.clearInterval(timerId)
+          setDeviceCode(null)
+          await loadStatus({ force: true })
+          addNotification('success', 'Outlook connected', `CRM Outlook connected as ${result.email || 'the selected mailbox'}.`)
+          return
+        }
+        setDeviceCode((current) => current ? { ...current, ...result, pending: true } : current)
+      } catch (err) {
+        const message = err?.response?.data?.message || 'Microsoft code sign-in failed.'
+        stopped = true
+        window.clearInterval(timerId)
+        setError(message)
+        addNotification('error', 'Outlook connection failed', message)
       }
-    } catch (error) {
-      addNotification('error', 'Outlook is not ready', error?.response?.data?.message || 'Microsoft Graph settings are missing.')
+    }, intervalMs)
+
+    return () => {
+      stopped = true
+      window.clearInterval(timerId)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addNotification, connected, deviceCode?.pending, deviceCode?.interval])
+
+  const handleConnect = () => {
+    setAction('connect')
+    window.location.href = `/api/auth/microsoft/login?returnUrl=${encodeURIComponent(returnUrl())}`
+  }
+
+  const handleGenerateQr = async () => {
+    setAction('qr')
+    setError('')
+    try {
+      const result = await integrationApi.connectOutlook({ returnUrl: returnUrl() })
+      setAuthUrl(result.authUrl || '')
+      addNotification('success', 'Outlook QR ready', 'Scan the QR code to open Microsoft sign-in.')
+    } catch (err) {
+      const message = err?.response?.data?.message || 'Unable to create Outlook login QR.'
+      setError(message)
+      addNotification('error', 'QR unavailable', message)
+    } finally {
+      setAction('')
     }
   }
 
-  const handleDisconnectOutlook = async () => {
+  const handleStartCode = async () => {
+    setAction('code')
+    setError('')
+    try {
+      const result = await integrationApi.startOutlookDeviceCode()
+      setDeviceCode({ ...result, pending: true })
+      const openUrl = result.verificationUriComplete || result.verificationUri
+      if (openUrl) window.open(openUrl, '_blank', 'noopener,noreferrer')
+      addNotification('success', 'Outlook code ready', `Enter code ${result.userCode} in Microsoft sign-in.`)
+    } catch (err) {
+      const message = err?.response?.data?.message || 'Unable to start Microsoft code sign-in.'
+      setError(message)
+      addNotification('error', 'Outlook code unavailable', message)
+    } finally {
+      setAction('')
+    }
+  }
+
+  const handleDisconnect = async () => {
+    setAction('disconnect')
     try {
       const status = await integrationApi.disconnectOutlook()
-      setIntegrationStatus((currentStatus) => ({
-        ...(currentStatus || {}),
-        outlook: status,
-      }))
-      addNotification('success', 'Outlook disconnected', 'Your Outlook connection was removed.')
-    } catch (_error) {
+      setIntegrationStatus((current) => ({ ...(current || {}), outlook: status }))
+      setAuthUrl('')
+      setDeviceCode(null)
+      addNotification('success', 'Outlook disconnected', 'The Outlook connection was removed.')
+    } catch (_err) {
       addNotification('error', 'Outlook disconnect failed', 'Unable to disconnect Outlook.')
+    } finally {
+      setAction('')
+    }
+  }
+
+  const handleTest = async () => {
+    setAction('test')
+    try {
+      const result = await integrationApi.testOutlookConnection()
+      await loadStatus({ force: true })
+      addNotification('success', 'Outlook verified', `Microsoft Graph verified ${result.email || 'the connected account'}.`)
+    } catch (err) {
+      addNotification('error', 'Outlook test failed', err?.response?.data?.message || 'Unable to verify Outlook connection.')
+    } finally {
+      setAction('')
+    }
+  }
+
+  const handleSendTest = async () => {
+    setAction('email')
+    try {
+      const result = await integrationApi.sendOutlookTestEmail()
+      addNotification(
+        result.status === 'sent' ? 'success' : 'error',
+        result.status === 'sent' ? 'Test email sent' : 'Test email failed',
+        result.status === 'sent' ? 'Microsoft Graph sent the test email.' : 'Microsoft Graph did not confirm the email send.'
+      )
+    } catch (err) {
+      addNotification('error', 'Test email failed', err?.response?.data?.message || 'Unable to send Outlook test email.')
+    } finally {
+      setAction('')
     }
   }
 
   return (
-    <div className="admin-settings-page">
-      <div className="admin-settings-header">
-        <h1>View Settings</h1>
-        <p>Manage admin startup behavior and launchpad presentation preferences.</p>
-      </div>
+    <section className="outlook-admin-page">
+      <header className="outlook-admin-hero">
+        <div className="outlook-admin-hero__icon">
+          <FaEnvelope />
+        </div>
+        <div>
+          <span>Microsoft Graph API</span>
+          <h1>Outlook Integration</h1>
+          <p>Connect Outlook once with Microsoft OAuth. CRM stores encrypted tokens in MongoDB and uses Microsoft Graph for mail.</p>
+        </div>
+        <div className={`outlook-admin-state${connected ? ' outlook-admin-state--connected' : ''}`}>
+          {connected ? <FaCheckCircle /> : <FaTimesCircle />}
+          <strong>{isLoading ? 'Checking' : connected ? 'Connected' : 'Not Connected'}</strong>
+        </div>
+      </header>
 
-      <div className="admin-settings-grid">
-        <Card
-          title="Startup Module"
-          subtitle="Choose which admin module opens right after admin login."
-        >
-          <div className="admin-settings-form">
-            <Select
-              label="Default Admin Module"
-              value={defaultModuleRoute}
-              onChange={(e) => setDefaultModuleRouteState(e.target.value)}
-              options={adminDefaultModuleOptions}
-              placeholder="Admin LaunchPad"
-              fullWidth
-            />
+      {error ? <div className="outlook-admin-error">{error}</div> : null}
 
-            <div className="admin-settings-summary">
-              <span className="admin-settings-summary-label">Current Startup</span>
-              <strong>{currentDefaultModule ? currentDefaultModule.title : 'Admin LaunchPad'}</strong>
-            </div>
-          </div>
-        </Card>
-
-        <Card
-          title="Launchpad Preferences"
-          subtitle="Adjust how the standalone admin launchpad is presented."
-        >
-          <div className="admin-settings-form">
-            <label className="admin-settings-toggle">
-              <input
-                type="checkbox"
-                checked={preferences.showTips}
-                onChange={(e) => setPreferences({ ...preferences, showTips: e.target.checked })}
-              />
-              <div>
-                <strong>Show launchpad help note</strong>
-                <p>Display the instructional note above the launchpad cards.</p>
-              </div>
-            </label>
-
-            <label className="admin-settings-toggle">
-              <input
-                type="checkbox"
-                checked={preferences.compactCards}
-                onChange={(e) => setPreferences({ ...preferences, compactCards: e.target.checked })}
-              />
-              <div>
-                <strong>Use compact launchpad cards</strong>
-                <p>Reduce card height for a denser admin launchpad layout.</p>
-              </div>
-            </label>
-          </div>
-        </Card>
-
-        <Card
-          title="Download App"
-          subtitle="Publish Windows, mobile, or web app download links from environment variables."
-          actions={<DownloadAppButton />}
-        >
-          <div className="admin-settings-integration-status">
-            <span>Download options</span>
-            <strong>
-              {integrationStatus?.downloads?.hasDownloads ? 'Configured' : 'Coming soon'}
-            </strong>
-          </div>
-        </Card>
-
-        <Card
-          title="WhatsApp Integration"
-          subtitle="Enable WhatsApp links or WhatsApp Business API for CRM contacts."
-        >
-          <div className="admin-settings-form">
-            <label className="admin-settings-toggle">
-              <input
-                type="checkbox"
-                checked={whatsappDraft.enabled}
-                onChange={(event) => handleWhatsappDraftChange('enabled', event.target.checked)}
-              />
-              <div>
-                <strong>Enable WhatsApp actions</strong>
-                <p>Show WhatsApp actions for valid customer and account phone numbers.</p>
-              </div>
-            </label>
-
-            <label className="admin-settings-field">
-              <span>Provider</span>
-              <select
-                value={whatsappDraft.provider}
-                onChange={(event) => handleWhatsappDraftChange('provider', event.target.value)}
-              >
-                <option value="whatsapp_link">WhatsApp Web link</option>
-                <option value="whatsapp_business_api">WhatsApp Business API</option>
-              </select>
-            </label>
-
-            <label className="admin-settings-field">
-              <span>Business Phone Number</span>
-              <input
-                type="tel"
-                value={whatsappDraft.businessPhoneNumber}
-                onChange={(event) => handleWhatsappDraftChange('businessPhoneNumber', event.target.value)}
-                placeholder="+919999999999"
-              />
-            </label>
-
-            <label className="admin-settings-field">
-              <span>Business Phone ID</span>
-              <input
-                type="text"
-                value={whatsappDraft.businessPhoneId}
-                onChange={(event) => handleWhatsappDraftChange('businessPhoneId', event.target.value)}
-                placeholder={integrationStatus?.whatsapp?.businessPhoneId || 'Optional'}
-              />
-            </label>
-
-            <label className="admin-settings-field">
-              <span>Access Token</span>
-              <input
-                type="password"
-                value={whatsappDraft.accessToken}
-                onChange={(event) => handleWhatsappDraftChange('accessToken', event.target.value)}
-                placeholder={integrationStatus?.whatsapp?.accessTokenConfigured ? 'Configured' : 'Optional'}
-              />
-            </label>
-
-            <label className="admin-settings-field">
-              <span>Message Templates</span>
-              <textarea
-                rows={4}
-                value={whatsappDraft.templates}
-                onChange={(event) => handleWhatsappDraftChange('templates', event.target.value)}
-                placeholder="One template per line"
-              />
-            </label>
-
-            <Button onClick={handleSaveWhatsapp} loading={isSavingWhatsapp}>
-              Save WhatsApp
+      <div className="outlook-admin-layout">
+        <div className="outlook-admin-panel outlook-admin-panel--main">
+          <div className="outlook-admin-panel__head">
+            <h2>Connection Details</h2>
+            <Button variant="outline" icon={<FaSyncAlt />} onClick={() => loadStatus({ force: true })} loading={isLoading}>
+              Refresh
             </Button>
           </div>
-        </Card>
 
-        <Card
-          title="Outlook Integration"
-          subtitle="Connect Microsoft Outlook with Microsoft Graph for CRM email logging."
-        >
-          <div className="admin-settings-form">
-            <div className="admin-settings-integration-status">
-              <span>Microsoft Graph setup</span>
-              <strong>{integrationStatus?.outlook?.configured ? 'Configured' : 'Missing environment variables'}</strong>
+          <div className="outlook-admin-details">
+            <div>
+              <span>Outlook Email</span>
+              <strong>{connected ? outlook.email || 'Connected' : '-'}</strong>
             </div>
-
-            <div className="admin-settings-integration-status">
-              <span>Current account</span>
-              <strong>{integrationStatus?.outlook?.connected ? integrationStatus?.outlook?.email || 'Connected' : 'Not connected'}</strong>
+            <div>
+              <span>Status</span>
+              <strong>{connected ? 'Connected' : configured ? 'Ready to connect' : 'Missing server config'}</strong>
             </div>
-
-            <div className="admin-settings-inline-actions">
-              <Button onClick={handleConnectOutlook} disabled={isLoadingIntegrations}>
-                Connect Outlook
-              </Button>
-              <Button variant="outline" onClick={handleDisconnectOutlook} disabled={!integrationStatus?.outlook?.connected}>
-                Disconnect
-              </Button>
+            <div>
+              <span>Connected Date</span>
+              <strong>{formatDateTime(outlook.connectedAt || outlook.updatedAt)}</strong>
+            </div>
+            <div>
+              <span>Microsoft Account</span>
+              <strong>{connected ? outlook.displayName || '-' : '-'}</strong>
+            </div>
+            <div>
+              <span>Token Status</span>
+              <strong>{connected ? outlook.tokenStatus || 'Active' : '-'}</strong>
+            </div>
+            <div>
+              <span>Availability</span>
+              <strong>{connected ? (shared ? 'All users and admin' : 'Current user') : '-'}</strong>
             </div>
           </div>
-        </Card>
-      </div>
 
-      <div className="admin-settings-actions">
-        <Button variant="outline" onClick={handleReset}>
-          Reset Draft
-        </Button>
-        <Button onClick={handleSave}>
-          Save Settings
-        </Button>
+          <div className="outlook-admin-actions">
+            <Button onClick={handleConnect} disabled={!configured || action === 'connect'}>
+              {action === 'connect' ? 'Connecting...' : connected ? 'Reconnect Outlook' : 'Connect Outlook'}
+            </Button>
+            <Button variant="outline" onClick={handleSendTest} disabled={!connected || action === 'email'}>
+              Send Test Email
+            </Button>
+            <Button variant="outline" onClick={handleTest} disabled={!connected || action === 'test'}>
+              Test Connection
+            </Button>
+            <Button variant="outline" onClick={handleDisconnect} disabled={!connected || action === 'disconnect'}>
+              Disconnect
+            </Button>
+          </div>
+        </div>
+
+        <aside className="outlook-admin-panel outlook-admin-panel--assist">
+          <div className="outlook-helper">
+            <FaKey />
+            <div>
+              <h3>Code Sign-In</h3>
+              <p>Use this when the normal Microsoft login opens a long page or needs another device.</p>
+            </div>
+          </div>
+
+          {deviceCode?.userCode ? (
+            <div className="outlook-device-code-box">
+              <span>Microsoft Code</span>
+              <strong>{deviceCode.userCode}</strong>
+              <small>{deviceCode.message || `Open ${deviceCode.verificationUri || 'https://www.microsoft.com/link'} and enter this code.`}</small>
+              <Button
+                variant="outline"
+                icon={<FaExternalLinkAlt />}
+                onClick={() => window.open(deviceCode.verificationUriComplete || deviceCode.verificationUri, '_blank', 'noopener,noreferrer')}
+              >
+                Open Microsoft
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outline" fullWidth onClick={handleStartCode} disabled={!configured || action === 'code'}>
+              {action === 'code' ? 'Preparing Code...' : 'Connect with Code'}
+            </Button>
+          )}
+
+          <div className="outlook-helper outlook-helper--qr">
+            <FaQrcode />
+            <div>
+              <h3>Login QR</h3>
+              <p>Generate a QR that opens the same Microsoft OAuth login.</p>
+            </div>
+          </div>
+
+          {qrUrl ? (
+            <div className="outlook-qr-preview">
+              <img src={qrUrl} alt="Outlook Microsoft sign-in QR code" />
+              <Button variant="outline" icon={<FaExternalLinkAlt />} onClick={() => window.open(authUrl, '_blank', 'noopener,noreferrer')}>
+                Open Login
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outline" fullWidth onClick={handleGenerateQr} disabled={!configured || action === 'qr'}>
+              {action === 'qr' ? 'Preparing QR...' : 'Generate QR'}
+            </Button>
+          )}
+        </aside>
       </div>
-    </div>
+    </section>
   )
 }
 

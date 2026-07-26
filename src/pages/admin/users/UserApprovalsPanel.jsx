@@ -144,7 +144,7 @@ const UserApprovalsPanel = () => {
       key: 'createdAt',
       label: 'Registered',
       width: '160px',
-      render: (value) => (value ? new Date(value).toLocaleString() : '—'),
+      render: (value) => (value ? new Date(value).toLocaleString() : '-'),
     },
     {
       key: 'actions',

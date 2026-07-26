@@ -26,10 +26,10 @@
   width: 100%;
   height: 38px;
   padding: 0 12px 0 36px;
-  border: 1px solid #d7e4ee;
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
-  background: #ffffff;
-  color: #20384d;
+  background: var(--surface-card);
+  color: var(--text-primary);
   font: inherit;
 }
 
@@ -37,7 +37,7 @@
 .manage-user-types-field select:focus,
 .manage-user-types-field textarea:focus {
   outline: none;
-  border-color: #2b8fc8;
+  border-color: var(--text-primary);
   box-shadow: 0 0 0 3px rgba(43, 143, 200, 0.12);
 }
 
@@ -46,7 +46,7 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #8ea1b4;
+  color: var(--text-primary);
   font-size: 0.85rem;
 }
 
@@ -59,7 +59,7 @@
 }
 
 .manage-user-types-list-meta span {
-  color: #6a7d8f;
+  color: var(--text-primary);
   font-size: 0.76rem;
   line-height: 1.5;
 }
@@ -74,9 +74,9 @@
 
 .manage-user-types-list-item {
   width: 100%;
-  border: 1px solid #d8e6f0;
+  border: 1px solid var(--border-subtle);
   border-radius: 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+  background: var(--surface-app);
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr) 82px;
   gap: 12px;
@@ -88,7 +88,7 @@
 
 .manage-user-types-list-item:hover,
 .manage-user-types-list-item.is-selected {
-  border-color: #8fc4e2;
+  border-color: var(--text-primary);
   box-shadow: 0 10px 24px rgba(26, 58, 92, 0.08);
   transform: translateY(-1px);
 }
@@ -100,8 +100,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #eaf5fb;
-  color: #2b8fc8;
+  background: var(--surface-muted);
+  color: var(--text-primary);
   font-size: 1rem;
 }
 
@@ -112,12 +112,12 @@
 }
 
 .manage-user-types-list-copy strong {
-  color: #20384d;
+  color: var(--text-primary);
   font-size: 0.92rem;
 }
 
 .manage-user-types-list-copy small {
-  color: #6a7d8f;
+  color: var(--text-primary);
   font-size: 0.74rem;
   line-height: 1.45;
 }
@@ -130,21 +130,21 @@
 }
 
 .manage-user-types-list-count span {
-  color: #7a8ea2;
+  color: var(--text-primary);
   font-size: 0.66rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .manage-user-types-list-count strong {
-  color: #1f3f60;
+  color: var(--text-primary);
   font-size: 1.15rem;
 }
 
 .manage-user-types-empty {
   padding: 26px 16px;
   text-align: center;
-  color: #6a7d8f;
+  color: var(--text-primary);
 }
 
 .manage-user-types-actions {
@@ -194,8 +194,8 @@
 .manage-user-types-timestamps > div {
   padding: 16px;
   border-radius: 16px;
-  border: 1px solid #d9e8f2;
-  background: linear-gradient(180deg, #ffffff 0%, #eef6fb 100%);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .manage-user-types-preview-stat span,
@@ -203,7 +203,7 @@
 .manage-user-types-timestamps span {
   display: block;
   margin-bottom: 8px;
-  color: #6d8399;
+  color: var(--text-primary);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -213,7 +213,7 @@
 .manage-user-types-preview-stat strong,
 .manage-user-types-preview-strip strong,
 .manage-user-types-timestamps strong {
-  color: #1f3f60;
+  color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -231,8 +231,8 @@
   width: fit-content;
   padding: 10px 14px;
   border-radius: 999px;
-  background: #e6f7ee;
-  color: #18794e;
+  background: var(--surface-muted);
+  color: var(--text-primary);
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -256,7 +256,7 @@
 }
 
 .manage-user-types-field span {
-  color: #4f6478;
+  color: var(--text-primary);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -264,11 +264,11 @@
 .manage-user-types-field select,
 .manage-user-types-field textarea {
   width: 100%;
-  border: 1px solid #d7e4ee;
+  border: 1px solid var(--border-subtle);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--surface-card);
   padding: 11px 14px;
-  color: #20384d;
+  color: var(--text-primary);
   font: inherit;
 }
 
@@ -291,7 +291,7 @@
 }
 
 .manage-user-types-toggle span {
-  color: #20384d;
+  color: var(--text-primary);
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -307,9 +307,9 @@
 }
 
 .manage-user-type-section {
-  border: 1px solid #d9e6ef;
+  border: 1px solid var(--border-subtle);
   border-radius: 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+  background: var(--surface-app);
   overflow: hidden;
 }
 
@@ -319,20 +319,20 @@
   justify-content: space-between;
   gap: 16px;
   padding: 16px 18px;
-  border-bottom: 1px solid #e8f0f6;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .manage-user-type-section-head h3,
 .manage-user-type-section-toggle h3 {
   margin: 0;
-  color: #20384d;
+  color: var(--text-primary);
   font-size: 0.98rem;
 }
 
 .manage-user-type-section-head p,
 .manage-user-type-section-toggle p {
   margin: 4px 0 0;
-  color: #6a7d8f;
+  color: var(--text-primary);
   font-size: 0.77rem;
   line-height: 1.45;
 }
@@ -344,7 +344,7 @@
   display: inline-flex;
   align-items: flex-start;
   gap: 12px;
-  color: #2b8fc8;
+  color: var(--text-primary);
   text-align: left;
   cursor: pointer;
 }
@@ -353,7 +353,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #20384d;
+  color: var(--text-primary);
   font-size: 0.82rem;
   font-weight: 700;
   white-space: nowrap;
@@ -372,9 +372,9 @@
 
 .manage-user-type-permission-item {
   min-height: 72px;
-  border: 1px solid #dbe6ef;
+  border: 1px solid var(--border-subtle);
   border-radius: 14px;
-  background: #ffffff;
+  background: var(--surface-card);
   display: grid;
   grid-template-columns: 18px 1fr;
   gap: 10px;
@@ -383,8 +383,8 @@
 }
 
 .manage-user-type-permission-item.is-enabled {
-  border-color: #87c1de;
-  background: #f3fbff;
+  border-color: var(--text-primary);
+  background: var(--surface-card);
 }
 
 .manage-user-type-permission-item input {
@@ -392,7 +392,7 @@
 }
 
 .manage-user-type-permission-item span {
-  color: #20384d;
+  color: var(--text-primary);
   font-size: 0.84rem;
   font-weight: 700;
   line-height: 1.45;
@@ -400,7 +400,7 @@
 
 .manage-user-type-permission-item small {
   grid-column: 2;
-  color: #6a7d8f;
+  color: var(--text-primary);
   font-size: 0.72rem;
   line-height: 1.35;
 }
@@ -430,7 +430,7 @@
 
 .manage-user-types-editor-shell .manage-user-types-editor-actions {
   grid-column: 1 / -1;
-  border-top: 1px solid #dbe8f1;
+  border-top: 1px solid var(--border-subtle);
   padding-top: 4px;
 }
 

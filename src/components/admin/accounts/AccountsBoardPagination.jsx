@@ -16,6 +16,8 @@ const getPageNumbers = (currentPage, totalPages) => {
 const AccountsBoardPagination = ({
   currentPage,
   totalPages,
+  pageStart,
+  pageEnd,
   totalItems,
   onPageChange,
 }) => {
@@ -25,7 +27,7 @@ const AccountsBoardPagination = ({
     <div className="admin-accounts-pagination">
       <div className="admin-accounts-pagination-left">
         <span className="admin-accounts-pagination-rows-indicator">
-          {Math.min(20, totalItems)}
+          {totalItems > 0 ? `${pageStart}-${pageEnd}` : '0'}
         </span>
         <span className="admin-accounts-pagination-total">
           Total records: {totalItems}

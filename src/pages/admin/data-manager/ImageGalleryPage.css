@@ -2,14 +2,14 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #fafafa;
+  background: var(--surface-card);
 }
 
 .ig-header {
   padding: 11px 30px;
-  border-top: 1px solid #d9d9d9;
-  border-bottom: 1px solid #d9d9d9;
-  background: linear-gradient(to bottom, #fafafa, #ededed);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .ig-back-btn {
@@ -19,14 +19,14 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #333333;
+  color: var(--text-primary);
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .ig-back-btn svg {
-  color: #2a86c9;
+  color: var(--text-primary);
   font-size: 15px;
 }
 
@@ -48,8 +48,8 @@
 .ig-section-title {
   margin: 0 0 16px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #bfbfbf;
-  color: #222222;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   font-size: 17px;
   font-weight: 700;
 }
@@ -57,8 +57,8 @@
 .ig-dropzone {
   width: 200px;
   min-height: 285px;
-  border: 3px dashed #cccccc;
-  background: #ffffff;
+  border: 3px dashed var(--border-subtle);
+  background: var(--surface-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,7 +68,7 @@
 
 .ig-dropzone--active,
 .ig-dropzone--has-file {
-  border-color: #9d9d9d;
+  border-color: var(--border-subtle);
 }
 
 .ig-dropzone-content {
@@ -92,7 +92,7 @@
   margin: 0;
   min-height: 18px;
   font-size: 14px;
-  color: #666666;
+  color: var(--text-secondary);
 }
 
 .ig-upload-actions {
@@ -106,7 +106,7 @@
   gap: 24px;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #bfbfbf;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .ig-checkbox {
@@ -114,7 +114,7 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  color: #111111;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
@@ -131,13 +131,13 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #1a78d6;
+  color: var(--text-primary);
   font-size: 14px;
   cursor: pointer;
 }
 
 .ig-trash-icon {
-  color: #111111;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
@@ -161,8 +161,8 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  background: #ffffff;
-  border: 1px solid #e1e1e1;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
   overflow: hidden;
 }
 
@@ -181,7 +181,7 @@
   justify-content: center;
   width: 22px;
   height: 22px;
-  background: #ffffff;
+  background: var(--surface-card);
 }
 
 .ig-image-checkbox input {
@@ -194,13 +194,13 @@
 .ig-image-size {
   margin: 0;
   font-size: 13px;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .ig-btn {
   min-width: 96px;
   padding: 8px 16px;
-  border: 1px solid #2a67a1;
+  border: 1px solid var(--border-subtle);
   border-radius: 2px;
   font-size: 14px;
   font-weight: 700;
@@ -219,7 +219,7 @@
   justify-content: center;
   gap: 2px;
   padding: 8px 16px;
-  background: #f36b37;
+  background: var(--surface-card);
   color: #ffffff;
   font-size: 16px;
   text-align: center;
@@ -229,7 +229,7 @@
 .ig-footer-strip button {
   border: 0;
   background: transparent;
-  color: #0f27ff;
+  color: var(--text-primary);
   text-decoration: underline;
   font: inherit;
   cursor: pointer;

@@ -54,7 +54,7 @@ const AddTicketPage = ({ basePath = '/tickets' }) => {
     const nextErrors = {}
 
     if (!formData.requestType) {
-      nextErrors.requestType = 'Please select Ticket Related To.'
+      nextErrors.requestType = 'Please select CRM Support Related To.'
     }
 
     if (!formData.title.trim()) {
@@ -84,7 +84,7 @@ const AddTicketPage = ({ basePath = '/tickets' }) => {
       title: formData.title.trim(),
       description: formData.description.trim(),
       status: 'open',
-      customerName: user?.name || 'Ticket',
+      customerName: user?.name || 'CRM Support',
       customerEmail: user?.email || '',
       contactPerson: user?.name || '',
       ownerId: user?.id || '',
@@ -96,11 +96,11 @@ const AddTicketPage = ({ basePath = '/tickets' }) => {
     setSaving(false)
 
     if (!result.success) {
-      addNotification('error', 'Send Failed', result.message || 'Unable to submit ticket.')
+      addNotification('error', 'Send Failed', result.message || 'Unable to submit CRM support request.')
       return
     }
 
-    addNotification('success', 'Ticket Created', 'Your ticket was submitted successfully.')
+    addNotification('success', 'CRM Support Created', 'Your CRM support request was submitted successfully.')
     navigate(basePath)
   }
 
@@ -110,7 +110,7 @@ const AddTicketPage = ({ basePath = '/tickets' }) => {
         <form className="sr-new-card ticket-new-card" onSubmit={handleSubmit}>
           <div className="sr-new-header">
             <div>
-              <h1>New Ticket</h1>
+              <h1>New CRM Support</h1>
             </div>
 
             <div className="sr-new-header-actions">

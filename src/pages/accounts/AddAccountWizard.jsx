@@ -259,7 +259,7 @@ const AddAccountWizard = () => {
       accountState: formData.accountState || 'pending',
       source: formData.accountSource,
       ownerName: formData.accountOwner,
-      addedBy: formData.accountOwner,
+      addedBy: user?.name || user?.username || '',
       address: formData.address,
       createdByUserId: user?.id || '',
       createdByUserName: user?.name || user?.username || '',
@@ -357,17 +357,6 @@ const AddAccountWizard = () => {
           onStepChange={handleStepChange}
           className="add-account-landscape-stepper"
         />
-
-        {validationNotice.length > 0 ? (
-          <div className="add-account-landscape-alert">
-            <p>Required fields</p>
-            <div>
-              {validationNotice.map((message) => (
-                <p key={message}>{message}</p>
-              ))}
-            </div>
-          </div>
-        ) : null}
 
         {currentStep === 0 ? (
           <LegacyFormSection

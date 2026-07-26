@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import { FaBell } from 'react-icons/fa'
+import React, { useEffect, useMemo, useState } from 'react'
+import { FaBell, FaCheck, FaEnvelope, FaExternalLinkAlt, FaRedo, FaTimes } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 import { useModal } from '../../hooks'
@@ -18,13 +19,27 @@ import {
   reopenStandaloneReminder,
   deleteStandaloneReminder,
 } from '../../features/standaloneReminders/standaloneReminderStorage'
+import { exportExcelWorkbook } from '../../utils/excelExport'
 import { formatDate, getPriorityColor } from '../../utils/helpers'
 import { TASK_STATUS, PRIORITY_LEVELS } from '../../utils/constants'
 import './Tasks.css'
 
 const Tasks = () => {
-  const { tasks, createTask, updateTask, deleteTask, addNotification } = useData()
+  const {
+    tasks,
+    reminders: mongoReminders,
+    notifications,
+    messages,
+    createTask,
+    updateTask,
+    deleteTask,
+    updateReminder,
+    deleteReminder,
+    addNotification,
+    clearNotification,
+  } = useData()
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { isOpen, data, open, close } = useModal()
 
   const [formData, setFormData] = useState({
@@ -35,12 +50,71 @@ const Tasks = () => {
     dueDate: ''
   })
 
-  const [reminders, setReminders] = useState(() => getStandaloneReminders())
+  const [localReminders, setLocalReminders] = useState(() => getStandaloneReminders())
   const [addReminderOpen, setAddReminderOpen] = useState(false)
+  const [dismissedMessageIds, setDismissedMessageIds] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('crm_todo_dismissed_message_ids') || '[]')
+    } catch (error) {
+      return []
+    }
+  })
 
-  useEffect(() => subscribeStandaloneReminders(setReminders), [])
+  useEffect(() => subscribeStandaloneReminders(setLocalReminders), [])
 
   const userTasks = tasks
+  const normalizedUserName = String(user?.name || user?.username || user?.email || '').trim().toLowerCase()
+  const isAdminUser = user?.role === 'admin' || user?.role === 'super_admin'
+  const mappedMongoReminders = (mongoReminders || []).map((reminder) => ({
+    ...reminder,
+    sourceKind: 'mongo',
+    title: reminder.title || 'Reminder',
+    note: reminder.note || reminder.message || '',
+    reminderDate: reminder.reminderDate || String(reminder.remindAt || '').slice(0, 10),
+    reminderTime: reminder.reminderTime || String(reminder.remindAt || '').slice(11, 16) || '09:00',
+    reminderMode: reminder.reminderMode || 'Follow Up',
+    status: reminder.status === 'closed' ? 'closed' : 'active',
+  }))
+  const mappedLocalReminders = localReminders.map((reminder) => ({
+    ...reminder,
+    sourceKind: 'local',
+  }))
+  const personalReminders = [...mappedMongoReminders, ...mappedLocalReminders].filter((reminder) => {
+    if (isAdminUser) return true
+    if (reminder.sourceKind === 'mongo') {
+      return String(reminder.assignedTo || reminder.createdBy || '') === String(user?.id || '')
+    }
+    const reminderOwner = String(reminder.createdBy || '').trim().toLowerCase()
+    return !reminderOwner || reminderOwner === normalizedUserName
+  })
+  const visibleReminders = [...personalReminders].sort((left, right) => {
+    if (left.status !== right.status) return left.status === 'active' ? -1 : 1
+    return new Date(right.updatedAt || right.createdAt || 0) - new Date(left.updatedAt || left.createdAt || 0)
+  })
+  const activeReminderCount = personalReminders.filter((reminder) => reminder.status === 'active').length
+  const visibleMessages = useMemo(() => (
+    messages.filter((message) => !dismissedMessageIds.includes(String(message.id)))
+  ), [dismissedMessageIds, messages])
+  const communicationItems = useMemo(() => ([
+    ...notifications.map((notification) => ({
+      id: `notification-${notification.id}`,
+      recordId: notification.id,
+      type: 'notification',
+      title: notification.title || 'Notification',
+      body: notification.message || '-',
+      timestamp: notification.timestamp || notification.createdAt,
+      route: isAdminUser ? '/admin/reminders/my' : '/reminders/my',
+    })),
+    ...visibleMessages.map((message) => ({
+      id: `message-${message.id}`,
+      recordId: message.id,
+      type: 'message',
+      title: message.senderName ? `Message from ${message.senderName}` : 'Message',
+      body: message.body || '-',
+      timestamp: message.createdAt,
+      route: isAdminUser ? '/admin/messages' : '/messages',
+    })),
+  ].sort((left, right) => new Date(right.timestamp || 0) - new Date(left.timestamp || 0))), [isAdminUser, notifications, visibleMessages])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -84,18 +158,71 @@ const Tasks = () => {
     })
   }
 
-  const handleCloseReminder = (id) => {
-    closeStandaloneReminder(id, user?.name || '')
-  }
-
-  const handleReopenReminder = (id) => {
-    reopenStandaloneReminder(id)
-  }
-
-  const handleDeleteReminder = (id) => {
-    if (window.confirm('Delete this reminder?')) {
-      deleteStandaloneReminder(id)
+  const handleCloseReminder = async (reminder) => {
+    if (reminder.sourceKind === 'mongo') {
+      const result = await updateReminder(reminder.id, { status: 'closed' })
+      if (!result.success) {
+        addNotification('error', 'Close reminder', result.message || 'Unable to close reminder.')
+        return
+      }
+    } else {
+      closeStandaloneReminder(reminder.id, user?.name || '')
     }
+    addNotification('success', 'Reminder closed', 'Reminder moved to closed list.')
+  }
+
+  const handleReopenReminder = async (reminder) => {
+    if (reminder.sourceKind === 'mongo') {
+      const result = await updateReminder(reminder.id, { status: 'scheduled' })
+      if (!result.success) {
+        addNotification('error', 'Reopen reminder', result.message || 'Unable to reopen reminder.')
+        return
+      }
+    } else {
+      reopenStandaloneReminder(reminder.id)
+    }
+    addNotification('info', 'Reminder active', 'Reminder reopened in your to-do list.')
+  }
+
+  const handleDeleteReminder = async (reminder) => {
+    if (window.confirm('Delete this reminder?')) {
+      if (reminder.sourceKind === 'mongo') {
+        const result = await deleteReminder(reminder.id)
+        if (!result.success) {
+          addNotification('error', 'Delete reminder', result.message || 'Unable to delete reminder.')
+          return
+        }
+      } else {
+        deleteStandaloneReminder(reminder.id)
+      }
+      addNotification('success', 'Reminder deleted', 'Reminder removed from your to-do list.')
+    }
+  }
+
+  const rememberDismissedMessage = (id) => {
+    const nextIds = Array.from(new Set([String(id), ...dismissedMessageIds])).slice(0, 300)
+    setDismissedMessageIds(nextIds)
+    localStorage.setItem('crm_todo_dismissed_message_ids', JSON.stringify(nextIds))
+  }
+
+  const handleCompleteCommunicationItem = (item) => {
+    if (item.type === 'notification') {
+      clearNotification(item.recordId)
+      addNotification('success', 'Notification done', 'Notification removed from your to-do list.')
+      return
+    }
+
+    rememberDismissedMessage(item.recordId)
+    addNotification('success', 'Message done', 'Message removed from your to-do list.')
+  }
+
+  const handleCloseCommunicationItem = (item) => {
+    if (item.type === 'notification') {
+      clearNotification(item.recordId)
+      return
+    }
+
+    rememberDismissedMessage(item.recordId)
   }
 
   const formatReminderDate = (dateStr, time) => {
@@ -149,30 +276,89 @@ const Tasks = () => {
 
   return (
     <div className="tasks-page">
-      <Card
-        title="Tasks"
-        subtitle={`${userTasks.length} tasks`}
-        actions={
-          <Button onClick={() => { resetForm(); open(); }}>
-            + Add Task
-          </Button>
-        }
-      >
-        <Table
-          columns={columns}
-          data={userTasks}
-          emptyMessage="No tasks found"
-        />
-      </Card>
-
       {/* ── Linked Reminders Panel ── */}
+      <div className="tasks-reminders-section tasks-communications-section">
+        <div className="tasks-reminders-header">
+          <div className="tasks-reminders-title">
+            <FaEnvelope />
+            Notifications & Messages
+            <span className="tasks-reminders-badge">
+              {communicationItems.length} open
+            </span>
+          </div>
+        </div>
+
+        <div className="tasks-reminders-list">
+          {communicationItems.length === 0 ? (
+            <p className="tasks-reminders-empty">
+              No notifications or messages in your to-do list.
+            </p>
+          ) : (
+            communicationItems.map((item) => (
+              <div key={item.id} className="tasks-reminder-card tasks-communication-card">
+                {item.type === 'message' ? (
+                  <FaEnvelope className="tasks-reminder-icon tasks-communication-icon" />
+                ) : (
+                  <FaBell className="tasks-reminder-icon tasks-communication-icon" />
+                )}
+                <button
+                  type="button"
+                  className="tasks-communication-main"
+                  onClick={() => navigate(item.route)}
+                  title="Open linked page"
+                >
+                  <div className="tasks-reminder-title">
+                    {item.title}
+                    <span className={`tasks-reminder-mode tasks-communication-mode tasks-communication-mode--${item.type}`}>
+                      {item.type === 'message' ? 'Message' : 'Notification'}
+                    </span>
+                  </div>
+                  <div className="tasks-reminder-meta tasks-communication-body">
+                    {item.body}
+                  </div>
+                </button>
+                <div className="tasks-reminder-actions">
+                  <button
+                    type="button"
+                    className="tasks-reminder-btn tasks-reminder-btn--close"
+                    onClick={() => handleCompleteCommunicationItem(item)}
+                    title="Mark as done"
+                    aria-label="Mark as done"
+                  >
+                    <FaCheck />
+                  </button>
+                  <button
+                    type="button"
+                    className="tasks-reminder-btn tasks-reminder-btn--open"
+                    onClick={() => navigate(item.route)}
+                    title="Open linked page"
+                    aria-label="Open linked page"
+                  >
+                    <FaExternalLinkAlt />
+                  </button>
+                  <button
+                    type="button"
+                    className="tasks-reminder-btn tasks-reminder-btn--delete"
+                    onClick={() => handleCloseCommunicationItem(item)}
+                    title="Close"
+                    aria-label="Close"
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
       <div className="tasks-reminders-section">
         <div className="tasks-reminders-header">
           <div className="tasks-reminders-title">
             <FaBell />
             Linked Reminders
             <span className="tasks-reminders-badge">
-              {reminders.filter((r) => r.status === 'active').length} active
+              {activeReminderCount} active
             </span>
           </div>
           <button
@@ -186,12 +372,12 @@ const Tasks = () => {
         </div>
 
         <div className="tasks-reminders-list">
-          {reminders.length === 0 ? (
+          {visibleReminders.length === 0 ? (
             <p className="tasks-reminders-empty">
-              No reminders yet. Click "+ Add Reminder" to create one — it will also appear on the Calendar.
+              No reminders yet. Click "+ Add Reminder" to create one - it will also appear on the Calendar.
             </p>
           ) : (
-            reminders.map((reminder) => (
+            visibleReminders.map((reminder) => (
               <div
                 key={reminder.id}
                 className={`tasks-reminder-card${reminder.status === 'closed' ? ' tasks-reminder-card--closed' : ''}`}
@@ -213,25 +399,31 @@ const Tasks = () => {
                     <button
                       type="button"
                       className="tasks-reminder-btn tasks-reminder-btn--close"
-                      onClick={() => handleCloseReminder(reminder.id)}
+                      onClick={() => handleCloseReminder(reminder)}
+                      title="Close reminder"
+                      aria-label="Close reminder"
                     >
-                      Close
+                      <FaCheck />
                     </button>
                   ) : (
                     <button
                       type="button"
                       className="tasks-reminder-btn tasks-reminder-btn--reopen"
-                      onClick={() => handleReopenReminder(reminder.id)}
+                      onClick={() => handleReopenReminder(reminder)}
+                      title="Reopen reminder"
+                      aria-label="Reopen reminder"
                     >
-                      Reopen
+                      <FaRedo />
                     </button>
                   )}
                   <button
                     type="button"
                     className="tasks-reminder-btn tasks-reminder-btn--delete"
-                    onClick={() => handleDeleteReminder(reminder.id)}
+                    onClick={() => handleDeleteReminder(reminder)}
+                    title="Delete reminder"
+                    aria-label="Delete reminder"
                   >
-                    Delete
+                    <FaTimes />
                   </button>
                 </div>
               </div>
@@ -239,6 +431,54 @@ const Tasks = () => {
           )}
         </div>
       </div>
+
+      <Card
+        title="Tasks"
+        subtitle={`${userTasks.length} tasks`}
+        actions={
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (userTasks.length === 0) {
+                  addNotification('error', 'Export Failed', 'No tasks to export.')
+                  return
+                }
+                const exportRows = userTasks.map(task => ({
+                  Title: task.title,
+                  Description: task.description,
+                  Status: task.status,
+                  Priority: task.priority,
+                  'Due Date': task.dueDate,
+                }))
+                exportExcelWorkbook({
+                  filename: 'Tasks_Export.xlsx',
+                  title: 'Tasks',
+                  columns: [
+                    { key: 'Title', label: 'Title' },
+                    { key: 'Description', label: 'Description' },
+                    { key: 'Status', label: 'Status' },
+                    { key: 'Priority', label: 'Priority' },
+                    { key: 'Due Date', label: 'Due Date', type: 'date' },
+                  ],
+                  rows: exportRows
+                })
+              }}
+            >
+              Export
+            </Button>
+            <Button onClick={() => { resetForm(); open(); }}>
+              + Add Task
+            </Button>
+          </div>
+        }
+      >
+        <Table
+          columns={columns}
+          data={userTasks}
+          emptyMessage="No tasks found"
+        />
+      </Card>
 
       <Modal
         isOpen={isOpen}
@@ -302,10 +542,10 @@ const Tasks = () => {
         isOpen={addReminderOpen}
         onClose={() => setAddReminderOpen(false)}
         createdBy={user?.name || ''}
+        onSaved={() => addNotification('success', 'Reminder added', 'Reminder added to your to-do list.')}
       />
     </div>
   )
 }
 
 export default Tasks
-

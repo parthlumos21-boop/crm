@@ -1,13 +1,13 @@
 .bulk-upload-page-customers {
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background-color: var(--surface-card);
   padding: 2rem 1rem;
 }
 
 .bulk-upload-page-customers .bulk-upload-container {
   max-width: 1000px;
   margin: 0 auto;
-  background-color: white;
+  background-color: var(--surface-card);
   border-radius: var(--radius-md);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -15,8 +15,8 @@
 
 .bulk-upload-page-customers .bulk-upload-header {
   padding: 2rem;
-  border-bottom: 1px solid #e0e8f0;
-  background-color: #fafbfc;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--surface-card);
 }
 
 .bulk-upload-header-top {
@@ -29,7 +29,7 @@
 .bulk-upload-title {
   font-size: 1.75rem;
   font-weight: 600;
-  color: #1a202c;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -46,14 +46,14 @@
 
 .bulk-upload-subtitle {
   font-size: 0.95rem;
-  color: #718096;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .bulk-upload-page-customers .bulk-upload-stepper-container {
   padding: 2rem;
-  border-bottom: 1px solid #e0e8f0;
-  background-color: #fafbfc;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--surface-card);
 }
 
 .bulk-upload-page-customers .bulk-upload-content {
@@ -80,7 +80,7 @@
 .bulk-upload-step-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1a202c;
+  color: var(--text-primary);
   margin: 0 0 1.5rem 0;
 }
 
@@ -92,20 +92,20 @@
 .bulk-upload-choose-btn,
 .bulk-upload-change-btn {
   padding: 0.75rem 1.5rem;
-  background-color: #e8eff9;
-  border: 1px solid #cbd5e0;
+  background-color: var(--surface-muted);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
   font-weight: 500;
-  color: #2d3748;
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .bulk-upload-choose-btn:hover,
 .bulk-upload-change-btn:hover {
-  background-color: #dde5f0;
-  border-color: #a0aec0;
+  background-color: var(--surface-muted);
+  border-color: var(--border-subtle);
 }
 
 .bulk-upload-file-selected {
@@ -113,8 +113,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem;
-  background-color: #f0f7ff;
-  border: 1px solid #bee3f8;
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
 }
 
@@ -133,8 +133,8 @@
 
 /* Duplicate config */
 .bulk-upload-duplicate-config {
-  background-color: #fafbfc;
-  border: 1px solid #e0e8f0;
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -151,7 +151,7 @@
 .bulk-upload-config-label {
   display: block;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--text-primary);
   margin-bottom: 0.75rem;
   font-size: 0.95rem;
 }
@@ -167,7 +167,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 0.9rem;
-  color: #2d3748;
+  color: var(--text-primary);
   cursor: pointer;
   user-select: none;
 }
@@ -189,11 +189,11 @@
 .bulk-upload-config-select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #cbd5e0;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
-  color: #2d3748;
-  background-color: white;
+  color: var(--text-primary);
+  background-color: var(--surface-card);
   cursor: pointer;
 }
 
@@ -206,8 +206,8 @@
 /* Errors */
 .bulk-upload-error {
   padding: 0.875rem 1rem;
-  background-color: #fed7d7;
-  border-left: 4px solid #fc8181;
+  background-color: var(--surface-card);
+  border-left: 4px solid var(--border-subtle);
   color: #c53030;
   border-radius: var(--radius-sm);
   margin-top: 1rem;
@@ -217,7 +217,7 @@
 .bulk-upload-file-info {
   margin-top: 1.5rem;
   padding: 1rem;
-  background-color: #edf2f7;
+  background-color: var(--surface-muted);
   border-radius: var(--radius-sm);
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -227,11 +227,11 @@
 .bulk-upload-file-info p {
   margin: 0;
   font-size: 0.9rem;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 .bulk-upload-file-info strong {
-  color: #1a202c;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -251,20 +251,20 @@
 
 .bulk-upload-mapping-label {
   font-weight: 500;
-  color: #2d3748;
+  color: var(--text-primary);
   padding: 0.5rem;
-  background-color: #edf2f7;
+  background-color: var(--surface-muted);
   border-radius: var(--radius-sm);
   word-break: break-word;
 }
 
 .bulk-upload-mapping-select {
   padding: 0.5rem;
-  border: 1px solid #cbd5e0;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
-  color: #2d3748;
-  background-color: white;
+  color: var(--text-primary);
+  background-color: var(--surface-card);
   cursor: pointer;
 }
 
@@ -276,14 +276,14 @@
 
 .bulk-upload-mapping-info {
   padding: 1rem;
-  background-color: #edf2f7;
+  background-color: var(--surface-muted);
   border-radius: var(--radius-sm);
 }
 
 .bulk-upload-mapping-info p {
   margin: 0;
   font-size: 0.9rem;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 /* Verify step */
@@ -298,7 +298,7 @@
 .bulk-upload-verify-mappings,
 .bulk-upload-verify-duplicate-config {
   padding: 1rem;
-  background-color: #edf2f7;
+  background-color: var(--surface-muted);
   border-radius: var(--radius-sm);
 }
 
@@ -307,13 +307,13 @@
 .bulk-upload-verify-duplicate-config h3 {
   margin: 0 0 0.5rem 0;
   font-size: 0.9rem;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 .bulk-upload-verify-info strong,
 .bulk-upload-verify-mappings strong,
 .bulk-upload-verify-duplicate-config strong {
-  color: #1a202c;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -332,9 +332,9 @@
 
 .mapping-csv-header {
   padding: 0.25rem 0.5rem;
-  background-color: #fed7d7;
+  background-color: var(--surface-card);
   border-radius: 3px;
-  color: #742a2a;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -344,24 +344,24 @@
 
 .mapping-field {
   padding: 0.25rem 0.5rem;
-  background-color: #c6f6d5;
+  background-color: var(--surface-muted);
   border-radius: 3px;
-  color: #22543d;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .verify-config-item {
   margin: 0.5rem 0;
   font-size: 0.85rem;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 .verify-config-warning {
   margin: 0.75rem 0 0 0;
   padding: 0.75rem;
-  background-color: #fef5e7;
+  background-color: var(--surface-card);
   border-left: 3px solid var(--color-warning);
-  color: #7d6608;
+  color: var(--text-primary);
   font-size: 0.85rem;
   border-radius: 3px;
 }
@@ -373,24 +373,24 @@
 .bulk-upload-verify-preview h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a202c;
+  color: var(--text-primary);
   margin: 0 0 1rem 0;
 }
 
 .bulk-upload-preview-table-container {
   overflow-x: auto;
-  border: 1px solid #e0e8f0;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
 }
 
 .bulk-upload-preview-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background-color: var(--surface-card);
 }
 
 .bulk-upload-preview-table thead {
-  background-color: #edf2f7;
+  background-color: var(--surface-muted);
 }
 
 .bulk-upload-preview-table th {
@@ -398,25 +398,25 @@
   text-align: left;
   font-weight: 600;
   font-size: 0.85rem;
-  color: #1a202c;
-  border-bottom: 1px solid #cbd5e0;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .bulk-upload-preview-table td {
   padding: 0.75rem;
-  border-bottom: 1px solid #e0e8f0;
+  border-bottom: 1px solid var(--border-subtle);
   font-size: 0.9rem;
-  color: #4a5568;
+  color: var(--text-primary);
   word-break: break-word;
   max-width: 200px;
 }
 
 .bulk-upload-preview-table tbody tr:hover {
-  background-color: #f7fafc;
+  background-color: var(--surface-card);
 }
 
 .row-duplicate-warning {
-  background-color: #fffbea !important;
+  background-color: var(--surface-card) !important;
 }
 
 .cell-content {
@@ -436,8 +436,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 2rem;
-  border-top: 1px solid #e0e8f0;
-  background-color: #fafbfc;
+  border-top: 1px solid var(--border-subtle);
+  background-color: var(--surface-card);
 }
 
 .bulk-upload-actions-right {
@@ -467,13 +467,13 @@
 }
 
 .bulk-upload-btn-secondary {
-  background-color: #e8eff9;
-  color: #2d3748;
-  border: 1px solid #cbd5e0;
+  background-color: var(--surface-muted);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
 }
 
 .bulk-upload-btn-secondary:hover {
-  background-color: #dde5f0;
+  background-color: var(--surface-muted);
 }
 
 .bulk-upload-btn-primary {
@@ -486,7 +486,7 @@
 }
 
 .bulk-upload-btn-primary:disabled {
-  background-color: #cbd5e0;
+  background-color: var(--surface-muted);
   color: #a0aec0;
   cursor: not-allowed;
 }
@@ -539,4 +539,128 @@
   .bulk-upload-mapping-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* Customer bulk upload night-theme completion. */
+[data-theme="dark"] :where(
+  .bulk-upload-page-customers,
+  .bulk-upload-page-customers .bulk-upload-container,
+  .bulk-upload-page-customers .bulk-upload-header,
+  .bulk-upload-page-customers .bulk-upload-stepper-container,
+  .bulk-upload-page-customers .bulk-upload-content,
+  .bulk-upload-page-customers .bulk-upload-actions,
+  .bulk-upload-page-customers .bulk-upload-file-selected,
+  .bulk-upload-page-customers .bulk-upload-duplicate-config,
+  .bulk-upload-page-customers .bulk-upload-file-info,
+  .bulk-upload-page-customers .bulk-upload-mapping-label,
+  .bulk-upload-page-customers .bulk-upload-mapping-info,
+  .bulk-upload-page-customers .bulk-upload-verify-info,
+  .bulk-upload-page-customers .bulk-upload-verify-mappings,
+  .bulk-upload-page-customers .bulk-upload-verify-duplicate-config,
+  .bulk-upload-page-customers .bulk-upload-preview-table-container
+) {
+  background: #12202a !important;
+  border-color: var(--text-primary) !important;
+  color: #f0fffd !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers :where(
+  .bulk-upload-title,
+  .bulk-upload-step-title,
+  .bulk-upload-config-label,
+  .bulk-upload-checkbox-label,
+  .bulk-upload-verify-preview h3,
+  .bulk-upload-file-info strong,
+  .bulk-upload-verify-info strong,
+  .bulk-upload-verify-mappings strong,
+  .bulk-upload-verify-duplicate-config strong
+) {
+  color: #f0fffd !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers :where(
+  .bulk-upload-subtitle,
+  .bulk-upload-file-info p,
+  .bulk-upload-mapping-info p,
+  .bulk-upload-verify-info p,
+  .bulk-upload-verify-mappings h3,
+  .bulk-upload-verify-duplicate-config h3,
+  .verify-config-item,
+  .bulk-upload-preview-table td,
+  .mapping-arrow
+) {
+  color: #c7e6e5 !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers :where(
+  .bulk-upload-choose-btn,
+  .bulk-upload-change-btn,
+  .bulk-upload-btn-secondary,
+  .bulk-upload-config-select,
+  .bulk-upload-mapping-select
+) {
+  background: #1b2c37 !important;
+  border-color: var(--text-primary) !important;
+  color: #f0fffd !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers :where(
+  .bulk-upload-choose-btn:hover,
+  .bulk-upload-change-btn:hover,
+  .bulk-upload-btn-secondary:hover
+) {
+  background: #223a49 !important;
+  border-color: var(--text-primary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers .bulk-upload-preview-table {
+  background: #12202a !important;
+  color: #f0fffd !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers .bulk-upload-preview-table thead,
+[data-theme="dark"] .bulk-upload-page-customers .bulk-upload-preview-table th {
+  background: linear-gradient(180deg, #2f6078 0%, #244b61 100%) !important;
+  border-color: var(--text-primary) !important;
+  color: #f4fbff !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers .bulk-upload-preview-table td {
+  background: #17232d !important;
+  border-color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers .bulk-upload-preview-table tbody tr:hover td,
+[data-theme="dark"] .bulk-upload-page-customers .row-duplicate-warning td {
+  background: #223a49 !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers .bulk-upload-error {
+  background: rgba(239, 68, 68, 0.13) !important;
+  border-color: rgba(248, 113, 113, 0.45) !important;
+  color: #ffb4b4 !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers .verify-config-warning {
+  background: rgba(245, 158, 11, 0.13) !important;
+  border-color: rgba(245, 158, 11, 0.44) !important;
+  color: #ffd98a !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers .mapping-csv-header {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #ffb4b4 !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers .mapping-field {
+  background: rgba(34, 197, 94, 0.16) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .bulk-upload-page-customers :where(.bulk-upload-file-icon, svg) {
+  color: var(--text-primary) !important;
+  opacity: 1 !important;
 }

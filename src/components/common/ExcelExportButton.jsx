@@ -7,7 +7,12 @@ import './ExcelExportButton.css'
 const SUCCESS_RESET_DELAY = 1800
 
 const waitForUiPaint = () => new Promise((resolve) => {
-  window.setTimeout(resolve, 0)
+  if (typeof window === 'undefined' || typeof window.requestAnimationFrame !== 'function') {
+    resolve()
+    return
+  }
+
+  window.requestAnimationFrame(() => resolve())
 })
 
 const toPromise = async (callback) => {
@@ -53,7 +58,7 @@ export const ExcelExportActionButton = ({
 
     setStatus('loading')
     try {
-      await waitForUiPaint()
+      // Keep the download inside the original click gesture so browsers do not block it.
       await toPromise(onClick)
       setStatus('success')
     } catch (error) {

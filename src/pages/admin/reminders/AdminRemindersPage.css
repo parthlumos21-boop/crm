@@ -1,13 +1,11 @@
 active .admin-my-reminders-page {
   min-height: 100%;
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.82), rgba(244, 247, 251, 0.96)),
-    linear-gradient(180deg, #f7f7f7 0%, #ffffff 100%);
+  background: var(--surface-app);
 }
 
 .admin-my-reminders-shell {
-  border: 1px solid #d8dde7;
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--glass-border);
+  background: var(--surface-card);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
@@ -17,13 +15,13 @@ active .admin-my-reminders-page {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.95rem 1.2rem;
-  border-bottom: 1px solid #dfe5ee;
-  background: linear-gradient(180deg, #fbfbfb 0%, #f1f3f5 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .admin-my-reminders-header h1 {
   margin: 0;
-  color: #303236;
+  color: var(--text-primary);
   font-size: 1.05rem;
   font-weight: 700;
 }
@@ -31,7 +29,7 @@ active .admin-my-reminders-page {
 .admin-my-reminders-help {
   border: none;
   background: transparent;
-  color: #1d8ccc;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
@@ -53,12 +51,12 @@ active .admin-my-reminders-page {
 
 .admin-my-reminders-tab-blue {
   background: linear-gradient(180deg, #55c1e3 0%, #2da5cf 100%);
-  border-color: #36a9d2;
+  border-color: var(--text-primary);
 }
 
 .admin-my-reminders-tab-orange {
-  background: linear-gradient(180deg, #ffb443 0%, #ef9419 100%);
-  border-color: #e59a2e;
+  background: var(--surface-app);
+  border-color:  var(--border-subtle);
 }
 
 .admin-my-reminders-tab-active {
@@ -68,8 +66,8 @@ active .admin-my-reminders-page {
 .admin-my-reminders-panel {
   min-height: 37rem;
   margin: 1.2rem 1.4rem 1.6rem;
-  border: 1px solid #d4d9e1;
-  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
   padding: 1rem 1.1rem;
 }
 
@@ -89,21 +87,21 @@ active .admin-my-reminders-page {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  border: 1px solid #dbe4ee;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-app);
   padding: 0.85rem 0.95rem;
 }
 
 .admin-my-reminders-item-main strong {
   display: block;
-  color: #243142;
+  color: var(--text-primary);
   font-size: 0.94rem;
 }
 
 .admin-my-reminders-item-main p,
 .admin-my-reminders-item-main span {
   margin: 0.2rem 0 0;
-  color: #5c6d80;
+  color: var(--text-primary);
   font-size: 0.83rem;
 }
 
@@ -122,6 +120,34 @@ active .admin-my-reminders-page {
   background: linear-gradient(180deg, #5c90ca 0%, #4078bb 100%);
 }
 
+.admin-my-reminders-notification-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 0 0 auto;
+}
+
+.admin-my-reminders-icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.admin-my-reminders-icon-action-check {
+  background: linear-gradient(180deg, #3ba7dd 0%, #227cb5 100%);
+}
+
+.admin-my-reminders-icon-action-close {
+  background: linear-gradient(180deg, #e55b55 0%, #cc3e3e 100%);
+}
+
 .admin-reminders-status {
   display: inline-flex;
   align-items: center;
@@ -134,8 +160,8 @@ active .admin-my-reminders-page {
 }
 
 .admin-reminders-status-active {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--surface-muted);
+  color: var(--text-primary);
 }
 
 .admin-reminders-status-closed {
@@ -180,7 +206,7 @@ active .admin-my-reminders-page {
 /* ── Active Reminders ─────────────────────────────────────── */
 .active-reminders-page {
   min-height: 100%;
-  background: #f5f5f5;
+  background: var(--surface-card);
 }
 
 .active-reminders-shell {
@@ -199,7 +225,7 @@ active .admin-my-reminders-page {
 
 .active-reminders-header h1 {
   margin: 0;
-  color: #2c2c2c;
+  color: var(--text-primary);
   font-size: 1.25rem;
   font-weight: 700;
   font-family: inherit;
@@ -211,7 +237,7 @@ active .admin-my-reminders-page {
   justify-content: center;
   gap: 0.45rem;
   min-height: 2.35rem;
-  border: 1px solid #1d7f49;
+  border: 1px solid var(--border-subtle);
   border-radius: 0.75rem;
   background: linear-gradient(180deg, #2fbe6b 0%, #1f8b4f 100%);
   color: #ffffff;
@@ -242,7 +268,7 @@ active .admin-my-reminders-page {
 .active-reminders-users-panel {
   border: 1px solid var(--border-subtle);
   border-radius: 3px;
-  background: #ffffff;
+  background: var(--surface-card);
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
 }
@@ -285,22 +311,22 @@ active .admin-my-reminders-page {
 }
 
 .active-reminders-user-row:hover {
-  background: #f4faff;
+  background: var(--surface-card);
 }
 
 .active-reminders-user-row-selected {
-  background: #e8f4fd;
+  background: var(--surface-muted);
 }
 
 .active-reminders-user-icon {
-  color: #555;
+  color: var(--text-primary);
   flex-shrink: 0;
   font-size: 0.85rem;
 }
 
 .active-reminders-user-name {
   flex: 1;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 0.88rem;
   font-weight: 400;
   font-family: inherit;
@@ -318,9 +344,9 @@ active .admin-my-reminders-page {
   min-width: 1.6rem;
   height: 1.5rem;
   padding: 0 0.35rem;
-  border: 1px solid #d4870d;
+  border: 1px solid var(--border-subtle);
   border-radius: 3px;
-  background: linear-gradient(180deg, #f5b942 0%, #e89412 100%);
+  background: var(--surface-app);
   color: #ffffff;
   font-size: 0.74rem;
   font-weight: 700;
@@ -335,7 +361,7 @@ active .admin-my-reminders-page {
 
 .active-reminders-select-card {
   border: 1px solid var(--border-subtle);
-  background: #ffffff;
+  background: var(--surface-card);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
@@ -344,19 +370,19 @@ active .admin-my-reminders-page {
   align-items: center;
   gap: 0.6rem;
   padding: 1.25rem 1.25rem;
-  color: #7cb95a;
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 600;
   font-family: inherit;
 }
 
 .active-reminders-select-icon {
-  color: #7cb95a;
+  color: var(--text-primary);
 }
 
 .active-reminders-detail-panel {
   border: 1px solid var(--border-subtle);
-  background: #ffffff;
+  background: var(--surface-card);
   display: flex;
   flex-direction: column;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -367,14 +393,14 @@ active .admin-my-reminders-page {
   align-items: center;
   justify-content: space-between;
   padding: 0.7rem 0.9rem;
-  border-bottom: 1px solid #e2eaf3;
-  background: linear-gradient(180deg, #fafafa 0%, #f2f4f6 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .active-reminders-detail-title {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #253148;
+  color: var(--text-primary);
   font-family: inherit;
 }
 
@@ -398,7 +424,7 @@ active .admin-my-reminders-page {
 }
 
 .active-reminders-detail-btn-orange {
-  border-color: #1d7f49;
+  border-color: var(--text-primary);
   background: linear-gradient(180deg, #2fbe6b 0%, #1f8b4f 100%);
 }
 
@@ -454,13 +480,45 @@ active .admin-my-reminders-page {
   justify-content: space-between;
   gap: 0.85rem;
   padding: 0.7rem 0.85rem;
-  border: 1px solid #dce2e8;
-  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+}
+
+.active-reminders-item-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+}
+
+.active-reminders-item-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.active-reminders-item-action-close {
+  background: linear-gradient(180deg, #3ba7dd 0%, #227cb5 100%);
+}
+
+.active-reminders-item-action-add {
+  background: linear-gradient(180deg, #6d7f99 0%, #4d607a 100%);
+}
+
+.active-reminders-item-action-reschedule {
+  background: var(--surface-app);
 }
 
 .active-reminders-detail-item-main strong {
   display: block;
-  color: #243142;
+  color: var(--text-primary);
   font-size: 0.88rem;
   font-family: inherit;
 }
@@ -468,13 +526,33 @@ active .admin-my-reminders-page {
 .active-reminders-detail-item-main p,
 .active-reminders-detail-item-main span {
   margin: 0.18rem 0 0;
-  color: #5c6d80;
+  color: var(--text-primary);
   font-size: 0.78rem;
+}
+
+.active-reminders-detail-item-main p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+}
+
+.active-reminders-detail-item-main p span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.25rem;
+  margin: 0;
+  padding: 0 0.42rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .active-reminders-filter-panel {
   border: 1px solid var(--border-subtle);
-  background: #ffffff;
+  background: var(--surface-card);
   display: flex;
   flex-direction: column;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
@@ -486,14 +564,14 @@ active .admin-my-reminders-page {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.7rem 0.9rem;
-  border-bottom: 1px solid #e2eaf3;
-  background: linear-gradient(180deg, #fafafa 0%, #f2f4f6 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .active-reminders-filter-title {
   font-size: 0.92rem;
   font-weight: 700;
-  color: #253148;
+  color: var(--text-primary);
 }
 
 .active-reminders-filter-header-actions {
@@ -529,7 +607,7 @@ active .admin-my-reminders-page {
 }
 
 .active-reminders-filter-action-icon-orange {
-  border-color: #1d7f49;
+  border-color: var(--text-primary);
   background: linear-gradient(180deg, #2fbe6b 0%, #1f8b4f 100%);
 }
 
@@ -555,7 +633,7 @@ active .admin-my-reminders-page {
 
 .active-reminders-filter-control label,
 .active-reminders-filter-toggle-row span {
-  color: #334155;
+  color: var(--text-primary);
   font-size: 0.84rem;
   font-weight: 700;
 }
@@ -563,11 +641,11 @@ active .admin-my-reminders-page {
 .active-reminders-filter-control select,
 .active-reminders-filter-date-select {
   min-height: 2.1rem;
-  border: 1px solid #d4dce7;
+  border: 1px solid var(--border-subtle);
   border-radius: 3px;
   padding: 0 0.7rem;
-  background: #ffffff;
-  color: #243142;
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-size: 0.82rem;
 }
 
@@ -581,10 +659,10 @@ active .admin-my-reminders-page {
 .active-reminders-filter-toggle-btn {
   min-width: 3.6rem;
   min-height: 1.9rem;
-  border: 1px solid #b8d8b7;
+  border: 1px solid var(--border-subtle);
   border-radius: 999px;
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--surface-app);
+  color: var(--text-primary);
   font-size: 0.76rem;
   font-weight: 800;
   cursor: pointer;
@@ -592,7 +670,7 @@ active .admin-my-reminders-page {
 
 .active-reminders-filter-toggle-btn-active {
   background: linear-gradient(180deg, #5fb95d 0%, #3f973b 100%);
-  border-color: #3f973b;
+  border-color: var(--text-primary);
   color: #ffffff;
 }
 
@@ -607,7 +685,7 @@ active .admin-my-reminders-page {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  color: #526274;
+  color: var(--text-primary);
   font-size: 0.82rem;
 }
 
@@ -628,10 +706,10 @@ active .admin-my-reminders-page {
 .active-reminders-filter-pill {
   min-height: 2rem;
   padding: 0.35rem 0.9rem;
-  border: 1px solid #cfe0ee;
+  border: 1px solid var(--border-subtle);
   border-radius: 999px;
-  background: #ffffff;
-  color: #355163;
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
@@ -639,12 +717,12 @@ active .admin-my-reminders-page {
 }
 
 .active-reminders-filter-pill:hover {
-  border-color: #7dc4e6;
-  background: #f4fbff;
+  border-color: var(--text-primary);
+  background: var(--surface-card);
 }
 
 .active-reminders-filter-pill-active {
-  border-color: #3499cf;
+  border-color: var(--text-primary);
   background: linear-gradient(180deg, #55bae8 0%, #3499cf 100%);
   color: #ffffff;
 }
@@ -669,4 +747,95 @@ active .admin-my-reminders-page {
     grid-template-columns: 1fr;
     justify-items: start;
   }
+}
+
+[data-theme="dark"] .admin-my-reminders-page,
+[data-theme="dark"] .active-reminders-page {
+  background: var(--surface-app);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .admin-my-reminders-shell,
+[data-theme="dark"] .admin-my-reminders-panel,
+[data-theme="dark"] .admin-my-reminders-item,
+[data-theme="dark"] .active-reminders-users-panel,
+[data-theme="dark"] .active-reminders-select-card,
+[data-theme="dark"] .active-reminders-detail-panel,
+[data-theme="dark"] .active-reminders-detail-item,
+[data-theme="dark"] .active-reminders-filter-panel {
+  border-color: var(--text-primary);
+  background: #17232d;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.22);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .admin-my-reminders-header,
+[data-theme="dark"] .active-reminders-detail-header,
+[data-theme="dark"] .active-reminders-filter-header {
+  border-color: var(--text-primary);
+  background: #14202a;
+}
+
+[data-theme="dark"] .admin-my-reminders-header h1,
+[data-theme="dark"] .admin-my-reminders-item-main strong,
+[data-theme="dark"] .active-reminders-header h1,
+[data-theme="dark"] .active-reminders-detail-title,
+[data-theme="dark"] .active-reminders-filter-title,
+[data-theme="dark"] .active-reminders-detail-item-main strong,
+[data-theme="dark"] .active-reminders-filter-control label,
+[data-theme="dark"] .active-reminders-filter-toggle-row span {
+  color: #f3faff;
+}
+
+[data-theme="dark"] .admin-my-reminders-item-main p,
+[data-theme="dark"] .admin-my-reminders-item-main span,
+[data-theme="dark"] .active-reminders-detail-item-main p,
+[data-theme="dark"] .active-reminders-detail-item-main span,
+[data-theme="dark"] .active-reminders-user-name,
+[data-theme="dark"] .active-reminders-filter-checkbox,
+[data-theme="dark"] .active-reminders-detail-empty-msg {
+  color: #c7dae6;
+}
+
+[data-theme="dark"] .active-reminders-users-panel-header,
+[data-theme="dark"] .active-reminders-detail-tab {
+  background: linear-gradient(180deg, #2f6078 0%, #244b61 100%);
+  border-color: var(--text-primary);
+}
+
+[data-theme="dark"] .active-reminders-user-row {
+  border-color: var(--text-primary);
+  color: #eaf5fb;
+}
+
+[data-theme="dark"] .active-reminders-user-row:hover,
+[data-theme="dark"] .active-reminders-user-row-selected {
+  background: #223a49;
+}
+
+[data-theme="dark"] .active-reminders-filter-control select,
+[data-theme="dark"] .active-reminders-filter-date-select {
+  border-color: var(--text-primary);
+  background: #1d2b36;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .active-reminders-filter-toggle-btn,
+[data-theme="dark"] .active-reminders-filter-pill,
+[data-theme="dark"] .active-reminders-detail-item-main p span {
+  border-color: var(--text-primary);
+  background: #1d2b36;
+  color: #d6e8f2;
+}
+
+[data-theme="dark"] .active-reminders-filter-toggle-btn-active,
+[data-theme="dark"] .active-reminders-filter-pill-active {
+  border-color: var(--text-primary);
+  background: linear-gradient(180deg, #4bb8e8 0%, #287fa8 100%);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .active-reminders-select-prompt,
+[data-theme="dark"] .active-reminders-select-icon {
+  color: var(--text-primary);
 }

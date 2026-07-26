@@ -1,9 +1,7 @@
 .deal-report-builder-page {
   margin: -1rem -1.25rem 0;
   min-height: 100%;
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.96), rgba(246, 248, 251, 0.98)),
-    linear-gradient(180deg, #f6f7f9 0%, #ffffff 100%);
+  background: var(--surface-app);
 }
 
 .deal-report-builder-topbar {
@@ -12,13 +10,13 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.55rem 0.9rem;
-  border-bottom: 1px solid #d5dbe3;
-  background: linear-gradient(180deg, #f6f6f6 0%, #eeeeee 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .deal-report-builder-topbar h1 {
   margin: 0;
-  color: #444444;
+  color: var(--text-secondary);
   font-size: 0.98rem;
   font-weight: 700;
 }
@@ -53,7 +51,7 @@
 
 .deal-report-builder-panel,
 .deal-report-builder-section {
-  border: 1px solid #39a4d6;
+  border: 1px solid var(--border-subtle);
   background: rgba(238, 247, 253, 0.88);
   margin-bottom: 0.55rem;
 }
@@ -63,7 +61,7 @@
 }
 
 .deal-report-builder-field label {
-  color: #3e5d73;
+  color: var(--text-primary);
   font-size: 0.74rem;
   font-weight: 700;
 }
@@ -75,9 +73,9 @@
 .deal-report-builder-section input {
   width: 100%;
   min-height: 1.65rem;
-  border: 1px solid #b7c9d8;
-  background: #ffffff;
-  color: #334455;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-size: 0.73rem;
   padding: 0.16rem 0.35rem;
 }
@@ -112,7 +110,7 @@
 .deal-report-builder-plus-btn,
 .deal-report-builder-mini-btn,
 .deal-report-builder-transfer-btn {
-  border: 1px solid #6db7dc;
+  border: 1px solid var(--border-subtle);
   background: linear-gradient(180deg, #75c6ec 0%, #57add5 100%);
   color: #ffffff;
   font-size: 0.8rem;
@@ -130,16 +128,16 @@
 
 .deal-report-builder-mini-btn-remove {
   background: linear-gradient(180deg, #e68a8a 0%, #ce5f5f 100%);
-  border-color: #d26f6f;
+  border-color:  var(--border-subtle);
 }
 
 .deal-report-builder-section-title {
   padding: 0.45rem 0.65rem;
-  border-bottom: 1px solid #39a4d6;
-  color: #3e5d73;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   font-size: 0.74rem;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.35);
+  background: var(--surface-card);
 }
 
 .deal-report-builder-section-body {
@@ -148,7 +146,7 @@
 
 .deal-report-builder-subpanel-title {
   padding: 0.35rem 0.6rem;
-  border: 1px solid #2f9acb;
+  border: 1px solid var(--border-subtle);
   background: linear-gradient(180deg, #4ca7d5 0%, #2988bc 100%);
   color: #ffffff;
   font-size: 0.72rem;
@@ -156,14 +154,14 @@
 }
 
 .deal-report-builder-filter-shell {
-  border: 1px solid #d3dce5;
+  border: 1px solid var(--border-subtle);
   border-top: none;
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--surface-card);
   padding: 0.6rem;
 }
 
 .deal-report-builder-filter-caption {
-  color: #63a8cf;
+  color: var(--text-primary);
   font-size: 0.74rem;
   font-weight: 700;
   margin-bottom: 0.45rem;
@@ -178,7 +176,7 @@
 }
 
 .deal-report-builder-filter-operator-label {
-  color: #6d7f8f;
+  color: var(--text-primary);
   font-size: 0.72rem;
 }
 
@@ -194,9 +192,9 @@
 }
 
 .deal-report-builder-field-list {
-  border: 1px solid #2f9acb;
+  border: 1px solid var(--border-subtle);
   border-top: none;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--surface-card);
   min-height: 360px;
   max-height: 460px;
   overflow-y: auto;
@@ -212,7 +210,7 @@
 }
 
 .deal-report-builder-field-group-title {
-  color: #4f96c0;
+  color: var(--text-primary);
   font-size: 0.73rem;
   font-weight: 700;
   margin-bottom: 0.45rem;
@@ -223,7 +221,7 @@
   width: 100%;
   border: none;
   background: transparent;
-  color: #32485a;
+  color: var(--text-primary);
   text-align: left;
   font-size: 0.73rem;
   padding: 0.16rem 0.2rem;
@@ -232,7 +230,7 @@
 
 .deal-report-builder-field-item-active {
   background: rgba(63, 160, 209, 0.14);
-  color: #206b9a;
+  color: var(--text-primary);
   font-weight: 700;
 }
 

@@ -14,18 +14,18 @@
   justify-content: center;
   border: 1px solid transparent;
   border-radius: 0.35rem;
-  background: #ffffff;
+  background: var(--surface-card);
   cursor: pointer;
 }
 
 .contact-integration-action--whatsapp {
-  border-color: #24a866;
-  color: #168a50;
+  border-color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 .contact-integration-action--outlook {
-  border-color: #3478c5;
-  color: #1f66b1;
+  border-color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 .contact-integration-action:disabled {

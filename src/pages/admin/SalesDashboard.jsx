@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useNavigate } from 'react-router-dom'
 import {
   FaCalendarAlt,
@@ -381,6 +382,60 @@ const SalesDashboard = () => {
             </div>
           </motion.div>
         ))}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ ...sectionMotion, delay: 0.1 }}
+      >
+        <Card className="sales-card full-width sales-chart-card" padding={false}>
+          <div className="card-header">
+            <h3>Pipeline Overview</h3>
+            <span className="deal-count">Deals by Stage</span>
+          </div>
+          <div className="sales-chart-wrapper">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={dealsByStage}
+                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis 
+                  dataKey="stage" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#64748b', fontSize: 12 }}
+                  dy={10}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#64748b', fontSize: 12 }}
+                  allowDecimals={false}
+                />
+                <Tooltip 
+                  cursor={{ fill: '#f1f5f9' }}
+                  contentStyle={{ 
+                    borderRadius: '8px', 
+                    border: 'none',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a'
+                  }}
+                  itemStyle={{ color: '#0f9f9a', fontWeight: 600 }}
+                />
+                <Bar 
+                  dataKey="count" 
+                  fill="#0f9f9a" 
+                  radius={[4, 4, 0, 0]} 
+                  barSize={40}
+                  animationDuration={1500}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
       </motion.div>
 
       <div className="sales-content-grid">

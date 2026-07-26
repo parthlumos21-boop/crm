@@ -13,8 +13,10 @@ const USER_ID_FIELDS = [
   'userId',
   'ownerId',
   'assignedToId',
+  'assignedTo',
   'assignedUserId',
   'createdById',
+  'createdBy',
   'updatedById',
 ]
 
@@ -167,7 +169,12 @@ export const canUserAccessEntity = (user, entityType, payload) => {
 
   if (entityType === 'message') {
     const message = payload?.record || payload
-    return message?.senderId === user.id || message?.recipientUserIds?.includes(user.id)
+    const userId = String(user.id || '')
+    return (
+      String(message?.senderId || '') === userId
+      || String(message?.receiverId || '') === userId
+      || (message?.recipientUserIds || []).map((id) => String(id || '')).includes(userId)
+    )
   }
 
   const record = payload?.record || payload?.previousRecord || payload

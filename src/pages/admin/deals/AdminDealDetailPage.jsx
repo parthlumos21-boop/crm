@@ -240,6 +240,10 @@ const AdminDealDetailPage = () => {
     navigate(buildCrmDealActionUrl('re-assign-deal', deal.id, fromPath))
   }
 
+  const handleChangeStatus = () => {
+    navigateBackWithAction('change-status')
+  }
+
   const handleGenerateQuotation = () => {
     if (!deal) return
 
@@ -415,6 +419,9 @@ const AdminDealDetailPage = () => {
             <div className="admin-deal-detail-meta-actions">
               <Button type="button" size="small" onClick={handleManageDeal}>
                 Manage Deal
+              </Button>
+              <Button type="button" size="small" variant="primary" style={{ background: '#3b82f6', borderColor: '#3b82f6' }} onClick={handleChangeStatus}>
+                Change Status
               </Button>
 
               <div className="admin-deal-detail-actions-menu" ref={actionsMenuRef}>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FiArrowRight, FiEye, FiEyeOff, FiLock, FiShield, FiUser } from 'react-icons/fi'
@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
 import { setupApi } from '../../services/setupApi'
-import { APP_NAME, APP_VERSION, getDashboardRoute } from '../../utils/constants'
+import { APP_VERSION, getDashboardRoute } from '../../utils/constants'
 import swatiLogo from '../../assets/swati-logo.png'
 import './Login.css'
 
@@ -15,30 +15,64 @@ const panelMotion = {
   ease: [0.22, 1, 0.36, 1],
 }
 
-const Login = ({ isAdmin = false, mode: modeProp = '' }) => {
+const LoginBrandHeader = ({ title = '', showLogoImage, setShowLogoImage, hideLogo = false, onLogoClick, glowColor }) => {
+  const LogoWrapper = onLogoClick ? 'button' : 'div'
+  const wrapperProps = onLogoClick ? {
+    type: 'button',
+    className: 'login-brand-mark login-brand-mark--center login-brand-mark--button',
+    onClick: onLogoClick,
+    'aria-label': 'Go back to options'
+  } : {
+    className: 'login-brand-mark login-brand-mark--center'
+  }
+
+  return (
+    <div className="login-brand-heading">
+      {!hideLogo && (
+        <LogoWrapper {...wrapperProps}>
+          {showLogoImage ? (
+            <img
+              src={swatiLogo}
+              alt="Swati Switchgears logo"
+              className="login-brand-image"
+              onError={() => setShowLogoImage(false)}
+            />
+          ) : (
+            <div className="login-brand-fallback">SWATI</div>
+          )}
+        </LogoWrapper>
+      )}
+      <div className="login-brand-crm" style={glowColor ? { '--crm-glow-color': glowColor } : undefined}>CRM</div>
+      {title ? <h1 className="login-brand-login-title">{title}</h1> : null}
+    </div>
+  )
+}
+
+const Login = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search])
-  const initialMode = modeProp
-    || (isAdmin ? 'admin' : (queryParams.get('role') === 'user' ? 'user' : 'choose'))
-
-  const [mode, setMode] = useState(initialMode)
+  
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'light')
+  }, [])
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
-  const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showLogoImage, setShowLogoImage] = useState(true)
   const [setupStatus, setSetupStatus] = useState(null)
   const [setupNotice, setSetupNotice] = useState('')
 
-  const { login } = useAuth()
-  const effectiveIsAdmin = mode === 'admin' || isAdmin
+  const { login, user } = useAuth()
 
   React.useEffect(() => {
     let isMounted = true
+
+    document.documentElement.setAttribute('data-theme', 'light')
 
     const loadSetupStatus = async () => {
       try {
@@ -61,6 +95,18 @@ const Login = ({ isAdmin = false, mode: modeProp = '' }) => {
       isMounted = false
     }
   }, [])
+
+  React.useEffect(() => {
+    if (!user) return
+    navigate(getDashboardRoute(user.role), { replace: true })
+  }, [navigate, user])
+
+  React.useEffect(() => {
+    const microsoftStatus = queryParams.get('microsoft')
+    if (microsoftStatus !== 'failed') return
+
+    setError(queryParams.get('message') || 'Microsoft login failed. Please use your CRM credentials or contact admin.')
+  }, [queryParams])
 
   const isSetupBlocked = setupStatus && !setupStatus.ready
 
@@ -97,7 +143,11 @@ const Login = ({ isAdmin = false, mode: modeProp = '' }) => {
   }
 
   const navigateAfterLogin = (result) => {
-    const userRole = result?.user?.role
+    const loginUser = result?.user || {}
+    const userRole = loginUser.role
+    const normalizedUserName = String(loginUser.name || loginUser.username || loginUser.email || '').trim().toLowerCase()
+    const isKevalVShah = normalizedUserName === 'keval v shah'
+      || normalizedUserName === 'keval@swatiswitchgears.com'
     const fallbackRoute = getDashboardRoute(userRole)
     const fromLocation = location.state?.from
     const fromPath = [
@@ -109,9 +159,8 @@ const Login = ({ isAdmin = false, mode: modeProp = '' }) => {
     const canReturnToFromPath = fromLocation?.pathname
       && fromLocation.pathname !== '/login'
       && fromLocation.pathname !== '/admin/login'
-      && (isAdminUser || !fromLocation.pathname.startsWith('/admin'))
 
-    navigate(canReturnToFromPath ? fromPath : fallbackRoute, { replace: true })
+    navigate(canReturnToFromPath ? fromPath : (isAdminUser && isKevalVShah ? '/admin/launchpad' : fallbackRoute), { replace: true })
   }
 
   const handleSubmit = async (event) => {
@@ -125,7 +174,7 @@ const Login = ({ isAdmin = false, mode: modeProp = '' }) => {
     setLoading(true)
 
     try {
-      const result = await login(username, password, effectiveIsAdmin ? 'admin' : 'user', { rememberMe })
+      const result = await login(username, password, 'user', { rememberMe: false })
       if (result.success) {
         navigateAfterLogin(result)
       } else {
@@ -136,169 +185,22 @@ const Login = ({ isAdmin = false, mode: modeProp = '' }) => {
     }
   }
 
-  const handleBack = () => {
-    if (isAdmin) {
-      navigate('/login')
-      return
-    }
 
-    setMode('choose')
-    setError('')
-    setFieldErrors({})
-    setUsername('')
-    setPassword('')
-    setRememberMe(false)
-    setShowPassword(false)
-  }
-
-  if (mode === 'choose') {
-    return (
-      <div className="login-shell">
-        <motion.div
-          className="login-chooser"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={panelMotion}
-        >
-          {setupNotice ? (
-            <div className="login-setup-banner login-setup-banner--warning">
-              <strong>Setup Notice:</strong> {setupNotice}
-            </div>
-          ) : null}
-
-          {isSetupBlocked ? (
-            <div className="login-setup-banner">
-              <strong>Login is blocked until MongoDB setup is ready.</strong>
-              <span>{setupStatus.storage || 'MongoDB'} storage is not ready yet.</span>
-            </div>
-          ) : null}
-
-          <motion.div
-            className="login-chooser-brand"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ ...panelMotion, delay: 0.08 }}
-          >
-            <div className="login-brand-mark">
-              {showLogoImage ? (
-                <img
-                  src={swatiLogo}
-                  alt={`${APP_NAME} logo`}
-                  className="login-brand-image"
-                  onError={() => setShowLogoImage(false)}
-                />
-              ) : (
-                <div className="login-brand-fallback">{APP_NAME}</div>
-              )}
-            </div>
-            <div className="login-chooser-copy">
-              <span className="login-kicker">{APP_NAME} Access</span>
-              <h1 className="login-title">{APP_NAME}</h1>
-              <p className="login-subtitle">
-                Admin and user access are now separated. User accounts are created and approved only by the administrator.
-              </p>
-            </div>
-          </motion.div>
-
-          <div className="login-choose-grid">
-            <motion.button
-              type="button"
-              className="login-choose-card login-choose-card--admin"
-              onClick={() => setMode('admin')}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ...panelMotion, delay: 0.16 }}
-            >
-              <div className="login-choose-card-icon">
-                <FiShield />
-              </div>
-              <div className="login-choose-card-title">Admin Login</div>
-              <div className="login-choose-card-desc">
-                Manage users, approvals, status control, and the complete CRM dashboard.
-              </div>
-              <div className="login-choose-card-meta">
-                <span>Secure admin portal</span>
-                <FiArrowRight />
-              </div>
-            </motion.button>
-
-            <motion.button
-              type="button"
-              className="login-choose-card login-choose-card--user"
-              onClick={() => setMode('user')}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ...panelMotion, delay: 0.24 }}
-            >
-              <div className="login-choose-card-icon">
-                <FiUser />
-              </div>
-              <div className="login-choose-card-title">User Login</div>
-              <div className="login-choose-card-desc">
-                Access your dashboard, tasks, deals, reminders, and assigned CRM data after admin approval.
-              </div>
-              <div className="login-choose-card-meta">
-                <span>Admin-created account only</span>
-                <FiArrowRight />
-              </div>
-            </motion.button>
-          </div>
-        </motion.div>
-      </div>
-    )
-  }
 
   return (
-    <div className="login-shell">
-      <div className="login-layout">
+    <div className="login-shell login-shell--single">
+      <div className="login-layout login-layout--single">
         <motion.section
-          className="login-panel login-panel--intro"
-          initial={{ opacity: 0, x: -24 }}
+          className="login-panel login-panel--form"
+          initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={panelMotion}
+          transition={{ ...panelMotion, delay: 0.08 }}
         >
           {setupNotice ? (
             <div className="login-setup-banner login-setup-banner--warning">
               <strong>Setup Notice:</strong> {setupNotice}
             </div>
           ) : null}
-
-          <div className="login-brand-mark login-brand-mark--left">
-            {showLogoImage ? (
-              <img
-                src={swatiLogo}
-                alt={`${APP_NAME} logo`}
-                className="login-brand-image"
-                onError={() => setShowLogoImage(false)}
-              />
-            ) : (
-              <div className="login-brand-fallback">{APP_NAME}</div>
-            )}
-          </div>
-
-          <span className="login-kicker">{effectiveIsAdmin ? 'Administrator Access' : 'User Workspace'}</span>
-          <h1 className="login-title">
-            {effectiveIsAdmin ? 'Admin Control Center' : APP_NAME}
-          </h1>
-          <p className="login-subtitle">
-            {effectiveIsAdmin
-              ? 'Sign in with the fixed MongoDB admin account to manage approvals, disable accounts, and control user access.'
-              : 'Sign in with the account created by your administrator. Users cannot self-register or create accounts from this page.'}
-          </p>
-
-          <div className={`login-role-card login-role-card--${effectiveIsAdmin ? 'admin' : 'user'}`}>
-            <div className="login-role-card-icon">
-              {effectiveIsAdmin ? <FiShield /> : <FiLock />}
-            </div>
-            <div>
-              <strong>{effectiveIsAdmin ? 'Admin-only access' : 'Approval-based access'}</strong>
-              <p>
-                {effectiveIsAdmin
-                  ? 'Only the fixed admin account can create users and approve access.'
-                  : 'Your account must be created and approved by admin before you can enter the dashboard.'}
-              </p>
-            </div>
-          </div>
 
           {isSetupBlocked ? (
             <div className="login-setup-card">
@@ -311,30 +213,24 @@ const Login = ({ isAdmin = false, mode: modeProp = '' }) => {
               </ul>
             </div>
           ) : null}
-        </motion.section>
 
-        <motion.section
-          className="login-panel login-panel--form"
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ ...panelMotion, delay: 0.08 }}
-        >
           <div className="login-form-header">
-            <h2>{effectiveIsAdmin ? 'Admin Login' : 'User Login'}</h2>
-            <p>
-              {effectiveIsAdmin
-                ? 'Use your administrator credentials to continue.'
-                : 'Use the username or email provided by your administrator.'}
-            </p>
+            <LoginBrandHeader
+              showLogoImage={showLogoImage}
+              setShowLogoImage={setShowLogoImage}
+              onLogoClick={() => navigate('/admin/login')}
+              glowColor={setupStatus?.loginBrandGlowColor}
+            />
+            <h2>User Login</h2>
           </div>
 
           <form className="login-form" onSubmit={handleSubmit}>
             <Input
-              label={effectiveIsAdmin ? 'Admin Username / Email' : 'Username / Email'}
+              label="Username / Email"
               type="text"
               value={username}
               onChange={handleUsernameChange}
-              placeholder={effectiveIsAdmin ? 'Enter admin username or email' : 'Enter username or email'}
+              placeholder="Enter username or email"
               fullWidth
               required
             />
@@ -365,24 +261,6 @@ const Login = ({ isAdmin = false, mode: modeProp = '' }) => {
             </div>
             {fieldErrors.password ? <div className="login-field-error">{fieldErrors.password}</div> : null}
 
-            <div className="login-form-options">
-              <label className="login-remember-option">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(event) => setRememberMe(event.target.checked)}
-                />
-                <span>Remember me for 30 days</span>
-              </label>
-              <button
-                type="button"
-                className="login-link-button"
-                onClick={() => setError('Forgot password is not enabled yet. Please contact your administrator.')}
-              >
-                Forgot password?
-              </button>
-            </div>
-
             {error ? <div className="login-error">{error}</div> : null}
 
             <Button
@@ -392,20 +270,13 @@ const Login = ({ isAdmin = false, mode: modeProp = '' }) => {
               fullWidth
               loading={loading}
             >
-              {loading ? 'Signing in...' : `Continue to ${effectiveIsAdmin ? 'Admin Dashboard' : 'User Dashboard'}`}
+              {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
 
           <div className="login-footer">
-            <button
-              type="button"
-              className="login-link-button"
-              onClick={handleBack}
-            >
-              Back to access options
-            </button>
             <p className="login-footer-note">
-              Version {APP_VERSION} - Copyright {new Date().getFullYear()} {APP_NAME}. Need an account? Contact your administrator.
+              Version {APP_VERSION} - Copyright {new Date().getFullYear()}. Need an account? Contact your administrator.
             </p>
           </div>
         </motion.section>

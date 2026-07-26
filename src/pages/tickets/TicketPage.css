@@ -12,8 +12,8 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.9rem 1.4rem;
-  border-bottom: 1px solid #d6e4ef;
-  background: linear-gradient(180deg, #fbfbfb 0%, #f2f4f7 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .ticket-title {
@@ -21,13 +21,13 @@
   align-items: center;
   gap: 0.35rem;
   margin: 0;
-  color: #203446;
+  color: var(--text-primary);
   font-size: 1.1rem;
   font-weight: 800;
 }
 
 .ticket-title svg {
-  color: #2186c8;
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
@@ -45,7 +45,7 @@
   justify-content: center;
   gap: 0.42rem;
   min-height: 2.35rem;
-  border: 1px solid #2d6fa5;
+  border: 1px solid var(--border-subtle);
   border-radius: 0.15rem;
   background: linear-gradient(180deg, #4f97d1 0%, #2f75b3 100%);
   color: #ffffff;
@@ -76,12 +76,12 @@
 
 .ticket-tab--open {
   background: linear-gradient(180deg, #4f97d1 0%, #2f75b3 100%);
-  border-color: #2d6fa5;
+  border-color: var(--text-primary);
 }
 
 .ticket-tab--closed {
   background: linear-gradient(180deg, #61c04f 0%, #3fa33a 100%);
-  border-color: #3f9340;
+  border-color: var(--text-primary);
 }
 
 .ticket-tab--active {
@@ -93,8 +93,8 @@
 .ticket-content {
   min-height: 28rem;
   margin: 0 2rem 2rem;
-  border: 1px solid #42a5ff;
-  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
 }
 
 .ticket-content--empty {
@@ -110,15 +110,15 @@
 
 .ticket-record-card {
   padding: 1rem 1.1rem;
-  border: 1px solid #d8e5f1;
+  border: 1px solid var(--border-subtle);
   border-radius: 1rem;
-  background: #ffffff;
+  background: var(--surface-card);
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.05);
 }
 
 .ticket-record-card h2 {
   margin: 0 0 0.3rem;
-  color: #203446;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 800;
 }
@@ -128,7 +128,7 @@
   flex-wrap: wrap;
   gap: 0.45rem;
   margin: 0;
-  color: #5c7287;
+  color: var(--text-primary);
   font-size: 0.84rem;
 }
 
@@ -144,14 +144,14 @@
 
 .ticket-empty-title {
   margin: 0;
-  color: #2d8cdc;
+  color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.5;
 }
 
 .ticket-empty-copy {
   margin: 0.15rem 0 1.2rem;
-  color: #2d8cdc;
+  color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -165,6 +165,7 @@
   .ticket-toolbar-actions {
     width: 100%;
     justify-content: flex-end;
+    flex-wrap: wrap;
   }
 
   .ticket-tabs {

@@ -8,7 +8,7 @@ const ClosedSupportRequest = ({
   <SupportRequestList
     basePath={basePath}
     showActionMenu={showActionMenu}
-    initialTab="closed"
+    closedOnly
   />
 )
 

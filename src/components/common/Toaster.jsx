@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { FiAlertCircle, FiCheckCircle, FiInfo, FiX, FiXCircle } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 import './Toaster.css'
@@ -9,10 +10,10 @@ const MAX_STORED_SEEN = 300
 const SEEN_STORAGE_PREFIX = 'crm_seen_toast_notifications'
 
 const ICON_BY_TYPE = {
-  success: '✓',
-  error: '!',
-  warning: '!',
-  info: 'i',
+  success: FiCheckCircle,
+  error: FiXCircle,
+  warning: FiAlertCircle,
+  info: FiInfo,
 }
 
 const getToastKey = (entry = {}) => String(
@@ -109,10 +110,11 @@ const Toaster = () => {
     <div className="toaster-root" role="status" aria-live="polite">
       {visible.map((entry) => {
         const type = entry.type || 'info'
+        const Icon = ICON_BY_TYPE[type] || ICON_BY_TYPE.info
         return (
           <div key={getToastKey(entry)} className={`toaster-item toaster-item--${type}`}>
             <span className={`toaster-icon toaster-icon--${type}`}>
-              {ICON_BY_TYPE[type] || ICON_BY_TYPE.info}
+              <Icon aria-hidden="true" />
             </span>
             <div className="toaster-body">
               {entry.title ? <div className="toaster-title">{entry.title}</div> : null}
@@ -124,7 +126,7 @@ const Toaster = () => {
               onClick={() => dismiss(entry)}
               aria-label="Dismiss notification"
             >
-              ×
+              <FiX aria-hidden="true" />
             </button>
           </div>
         )

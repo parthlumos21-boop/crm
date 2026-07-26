@@ -106,12 +106,12 @@ const LegacyFormField = ({
           className={`legacy-form-label ${labelClassName}`.trim()}
         >
           {label}
-          {required && <span className="ml-1 text-red-600">*</span>}
+          {required && <span className="legacy-form-required-marker ml-1 text-red-600">*</span>}
         </label>
 
         <div className={`space-y-1 ${inputWrapperClassName}`.trim()}>
           {control}
-          {error ? <p className="text-xs text-red-600">{error}</p> : null}
+          {error ? <p className="legacy-form-error-message text-xs text-red-600">{error}</p> : null}
         </div>
       </div>
     )
@@ -124,12 +124,12 @@ const LegacyFormField = ({
         className={`legacy-form-label ${labelClassName}`.trim()}
       >
         {label}
-        {required && <span className="ml-1 text-red-600">*</span>}
+        {required && <span className="legacy-form-required-marker ml-1 text-red-600">*</span>}
       </label>
 
       <div className="space-y-0.5">
         {control}
-        {error ? <p className="text-xs text-red-600">{error}</p> : null}
+        {error ? <p className="legacy-form-error-message text-xs text-red-600">{error}</p> : null}
       </div>
     </div>
   )

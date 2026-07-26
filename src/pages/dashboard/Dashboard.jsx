@@ -49,6 +49,16 @@ const buildMonthlyTrend = (deals) => {
 }
 
 const PIE_COLORS = ['#1976d2', '#2e7d32', '#ed6c02', '#9c27b0', '#d32f2f', '#0288d1']
+const CHART_GRID_STROKE = 'var(--chart-grid-stroke, #eef0f3)'
+const CHART_AXIS_STROKE = 'var(--chart-axis-stroke, #90a4ae)'
+const CHART_TOOLTIP_STYLE = {
+  borderRadius: 8,
+  border: '1px solid var(--chart-tooltip-border, #e0e0e0)',
+  background: 'var(--chart-tooltip-bg, #ffffff)',
+  color: 'var(--chart-tooltip-text, #1f2d3d)',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.18)',
+  fontSize: 12,
+}
 
 const Dashboard = () => {
   const { accounts, deals, tasks } = useData()
@@ -145,7 +155,7 @@ const Dashboard = () => {
         <div>
           <h1 className="md-dashboard__title">Dashboard</h1>
           <p className="md-dashboard__subtitle">
-            Welcome back, {user?.name || 'User'} — here is your CRM dashboard.
+            Welcome back, {user?.name || 'User'} - here is your CRM dashboard.
           </p>
         </div>
         <div className="md-dashboard__topbar-actions">
@@ -191,16 +201,11 @@ const Dashboard = () => {
                     <stop offset="100%" stopColor="#1976d2" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef0f3" vertical={false} />
-                <XAxis dataKey="name" stroke="#90a4ae" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#90a4ae" fontSize={12} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
+                <XAxis dataKey="name" stroke={CHART_AXIS_STROKE} fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke={CHART_AXIS_STROKE} fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip
-                  contentStyle={{
-                    borderRadius: 8,
-                    border: '1px solid #e0e0e0',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                    fontSize: 12,
-                  }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
                 />
                 <Area
                   type="monotone"
@@ -239,12 +244,7 @@ const Dashboard = () => {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{
-                      borderRadius: 8,
-                      border: '1px solid #e0e0e0',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                      fontSize: 12,
-                    }}
+                    contentStyle={CHART_TOOLTIP_STYLE}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -287,7 +287,7 @@ const Dashboard = () => {
                 </span>
                 <div className="md-list__main">
                   <span className="md-list__title">{account.name}</span>
-                  <span className="md-list__meta">{account.industry || '—'}</span>
+                  <span className="md-list__meta">{account.industry || '-'}</span>
                 </div>
                 <span className={`md-chip md-chip--${getStatusColor(account.status)}`}>
                   {account.status}

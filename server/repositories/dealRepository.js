@@ -16,6 +16,9 @@ const normalizeMappedDeal = async (record) => {
   if (!mapped) return null
 
   const data = mapped.data && typeof mapped.data === 'object' ? mapped.data : {}
+  const latest = (...values) => values.find((value) => value !== undefined && value !== null)
+  const latestText = (...values) => String(latest(...values, '') || '').trim()
+  const resolvedAmount = latest(data.amount, data.value, data.dealValue, mapped.amount, mapped.value, mapped.dealValue)
   let linkedAccountName = mapped.linkedAccountName || mapped.accountName || data.accountName || ''
   let linkedAccountNumber = mapped.linkedAccountNumber || mapped.accountNumber || data.accountNumber || data.accountNo || ''
 
@@ -30,6 +33,45 @@ const normalizeMappedDeal = async (record) => {
   return {
     ...mapped,
     dealNumber: mapped.dealNumber || data.dealNumber || data.deal_number || '',
+    amount: resolvedAmount ?? null,
+    value: resolvedAmount ?? null,
+    dealValue: resolvedAmount ?? null,
+    status: latestText(data.status, mapped.status, data.stage, mapped.stage),
+    stage: latestText(data.stage, mapped.stage, data.status, mapped.status) || 'new',
+    probability: latest(data.probability, mapped.probability, null),
+    expectedCloseDate: latestText(data.expectedCloseDate, data.expectedClosureDate, data.closeDate, mapped.expectedCloseDate, mapped.expectedClosureDate, mapped.closeDate),
+    expectedClosureDate: latestText(data.expectedClosureDate, data.expectedCloseDate, data.closeDate, mapped.expectedClosureDate, mapped.expectedCloseDate, mapped.closeDate),
+    closeDate: latestText(data.closeDate, data.expectedCloseDate, mapped.closeDate, mapped.expectedCloseDate),
+    actualClosureDate: latestText(data.actualClosureDate, mapped.actualClosureDate),
+    dealDate: latestText(data.dealDate, mapped.dealDate),
+    dealType: latestText(data.dealType, mapped.dealType, data.customerCategory, mapped.customerCategory),
+    dealSource: latestText(data.dealSource, data.source, mapped.dealSource, mapped.source),
+    source: latestText(data.source, data.dealSource, mapped.source, mapped.dealSource),
+    dealSubsource: latestText(data.dealSubsource, data.subsource, mapped.dealSubsource, mapped.subsource),
+    subsource: latestText(data.subsource, data.dealSubsource, mapped.subsource, mapped.dealSubsource),
+    projectName: latestText(data.projectName, mapped.projectName),
+    projectStatus: latestText(data.projectStatus, mapped.projectStatus),
+    poValue: latest(data.poValue, mapped.poValue, ''),
+    jobNo: latestText(data.jobNo, mapped.jobNo),
+    contactPerson: latestText(data.contactPerson, data.contactName, mapped.contactPerson, mapped.contactName),
+    contactName: latestText(data.contactName, data.contactPerson, mapped.contactName, mapped.contactPerson),
+    contactMobile: latestText(data.contactMobile, data.phone, mapped.contactMobile, mapped.phone),
+    contactPhone: latestText(data.contactPhone, data.phone, mapped.contactPhone, mapped.phone),
+    phone: latestText(data.phone, data.contactMobile, data.contactPhone, mapped.phone, mapped.contactMobile, mapped.contactPhone),
+    contactEmail: latestText(data.contactEmail, data.email, mapped.contactEmail, mapped.email),
+    email: latestText(data.email, data.contactEmail, mapped.email, mapped.contactEmail),
+    address: latestText(data.address, mapped.address),
+    description: latestText(data.description, mapped.description),
+    dealScore: latest(data.dealScore, mapped.dealScore, null),
+    productCategory: latestText(data.productCategory, mapped.productCategory),
+    consultantName: latestText(data.consultantName, mapped.consultantName),
+    gstin: latestText(data.gstin, mapped.gstin),
+    orderCustomerStatus: latestText(data.orderCustomerStatus, mapped.orderCustomerStatus),
+    quotationCustomerStatus: latestText(data.quotationCustomerStatus, mapped.quotationCustomerStatus),
+    customerReferenceDate: latestText(data.customerReferenceDate, data.customerRefDate, mapped.customerReferenceDate, mapped.customerRefDate),
+    customerReferenceNumber: latestText(data.customerReferenceNumber, data.customerRefNo, mapped.customerReferenceNumber, mapped.customerRefNo),
+    reasonForLostOrder: latestText(data.reasonForLostOrder, data.reasonForLost, mapped.reasonForLostOrder, mapped.reasonForLost),
+    reasonForLost: latestText(data.reasonForLost, data.reasonForLostOrder, mapped.reasonForLost, mapped.reasonForLostOrder),
     linkedAccountName,
     linkedAccountNumber,
   }
@@ -183,6 +225,8 @@ const findDuplicate = async ({ title, accountId = null, customerName = null } = 
   const normalizedExcludeId = toNumberOrNull(excludeId)
   if (normalizedExcludeId !== null) {
     filter.legacyId = { $ne: normalizedExcludeId }
+  } else if (excludeId) {
+    filter._id = { $ne: excludeId }
   }
 
   const record = await Deal.findOne(filter).sort({ legacyId: -1 }).lean()

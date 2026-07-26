@@ -54,6 +54,12 @@ const isOwnedByCurrentUser = (record, user) => {
       raw.ownerId,
       raw.createdByUserId,
       raw.assignedToUserId,
+      raw.assignedTo,
+      raw.assignedUserId,
+      record.ownerUserId,
+      record.ownerId,
+      record.assignedTo,
+      record.assignedUserId,
     ].map(normalizeCompareValue)
 
     if (matchingIds.includes(userId)) {
@@ -65,13 +71,32 @@ const isOwnedByCurrentUser = (record, user) => {
   //    code-prefixed names, and aliases all resolve to the same person.
   const candidateOwners = [
     record.accountOwner,
+    record.accountOwnerDisplay,
+    record.accountOwnerName,
+    record.ownerName,
+    record.assignedUserName,
     record.addedBy,
+    record.addedByDisplay,
     raw.accountOwner,
+    raw.accountOwnerDisplay,
+    raw.accountOwnerName,
     raw.ownerName,
+    raw.assignedUserName,
     raw.addedBy,
+    raw.addedByName,
   ]
 
-  return candidateOwners.some((candidate) => isSameCrmOwner(candidate, user.name))
+  const userNames = [
+    user.name,
+    user.ownerDisplayName,
+    user.username,
+    user.email,
+    user.ownerCode,
+  ]
+
+  return candidateOwners.some((candidate) => (
+    userNames.some((userName) => isSameCrmOwner(candidate, userName))
+  ))
 }
 
 export const getMyAccountsBoardData = (accounts = [], user = null) => {

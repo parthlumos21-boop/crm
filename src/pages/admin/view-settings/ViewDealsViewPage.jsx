@@ -167,7 +167,7 @@ const ViewDealsViewPage = ({ basePath = '/admin/view-settings' }) => {
         {step === 2 && (
           <div className="vdv-step-body vdv-step-body--placeholder">
             <p className="vdv-placeholder-text">
-              Step 2 — Additional Filters: configure filter conditions for this view.
+              Step 2 - Additional Filters: configure filter conditions for this view.
             </p>
           </div>
         )}

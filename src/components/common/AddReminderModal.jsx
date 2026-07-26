@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { FaCalendarAlt } from 'react-icons/fa'
+import { useAuth } from '../../context/AuthContext'
+import { useData } from '../../context/DataContext'
 import { addStandaloneReminder } from '../../features/standaloneReminders/standaloneReminderStorage'
 import './AddReminderModal.css'
 
@@ -13,7 +15,7 @@ const getInitialFormState = () => ({
   reminderTime: '09:00',
   reminderMode: 'Call',
   note: '',
-  createTask: false,
+  createTask: true,
 })
 
 /**
@@ -27,6 +29,8 @@ const getInitialFormState = () => ({
  *   onSaved     – optional (reminder) => void callback after save
  */
 const AddReminderModal = ({ isOpen, onClose, contextLabel = '', createdBy = '', onSaved }) => {
+  const { user } = useAuth()
+  const { createReminder, addNotification } = useData()
   const [form, setForm] = useState(getInitialFormState)
   const [saving, setSaving] = useState(false)
 
@@ -37,7 +41,7 @@ const AddReminderModal = ({ isOpen, onClose, contextLabel = '', createdBy = '', 
     onClose()
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!form.title.trim()) {
@@ -52,15 +56,34 @@ const AddReminderModal = ({ isOpen, onClose, contextLabel = '', createdBy = '', 
 
     setSaving(true)
 
-    const saved = addStandaloneReminder({
+    const reminderTime = form.reminderTime || '09:00'
+    const reminderPayload = {
       title: form.title.trim(),
+      message: form.note.trim(),
+      remindAt: `${form.reminderDate}T${reminderTime}:00`,
+      status: 'scheduled',
       reminderDate: form.reminderDate,
-      reminderTime: form.reminderTime,
+      reminderTime,
       reminderMode: form.reminderMode,
-      note: form.note.trim(),
-      createdBy,
-      createTask: form.createTask,
-    })
+      assignedTo: user?.id,
+    }
+
+    const result = await createReminder(reminderPayload)
+    const saved = result.success
+      ? result.data
+      : addStandaloneReminder({
+        title: form.title.trim(),
+        reminderDate: form.reminderDate,
+        reminderTime,
+        reminderMode: form.reminderMode,
+        note: form.note.trim(),
+        createdBy,
+        createTask: form.createTask,
+      })
+
+    if (!result.success) {
+      addNotification?.('warning', 'Reminder saved locally', result.message || 'MongoDB reminder save failed, so this reminder was kept on this device.')
+    }
 
     setSaving(false)
 

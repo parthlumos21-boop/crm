@@ -26,6 +26,23 @@ const titleize = (value) => {
     .replace(/\b\w/g, (character) => character.toUpperCase())
 }
 
+const resolveAddedByName = (account = {}) => {
+  const value = (
+    account.addedByDisplay
+    || account.addedByName
+    || account.createdByUserName
+    || account.createdByName
+    || account.raw?.addedByDisplay
+    || account.raw?.addedByName
+    || account.raw?.createdByUserName
+    || account.raw?.createdByName
+    || account.addedBy
+    || ''
+  )
+
+  return getCanonicalCrmUserName(value) || titleize(value)
+}
+
 const isBlank = (value) => {
   if (value === null || value === undefined) return true
   if (typeof value === 'string') return value.trim() === ''
@@ -109,6 +126,7 @@ export const normalizeAccountRecord = (account = {}, index = 0, options = {}) =>
   const accountState = titleize(account.accountState || '')
   const accountSource = titleize(account.accountSource || account.source || '')
   const accountSubsource = titleize(account.accountSubsource || account.subsource || '')
+  const addedByName = resolveAddedByName(account)
   const latestRemark = account.latestRemark || account.remark || account.description || ''
   const convertedAs = titleize(account.convertedAs || account.convertedType || ((stage === 'converted') ? 'Customer' : ''))
   const convertedContextNumber = account.convertedContextNumber || account.convertedReferenceNumber || account.customerRefNo || ''
@@ -171,8 +189,8 @@ export const normalizeAccountRecord = (account = {}, index = 0, options = {}) =>
     convertedBy: account.convertedBy || '',
     dealId: account.dealId || '',
     convertedDealId: account.convertedDealId || '',
-    addedBy: getCanonicalCrmUserName(account.addedBy || '') || titleize(account.addedBy || ''),
-    addedByDisplay: getCanonicalCrmUserName(account.addedBy || '') || titleize(account.addedBy || ''),
+    addedBy: addedByName,
+    addedByDisplay: addedByName,
     alternatePhone: account.alternatePhone || '',
     alternateEmail: account.alternateEmail || '',
     gstin: account.gstin || '',

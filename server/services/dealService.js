@@ -25,49 +25,89 @@ const buildDealData = (body = {}, existing = null) => {
 }
 
 const buildPayload = (body = {}, actor, existing) => {
-  const title = asTrimmedStringOrNull(pickFirstDefined(body.title, body.name, existing?.title)) || 'Untitled Deal'
-  const amount = asOptionalNumber(pickFirstDefined(body.amount, body.value, existing?.amount))
+  const title = asTrimmedStringOrNull(pickFirstDefined(body.title, body.name, body.dealName, existing?.title)) || 'Untitled Deal'
+  const amount = asOptionalNumber(pickFirstDefined(body.amount, body.value, body.dealValue, existing?.amount, existing?.value, existing?.dealValue))
   const probability = asOptionalInteger(pickFirstDefined(body.probability, existing?.probability))
+  const dealNumber = asTrimmedStringOrNull(pickFirstDefined(body.dealNumber, existing?.dealNumber, existing?.data?.dealNumber))
+  const expectedCloseDate = asTrimmedStringOrNull(
+    pickFirstDefined(
+      body.expectedCloseDate,
+      body.expectedClosureDate,
+      body.closeDate,
+      existing?.expectedCloseDate
+    )
+  )
+  const ownerUserId = asOptionalInteger(
+    pickFirstDefined(
+      body.ownerUserId,
+      body.ownerId,
+      body.assignedTo,
+      body.assignedUserId,
+      existing?.ownerUserId,
+      existing?.assignedTo,
+      actor.role === 'user' ? actor.id : null
+    )
+  )
+  const assignedTo = asOptionalInteger(
+    pickFirstDefined(
+      body.assignedTo,
+      body.assignedUserId,
+      body.ownerUserId,
+      existing?.assignedTo,
+      existing?.ownerUserId,
+      actor.role === 'user' ? actor.id : null
+    )
+  )
 
   return {
     title,
+    ...(dealNumber ? { dealNumber } : {}),
     customerName: asTrimmedStringOrNull(pickFirstDefined(body.customerName, existing?.customerName)),
     accountId: asOptionalInteger(pickFirstDefined(body.accountId, body.account_id, existing?.accountId)),
     amount,
+    value: amount,
+    dealValue: amount,
     currency: asTrimmedStringOrNull(pickFirstDefined(body.currency, existing?.currency)) || 'INR',
     stage: asTrimmedStringOrNull(pickFirstDefined(body.stage, body.status, existing?.stage)) || 'new',
+    status: asTrimmedStringOrNull(pickFirstDefined(body.status, body.stage, existing?.status, existing?.stage)) || 'new',
     probability: probability === null ? null : Math.max(0, Math.min(100, probability)),
-    expectedCloseDate: asTrimmedStringOrNull(
-      pickFirstDefined(
-        body.expectedCloseDate,
-        body.expectedClosureDate,
-        body.closeDate,
-        existing?.expectedCloseDate
-      )
-    ),
-    assignedTo: asOptionalInteger(
-      pickFirstDefined(
-        body.assignedTo,
-        body.assignedUserId,
-        body.ownerUserId,
-        existing?.assignedTo,
-        existing?.ownerUserId,
-        actor.role === 'user' ? actor.id : null
-      )
-    ),
-    ownerUserId: asOptionalInteger(
-      pickFirstDefined(
-        body.ownerUserId,
-        body.ownerId,
-        body.assignedTo,
-        body.assignedUserId,
-        existing?.ownerUserId,
-        existing?.assignedTo,
-        actor.role === 'user' ? actor.id : null
-      )
-    ),
+    expectedCloseDate,
+    expectedClosureDate: expectedCloseDate,
+    closeDate: expectedCloseDate,
+    actualClosureDate: asTrimmedStringOrNull(pickFirstDefined(body.actualClosureDate, existing?.actualClosureDate)),
+    assignedTo,
+    ownerUserId,
     createdBy: existing?.createdBy ?? actor.id,
     notes: asTrimmedStringOrNull(pickFirstDefined(body.notes, existing?.notes)) || '',
+    dealDate: asTrimmedStringOrNull(pickFirstDefined(body.dealDate, existing?.dealDate)),
+    dealType: asTrimmedStringOrNull(pickFirstDefined(body.dealType, existing?.dealType)),
+    dealSource: asTrimmedStringOrNull(pickFirstDefined(body.dealSource, body.source, existing?.dealSource, existing?.source)),
+    source: asTrimmedStringOrNull(pickFirstDefined(body.source, body.dealSource, existing?.source, existing?.dealSource)),
+    dealSubsource: asTrimmedStringOrNull(pickFirstDefined(body.dealSubsource, body.subsource, existing?.dealSubsource, existing?.subsource)),
+    subsource: asTrimmedStringOrNull(pickFirstDefined(body.subsource, body.dealSubsource, existing?.subsource, existing?.dealSubsource)),
+    projectName: asTrimmedStringOrNull(pickFirstDefined(body.projectName, existing?.projectName)),
+    projectStatus: asTrimmedStringOrNull(pickFirstDefined(body.projectStatus, existing?.projectStatus)),
+    poValue: asOptionalNumber(pickFirstDefined(body.poValue, existing?.poValue)),
+    jobNo: asTrimmedStringOrNull(pickFirstDefined(body.jobNo, existing?.jobNo)),
+    contactPerson: asTrimmedStringOrNull(pickFirstDefined(body.contactPerson, body.contactName, existing?.contactPerson, existing?.contactName)),
+    contactName: asTrimmedStringOrNull(pickFirstDefined(body.contactName, body.contactPerson, existing?.contactName, existing?.contactPerson)),
+    contactMobile: asTrimmedStringOrNull(pickFirstDefined(body.contactMobile, body.phone, existing?.contactMobile, existing?.phone)),
+    contactPhone: asTrimmedStringOrNull(pickFirstDefined(body.contactPhone, body.phone, existing?.contactPhone, existing?.phone)),
+    phone: asTrimmedStringOrNull(pickFirstDefined(body.phone, body.contactMobile, body.contactPhone, existing?.phone, existing?.contactMobile, existing?.contactPhone)),
+    contactEmail: asTrimmedStringOrNull(pickFirstDefined(body.contactEmail, body.email, existing?.contactEmail, existing?.email)),
+    email: asTrimmedStringOrNull(pickFirstDefined(body.email, body.contactEmail, existing?.email, existing?.contactEmail)),
+    address: asTrimmedStringOrNull(pickFirstDefined(body.address, existing?.address)),
+    description: asTrimmedStringOrNull(pickFirstDefined(body.description, existing?.description)),
+    dealScore: asOptionalNumber(pickFirstDefined(body.dealScore, existing?.dealScore)),
+    productCategory: asTrimmedStringOrNull(pickFirstDefined(body.productCategory, existing?.productCategory)),
+    consultantName: asTrimmedStringOrNull(pickFirstDefined(body.consultantName, existing?.consultantName)),
+    gstin: asTrimmedStringOrNull(pickFirstDefined(body.gstin, existing?.gstin)),
+    orderCustomerStatus: asTrimmedStringOrNull(pickFirstDefined(body.orderCustomerStatus, existing?.orderCustomerStatus)),
+    quotationCustomerStatus: asTrimmedStringOrNull(pickFirstDefined(body.quotationCustomerStatus, existing?.quotationCustomerStatus)),
+    customerReferenceDate: asTrimmedStringOrNull(pickFirstDefined(body.customerReferenceDate, body.customerRefDate, existing?.customerReferenceDate, existing?.customerRefDate)),
+    customerReferenceNumber: asTrimmedStringOrNull(pickFirstDefined(body.customerReferenceNumber, body.customerRefNo, existing?.customerReferenceNumber, existing?.customerRefNo)),
+    reasonForLostOrder: asTrimmedStringOrNull(pickFirstDefined(body.reasonForLostOrder, body.reasonForLost, existing?.reasonForLostOrder, existing?.reasonForLost)),
+    reasonForLost: asTrimmedStringOrNull(pickFirstDefined(body.reasonForLost, body.reasonForLostOrder, existing?.reasonForLost, existing?.reasonForLostOrder)),
     data: buildDealData(body, existing),
   }
 }

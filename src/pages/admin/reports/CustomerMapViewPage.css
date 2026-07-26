@@ -1,9 +1,7 @@
 .customer-map-view-page {
   margin: -1rem -1.25rem 0;
   min-height: 100%;
-  background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.95), rgba(246, 246, 246, 0.98)),
-    linear-gradient(180deg, #f8f8f8 0%, #ffffff 100%);
+  background: var(--surface-app);
 }
 
 .customer-map-view-topbar {
@@ -12,13 +10,13 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.7rem 1rem;
-  border-bottom: 1px solid #d5dbe3;
-  background: linear-gradient(180deg, #f8f8f8 0%, #f0f0f0 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .customer-map-view-topbar h1 {
   margin: 0;
-  color: #343434;
+  color: var(--text-primary);
   font-size: 1rem;
   font-weight: 700;
 }
@@ -32,7 +30,7 @@
 .customer-map-view-plot-btn {
   border: none;
   background: transparent;
-  color: #2f8fca;
+  color: var(--text-primary);
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
@@ -42,9 +40,9 @@
 .customer-map-view-mode-select {
   min-width: 124px;
   min-height: 2.2rem;
-  border: 1px solid #c7cfda;
-  background: #ffffff;
-  color: #3b3b3b;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-size: 0.82rem;
   padding: 0 0.8rem;
 }
@@ -56,12 +54,12 @@
   gap: 1rem;
   margin: 0.95rem 1rem 0;
   padding: 0.6rem 0.8rem;
-  border: 1px solid #4bb2ea;
+  border: 1px solid var(--border-subtle);
   background: linear-gradient(180deg, rgba(234, 247, 255, 0.95) 0%, rgba(228, 244, 255, 0.88) 100%);
 }
 
 .customer-map-view-summary-item {
-  color: #49a1dd;
+  color: var(--text-primary);
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -78,8 +76,8 @@
 .customer-map-view-map-frame {
   position: relative;
   min-height: 635px;
-  border: 1px solid #cfd6df;
-  background: #d9e3ea;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-muted);
   overflow: hidden;
 }
 
@@ -113,9 +111,9 @@
   justify-content: center;
   width: 0.9rem;
   height: 0.9rem;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--border-subtle);
   border-radius: 999px;
-  background: #ff6f48;
+  background: var(--surface-card);
   box-shadow: 0 0 0 3px rgba(255, 111, 72, 0.18);
   color: #ffffff;
   font-size: 0.6rem;

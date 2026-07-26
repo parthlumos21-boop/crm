@@ -85,6 +85,7 @@ const AddDocumentModal = ({
   onFileChange,
   onClose,
   onAdd,
+  errors,
 }) => (
   <div className="db-modal-overlay" onClick={onClose}>
     <div className="db-modal db-modal--large" onClick={(event) => event.stopPropagation()}>
@@ -117,18 +118,21 @@ const AddDocumentModal = ({
         <div className="db-modal-panel">
           <div className="db-form-row">
             <label className="db-form-label" htmlFor="db-document-type">Document Type</label>
-            <select
-              id="db-document-type"
-              value={form.documentType}
-              onChange={(event) => onChange('documentType', event.target.value)}
-              className="db-select-input"
-            >
-              {DOCUMENT_TYPE_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+            <div>
+              <select
+                id="db-document-type"
+                value={form.documentType}
+                onChange={(event) => onChange('documentType', event.target.value)}
+                className="db-select-input"
+              >
+                {DOCUMENT_TYPE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              {errors?.documentType && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>{errors.documentType}</div>}
+            </div>
           </div>
 
           <div className="db-form-row">
@@ -136,30 +140,37 @@ const AddDocumentModal = ({
               <span>Folder</span>
               <FaInfoCircle className="db-form-info-icon" />
             </label>
-            <select
-              id="db-document-folder"
-              value={form.folder}
-              onChange={(event) => onChange('folder', event.target.value)}
-              className="db-select-input"
-            >
-              {folders.map((folder) => (
-                <option key={folder} value={folder}>
-                  {folder}
-                </option>
-              ))}
-            </select>
+            <div>
+              <select
+                id="db-document-folder"
+                value={form.folder}
+                onChange={(event) => onChange('folder', event.target.value)}
+                className="db-select-input"
+              >
+                <option value="">Select Folder</option>
+                {folders.map((folder) => (
+                  <option key={folder} value={folder}>
+                    {folder}
+                  </option>
+                ))}
+              </select>
+              {errors?.folder && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>{errors.folder}</div>}
+            </div>
           </div>
 
           <div className="db-form-row">
             <label className="db-form-label" htmlFor="db-document-name">Document Name</label>
-            <input
-              id="db-document-name"
-              type="text"
-              value={form.documentName}
-              onChange={(event) => onChange('documentName', event.target.value)}
-              className="db-text-input"
-              placeholder="Enter Document Name"
-            />
+            <div>
+              <input
+                id="db-document-name"
+                type="text"
+                value={form.documentName}
+                onChange={(event) => onChange('documentName', event.target.value)}
+                className="db-text-input"
+                placeholder="Enter Document Name"
+              />
+              {errors?.documentName && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>{errors.documentName}</div>}
+            </div>
           </div>
 
           <div className="db-form-row">
@@ -207,17 +218,20 @@ const AddDocumentModal = ({
 
           <div className="db-form-row">
             <label className="db-form-label" htmlFor="db-file-input">File</label>
-            <div className="db-file-picker">
-              <div className="db-file-display">{form.file ? form.file.name : ''}</div>
-              <label className="db-file-button" htmlFor="db-file-input">
-                Choose file
-              </label>
-              <input
-                id="db-file-input"
-                type="file"
-                onChange={(event) => onFileChange(event.target.files?.[0] || null)}
-                className="db-file-input"
-              />
+            <div>
+              <div className="db-file-picker">
+                <div className="db-file-display">{form.file ? form.file.name : 'No file chosen'}</div>
+                <label className="db-file-button" htmlFor="db-file-input">
+                  Choose file
+                </label>
+                <input
+                  id="db-file-input"
+                  type="file"
+                  onChange={(event) => onFileChange(event.target.files?.[0] || null)}
+                  className="db-file-input"
+                />
+              </div>
+              {errors?.file && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '4px' }}>{errors.file}</div>}
             </div>
           </div>
         </div>
@@ -253,6 +267,7 @@ const DocumentBasePage = ({ basePath = '/admin/data-manager' }) => {
     description: '',
     file: null,
   })
+  const [formErrors, setFormErrors] = useState({})
 
   const filteredDocuments = useMemo(() => {
     return documents.filter((document) => {
@@ -284,6 +299,7 @@ const DocumentBasePage = ({ basePath = '/admin/data-manager' }) => {
       description: '',
       file: null,
     })
+    setFormErrors({})
   }
 
   const handleOpenFolderModal = () => {
@@ -321,10 +337,26 @@ const DocumentBasePage = ({ basePath = '/admin/data-manager' }) => {
       ...currentForm,
       [field]: value,
     }))
+    setFormErrors((current) => ({ ...current, [field]: undefined }))
   }
 
   const handleAddDocument = () => {
-    if (!documentForm.documentName.trim() || !documentForm.file) {
+    const errors = {}
+    if (documentForm.documentType === 'Select a document type') {
+      errors.documentType = 'Please select document type'
+    }
+    if (!documentForm.folder) {
+      errors.folder = 'Please enter the folder name'
+    }
+    if (!documentForm.documentName.trim()) {
+      errors.documentName = 'Please provide document name'
+    }
+    if (!documentForm.file) {
+      errors.file = 'Please select a file to upload'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
       return
     }
 
@@ -432,6 +464,7 @@ const DocumentBasePage = ({ basePath = '/admin/data-manager' }) => {
         <AddDocumentModal
           folders={orderedFolders}
           form={documentForm}
+          errors={formErrors}
           onChange={handleDocumentFieldChange}
           onFileChange={(file) => handleDocumentFieldChange('file', file)}
           onClose={() => setDocumentModalOpen(false)}

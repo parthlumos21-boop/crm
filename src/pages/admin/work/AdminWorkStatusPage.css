@@ -45,7 +45,7 @@
   padding: 16px 18px;
   border: 1px solid var(--border-color);
   border-radius: 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  background: var(--surface-app);
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
 }
 
@@ -85,8 +85,8 @@
   min-height: 32px;
   padding: 0 0.8rem;
   border-radius: 999px;
-  background: #eef6fc;
-  color: #476277;
+  background: var(--surface-muted);
+  color: var(--text-primary);
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--text-secondary);

@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import { getVisibleAccountStages } from '../adminAccounts/config/accountStages'
+import { getCrmOwnerDisplay } from '../users/crmUserDirectory'
 
 const titleize = (value = '') =>
   String(value || '')
@@ -11,7 +12,7 @@ const titleize = (value = '') =>
 const toSortedUniqueValues = (values = []) => (
   Array.from(new Set(
     values
-      .map((value) => String(value || '').trim())
+      .map((value) => getCrmOwnerDisplay(value) || String(value || '').trim())
       .filter(Boolean)
   )).sort((left, right) => left.localeCompare(right))
 )

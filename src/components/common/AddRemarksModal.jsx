@@ -81,6 +81,11 @@ const getAccountNumber = (accountData) => (
   accountData?.accountNumber || accountData?.account_number || accountData?.id || 'N/A'
 )
 
+const getDisplayValue = (...values) => {
+  const value = values.find((entry) => String(entry || '').trim())
+  return String(value || 'Not Available').trim()
+}
+
 const getAccountOwnerId = (accountData) => (
   accountData?.assignedUserId || accountData?.ownerId || accountData?.assigned_to || accountData?.assignedTo || ''
 )
@@ -126,11 +131,16 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
   const fallbackAssignedUser = availableUsers[0]?.id || ownerId || ''
   const selectedAssignedUser = assignedTo === 'owner' ? ownerId || fallbackAssignedUser : otherUserId
 
+  const [initialSelectDone, setInitialSelectDone] = useState(false)
+
   useEffect(() => {
-    if (isOpen && selectedAssignmentUserIds.length === 0 && allUserIds.length > 0) {
+    if (isOpen && !initialSelectDone && allUserIds.length > 0) {
       setSelectedAssignmentUserIds(allUserIds)
+      setInitialSelectDone(true)
+    } else if (!isOpen) {
+      setInitialSelectDone(false)
     }
-  }, [allUserIds, isOpen, selectedAssignmentUserIds.length])
+  }, [allUserIds, isOpen, initialSelectDone])
 
   const getExpandedAssignmentUserIds = () => {
     if (assignmentMode === 'type') {
@@ -146,6 +156,19 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
     }
 
     return selectedAssignmentUserIds
+  }
+
+  const getExpandedAssignmentUsers = (userIds = []) => {
+    const selectedIds = new Set(userIds.map((userId) => String(userId)))
+    return assignmentUsers
+      .filter((user) => selectedIds.has(String(user.id)))
+      .map((user) => ({
+        id: String(user.id),
+        name: getDisplayUserName(user),
+        ownerCode: user.ownerCode || '',
+        username: user.username || '',
+        email: user.email || '',
+      }))
   }
 
   const handleSubmit = (e) => {
@@ -172,6 +195,7 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
     }
 
     const expandedAssignmentUserIds = getExpandedAssignmentUserIds()
+    const expandedAssignmentUsers = getExpandedAssignmentUsers(expandedAssignmentUserIds)
 
     if (expandedAssignmentUserIds.length === 0) {
       alert('Please select at least one assignment user, type, or group')
@@ -196,6 +220,8 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
         status: reminderStatus,
         followupType,
         assignedTo: selectedAssignedUser,
+        assignedUserIds: expandedAssignmentUserIds,
+        assignedUsers: expandedAssignmentUsers,
         note: reminderNote,
         closeOldReminders
       } : null
@@ -315,6 +341,26 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
               <span className="label">Account No.:</span>
               <span className="value">{getAccountNumber(accountData)}</span>
             </div>
+            <div className="info-item">
+              <span className="label">Industry:</span>
+              <span className="value">{getDisplayValue(accountData?.industryType, accountData?.industry)}</span>
+            </div>
+            <div className="info-item">
+              <span className="label">Account Type:</span>
+              <span className="value">{getDisplayValue(accountData?.accountCategory, accountData?.accountType, accountData?.customerType)}</span>
+            </div>
+            <div className="info-item">
+              <span className="label">Source:</span>
+              <span className="value">{getDisplayValue(accountData?.accountSource, accountData?.source, accountData?.dealSource)}</span>
+            </div>
+            <div className="info-item">
+              <span className="label">Status:</span>
+              <span className="value">{getDisplayValue(accountData?.status, accountData?.accountStatus, accountData?.dealStatus)}</span>
+            </div>
+            <div className="info-item">
+              <span className="label">Stage:</span>
+              <span className="value">{getDisplayValue(accountData?.stageLabel, accountData?.stage)}</span>
+            </div>
           </div>
         </div>
 
@@ -373,7 +419,7 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
               <>
                 <label className="assignment-checkbox-option assignment-checkbox-option-strong">
                   <input type="checkbox" checked={allUsersSelected} onChange={toggleAllAssignmentUsers} />
-                  <span>Check All</span>
+                  <span>Select All</span>
                 </label>
 
                 {renderUserGrid(assignmentUsers)}

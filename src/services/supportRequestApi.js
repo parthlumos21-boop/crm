@@ -3,7 +3,7 @@ import apiClient from './apiClient'
 const buildAutoSupportRequestNumber = (value) => {
   const parsedValue = Number.parseInt(String(value || '').replace(/\D/g, ''), 10)
   if (!Number.isFinite(parsedValue) || parsedValue <= 0) return ''
-  return `SR${String(parsedValue).padStart(5, '0')}`
+  return `SR${String(parsedValue).padStart(6, '0')}`
 }
 
 const normalizeSupportRequestRecord = (sr = {}) => {

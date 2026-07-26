@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #f8fafb 100%);
+  background: var(--surface-app);
   padding: 2rem 1rem;
 }
 
@@ -17,14 +17,14 @@
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .dm-subtitle {
   margin: 0;
   font-size: 0.95rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* ── Container ───────────────────────────────────────────– */
@@ -43,8 +43,8 @@
 
 /* ── Card component ──────────────────────────────────────– */
 .dm-card {
-  background: white;
-  border: 1px solid #e5e9f0;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   overflow: hidden;
   transition: all 0.3s ease;
@@ -57,7 +57,7 @@
 
 .dm-card:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  border-color: #1a5faa;
+  border-color: var(--text-primary);
   transform: translateY(-4px);
 }
 
@@ -78,23 +78,23 @@
 }
 
 .dm-card:nth-child(1) .dm-card-icon {
-  background: #fff3e0;
+  background: var(--surface-card);
   color: #f57c00;
 }
 
 .dm-card:nth-child(2) .dm-card-icon {
-  background: #e3f2fd;
+  background: var(--surface-muted);
   color: var(--color-primary);
 }
 
 .dm-card:nth-child(3) .dm-card-icon {
-  background: #e8f5e9;
-  color: #388e3c;
+  background: var(--surface-muted);
+  color: var(--text-primary);
 }
 
 .dm-card:nth-child(4) .dm-card-icon {
-  background: #f3e5f5;
-  color: #7b1fa2;
+  background: var(--surface-card);
+  color: var(--text-primary);
 }
 
 .dm-card:hover .dm-card-icon {
@@ -110,13 +110,13 @@
   margin: 0 0 0.5rem;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .dm-card-description {
   margin: 0;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -141,7 +141,7 @@
 }
 
 .dm-modal {
-  background: white;
+  background: var(--surface-card);
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   max-width: 500px;
@@ -174,7 +174,7 @@
   margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
 }
 
 .dm-modal-close {
@@ -193,8 +193,8 @@
 }
 
 .dm-modal-close:hover {
-  background: #f5f7fa;
-  color: #1a1a1a;
+  background: var(--surface-card);
+  color: var(--text-primary);
 }
 
 .dm-modal-body {
@@ -215,33 +215,33 @@
   align-items: center;
   justify-content: center;
   padding: 3rem 1.5rem;
-  border: 2px dashed #b8d8ec;
+  border: 2px dashed var(--border-subtle);
   border-radius: var(--radius-md);
-  background: #f8fbff;
+  background: var(--surface-card);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .dm-upload-label:hover {
-  border-color: #1a5faa;
-  background: #f0f8ff;
+  border-color: var(--text-primary);
+  background: var(--surface-card);
 }
 
 .dm-file-input:focus + .dm-upload-label {
-  border-color: #1a5faa;
+  border-color: var(--text-primary);
   box-shadow: 0 0 0 3px rgba(26, 95, 170, 0.1);
 }
 
 .dm-upload-icon {
   font-size: 2.5rem;
-  color: #1a5faa;
+  color: var(--text-primary);
   margin-bottom: 0.8rem;
 }
 
 .dm-upload-text {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--text-primary);
   text-align: center;
 }
 
@@ -258,7 +258,7 @@
   justify-content: flex-end;
   padding: 1.5rem;
   border-top: 1px solid var(--surface-app);
-  background: #fafbfc;
+  background: var(--surface-card);
 }
 
 /* ── Buttons ─────────────────────────────────────────────– */
@@ -289,14 +289,14 @@
 }
 
 .dm-btn-secondary {
-  background: white;
-  color: #666;
-  border: 1px solid #e5e9f0;
+  background: var(--surface-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
 }
 
 .dm-btn-secondary:hover {
-  background: #f5f7fa;
-  border-color: #d0d8e0;
+  background: var(--surface-card);
+  border-color:  var(--border-subtle);
 }
 
 /* ── Toast notification ──────────────────────────────────– */
@@ -325,21 +325,21 @@
 }
 
 .dm-toast--success {
-  background: #d4edda;
-  color: #155724;
-  border-left: 4px solid #28a745;
+  background: var(--surface-muted);
+  color: var(--text-primary);
+  border-left: 4px solid var(--border-subtle);
 }
 
 .dm-toast--error {
-  background: #f8d7da;
-  color: #721c24;
-  border-left: 4px solid #dc3545;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border-left: 4px solid var(--border-subtle);
 }
 
 .dm-toast--info {
-  background: #d1ecf1;
-  color: #0c5460;
-  border-left: 4px solid #17a2b8;
+  background: var(--surface-muted);
+  color: var(--text-primary);
+  border-left: 4px solid var(--border-subtle);
 }
 
 /* ── Responsive design ───────────────────────────────────– */

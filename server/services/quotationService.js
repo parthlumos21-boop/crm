@@ -1,8 +1,9 @@
 const quotationRepository = require('../repositories/quotationRepository')
 const { createCrudService } = require('./crudServiceFactory')
 const { AppError } = require('../utils/appError')
+const { getNextCounterSequence } = require('../models/mongoModels')
 
-const DEFAULT_QUOTATION_NUMBER_START = 30182
+const DEFAULT_QUOTATION_NUMBER_START = 1001
 
 const computeTotals = (lineItems = []) => {
   let total = 0
@@ -26,7 +27,53 @@ const parseQuotationNumber = (quotationNumber = '') => {
 
 const buildQuotationNumber = (sequence, referenceDate) => {
   const year = new Date(referenceDate || Date.now()).getFullYear()
-  return `SSIPL/${year}/${String(sequence).padStart(5, '0')}`
+  return `SSIPL/${year}/${String(sequence).padStart(4, '0')}`
+}
+
+const getQuotationSequenceMonth = (referenceDate) => {
+  const date = new Date(referenceDate || Date.now())
+  const validDate = Number.isNaN(date.getTime()) ? new Date() : date
+  const year = validDate.getFullYear()
+  const month = String(validDate.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
+}
+
+const isUploadQuotationPayload = (body = {}) => Boolean(
+  body.quoteFile
+  || body.quoteFileName
+  || body.quotationFileName
+  || body.uploadedQuotationFileName
+)
+
+const isInSequenceWindow = (sequence) => (
+  Number.isFinite(sequence)
+  && sequence >= DEFAULT_QUOTATION_NUMBER_START
+  && sequence < 10000
+)
+
+const getRecordSequenceMonth = (record = {}) => (
+  record.quotationSequenceMonth
+  || record.data?.quotationSequenceMonth
+  || getQuotationSequenceMonth(record.quotationDate || record.data?.quotationDate || record.createdAt)
+)
+
+const getNextQuotationSequenceForMonth = (records = [], sequenceMonth) => {
+  const maxSequence = records.reduce((currentMax, record) => {
+    if (getRecordSequenceMonth(record) !== sequenceMonth) return currentMax
+
+    const parsedValue = parseQuotationNumber(
+      record?.quoteNumber
+      || record?.quotationNumber
+      || record?.data?.quoteNumber
+      || record?.data?.quotationNumber
+    )
+
+    return isInSequenceWindow(parsedValue)
+      ? Math.max(currentMax, parsedValue)
+      : currentMax
+  }, DEFAULT_QUOTATION_NUMBER_START - 1)
+
+  return maxSequence + 1
 }
 
 const parseJsonValue = (value) => {
@@ -85,8 +132,11 @@ const normalizeLineItems = (lineItems = []) => (
     .filter(Boolean)
 )
 
-const getNextQuotationSequence = (records = []) => {
+const getNextQuotationSequence = (records = [], referenceDate) => {
+  const sequenceMonth = getQuotationSequenceMonth(referenceDate)
   const maxSequence = records.reduce((currentMax, record) => {
+    if (getRecordSequenceMonth(record) !== sequenceMonth) return currentMax
+
     const parsedValue = parseQuotationNumber(
       record?.quoteNumber
       || record?.quotationNumber
@@ -94,7 +144,7 @@ const getNextQuotationSequence = (records = []) => {
       || record?.data?.quotationNumber
     )
 
-    return Number.isFinite(parsedValue)
+    return isInSequenceWindow(parsedValue)
       ? Math.max(currentMax, parsedValue)
       : currentMax
   }, DEFAULT_QUOTATION_NUMBER_START - 1)
@@ -104,9 +154,16 @@ const getNextQuotationSequence = (records = []) => {
 
 const resolveQuoteNumber = async (body, existing, actor) => {
   const requestedQuoteNumber = String(body.quoteNumber || body.quotationNumber || '').trim()
+  const referenceDate = body.quotationDate || body.createdAt || existing?.quotationDate || existing?.createdAt
+  const quotationSequenceMonth = getQuotationSequenceMonth(referenceDate)
 
   if (existing) {
-    return requestedQuoteNumber || existing.quoteNumber || existing.data?.quotationNumber || buildQuotationNumber(DEFAULT_QUOTATION_NUMBER_START)
+    const retainedQuoteNumber = requestedQuoteNumber || existing.quoteNumber || existing.data?.quotationNumber || buildQuotationNumber(DEFAULT_QUOTATION_NUMBER_START, referenceDate)
+    return {
+      quoteNumber: retainedQuoteNumber,
+      quotationSequenceMonth: existing.quotationSequenceMonth || existing.data?.quotationSequenceMonth || quotationSequenceMonth,
+      quotationSequence: existing.quotationSequence || existing.data?.quotationSequence || parseQuotationNumber(retainedQuoteNumber),
+    }
   }
 
   const existingRecords = quotationRepository.listForActor
@@ -118,14 +175,24 @@ const resolveQuoteNumber = async (body, existing, actor) => {
       .filter(Boolean)
   )
 
-  if (requestedQuoteNumber && !existingNumbers.has(requestedQuoteNumber)) {
-    return requestedQuoteNumber
+  if (requestedQuoteNumber && isUploadQuotationPayload(body) && !existingNumbers.has(requestedQuoteNumber)) {
+    return {
+      quoteNumber: requestedQuoteNumber,
+      quotationSequenceMonth,
+      quotationSequence: parseQuotationNumber(requestedQuoteNumber),
+    }
   }
 
-  return buildQuotationNumber(
-    getNextQuotationSequence(existingRecords),
-    body.quotationDate || body.createdAt
-  )
+  const counterKey = `quotations:${actor.companyId || 'default'}:${quotationSequenceMonth}`
+  const minimumSequence = getNextQuotationSequenceForMonth(existingRecords, quotationSequenceMonth) - 1
+  const quotationSequence = await getNextCounterSequence(counterKey, minimumSequence)
+  const quoteNumber = buildQuotationNumber(quotationSequence, referenceDate)
+
+  return {
+    quoteNumber,
+    quotationSequence,
+    quotationSequenceMonth,
+  }
 }
 
 // ── Duplicate detection ────────────────────────────────────────────────
@@ -237,7 +304,11 @@ const buildPayload = async (body, actor, existing) => {
     }
   }
 
-  const quoteNumber = await resolveQuoteNumber(body, existing, actor)
+  const {
+    quoteNumber,
+    quotationSequence,
+    quotationSequenceMonth,
+  } = await resolveQuoteNumber(body, existing, actor)
   const customerName = body.customerName
     ?? body.companyName
     ?? body.clientName
@@ -256,6 +327,9 @@ const buildPayload = async (body, actor, existing) => {
 
   return {
     quoteNumber,
+    quotationNumber: quoteNumber,
+    quotationSequence,
+    quotationSequenceMonth,
     title: body.title ?? body.quotationSubject ?? body.projectName ?? existing?.title ?? 'Quotation',
     customerName,
     customerId,
@@ -275,6 +349,8 @@ const buildPayload = async (body, actor, existing) => {
       ...body,
       quoteNumber,
       quotationNumber: quoteNumber,
+      quotationSequence,
+      quotationSequenceMonth,
       customerName,
       customerId,
       amount: totalAmount,

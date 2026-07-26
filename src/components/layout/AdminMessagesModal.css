@@ -9,7 +9,7 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  color: #2c3e50;
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 
@@ -25,8 +25,8 @@
 }
 
 .admin-messages-recipient-box {
-  border: 1px solid #53aaf5;
-  background: linear-gradient(180deg, #f7fbff 0%, #e7f3fd 100%);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-app);
   padding: 0.9rem 1rem 1rem;
   min-height: 12rem;
 }
@@ -35,7 +35,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  color: #2878b8;
+  color: var(--text-primary);
   font-weight: 600;
   cursor: pointer;
 }
@@ -52,7 +52,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.55rem;
-  color: #243746;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
@@ -63,8 +63,8 @@
 }
 
 .admin-messages-group-option {
-  border: 1px solid #c8dff4;
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
   border-radius: 0.35rem;
   padding: 0.8rem;
 }
@@ -76,7 +76,7 @@
 
 .admin-messages-group-count {
   margin-top: 0.2rem;
-  color: #5d6d7e;
+  color: var(--text-primary);
   font-size: 0.82rem;
 }
 
@@ -88,16 +88,16 @@
   width: 100%;
   min-height: 6.5rem;
   resize: vertical;
-  border: 1px solid #cfdbe7;
+  border: 1px solid var(--border-subtle);
   border-radius: 0.15rem;
   padding: 0.8rem 0.9rem;
   font: inherit;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .admin-messages-textarea:focus {
   outline: none;
-  border-color: #53aaf5;
+  border-color: var(--text-primary);
   box-shadow: 0 0 0 2px rgba(83, 170, 245, 0.14);
 }
 

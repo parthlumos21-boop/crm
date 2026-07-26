@@ -94,9 +94,22 @@ class AuthService {
       )
     })
 
-    return Array.from(usersByName.values())
+    const uniqueUsers = new Map()
+
+    Array.from(usersByName.values())
       .filter((user) => user.id && !isHiddenFilterUser(user))
-      .sort((left, right) => String(left.name || '').localeCompare(String(right.name || '')))
+      .forEach((user) => {
+        const ownerKey = user.ownerCode
+          ? `code:${user.ownerCode}`
+          : `name:${normalizeCrmUserName(user.ownerDisplayName || user.name || user.username || user.email)}`
+        const existingUser = uniqueUsers.get(ownerKey)
+        if (!existingUser || String(existingUser.id || '').startsWith('crm-')) {
+          uniqueUsers.set(ownerKey, user)
+        }
+      })
+
+    return Array.from(uniqueUsers.values())
+      .sort((left, right) => String(left.ownerDisplayName || left.name || '').localeCompare(String(right.ownerDisplayName || right.name || '')))
   }
 
   saveAvailableUsers(users = []) {

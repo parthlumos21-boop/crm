@@ -65,7 +65,7 @@
   content: '';
   position: absolute;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-card);
   pointer-events: none;
 }
 
@@ -124,7 +124,7 @@
   padding: 0.4rem 0.85rem;
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--surface-card);
   color: rgba(255, 255, 255, 0.92);
   font-size: 0.72rem;
   font-weight: 800;
@@ -375,7 +375,7 @@
   padding: 0 0.55rem;
   border-radius: 9999px;
   background: rgba(22, 93, 255, 0.12);
-  color: #1357cb;
+  color: var(--text-primary);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -493,7 +493,7 @@
   width: 110px;
   height: 110px;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgba(91, 167, 255, 0.16), rgba(91, 167, 255, 0) 72%);
+  background: var(--surface-app);
 }
 
 .sales-dashboard .sales-stat-card:hover {
@@ -521,7 +521,7 @@
 
 .sales-dashboard .stat-icon-blue {
   background: linear-gradient(180deg, #eaf2ff 0%, #d8e7ff 100%);
-  color: #1357cb;
+  color: var(--text-primary);
 }
 
 .sales-dashboard .stat-icon-green {
@@ -530,13 +530,13 @@
 }
 
 .sales-dashboard .stat-icon-red {
-  background: linear-gradient(180deg, #fff1f1 0%, #ffe0e0 100%);
+  background: var(--surface-app);
   color: var(--color-danger);
 }
 
 .sales-dashboard .stat-icon-purple {
-  background: linear-gradient(180deg, #f0ebff 0%, #e4dbff 100%);
-  color: #6b46c1;
+  background: var(--surface-app);
+  color: var(--text-primary);
 }
 
 .sales-dashboard .stat-details {
@@ -563,6 +563,15 @@
   font-size: 0.76rem;
   font-weight: 600;
   color: var(--text-muted);
+}
+
+.sales-dashboard .sales-chart-card {
+  margin-bottom: 20px;
+}
+
+.sales-dashboard .sales-chart-wrapper {
+  height: 350px;
+  padding: 10px 20px 20px;
 }
 
 .sales-dashboard .sales-content-grid {
@@ -626,7 +635,7 @@
   padding: 0.3rem 0.78rem;
   border: 1px solid rgba(207, 217, 232, 0.94);
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--surface-card);
   color: var(--text-muted);
   font-size: 0.76rem;
   font-weight: 700;
@@ -640,7 +649,7 @@
   padding: 0 0.95rem;
   border: 1px solid rgba(22, 93, 255, 0.12);
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--surface-card);
   color: var(--color-primary);
   font-size: 0.8rem;
   font-weight: 700;
@@ -688,7 +697,7 @@
   margin-top: 0.55rem;
   border: 1px solid rgba(227, 234, 243, 0.92);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--surface-card);
   transition:
     transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
@@ -748,7 +757,7 @@
   padding: 1rem;
   border: 1px solid rgba(226, 234, 243, 0.92);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--surface-card);
 }
 
 .sales-dashboard .stage-info {
@@ -800,7 +809,7 @@
   padding: 1rem 1.05rem;
   border: 1px solid rgba(226, 234, 243, 0.92);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--surface-card);
   transition:
     transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
@@ -922,7 +931,7 @@
 }
 
 .sales-dashboard .action-btn-secondary {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--surface-card);
   border-color: rgba(198, 210, 227, 0.92);
   color: var(--color-primary-strong);
   box-shadow: var(--shadow-sm);

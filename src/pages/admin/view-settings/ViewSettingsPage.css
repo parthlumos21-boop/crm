@@ -16,8 +16,8 @@
 /* ── Top bar ────────────────────────────────────────────── */
 .vs-topbar {
   padding: 0.75rem 1.4rem;
-  background: #ffffff;
-  border-bottom: 1px solid #d5dbe3;
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
   position: sticky;
   top: 0;
@@ -28,7 +28,7 @@
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
-  color: #2c2c2c;
+  color: var(--text-primary);
 }
 
 /* ── Card grid ──────────────────────────────────────────── */
@@ -42,8 +42,8 @@
 
 /* ── Individual card ────────────────────────────────────── */
 .vs-card {
-  background: #ffffff;
-  border: 1px solid #d8e2ec;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 3px;
   padding: 1.4rem 1rem;
   text-align: left;
@@ -57,7 +57,7 @@
 
 .vs-card:hover {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  border-color: #b0c8de;
+  border-color: var(--border-subtle);
 }
 
 .vs-card-header {
@@ -75,7 +75,7 @@
 .vs-card-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #1a2a3a;
+  color: var(--text-primary);
   line-height: 1.3;
 }
 

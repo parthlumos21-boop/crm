@@ -20,6 +20,9 @@ const toLegacyUser = (record) => {
     authTokenVersion: record.authTokenVersion ?? record.auth_token_version ?? 0,
     email: record.email,
     role: record.role,
+    actualRole: record.actualRole ?? record.actual_role ?? record.role,
+    userRoleMode: record.userRoleMode ?? record.user_role_mode ?? '',
+    canActAsUser: Boolean(record.canActAsUser ?? record.can_act_as_user ?? false),
     company_id: record.companyId ?? record.company_id ?? 1,
     companyId: record.companyId ?? record.company_id ?? 1,
     status: record.status,
@@ -29,6 +32,7 @@ const toLegacyUser = (record) => {
     isOnline: record.isOnline ?? record.is_online ?? false,
     password_hash: record.passwordHash ?? record.password_hash,
     passwordHash: record.passwordHash ?? record.password_hash,
+    assignedPassword: record.assignedPassword ?? record.assigned_password ?? '',
     created_at: record.createdAt,
     createdAt: record.createdAt,
   }
@@ -46,10 +50,14 @@ const sanitizeUserRow = (row) => {
     authTokenVersion: user.authTokenVersion,
     email: user.email,
     role: user.role,
+    actualRole: user.actualRole,
+    userRoleMode: user.userRoleMode,
+    canActAsUser: user.canActAsUser,
     companyId: user.companyId,
     status: user.status,
     isApproved: user.isApproved,
     isOnline: user.isOnline,
+    assignedPassword: user.assignedPassword,
     createdAt: user.createdAt,
   }
 }
@@ -66,10 +74,16 @@ const sanitizeSession = (session = {}) => ({
 
 const findUserByLogin = async (loginValue) => {
   const normalizedLogin = String(loginValue || '').trim().toLowerCase()
+  const escapedLogin = normalizedLogin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const normalizedName = normalizedLogin.replace(/[^a-z0-9]+/g, ' ').trim()
+  const namePattern = normalizedName
+    ? new RegExp(`^${normalizedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')}$`, 'i')
+    : null
   const record = await User.findOne({
     $or: [
-      { username: new RegExp(`^${normalizedLogin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-      { email: new RegExp(`^${normalizedLogin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+      { username: new RegExp(`^${escapedLogin}$`, 'i') },
+      { email: new RegExp(`^${escapedLogin}$`, 'i') },
+      ...(namePattern ? [{ name: namePattern }] : []),
     ],
   }).lean()
 
@@ -147,6 +161,7 @@ const saveRefreshTokenHash = async (userId, refreshTokenHash, refreshTokenExpire
     deviceName: session.deviceName || 'Unknown device',
     browser: session.browser || 'Unknown browser',
     ipAddress: session.ipAddress || '',
+    portalRole: session.portalRole || '',
     loginTime: session.loginTime || new Date(),
     lastActivity: session.lastActivity || new Date(),
     expiresAt: refreshTokenExpiresAt,
@@ -307,7 +322,7 @@ const updateUserStatus = async (userId, status) => {
   return sanitizeUserRow(record)
 }
 
-const createUser = async ({ username, name, email, passwordHash, role, companyId = 1, status = 'pending', isApproved = false }) => {
+const createUser = async ({ username, name, email, passwordHash, assignedPassword = '', role, companyId = 1, status = 'pending', isApproved = false }) => {
   const legacyId = await getNextLegacyId('users')
   const record = await User.create({
     legacyId,
@@ -315,6 +330,7 @@ const createUser = async ({ username, name, email, passwordHash, role, companyId
     name,
     email,
     passwordHash,
+    assignedPassword,
     role,
     companyId,
     status,
@@ -326,9 +342,78 @@ const createUser = async ({ username, name, email, passwordHash, role, companyId
   return sanitizeUserRow(record)
 }
 
-const updateUserDetails = async (userId, { name, email, passwordHash = null }) => {
+const upsertMicrosoftUser = async ({
+  microsoftUserId = '',
+  tenantId = '',
+  displayName = '',
+  email = '',
+  username = '',
+  profilePhoto = '',
+}) => {
+  const normalizedEmail = String(email || '').trim().toLowerCase()
+  if (!normalizedEmail) return null
+
+  const now = new Date()
+  const existing = await User.findOne({
+    $or: [
+      { email: new RegExp(`^${normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+      ...(microsoftUserId ? [{ microsoftUserId }] : []),
+    ],
+  }).lean()
+
+  if (existing) {
+    const record = await User.findOneAndUpdate(
+      { _id: existing._id },
+      {
+        $set: {
+          microsoftUserId,
+          microsoftTenantId: tenantId,
+          name: displayName || existing.name || normalizedEmail,
+          email: normalizedEmail,
+          username: existing.username || username || normalizedEmail.split('@')[0],
+          profilePhoto: profilePhoto || existing.profilePhoto || '',
+          outlookConnected: true,
+          lastLoginAt: now,
+          status: existing.status || 'approved',
+          isApproved: existing.isApproved ?? existing.is_approved ?? true,
+          updatedAt: now,
+        },
+      },
+      { new: true }
+    ).lean()
+    return sanitizeUserRow(record)
+  }
+
+  const legacyId = await getNextLegacyId('users')
+  const record = await User.create({
+    legacyId,
+    microsoftUserId,
+    microsoftTenantId: tenantId,
+    username: username || normalizedEmail.split('@')[0],
+    name: displayName || normalizedEmail,
+    email: normalizedEmail,
+    passwordHash: '',
+    assignedPassword: '',
+    role: 'user',
+    companyId: 1,
+    profilePhoto,
+    outlookConnected: true,
+    status: 'approved',
+    isApproved: true,
+    isOnline: false,
+    authTokenVersion: 0,
+    lastLoginAt: now,
+  })
+
+  return sanitizeUserRow(record)
+}
+
+const updateUserDetails = async (userId, { name, email, passwordHash = null, assignedPassword = null }) => {
   const updates = { name, email }
-  if (passwordHash) updates.passwordHash = passwordHash
+  if (passwordHash) {
+    updates.passwordHash = passwordHash
+    updates.assignedPassword = assignedPassword || ''
+  }
 
   const record = await User.findOneAndUpdate(byLegacyId(userId), { $set: updates }, { new: true }).lean()
   return sanitizeUserRow(record)
@@ -387,6 +472,7 @@ module.exports = {
   revokeRefreshSessionById,
   updateUserStatus,
   createUser,
+  upsertMicrosoftUser,
   updateUserDetails,
   deleteUser,
   findUsersByIds,

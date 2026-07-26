@@ -9,7 +9,7 @@
 .account-board-header-help {
   border: none;
   background: transparent;
-  color: #1d8ccc;
+  color: var(--text-primary);
   font-size: 0.92rem;
   cursor: pointer;
 }
@@ -42,7 +42,7 @@
 .account-board-header-btn-bulk {
   min-width: 12rem;
   padding: 0 0.8rem;
-  border-color: #1f6395;
+  border-color: var(--text-primary);
   background: linear-gradient(180deg, #3f89c8 0%, #2a6fab 100%);
   font-size: 0.82rem;
   font-weight: 700;
@@ -72,24 +72,36 @@
   font-size: 0.95rem;
 }
 
-.account-board-header-icon-btn-export,
+.account-board-header-export-dropdown {
+  flex: 0 0 auto;
+}
+
+.account-board-header-export-trigger {
+  min-width: 2.2rem;
+}
+
+.account-board-header-export-trigger .excel-export-button__label,
+.account-board-header-export-trigger .excel-export-button__chevron {
+  display: none;
+}
+
 .account-board-header-icon-btn-refresh {
-  border-color: #d48a17;
-  background: linear-gradient(180deg, #f4ab36 0%, #e6900d 100%);
+  border-color:  var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .account-board-header-icon-btn-filter {
-  border-color: #4ca94a;
+  border-color: var(--text-primary);
   background: linear-gradient(180deg, #66c45a 0%, #46a23d 100%);
 }
 
 .account-board-header-icon-btn-blue {
-  border-color: #1f6395;
+  border-color: var(--text-primary);
   background: linear-gradient(180deg, #3f89c8 0%, #2a6fab 100%);
 }
 
 .account-board-header-icon-btn-cyan {
-  border-color: #318eab;
+  border-color: var(--text-primary);
   background: linear-gradient(180deg, #52c0dc 0%, #2b92b4 100%);
 }
 
@@ -120,9 +132,9 @@
   min-width: 300px;
   max-width: min(380px, calc(100vw - 1.5rem));
   max-height: min(62vh, 360px);
-  border: 1px solid #d0d7e0;
+  border: 1px solid var(--border-subtle);
   border-radius: 0.6rem;
-  background: #ffffff;
+  background: var(--surface-card);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
   z-index: 75;
   overflow-x: hidden;
@@ -146,8 +158,8 @@
 
 .account-board-header-menu-summary {
   padding: 0.55rem 0.8rem;
-  border-bottom: 1px solid #edf2f7;
-  background: #f6f9fc;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-card);
   color: var(--text-muted);
   font-size: 0.74rem;
   font-weight: 600;
@@ -165,8 +177,8 @@
   width: 100%;
   padding: 0.75rem 0.8rem;
   border: none;
-  border-bottom: 1px solid #edf2f7;
-  background: #ffffff;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-card);
   color: var(--text-secondary);
   font-size: 0.82rem;
   text-align: left;
@@ -188,20 +200,20 @@
   height: 1.85rem;
   padding: 0.4rem;
   border-radius: 0.4rem;
-  background: #eaf3ff;
-  color: #1f6ea4;
+  background: var(--surface-muted);
+  color: var(--text-primary);
   font-size: 1rem;
 }
 
 .account-board-header-bulk-item:disabled .account-board-header-bulk-item-icon {
-  background: #f1f4f8;
+  background: var(--surface-card);
   color: #b6c2cf;
 }
 
 .account-board-header-bulk-item-label {
   flex: 1 1 auto;
   min-width: 0;
-  color: #1f3a5f;
+  color: var(--text-primary);
   font-size: 0.86rem;
   font-weight: 700;
   line-height: 1.25;
@@ -219,18 +231,18 @@
 
 .account-board-header-menu-item:hover:not(:disabled),
 .account-board-header-check-item:hover {
-  background: #f8fbff;
+  background: var(--surface-card);
   color: var(--color-primary-strong);
 }
 
 .account-board-header-check-item-active {
-  background: #eef6ff;
-  color: #1f6ea4;
+  background: var(--surface-muted);
+  color: var(--text-primary);
 }
 
 .account-board-header-menu-item:disabled {
   color: #b6c2cf;
-  background: #fbfcfd;
+  background: var(--surface-card);
   cursor: not-allowed;
 }
 
@@ -245,16 +257,16 @@
   justify-content: center;
   width: 1rem;
   height: 1rem;
-  border: 1px solid #c7d2de;
+  border: 1px solid var(--border-subtle);
   background: var(--surface-muted);
   color: #ffffff;
   font-size: 0.72rem;
 }
 
 .account-board-header-check-box-active {
-  background: #d9ebff;
-  border-color: #6aa8dd;
-  color: #166192;
+  background: var(--surface-muted);
+  border-color: var(--text-primary);
+  color: var(--text-primary);
 }
 
 .account-board-header-load-btn {

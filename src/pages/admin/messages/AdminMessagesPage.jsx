@@ -35,8 +35,8 @@ const AdminMessagesPage = () => {
   const rows = useMemo(() => messages.map((entry) => ({
     ...entry,
     sentOn: formatDateTime(entry.createdAt),
-    targetSummary: entry.targetNames.join(', '),
-    recipientSummary: entry.recipientUserNames.join(', '),
+    targetSummary: (entry.targetNames || entry.recipientUserNames || []).join(', '),
+    recipientSummary: (entry.recipientUserNames || entry.targetNames || []).join(', '),
   })), [messages])
 
   const columns = [

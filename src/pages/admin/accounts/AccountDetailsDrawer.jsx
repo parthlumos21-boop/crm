@@ -4,6 +4,7 @@ import {
   FaBell,
   FaEnvelope,
   FaExchangeAlt,
+  FaExternalLinkAlt,
   FaFileAlt,
   FaRegStickyNote,
   FaRegSun,
@@ -11,9 +12,6 @@ import {
 import {
   FiChevronDown,
   FiEdit2,
-  FiRefreshCw,
-  FiSave,
-  FiX,
 } from 'react-icons/fi'
 import { HiOutlineStatusOnline } from 'react-icons/hi'
 import Badge from '../../../components/common/Badge'
@@ -23,10 +21,24 @@ import { useData } from '../../../context/DataContext'
 import { buildAdminDealDetailUrl } from '../../../features/adminDeals/config/adminDealViews'
 import { useClickOutside } from '../../../hooks'
 import { ACCOUNT_ACTION_DROPDOWN_LABEL, ACCOUNT_DRAWER_ACTIONS } from '../../../features/adminAccounts/config/accountActions'
+import { ACCOUNT_CATEGORY_OPTIONS, ACCOUNT_SOURCE_OPTIONS, CUSTOMER_TYPE_OPTIONS, INDUSTRY_TYPE_OPTIONS } from '../../../features/accounts/config/accountDropdownOptions'
+import { ACCOUNT_STATE_OPTIONS, ACCOUNT_CHANGE_STATUS_OPTIONS } from '../../../features/adminAccounts/config/accountStages'
 import { buildAdminAccountActionUrl } from '../../../features/adminAccounts/utils/accountNavigation'
+import { getAccountOwnerOptionLabel, getCachedAccountOwnerOptions, loadAccountOwnerOptions } from '../../../features/adminAccounts/utils/accountOwnerOptions'
 import { formatCurrency, formatDate, getStatusColor } from '../../../utils/helpers'
 import AccountActionModal from './AccountActionModal'
 import './MyGroupAccounts.css'
+
+const HIDDEN_ACCOUNT_ACTION_STAGE_VALUES = new Set(['converted', 'closed', 'contacted', 'order_lost'])
+const ACCOUNT_INFORMATION_STAGE_OPTIONS = ACCOUNT_CHANGE_STATUS_OPTIONS
+  .filter((option) => !HIDDEN_ACCOUNT_ACTION_STAGE_VALUES.has(option.value))
+  .map((option) => ({
+    value: option.stageKey,
+    label: option.value === 'convert_to_po' ? 'PO Converted' : option.label,
+  }))
+const getAllowedAccountInformationStage = (value) => (
+  ACCOUNT_INFORMATION_STAGE_OPTIONS.some((option) => option.value === value) ? value : ''
+)
 
 const ACTION_ICONS = {
   'add-note-remarks': FaRegStickyNote,
@@ -35,6 +47,7 @@ const ACTION_ICONS = {
   'add-document': FaFileAlt,
   're-assign-account': FaExchangeAlt,
   'converted-deal': FaExchangeAlt,
+  'view-linked-deal': FaExternalLinkAlt,
   'send-mail': FaEnvelope,
   'manage-account': HiOutlineStatusOnline,
 }
@@ -42,86 +55,59 @@ const ACTION_ICONS = {
 const sectionConfig = [
   {
     key: 'account',
-    title: 'Account Information',
     fields: [
-      { key: 'accountNumber', label: 'Account No.', readOnly: true },
       { key: 'accountName', label: 'Account Name' },
-      { key: 'company', label: 'Company Name' },
-      { key: 'industry', label: 'Industry' },
-      { key: 'accountCategory', label: 'Account Type' },
-      { key: 'accountSource', label: 'Source' },
-      { key: 'status', label: 'Status' },
-      { key: 'stage', label: 'Stage' },
+      { key: 'mobile', label: 'Phone' },
+      { key: 'email', label: 'Email', type: 'email' },
+      { key: 'accountDate', label: 'Account Date', type: 'date' },
+      { key: 'addedBy', label: 'Added By' },
+      { key: 'lastUpdated', label: 'Last Updated', readOnly: true },
+      { key: 'accountCategory', label: 'Account Category', options: ACCOUNT_CATEGORY_OPTIONS },
+      { key: 'status', label: 'Account Status', options: ACCOUNT_STATE_OPTIONS.map((value) => ({ value, label: value })) },
+      { key: 'accountOwner', label: 'Account Owner' },
+      { key: 'accountState', label: 'Account State' },
+      { key: 'accountSource', label: 'Account Source', options: ACCOUNT_SOURCE_OPTIONS },
+      { key: 'changeStatus', label: 'Change Status', options: ACCOUNT_CHANGE_STATUS_OPTIONS },
+      { key: 'accountSubsource', label: 'Account Subsource' },
+      { key: 'gstin', label: 'GSTIN' },
+      { key: 'stateCode', label: 'State Code' },
     ],
   },
   {
     key: 'contact',
-    title: 'Contact Information',
     fields: [
       { key: 'contactPerson', label: 'Contact Person' },
-      { key: 'mobile', label: 'Mobile Number' },
-      { key: 'alternatePhone', label: 'Alternate Number' },
-      { key: 'email', label: 'Email', type: 'email' },
-      { key: 'website', label: 'Website' },
-    ],
-  },
-  {
-    key: 'address',
-    title: 'Address Information',
-    fields: [
-      { key: 'address', label: 'Address', multiline: true },
-      { key: 'city', label: 'City' },
-      { key: 'state', label: 'State' },
-      { key: 'country', label: 'Country' },
-      { key: 'pincode', label: 'Pincode' },
-    ],
-  },
-  {
-    key: 'project',
-    title: 'Project Information',
-    fields: [
-      { key: 'projectName', label: 'Project Name' },
-      { key: 'projectCode', label: 'Project Code' },
-      { key: 'projectType', label: 'Project Type' },
-      { key: 'projectLocation', label: 'Project Location' },
-      { key: 'consultantName', label: 'Consultant' },
-      { key: 'architectName', label: 'Architect' },
-      { key: 'pmcName', label: 'PMC' },
-      { key: 'projectValue', label: 'Project Value' },
-      { key: 'projectStatus', label: 'Project Status' },
-      { key: 'projectDescription', label: 'Project Description', multiline: true },
-    ],
-  },
-  {
-    key: 'followup',
-    title: 'Follow-up Information',
-    fields: [
-      { key: 'reminderDate', label: 'Reminder Date', type: 'date' },
-      { key: 'reminderMode', label: 'Reminder Mode' },
-      { key: 'latestRemark', label: 'Latest Remark', multiline: true },
-    ],
-  },
-  {
-    key: 'assignment',
-    title: 'Assignment Information',
-    fields: [
-      { key: 'accountOwner', label: 'Account Owner' },
-      { key: 'addedBy', label: 'Added By', readOnly: true },
-      { key: 'recordSource', label: 'Record Source', readOnly: true },
-    ],
-  },
-  {
-    key: 'notes',
-    title: 'Notes & Support Information',
-    fields: [
-      { key: 'remark', label: 'Remark', multiline: true },
+      { key: 'city', label: 'Location' },
       { key: 'description', label: 'Description', multiline: true },
+      { key: 'address', label: 'Address', multiline: true },
+    ],
+  },
+  {
+    key: 'other',
+    fields: [
+      { key: 'alternatePhone', label: 'Alternate Phone' },
+      { key: 'alternateEmail', label: 'Alternate Email', type: 'email' },
+      { key: 'customerType', label: 'Customer Type', options: CUSTOMER_TYPE_OPTIONS },
+      { key: 'projectName', label: 'Project Name' },
+      { key: 'projectType', label: 'Product Category' },
+      { key: 'state', label: 'State' },
+      { key: 'industry', label: 'Industry type', options: INDUSTRY_TYPE_OPTIONS },
+      { key: 'customerRefNo', label: 'Customer Ref. No.' },
+      { key: 'customerRefDate', label: 'Customer Ref. Date', type: 'date' },
+      { key: 'consultantName', label: 'Consultant Name' },
+      { key: 'poValue', label: 'PO Value' },
+      { key: 'statusAsPerOrderReceived', label: 'Status of Customer as per Order Received' },
+      { key: 'statusAsPerQuotationGiven', label: 'Status Of Customer as per quotation Given' },
       { key: 'jobNo', label: 'Job No' },
-      { key: 'customerRefNo', label: 'Inquiry Ref No.' },
-      { key: 'customerRefDate', label: 'Inquiry Ref Date', type: 'date' },
+      { key: 'reasonForLost', label: 'Reason For Lost' },
+      { key: 'customerName', label: 'Customer Name' },
     ],
   },
 ]
+
+const flattenedAccountFields = sectionConfig.flatMap((section) => (
+  section.fields.map((field) => ({ ...field, sectionKey: section.key }))
+))
 
 const formatHeaderDate = (value) => {
   if (!value) return '-'
@@ -137,6 +123,42 @@ const normalizeDateInput = (value) => {
   return date.toISOString().slice(0, 10)
 }
 
+const formatDetailDate = (value, pattern = 'dd-MM-yyyy') => {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+
+  if (pattern === 'dd-MM-yyyy hh:mm a') {
+    const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+    return `${day}-${month}-${year} ${time}`
+  }
+
+  return `${day}-${month}-${year}`
+}
+
+const getDisplayFieldValue = (field, value) => {
+  if (!value) return ''
+  if (field.key === 'lastUpdated') return formatDetailDate(value, 'dd-MM-yyyy hh:mm a')
+  if (field.type === 'date') return formatDetailDate(value)
+  return value
+}
+
+const getTodayInputValue = () => new Date().toISOString().slice(0, 10)
+
+const resolveAddedByDisplay = (account = {}) => (
+  account.addedByDisplay
+  || account.raw?.addedByDisplay
+  || account.raw?.addedByName
+  || account.raw?.createdByUserName
+  || account.raw?.createdByName
+  || account.addedBy
+  || ''
+)
+
 const buildInitialForm = (account) => ({
   accountNumber: account.accountNumber || '',
   accountName: account.name || '',
@@ -144,83 +166,98 @@ const buildInitialForm = (account) => ({
   industry: account.industryType || account.raw?.industry || '',
   accountCategory: account.accountCategory || account.customerType || '',
   accountSource: account.accountSource || account.source || '',
+  accountSubsource: account.accountSubsource || account.raw?.accountSubsource || account.raw?.subsource || '',
   status: account.status || '',
-  stage: account.stage || '',
+  stage: getAllowedAccountInformationStage(account.stage || ''),
+  accountDate: normalizeDateInput(account.accountDate || account.createdAt) || '',
   accountOwner: account.accountOwnerName || account.accountOwner || '',
-  addedBy: account.addedBy || account.addedByDisplay || '',
+  addedBy: resolveAddedByDisplay(account),
+  lastUpdated: account.updatedAt || account.raw?.updatedAt || '',
   assignedUserId: account.raw?.assignedUserId || account.raw?.assignedTo || account.raw?.ownerId || '',
-  recordSource: account.recordSource || '',
   contactPerson: account.contactPerson || '',
+  designation: account.contactDesignation || account.designation || account.raw?.designation || '',
+  customerType: account.customerType || account.accountCategory || '',
   mobile: account.contactMobile || account.phone || '',
   alternatePhone: account.alternatePhone || '',
+  alternateEmail: account.alternateEmail || '',
   email: account.email || account.contactEmail || '',
   website: account.website || '',
   address: account.address || '',
   city: account.location || account.raw?.city || '',
   state: account.state || '',
+  gstin: account.gstin || account.raw?.gstin || '',
+  stateCode: account.stateCode || account.raw?.stateCode || '',
   country: account.raw?.country || '',
   pincode: account.raw?.pincode || account.raw?.pinCode || '',
   projectName: account.projectName || '',
-  projectCode: account.projectCode || account.raw?.projectCode || '',
   projectType: account.productCategory || account.raw?.projectType || '',
   projectLocation: account.projectLocation || account.raw?.projectLocation || '',
   consultantName: account.consultantName || '',
   architectName: account.architectName || account.raw?.architectName || '',
   pmcName: account.pmcName || account.raw?.pmcName || '',
-  projectValue: account.poValue || account.raw?.projectValue || '',
-  projectStatus: account.projectStatus || account.raw?.projectStatus || '',
-  projectDescription: account.projectDescription || account.raw?.projectDescription || '',
-  reminderDate: normalizeDateInput(account.reminderDate),
+  poValue: account.poValue || account.raw?.poValue || '',
+  statusAsPerOrderReceived: account.statusAsPerOrderReceived || account.raw?.statusAsPerOrderReceived || '',
+  statusAsPerQuotationGiven: account.statusAsPerQuotationGiven || account.raw?.statusAsPerQuotationGiven || '',
+  reasonForLost: account.reasonForLost || account.raw?.reasonForLost || '',
+  customerName: account.customerName || account.raw?.customerName || '',
+  reminderDate: normalizeDateInput(account.reminderDate) || getTodayInputValue(),
   reminderMode: account.reminderMode || '',
   latestRemark: account.latestRemark || '',
   remark: account.remark || '',
-  description: account.description || '',
+  description: account.description || account.raw?.description || '',
   jobNo: account.jobNo || '',
   customerRefNo: account.customerRefNo || '',
-  customerRefDate: normalizeDateInput(account.customerRefDate),
+  customerRefDate: normalizeDateInput(account.customerRefDate) || '',
 })
 
 const buildUpdatePayload = (form) => ({
   accountName: form.accountName,
-  customerName: form.accountName,
   company: form.company,
   industry: form.industry,
   industryType: form.industry,
   accountCategory: form.accountCategory,
-  customerType: form.accountCategory,
   accountSource: form.accountSource,
+  accountSubsource: form.accountSubsource,
+  subsource: form.accountSubsource,
   source: form.accountSource,
   status: form.status,
   stage: form.stage,
+  accountDate: form.accountDate,
   accountOwner: form.accountOwner,
   ownerName: form.accountOwner,
+  addedBy: form.addedBy,
+  addedByDisplay: form.addedBy,
   contactPerson: form.contactPerson,
+  contactDesignation: form.designation,
+  designation: form.designation,
+  customerType: form.customerType || form.accountCategory,
   contactMobile: form.mobile,
   mobile: form.mobile,
   phone: form.mobile,
   alternatePhone: form.alternatePhone,
+  alternateEmail: form.alternateEmail,
   contactEmail: form.email,
   email: form.email,
-  alternateEmail: form.email,
   website: form.website,
   address: form.address,
   location: form.city,
   city: form.city,
   state: form.state,
+  gstin: form.gstin,
+  stateCode: form.stateCode,
   country: form.country,
   pincode: form.pincode,
   projectName: form.projectName,
-  projectCode: form.projectCode,
   productCategory: form.projectType,
   projectType: form.projectType,
   projectLocation: form.projectLocation,
   consultantName: form.consultantName,
   architectName: form.architectName,
   pmcName: form.pmcName,
-  poValue: form.projectValue,
-  projectValue: form.projectValue,
-  projectStatus: form.projectStatus,
-  projectDescription: form.projectDescription,
+  poValue: form.poValue,
+  statusAsPerOrderReceived: form.statusAsPerOrderReceived,
+  statusAsPerQuotationGiven: form.statusAsPerQuotationGiven,
+  reasonForLost: form.reasonForLost,
   reminderDate: form.reminderDate,
   reminderMode: form.reminderMode,
   latestRemark: form.latestRemark,
@@ -230,6 +267,7 @@ const buildUpdatePayload = (form) => ({
   jobNo: form.jobNo,
   customerRefNo: form.customerRefNo,
   customerRefDate: form.customerRefDate,
+  customerName: form.customerName,
 })
 
 const AccountDetailsDrawer = ({
@@ -241,16 +279,19 @@ const AccountDetailsDrawer = ({
   onRefresh,
   canEdit = false,
   actionItems = ACCOUNT_DRAWER_ACTIONS,
+  inline = false,
 }) => {
   const location = useLocation()
   const navigate = useNavigate()
   const { convertedDeals } = useData()
   const [isActionsOpen, setIsActionsOpen] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
+  const [editingFieldKey, setEditingFieldKey] = useState('')
   const [form, setForm] = useState(() => account ? buildInitialForm(account) : {})
   const [isSaving, setIsSaving] = useState(false)
   const [validationError, setValidationError] = useState('')
   const [activeActionKey, setActiveActionKey] = useState(null)
+  const [ownerOptions, setOwnerOptions] = useState(getCachedAccountOwnerOptions)
   const closeActions = useCallback(() => setIsActionsOpen(false), [])
   const actionsRef = useClickOutside(closeActions)
 
@@ -258,13 +299,29 @@ const AccountDetailsDrawer = ({
     if (account) {
       setForm(buildInitialForm(account))
       setEditingSection(null)
+      setEditingFieldKey('')
       setValidationError('')
       setActiveActionKey(null)
     }
   }, [account])
 
+  useEffect(() => {
+    let isMounted = true
+
+    loadAccountOwnerOptions()
+      .then((options) => {
+        if (isMounted) setOwnerOptions(options)
+      })
+      .catch(() => {
+        if (isMounted) setOwnerOptions(getCachedAccountOwnerOptions())
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const headerFacts = useMemo(() => ([
-    { label: 'Account No.', value: account?.accountNumber || '-' },
     { label: 'Stage', value: account?.stageLabel || account?.stage || '-' },
     { label: 'Status', value: account?.status || '-' },
     { label: 'Owner', value: account?.accountOwnerDisplay || account?.accountOwner || '-' },
@@ -279,6 +336,27 @@ const AccountDetailsDrawer = ({
         - new Date(left.convertedAt || left.createdAt || 0).getTime()
       ))
   ), [account?.id, convertedDeals])
+  const linkedDealId = useMemo(() => {
+    const convertedDeal = relatedConvertedDeals[0] || null
+    return account?.dealId
+      || convertedDeal?.sourceDealId
+      || convertedDeal?.dealId
+      || account?.convertedDealId
+      || ''
+  }, [account?.convertedDealId, account?.dealId, relatedConvertedDeals])
+  const visibleActionItems = useMemo(() => {
+    const alreadyConverted = Boolean(
+      account?.isConverted
+      || account?.dealId
+      || account?.convertedDealId
+      || relatedConvertedDeals.length > 0
+    )
+
+    return actionItems.filter((action) => (
+      (action.key !== 'converted-deal' || !alreadyConverted)
+      && (action.key !== 'view-linked-deal' || alreadyConverted)
+    ))
+  }, [account?.convertedDealId, account?.dealId, account?.isConverted, actionItems, relatedConvertedDeals.length])
 
   if (!isOpen || !account) return null
 
@@ -293,6 +371,7 @@ const AccountDetailsDrawer = ({
   const handleCancelEdit = () => {
     setForm(buildInitialForm(account))
     setEditingSection(null)
+    setEditingFieldKey('')
     setValidationError('')
   }
 
@@ -305,17 +384,21 @@ const AccountDetailsDrawer = ({
     }
 
     setIsSaving(true)
-    const result = await onSaveAccount(account.id, buildUpdatePayload(form))
+    const selectedOwner = ownerOptions.find((owner) => owner.name === form.accountOwner)
+    const result = await onSaveAccount(account.id, {
+      ...buildUpdatePayload(form),
+      ...(selectedOwner ? {
+        ownerId: selectedOwner.id,
+        assignedUserId: selectedOwner.id,
+      } : {}),
+    })
     setIsSaving(false)
 
     if (result?.success) {
       setEditingSection(null)
+      setEditingFieldKey('')
       setValidationError('')
     }
-  }
-
-  const handleRefresh = async () => {
-    await onRefresh?.()
   }
 
   const handleOpenConvertedDeal = (convertedDeal) => {
@@ -344,7 +427,12 @@ const AccountDetailsDrawer = ({
   }
 
   return (
-    <div className="admin-accounts-drawer-layer admin-accounts-workspace-layer" role="dialog" aria-modal="true" aria-label="Account details workspace">
+    <div
+      className={`admin-accounts-drawer-layer admin-accounts-workspace-layer${inline ? ' admin-accounts-workspace-layer--inline' : ''}`}
+      role="dialog"
+      aria-modal={inline ? 'false' : 'true'}
+      aria-label="Account details workspace"
+    >
       <section className="admin-accounts-drawer admin-accounts-workspace">
         <header className="admin-accounts-workspace-header">
           <div className="admin-accounts-workspace-title">
@@ -361,43 +449,6 @@ const AccountDetailsDrawer = ({
           </div>
 
           <div className="admin-accounts-workspace-actions">
-            <button
-              type="button"
-              className="admin-accounts-workspace-icon-btn"
-              onClick={() => setEditingSection(editingSection || sectionConfig[0].key)}
-              disabled={!canEdit || isSaving}
-              title="Edit"
-            >
-              <FiEdit2 />
-            </button>
-            <button
-              type="button"
-              className="admin-accounts-workspace-icon-btn admin-accounts-workspace-icon-btn-save"
-              onClick={handleSave}
-              disabled={!editingSection || isSaving}
-              title="Save"
-            >
-              <FiSave />
-            </button>
-            <button
-              type="button"
-              className="admin-accounts-workspace-icon-btn"
-              onClick={handleCancelEdit}
-              disabled={!editingSection || isSaving}
-              title="Cancel"
-            >
-              <FiX />
-            </button>
-            <button
-              type="button"
-              className="admin-accounts-workspace-icon-btn"
-              onClick={handleRefresh}
-              disabled={isSaving}
-              title="Refresh"
-            >
-              <FiRefreshCw />
-            </button>
-
             <div className="admin-accounts-actions-dropdown" ref={actionsRef}>
               <button
                 type="button"
@@ -412,7 +463,7 @@ const AccountDetailsDrawer = ({
 
               {isActionsOpen ? (
                 <div className="admin-accounts-actions-menu">
-                  {actionItems.map((action) => {
+                  {visibleActionItems.map((action) => {
                     const Icon = ACTION_ICONS[action.key] || HiOutlineStatusOnline
 
                     return (
@@ -422,8 +473,34 @@ const AccountDetailsDrawer = ({
                         className="admin-accounts-actions-menu-button"
                         onClick={() => {
                           closeActions()
+                          if (action.key === 'generate-quotation') {
+                            navigate('/admin/quotations', {
+                              state: {
+                                openGenerator: true,
+                                preselectedAccountId: account.id,
+                              },
+                            })
+                            return
+                          }
+
                           if (action.key === 'send-mail' || action.key === 'converted-deal') {
                             window.location.href = buildAdminAccountActionUrl(action.route, account.id, boardStateQuery)
+                            return
+                          }
+
+                          if (action.key === 'view-linked-deal') {
+                            if (linkedDealId) {
+                              navigate(buildAdminDealDetailUrl(linkedDealId), {
+                                state: {
+                                  fromPath: `${location.pathname}${location.search || ''}`,
+                                },
+                              })
+                            } else {
+                              const convertedDeal = relatedConvertedDeals[0]
+                              if (convertedDeal) {
+                                handleOpenConvertedDeal(convertedDeal)
+                              }
+                            }
                             return
                           }
 
@@ -457,128 +534,160 @@ const AccountDetailsDrawer = ({
                 {validationError}
               </div>
             ) : null}
-            <div className="admin-accounts-workspace-sections">
-              {sectionConfig.map((section) => {
-              const isEditing = editingSection === section.key
-              const isAccountInfoSection = section.key === 'account'
+            <div className="admin-accounts-workspace-flat-fields">
+              {flattenedAccountFields.map((field) => {
+                const value = field.key === 'changeStatus' ? (form.stage || form.status || '') : (form[field.key] || '')
+                const displayValue = getDisplayFieldValue(field, value)
+                const isEditing = editingSection === field.sectionKey
+                const isSingleFieldEditing = isEditing && editingFieldKey === field.key
+                const canEditThisField = canEdit || !isAdminPortal || field.key === 'addedBy'
+                const canEditField = isSingleFieldEditing && canEditThisField && !field.readOnly
+                const isUserSelectField = ['accountOwner', 'addedBy'].includes(field.key)
+                const visibleOwnerOptions = isUserSelectField && value && !ownerOptions.some((owner) => owner.name === value)
+                  ? [{ id: `current-${value}`, name: value, ownerDisplayName: value }, ...ownerOptions]
+                  : ownerOptions
 
-              return (
-                <section
-                  key={section.key}
-                  className={`admin-accounts-workspace-section ${isEditing ? 'admin-accounts-workspace-section-editing' : ''} ${isAccountInfoSection ? 'admin-accounts-workspace-section--account-info' : ''}`}
-                >
-                  <div className="admin-accounts-workspace-section-header">
-                    <h3>{section.title}</h3>
-                    <button
-                      type="button"
-                      className="admin-accounts-section-edit-btn"
-                      onClick={() => setEditingSection(section.key)}
-                      disabled={!canEdit || isSaving}
-                      title={`Edit ${section.title}`}
-                    >
-                      <FiEdit2 />
-                    </button>
-                  </div>
-
-                  <div className={`admin-accounts-workspace-field-grid ${isAccountInfoSection ? 'admin-accounts-workspace-field-grid--account-info' : ''}`}>
-                    {section.fields.map((field) => {
-                      const value = form[field.key] || ''
-                      const canEditField = isEditing && canEdit && !field.readOnly
-
-                      return (
-                        <label
-                          key={field.key}
-                          className={`admin-accounts-workspace-field ${field.multiline ? 'admin-accounts-workspace-field-wide' : ''}`}
-                          data-field-key={field.key}
+                return (
+                  <label
+                    key={`${field.sectionKey}-${field.key}`}
+                    className={`admin-accounts-workspace-field admin-accounts-workspace-field--flat ${field.multiline && !field.compact ? 'admin-accounts-workspace-field-wide' : ''} ${field.compact ? 'admin-accounts-workspace-field-compact' : ''} ${isSingleFieldEditing ? 'admin-accounts-workspace-field--single-editing' : ''}`}
+                    data-field-key={field.key}
+                  >
+                    <span className="admin-accounts-workspace-field-label">
+                      <span>{field.label}</span>
+                      {!field.readOnly ? (
+                        <button
+                          type="button"
+                          className="admin-accounts-workspace-field-edit-btn"
+                          onClick={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            setEditingSection(field.sectionKey)
+                            setEditingFieldKey(field.key)
+                          }}
+                          disabled={!canEditThisField || isSaving}
+                          title={`Edit ${field.label}`}
+                          aria-label={`Edit ${field.label}`}
                         >
-                          <span>{field.label}</span>
-                          {canEditField ? (
-                            field.multiline ? (
-                              <textarea
-                                value={value}
-                                onChange={(event) => handleFieldChange(field.key, event.target.value)}
-                                rows={4}
-                              />
-                            ) : (
-                              <input
-                                type={field.type || 'text'}
-                                value={value}
-                                onChange={(event) => handleFieldChange(field.key, event.target.value)}
-                              />
-                            )
-                          ) : (
-                            <strong className={`admin-accounts-workspace-field-value ${!value ? 'admin-accounts-workspace-field-value-missing admin-accounts-detail-value-missing' : ''}`}>
-                              {value || 'Not available'}
-                              {['mobile', 'email'].includes(field.key) && value ? (
-                                <ContactIntegrationActions
-                                  phone={form.mobile}
-                                  email={form.email}
-                                  targetType="account"
-                                  targetId={account.id}
-                                  defaultMessage={`Hello ${account.name || ''}`.trim()}
-                                  emailSubject={`Regarding ${account.name || 'Account'}`}
-                                  onStatus={(type, message) => {
-                                    setValidationError(type === 'error' ? message : '')
-                                    if (type === 'success') setValidationError('')
-                                  }}
-                                />
-                              ) : null}
-                            </strong>
-                          )}
-                        </label>
-                      )
-                    })}
-                  </div>
+                          <FiEdit2 />
+                        </button>
+                      ) : null}
+                    </span>
+                    {canEditField ? (
+                      isUserSelectField ? (
+                        <select
+                          value={value}
+                          onChange={(event) => handleFieldChange(field.key, event.target.value)}
+                        >
+                          <option value="">Select {field.label}</option>
+                          {visibleOwnerOptions.map((owner) => (
+                            <option key={owner.id} value={owner.name}>
+                              {getAccountOwnerOptionLabel(owner)}
+                            </option>
+                          ))}
+                        </select>
+                      ) : field.options ? (
+                        <select
+                          value={value}
+                          onChange={(event) => {
+                            if (field.key === 'changeStatus') {
+                              handleFieldChange('stage', event.target.value)
+                              handleFieldChange('status', event.target.value)
+                              return
+                            }
 
-                  {isEditing ? (
-                    <div className="admin-accounts-workspace-section-actions">
-                      <Button variant="outline" size="small" onClick={handleCancelEdit} disabled={isSaving}>
-                        Cancel
-                      </Button>
-                      <Button size="small" onClick={handleSave} loading={isSaving}>
-                        Save Changes
-                      </Button>
-                    </div>
-                  ) : null}
-                </section>
-              )
+                            handleFieldChange(field.key, event.target.value)
+                          }}
+                        >
+                          <option value="">Select {field.label}</option>
+                          {field.options.map((option) => (
+                            <option key={option.value || option.label} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : field.multiline ? (
+                        <textarea
+                          value={value}
+                          onChange={(event) => handleFieldChange(field.key, event.target.value)}
+                          rows={field.rows || 4}
+                        />
+                      ) : (
+                        <input
+                          type={field.type || 'text'}
+                          value={value}
+                          onChange={(event) => handleFieldChange(field.key, event.target.value)}
+                        />
+                      )
+                    ) : (
+                      <strong className={`admin-accounts-workspace-field-value ${!displayValue ? 'admin-accounts-workspace-field-value-missing admin-accounts-detail-value-missing' : ''}`}>
+                        {displayValue || 'Not available'}
+                        {['mobile', 'email'].includes(field.key) && value ? (
+                          <ContactIntegrationActions
+                            phone={form.mobile}
+                            email={form.email}
+                            targetType="account"
+                            targetId={account.id}
+                            defaultMessage={`Hello ${account.name || ''}`.trim()}
+                            emailSubject={`Regarding ${account.name || 'Account'}`}
+                            onStatus={(type, message) => {
+                              setValidationError(type === 'error' ? message : '')
+                              if (type === 'success') setValidationError('')
+                            }}
+                          />
+                        ) : null}
+                      </strong>
+                    )}
+                  </label>
+                )
               })}
 
-              <section className="admin-accounts-workspace-section">
-                <div className="admin-accounts-workspace-section-header">
-                  <h3>Converted Deals</h3>
-                  <span className="admin-accounts-converted-deals-count">
-                    {relatedConvertedDeals.length} linked
-                  </span>
+              {editingFieldKey ? (
+                <div className="admin-accounts-workspace-section-actions admin-accounts-workspace-section-actions--flat">
+                  <Button variant="outline" size="small" onClick={handleCancelEdit} disabled={isSaving}>
+                    Cancel
+                  </Button>
+                  <Button size="small" onClick={handleSave} loading={isSaving}>
+                    Save Changes
+                  </Button>
                 </div>
-
-                {relatedConvertedDeals.length === 0 ? (
-                  <div className="admin-accounts-converted-deals-empty">
-                    No converted deals are linked with this account yet.
-                  </div>
-                ) : (
-                  <div className="admin-accounts-converted-deals-list">
-                    {relatedConvertedDeals.map((convertedDeal) => (
-                      <button
-                        key={convertedDeal.id}
-                        type="button"
-                        className="admin-accounts-converted-deal-card"
-                        onClick={() => handleOpenConvertedDeal(convertedDeal)}
-                      >
-                        <div className="admin-accounts-converted-deal-card__title">
-                          {convertedDeal.title || convertedDeal.name || convertedDeal.dealNumber || 'Untitled Deal'}
-                        </div>
-                        <div className="admin-accounts-converted-deal-card__meta">
-                          <span>{convertedDeal.dealNumber || 'No deal number'}</span>
-                          <span>{convertedDeal.amount !== null && convertedDeal.amount !== undefined ? formatCurrency(convertedDeal.amount, convertedDeal.currency) : 'No value'}</span>
-                          <span>{formatDate(convertedDeal.convertedAt || convertedDeal.createdAt || '') || 'No conversion date'}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </section>
+              ) : null}
             </div>
+
+            <section className="admin-accounts-workspace-section">
+              <div className="admin-accounts-workspace-section-header">
+                <h3>Converted Deals</h3>
+                <span className="admin-accounts-converted-deals-count">
+                  {relatedConvertedDeals.length} linked
+                </span>
+              </div>
+
+              {relatedConvertedDeals.length === 0 ? (
+                <div className="admin-accounts-converted-deals-empty">
+                  No converted deals are linked with this account yet.
+                </div>
+              ) : (
+                <div className="admin-accounts-converted-deals-list">
+                  {relatedConvertedDeals.map((convertedDeal) => (
+                    <button
+                      key={convertedDeal.id}
+                      type="button"
+                      className="admin-accounts-converted-deal-card"
+                      onClick={() => handleOpenConvertedDeal(convertedDeal)}
+                    >
+                      <div className="admin-accounts-converted-deal-card__title">
+                        {convertedDeal.title || convertedDeal.name || convertedDeal.dealNumber || 'Untitled Deal'}
+                      </div>
+                      <div className="admin-accounts-converted-deal-card__meta">
+                        <span>{convertedDeal.dealNumber || 'No deal number'}</span>
+                        <span>{convertedDeal.amount !== null && convertedDeal.amount !== undefined ? formatCurrency(convertedDeal.amount, convertedDeal.currency) : 'No value'}</span>
+                        <span>{formatDate(convertedDeal.convertedAt || convertedDeal.createdAt || '') || 'No conversion date'}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
           </div>
 
         </main>

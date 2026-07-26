@@ -8,7 +8,6 @@ import {
   FaPlus,
   FaRedo,
   FaRupeeSign,
-  FaTasks,
   FaUserTie,
   FaUsers,
 } from 'react-icons/fa'
@@ -56,16 +55,6 @@ const COLLECTIONS = [
     getMeta: (entry) => entry.srNumber || entry.customerName || entry.customerEmail || 'No request code',
     getStatus: (entry) => entry.status || 'open',
   },
-  {
-    key: 'tasks',
-    label: 'Tasks',
-    icon: FaTasks,
-    adminPath: '/admin/my-work-status',
-    userPath: '/tasks',
-    getTitle: (entry) => entry.title || 'Untitled task',
-    getMeta: (entry) => entry.dueDate || entry.relatedEntityType || 'No due date',
-    getStatus: (entry) => entry.status || 'open',
-  },
 ]
 
 const ACTIONS = [
@@ -103,13 +92,6 @@ const ACTIONS = [
     icon: FaFileInvoice,
     adminPath: '/admin/quotation-manager/view',
     userPath: '/quotation-manager/view',
-  },
-  {
-    key: 'tasks',
-    label: 'Tasks',
-    icon: FaTasks,
-    adminPath: '/admin/my-work-status',
-    userPath: '/tasks',
   },
 ]
 
@@ -149,7 +131,6 @@ const CrmWorkspacePage = ({ isAdmin = false }) => {
     const deals = getRecords(workspaceData?.deals)
     const quotations = getRecords(workspaceData?.quotations)
     const openDeals = deals.filter((deal) => !['closed', 'won', 'lost', 'converted'].includes(String(deal.status || deal.stage || '').toLowerCase()))
-    const openTasks = getRecords(workspaceData?.tasks).filter((task) => !['done', 'closed', 'completed'].includes(String(task.status || '').toLowerCase()))
     const openSupport = getRecords(workspaceData?.supportRequests).filter((request) => !['closed', 'resolved', 'done'].includes(String(request.status || '').toLowerCase()))
     const pipelineValue = deals.reduce((sum, deal) => sum + (Number(deal.amount ?? deal.value) || 0), 0)
     const quotationValue = quotations.reduce((sum, quotation) => sum + (Number(quotation.totalAmount ?? quotation.amount) || 0), 0)
@@ -159,7 +140,6 @@ const CrmWorkspacePage = ({ isAdmin = false }) => {
       customers: getRecords(workspaceData?.customers).length,
       deals: deals.length,
       openDeals: openDeals.length,
-      openTasks: openTasks.length,
       openSupport: openSupport.length,
       pipelineValue,
       quotationValue,
@@ -222,10 +202,6 @@ const CrmWorkspacePage = ({ isAdmin = false }) => {
         <div className="crm-workspace-metric">
           <span>Open Support</span>
           <strong>{totals.openSupport}</strong>
-        </div>
-        <div className="crm-workspace-metric">
-          <span>Open Tasks</span>
-          <strong>{totals.openTasks}</strong>
         </div>
         <div className="crm-workspace-metric crm-workspace-metric--money">
           <span>Pipeline</span>

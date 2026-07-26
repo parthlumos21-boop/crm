@@ -22,7 +22,12 @@ const WizardStepper = ({
             <button
               type="button"
               onClick={() => onStepChange(index)}
-              className="wizard-stepper__step flex min-w-0 flex-1 items-start gap-3 rounded-[20px] px-1 py-1 text-left transition duration-200 ease-out hover:bg-[rgba(255,255,255,0.55)]"
+              aria-current={isActive ? 'step' : undefined}
+              className={[
+                'wizard-stepper__step flex min-w-0 flex-1 items-start gap-3 rounded-[20px] px-1 py-1 text-left transition duration-200 ease-out hover:bg-[rgba(255,255,255,0.55)]',
+                isActive ? 'wizard-stepper__step--active' : '',
+                isComplete ? 'wizard-stepper__step--complete' : '',
+              ].filter(Boolean).join(' ')}
             >
               <span
                 className={[

@@ -13,7 +13,6 @@ import {
 import { useData } from '../../../context/DataContext'
 import { useAuth } from '../../../context/AuthContext'
 import { customerService } from '../../../services/customerService'
-import { setupApi } from '../../../services/setupApi'
 import { SUPPORT_REQUEST_TYPE_OPTIONS } from './SupportRequestShared'
 import './AddSupportRequest.css'
 
@@ -25,6 +24,49 @@ const STEP_CONFIG = [
   { number: 3, title: 'Location' },
   { number: 4, title: 'Contact' },
 ]
+
+const COUNTRY_STATE_CITY = {
+  India: {
+    Gujarat: ['Ahmedabad', 'Vadodara', 'Surat', 'Rajkot'],
+    Maharashtra: ['Mumbai', 'Pune', 'Nashik'],
+    Rajasthan: ['Jaipur', 'Udaipur'],
+  },
+  USA: {
+    California: ['Los Angeles', 'San Francisco', 'San Diego'],
+    Texas: ['Austin', 'Dallas', 'Houston'],
+  },
+}
+
+const REQUIRED_FIELDS_BY_STEP = {
+  0: [
+    { key: 'customerName', label: 'Customer Name', message: 'Please provide Customer Name.' },
+    { key: 'customerMobile', label: 'Mobile Number', message: 'Please provide Mobile Number.' },
+    { key: 'customerEmail', label: 'Email', message: 'Please provide Email.' },
+    { key: 'customerCompany', label: 'Company Name', message: 'Please provide Company Name.' },
+    { key: 'requestType', label: 'SR Type / Complaint Type', message: 'Please select SR Type / Complaint Type.' },
+  ],
+  1: [
+    { key: 'ownerId', label: 'Owner', message: 'Please select Owner.' },
+    { key: 'description', label: 'Description', message: 'Please provide Description.' },
+  ],
+  2: [
+    { key: 'locationName', label: 'Location Name', message: 'Please provide Location Name.' },
+    { key: 'address', label: 'Address', message: 'Please provide Address.' },
+    { key: 'country', label: 'Country', message: 'Please select Country.' },
+    { key: 'state', label: 'State', message: 'Please select State.' },
+    { key: 'city', label: 'City', message: 'Please select City.' },
+  ],
+  3: [
+    { key: 'contactPerson', label: 'Contact Name', message: 'Please provide Contact Name.' },
+    { key: 'contactPhone', label: 'Contact Phone', message: 'Please provide Contact Phone.' },
+  ],
+}
+
+const requiredLabel = (label) => (
+  <>
+    {label} <span className="sr-required">*</span>
+  </>
+)
 
 const compactAddress = (...parts) => (
   parts
@@ -279,8 +321,8 @@ const SearchableRequestTypeField = ({ value, options, error, onChange }) => {
     : (selectedOption?.label || '')
 
   return (
-    <label className="sr-new-field">
-      <span>Request Type*</span>
+    <label className={`sr-new-field ${error ? 'sr-new-field--error' : ''}`}>
+      <span>{requiredLabel('Request Type')}</span>
       <div
         ref={containerRef}
         className={`sr-new-searchable-select ${error ? 'sr-new-searchable-select--error' : ''}`}
@@ -525,16 +567,18 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
-  const { addNotification, createSupportRequest } = useData()
+  const { addNotification, createSupportRequest, supportRequests } = useData()
   const fileInputRef = useRef(null)
   const locationWatchIdRef = useRef(null)
   const liveReverseLookupRef = useRef({ latitude: '', longitude: '', checkedAt: 0 })
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState({})
+  const [validationSummary, setValidationSummary] = useState([])
   const [selectedFiles, setSelectedFiles] = useState([])
   const [currentStep, setCurrentStep] = useState(0)
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false)
   const [isLocationEditorOpen, setIsLocationEditorOpen] = useState(false)
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false)
   const [isLiveLocationActive, setIsLiveLocationActive] = useState(false)
   const [locationSearchTerm, setLocationSearchTerm] = useState('')
   const [locationBusy, setLocationBusy] = useState(false)
@@ -546,6 +590,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
     customerEmail: '',
     customerPhone: '',
     customerMobile: '',
+    customerCompany: '',
     requestType: '',
     title: '',
     description: '',
@@ -566,47 +611,24 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
     contactEmail: '',
     contactPhone: '',
     contactMobile: '',
+    ownerId: user?.id || '',
+    ownerName: user?.name || user?.username || '',
   })
 
   const isAdminRoute = location.pathname.startsWith('/admin')
   const backPath = isAdminRoute ? '/admin/support-requests/list' : '/support-requests/list'
 
-  const [customers, setCustomers] = useState(() => customerService.getCustomers())
-  const [mongoStatus, setMongoStatus] = useState({
-    loading: true,
-    ready: false,
-    storage: 'MongoDB',
-    message: 'Checking MongoDB storage',
-  })
-
   useEffect(() => {
-    let isMounted = true
-
-    setupApi.getPublicSetupStatus()
-      .then((status) => {
-        if (!isMounted) return
-        setMongoStatus({
-          loading: false,
-          ready: Boolean(status?.ready && status?.databaseReady),
-          storage: status?.storage || 'MongoDB',
-          message: status?.databaseReady ? 'Support requests save to MongoDB' : 'MongoDB storage is not ready',
-        })
-      })
-      .catch((error) => {
-        if (!isMounted) return
-        setMongoStatus({
-          loading: false,
-          ready: false,
-          storage: 'MongoDB',
-          message: error?.response?.data?.message || error?.message || 'Unable to confirm MongoDB storage',
-        })
-      })
-
-    return () => {
-      isMounted = false
+    if (user?.id && !formData.ownerId) {
+      setFormData((currentValue) => ({
+        ...currentValue,
+        ownerId: user.id,
+        ownerName: user.name || user.username || '',
+      }))
     }
-  }, [])
+  }, [formData.ownerId, user?.id, user?.name, user?.username])
 
+  const [customers, setCustomers] = useState(() => customerService.getCustomers())
   useEffect(() => {
     const unsubscribe = customerService.subscribe((nextCustomers) => {
       setCustomers([...nextCustomers])
@@ -651,6 +673,42 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
       }))
   }, [selectedCustomer])
 
+  const customerContacts = useMemo(() => (
+    Array.isArray(selectedCustomer?.contacts)
+      ? selectedCustomer.contacts.filter(Boolean)
+      : []
+  ), [selectedCustomer])
+
+  const srNumberPreview = useMemo(() => {
+    const maxSequence = (supportRequests || []).reduce((currentMax, supportRequest) => {
+      const sequence = Number.parseInt(String(supportRequest?.srNumber || '').replace(/\D/g, ''), 10)
+      return Number.isFinite(sequence) ? Math.max(currentMax, sequence) : currentMax
+    }, 0)
+
+    return `SR${String(maxSequence + 1).padStart(6, '0')}`
+  }, [supportRequests])
+
+  const countryOptions = useMemo(() => {
+    const options = Object.keys(COUNTRY_STATE_CITY)
+    return formData.country && !options.includes(formData.country)
+      ? [formData.country, ...options]
+      : options
+  }, [formData.country])
+
+  const stateOptions = useMemo(() => {
+    const states = Object.keys(COUNTRY_STATE_CITY[formData.country] || {})
+    return formData.state && !states.includes(formData.state)
+      ? [formData.state, ...states]
+      : states
+  }, [formData.country, formData.state])
+
+  const cityOptions = useMemo(() => {
+    const cities = COUNTRY_STATE_CITY[formData.country]?.[formData.state] || []
+    return formData.city && !cities.includes(formData.city)
+      ? [formData.city, ...cities]
+      : cities
+  }, [formData.city, formData.country, formData.state])
+
   const attachmentSummary = useMemo(
     () => selectedFiles.map((file) => file.name).join(', '),
     [selectedFiles]
@@ -691,13 +749,29 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
   const hasMapCoordinates = Boolean(formData.latitude && formData.longitude)
 
   const handleChange = (field, value) => {
-    setFormData((currentValue) => ({ ...currentValue, [field]: value }))
+    setFormData((currentValue) => {
+      const nextValue = { ...currentValue, [field]: value }
+
+      if (field === 'country') {
+        nextValue.state = ''
+        nextValue.city = ''
+      }
+
+      if (field === 'state') {
+        nextValue.city = ''
+      }
+
+      return nextValue
+    })
     if (errors[field]) {
       setErrors((currentErrors) => {
         const nextErrors = { ...currentErrors }
         delete nextErrors[field]
         return nextErrors
       })
+    }
+    if (validationSummary.length > 0) {
+      setValidationSummary((currentSummary) => currentSummary.filter((entry) => entry.key !== field))
     }
   }
 
@@ -870,43 +944,49 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
 
   const validateStep = (stepIndex) => {
     const nextErrors = {}
+    const nextSummary = []
 
-    if (stepIndex === 0) {
-      if (!formData.customerId) {
-        nextErrors.customerId = 'Please select a customer.'
+    ;(REQUIRED_FIELDS_BY_STEP[stepIndex] || []).forEach((field) => {
+      if (!String(formData[field.key] || '').trim()) {
+        nextErrors[field.key] = field.message
+        nextSummary.push(field)
       }
-
-      if (!formData.requestType) {
-        nextErrors.requestType = 'Please select request type.'
-      }
-    }
-
-    if (stepIndex === 1) {
-      if (!formData.title.trim()) {
-        nextErrors.title = 'Title is required.'
-      }
-
-      if (!formData.description.trim()) {
-        nextErrors.description = 'Description is required.'
-      }
-    }
+    })
 
     setErrors((currentErrors) => ({
-      ...currentErrors,
+      ...Object.fromEntries(Object.keys(currentErrors).filter((key) => (
+        !(REQUIRED_FIELDS_BY_STEP[stepIndex] || []).some((field) => field.key === key)
+      )).map((key) => [key, currentErrors[key]])),
       ...nextErrors,
     }))
+    setValidationSummary(nextSummary)
+
+    if (stepIndex === 2 && nextSummary.length > 0) {
+      setIsLocationEditorOpen(true)
+    }
+
+    if (stepIndex === 3 && nextSummary.length > 0) {
+      setIsContactFormOpen(true)
+    }
 
     return Object.keys(nextErrors).length === 0
   }
 
   const validateAll = () => {
-    const isCustomerStepValid = validateStep(0)
-    const isRequestStepValid = validateStep(1)
-    return isCustomerStepValid && isRequestStepValid
+    for (let stepIndex = 0; stepIndex < STEP_CONFIG.length; stepIndex += 1) {
+      if (!validateStep(stepIndex)) {
+        setCurrentStep(stepIndex)
+        return false
+      }
+    }
+
+    return true
   }
 
   const handleNext = () => {
-    setCurrentStep((value) => Math.min(STEP_CONFIG.length - 1, value + 1))
+    if (validateStep(currentStep)) {
+      setCurrentStep((value) => Math.min(STEP_CONFIG.length - 1, value + 1))
+    }
   }
 
   const handleCustomerSelect = (row) => {
@@ -921,6 +1001,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
       customerEmail: primaryContact.email || '',
       customerPhone: primaryContact.phone || '',
       customerMobile: primaryContact.mobile || primaryContact.phone || '',
+      customerCompany: customer.companyName || customer.company || customer.customerCompany || customer.customerName || '',
       state: currentValue.state || '',
       city: currentValue.city || '',
       address: customer.address || currentValue.address || '',
@@ -932,15 +1013,38 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
       contactMobile: primaryContact.mobile || primaryContact.phone || '',
     }))
     setIsLocationEditorOpen(false)
+    setIsContactFormOpen(false)
     setLocationSearchTerm('')
     setLocationMessage('')
 
     setErrors((currentErrors) => {
       const nextErrors = { ...currentErrors }
       delete nextErrors.customerId
+      delete nextErrors.customerName
+      delete nextErrors.customerMobile
+      delete nextErrors.customerEmail
+      delete nextErrors.customerCompany
       return nextErrors
     })
     setIsCustomerModalOpen(false)
+  }
+
+  const handleContactSelect = (contact) => {
+    setFormData((currentValue) => ({
+      ...currentValue,
+      contactPerson: contact.contactPerson || contact.name || contact.person || '',
+      contactDesignation: contact.designation || contact.contactDesignation || '',
+      contactEmail: contact.email || contact.contactEmail || '',
+      contactPhone: contact.phone || contact.contactPhone || contact.mobile || '',
+      contactMobile: contact.mobile || contact.contactMobile || contact.phone || '',
+    }))
+    setIsContactFormOpen(false)
+    setErrors((currentErrors) => {
+      const nextErrors = { ...currentErrors }
+      delete nextErrors.contactPerson
+      delete nextErrors.contactPhone
+      return nextErrors
+    })
   }
 
   const handleSubmit = async (event) => {
@@ -955,14 +1059,14 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
 
     const result = await createSupportRequest({
       requestType: formData.requestType,
-      title: formData.title.trim(),
+      title: formData.title.trim() || `${formData.requestType || 'Service Request'} - ${formData.customerName.trim()}`,
       description: formData.description.trim(),
       status: 'open',
       customerName: formData.customerName.trim(),
       customerEmail: formData.customerEmail.trim(),
       customerPhone: formData.customerPhone.trim(),
       customerMobile: formData.customerMobile.trim(),
-      customerCompany: formData.customerName.trim(),
+      customerCompany: formData.customerCompany.trim(),
       state: formData.state.trim(),
       city: formData.city.trim(),
       address: formData.address.trim(),
@@ -972,8 +1076,8 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
       contactEmail: formData.contactEmail.trim(),
       contactPhone: formData.contactPhone.trim(),
       contactMobile: formData.contactMobile.trim(),
-      ownerId: user?.id || '',
-      ownerName: user?.name || user?.username || '',
+      ownerId: formData.ownerId,
+      ownerName: formData.ownerName,
       attachmentNames: selectedFiles.map((file) => file.name),
       notes: formData.notes.trim(),
       locationName: formData.locationName.trim(),
@@ -1021,11 +1125,6 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
             <div>
               <h1>Add Service Request</h1>
               <p>Create the SR with customer, location, and contact details.</p>
-              <div className={`sr-new-mongo-status ${mongoStatus.ready ? 'sr-new-mongo-status--ready' : 'sr-new-mongo-status--warn'}`}>
-                <span className="sr-new-mongo-dot" />
-                <strong>{mongoStatus.storage}</strong>
-                <span>{mongoStatus.loading ? 'Checking MongoDB storage' : mongoStatus.message}</span>
-              </div>
             </div>
 
             <div className="sr-new-header-actions">
@@ -1073,11 +1172,22 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
           </div>
 
           <div className="sr-new-panel">
+            {validationSummary.length > 0 ? (
+              <div className="sr-validation-summary" role="alert">
+                <strong>{validationSummary.length} error(s) found, please check and proceed.</strong>
+                <ol>
+                  {validationSummary.map((entry) => (
+                    <li key={entry.key}>{entry.label}: {entry.message}</li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
+
             {currentStep === 0 ? (
               <div className="sr-new-form-grid">
                 <label className="sr-new-field sr-new-field--full">
-                  <span>Customer*</span>
-                  <div className={`sr-new-customer-search ${errors.customerId ? 'sr-new-customer-search--error' : ''}`}>
+                  <span>{requiredLabel('Customer Name')}</span>
+                  <div className={`sr-new-customer-search ${errors.customerName ? 'sr-new-customer-search--error' : ''}`}>
                     <input
                       type="text"
                       readOnly
@@ -1088,7 +1198,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                       <FiSearch />
                     </button>
                   </div>
-                  {errors.customerId ? <small>{errors.customerId}</small> : null}
+                  {errors.customerName ? <small>{errors.customerName}</small> : null}
                 </label>
 
                 <SearchableRequestTypeField
@@ -1103,13 +1213,14 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                   <input type="text" value={formData.customerNumber} readOnly />
                 </label>
 
-                <label className="sr-new-field">
-                  <span>Email</span>
+                <label className={`sr-new-field ${errors.customerEmail ? 'sr-new-field--error' : ''}`}>
+                  <span>{requiredLabel('Email')}</span>
                   <input
                     type="email"
                     value={formData.customerEmail}
                     onChange={(event) => handleChange('customerEmail', event.target.value)}
                   />
+                  {errors.customerEmail ? <small>{errors.customerEmail}</small> : null}
                 </label>
 
                 <label className="sr-new-field">
@@ -1121,31 +1232,62 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                   />
                 </label>
 
-                <label className="sr-new-field">
-                  <span>Mobile</span>
+                <label className={`sr-new-field ${errors.customerMobile ? 'sr-new-field--error' : ''}`}>
+                  <span>{requiredLabel('Mobile Number')}</span>
                   <input
                     type="text"
                     value={formData.customerMobile}
                     onChange={(event) => handleChange('customerMobile', event.target.value)}
                   />
+                  {errors.customerMobile ? <small>{errors.customerMobile}</small> : null}
+                </label>
+
+                <label className={`sr-new-field sr-new-field--full ${errors.customerCompany ? 'sr-new-field--error' : ''}`}>
+                  <span>{requiredLabel('Company Name')}</span>
+                  <input
+                    type="text"
+                    value={formData.customerCompany}
+                    onChange={(event) => handleChange('customerCompany', event.target.value)}
+                  />
+                  {errors.customerCompany ? <small>{errors.customerCompany}</small> : null}
                 </label>
               </div>
             ) : null}
 
             {currentStep === 1 ? (
               <div className="sr-new-form-grid">
+                <label className="sr-new-field">
+                  <span>SR Number</span>
+                  <input type="text" value={srNumberPreview} readOnly />
+                </label>
+
+                <label className={`sr-new-field ${errors.ownerId ? 'sr-new-field--error' : ''}`}>
+                  <span>{requiredLabel('Owner')}</span>
+                  <select
+                    value={formData.ownerId}
+                    onChange={(event) => {
+                      const selectedOwnerId = event.target.value
+                      handleChange('ownerId', selectedOwnerId)
+                      handleChange('ownerName', selectedOwnerId ? (user?.name || user?.username || '') : '')
+                    }}
+                  >
+                    <option value="">Select Owner</option>
+                    <option value={user?.id || ''}>{user?.name || user?.username || 'Current User'}</option>
+                  </select>
+                  {errors.ownerId ? <small>{errors.ownerId}</small> : null}
+                </label>
+
                 <label className="sr-new-field sr-new-field--full">
-                  <span>Title*</span>
+                  <span>Title</span>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(event) => handleChange('title', event.target.value)}
                   />
-                  {errors.title ? <small>{errors.title}</small> : null}
                 </label>
 
-                <label className="sr-new-field sr-new-field--full">
-                  <span>Description*</span>
+                <label className={`sr-new-field sr-new-field--full ${errors.description ? 'sr-new-field--error' : ''}`}>
+                  <span>{requiredLabel('Description')}</span>
                   <textarea
                     rows="7"
                     value={formData.description}
@@ -1286,6 +1428,12 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                       <div className={`sr-location-map ${hasMapCoordinates ? 'sr-location-map--selected' : ''}`}>
                         {hasMapCoordinates ? (
                           <>
+                            <iframe
+                              title="Selected service location map"
+                              className="sr-location-map-embed"
+                              src={`https://maps.google.com/maps?q=${encodeURIComponent(formData.latitude)},${encodeURIComponent(formData.longitude)}&z=15&output=embed`}
+                              loading="lazy"
+                            />
                             <div className="sr-location-map-controls" aria-hidden="true">
                               <span>+</span>
                               <span>-</span>
@@ -1314,44 +1462,54 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
 
                     <div className="sr-location-form-panel">
                       <div className="sr-new-form-grid sr-location-fields">
-                        <label className="sr-new-field">
-                          <span>Location Name</span>
+                        <label className={`sr-new-field ${errors.locationName ? 'sr-new-field--error' : ''}`}>
+                          <span>{requiredLabel('Location Name')}</span>
                           <input
                             type="text"
                             value={formData.locationName}
                             onChange={(event) => handleChange('locationName', event.target.value)}
                           />
+                          {errors.locationName ? <small>{errors.locationName}</small> : null}
                         </label>
 
-                        <label className="sr-new-field">
-                          <span>Country</span>
-                          <input
-                            type="text"
+                        <label className={`sr-new-field ${errors.country ? 'sr-new-field--error' : ''}`}>
+                          <span>{requiredLabel('Country')}</span>
+                          <select
                             value={formData.country}
                             onChange={(event) => handleChange('country', event.target.value)}
-                          />
+                          >
+                            <option value="">Select Country</option>
+                            {countryOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+                          </select>
+                          {errors.country ? <small>{errors.country}</small> : null}
                         </label>
 
-                        <label className="sr-new-field">
-                          <span>State</span>
-                          <input
-                            type="text"
+                        <label className={`sr-new-field ${errors.state ? 'sr-new-field--error' : ''}`}>
+                          <span>{requiredLabel('State')}</span>
+                          <select
                             value={formData.state}
                             onChange={(event) => handleChange('state', event.target.value)}
-                          />
+                          >
+                            <option value="">Select State</option>
+                            {stateOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+                          </select>
+                          {errors.state ? <small>{errors.state}</small> : null}
                         </label>
 
-                        <label className="sr-new-field">
-                          <span>City</span>
-                          <input
-                            type="text"
+                        <label className={`sr-new-field ${errors.city ? 'sr-new-field--error' : ''}`}>
+                          <span>{requiredLabel('City')}</span>
+                          <select
                             value={formData.city}
                             onChange={(event) => handleChange('city', event.target.value)}
-                          />
+                          >
+                            <option value="">Select City</option>
+                            {cityOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+                          </select>
+                          {errors.city ? <small>{errors.city}</small> : null}
                         </label>
 
                         <label className="sr-new-field">
-                          <span>Zip Code</span>
+                          <span>Pincode</span>
                           <input
                             type="text"
                             value={formData.zipCode}
@@ -1377,13 +1535,34 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                           />
                         </label>
 
-                        <label className="sr-new-field sr-new-field--full">
-                          <span>Address</span>
+                        <label className={`sr-new-field sr-new-field--full ${errors.address ? 'sr-new-field--error' : ''}`}>
+                          <span>{requiredLabel('Address')}</span>
                           <textarea
                             rows="5"
                             value={formData.address}
                             onChange={(event) => handleChange('address', event.target.value)}
                           />
+                          {errors.address ? <small>{errors.address}</small> : null}
+                        </label>
+
+                        <label className="sr-new-field">
+                          <span>Contact Name</span>
+                          <input type="text" value={formData.contactPerson} onChange={(event) => handleChange('contactPerson', event.target.value)} />
+                        </label>
+
+                        <label className="sr-new-field">
+                          <span>Contact Phone</span>
+                          <input type="text" value={formData.contactPhone} onChange={(event) => handleChange('contactPhone', event.target.value)} />
+                        </label>
+
+                        <label className="sr-new-field">
+                          <span>Contact Email</span>
+                          <input type="email" value={formData.contactEmail} onChange={(event) => handleChange('contactEmail', event.target.value)} />
+                        </label>
+
+                        <label className="sr-new-field sr-new-field--full">
+                          <span>Note</span>
+                          <textarea rows="3" value={formData.notes} onChange={(event) => handleChange('notes', event.target.value)} />
                         </label>
                       </div>
                     </div>
@@ -1393,14 +1572,44 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
             ) : null}
 
             {currentStep === 3 ? (
-              <div className="sr-new-form-grid">
-                <label className="sr-new-field">
-                  <span>Contact Person</span>
+              <div className="sr-contact-step">
+                {customerContacts.length > 0 ? (
+                  <div className="sr-contact-card-grid">
+                    {customerContacts.map((contact, index) => (
+                      <button
+                        key={contact.id || `${contact.email || contact.phone || index}`}
+                        type="button"
+                        className={`sr-contact-card ${formData.contactPerson === (contact.contactPerson || contact.name || contact.person || '') ? 'sr-contact-card--selected' : ''}`}
+                        onClick={() => handleContactSelect(contact)}
+                      >
+                        <strong>{contact.contactPerson || contact.name || contact.person || `Contact ${index + 1}`}</strong>
+                        <span>{contact.designation || contact.contactDesignation || '-'}</span>
+                        <span>{contact.email || contact.contactEmail || '-'}</span>
+                        <span>{contact.phone || contact.contactPhone || contact.mobile || '-'}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+
+                <button
+                  type="button"
+                  className="sr-contact-add-btn"
+                  onClick={() => setIsContactFormOpen((currentValue) => !currentValue)}
+                >
+                  <FiPlus />
+                  <span>Add New Contact</span>
+                </button>
+
+                {isContactFormOpen || customerContacts.length === 0 ? (
+                  <div className="sr-new-form-grid">
+                <label className={`sr-new-field ${errors.contactPerson ? 'sr-new-field--error' : ''}`}>
+                  <span>{requiredLabel('Contact Person')}</span>
                   <input
                     type="text"
                     value={formData.contactPerson}
                     onChange={(event) => handleChange('contactPerson', event.target.value)}
                   />
+                  {errors.contactPerson ? <small>{errors.contactPerson}</small> : null}
                 </label>
 
                 <label className="sr-new-field">
@@ -1421,13 +1630,14 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                   />
                 </label>
 
-                <label className="sr-new-field">
-                  <span>Contact Phone</span>
+                <label className={`sr-new-field ${errors.contactPhone ? 'sr-new-field--error' : ''}`}>
+                  <span>{requiredLabel('Contact Phone')}</span>
                   <input
                     type="text"
                     value={formData.contactPhone}
                     onChange={(event) => handleChange('contactPhone', event.target.value)}
                   />
+                  {errors.contactPhone ? <small>{errors.contactPhone}</small> : null}
                 </label>
 
                 <label className="sr-new-field">
@@ -1438,6 +1648,8 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                     onChange={(event) => handleChange('contactMobile', event.target.value)}
                   />
                 </label>
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </div>

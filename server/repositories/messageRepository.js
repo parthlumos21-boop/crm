@@ -12,14 +12,22 @@ const mapMessageRow = (record) => {
   const row = baseRepository.map(record)
   if (!row) return null
 
+  const recipientUserIds = row.recipientUserIds || [row.receiverId].filter(Boolean)
+  const recipientUserNames = row.recipientUserNames || [row.receiverName].filter(Boolean)
+
   return {
     id: row.id,
     companyId: row.companyId || 1,
     senderId: row.senderId,
     senderName: row.senderName,
-    recipientUserIds: row.recipientUserIds || [row.receiverId].filter(Boolean),
-    recipientUserNames: row.recipientUserNames || [row.receiverName].filter(Boolean),
+    receiverId: row.receiverId,
+    receiverName: row.receiverName,
+    recipientUserIds,
+    recipientUserNames,
+    targetNames: row.targetNames || recipientUserNames,
+    recipientCount: row.recipientCount ?? recipientUserIds.length,
     body: row.body || row.message,
+    message: row.message || row.body,
     createdAt: row.createdAt,
   }
 }
@@ -42,14 +50,15 @@ const createMessage = async ({ senderId, senderName, receiverId, receiverName, m
 
 const listMessagesForUser = async (user) => {
   const isAdmin = user.role === 'admin' || user.role === 'super_admin'
+  const userIdValues = Array.from(new Set([user.id, String(user.id), Number(user.id)].filter((value) => value !== '' && !Number.isNaN(value))))
   const filter = isAdmin
     ? { companyId: user.companyId || 1 }
     : {
         companyId: user.companyId || 1,
         $or: [
-          { senderId: user.id },
-          { receiverId: user.id },
-          { recipientUserIds: user.id },
+          { senderId: { $in: userIdValues } },
+          { receiverId: { $in: userIdValues } },
+          { recipientUserIds: { $in: userIdValues } },
         ],
       }
 

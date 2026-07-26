@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   FaArrowLeft, FaArrowRight, FaCheck, FaClock, FaCog,
@@ -65,6 +65,11 @@ const PIE_PREVIEW_DATA = [
 ]
 
 const PIE_COLORS = ['#f4ce46', '#69b1e0', '#d04848', '#7dc15c', '#9b6dd1', '#a08b3f', '#90a4a7']
+const CHART_GRID_STROKE = 'var(--chart-grid-stroke, #e2e8f0)'
+const CHART_AXIS_STROKE = 'var(--chart-axis-stroke, #5a6b7d)'
+const CHART_SLICE_STROKE = 'var(--chart-slice-stroke, #ffffff)'
+const CHART_LABEL_FILL = 'var(--chart-label-fill, #ffffff)'
+const CHART_TOOLTIP_CURSOR = 'rgba(75, 184, 232, 0.14)'
 
 const FUNNEL_PREVIEW_DATA = [
   { name: 'Status 4', value: 350, fill: '#3a5a99' },
@@ -304,6 +309,19 @@ const ChartsPage = ({ basePath = '/admin/charts' }) => {
         type: selectedChartType || 'Card',
         mobileEnabled: false,
         active: true,
+        context: selectedContext,
+        classificationField,
+        classificationOptions,
+        chartOrderBy,
+        timeFilterEnabled,
+        timeFilterField,
+        timeFilterPeriod,
+        additionalFiltersEnabled,
+        filterRows,
+        selectedActionKeys,
+        orderByEnabled,
+        orderByField,
+        selectedFieldKeys,
       })
     }
     addNotification('success', 'Chart Created', `"${trimmedTitle}" was saved successfully.`)
@@ -327,10 +345,10 @@ const ChartsPage = ({ basePath = '/admin/charts' }) => {
         return (
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={BAR_PREVIEW_DATA} margin={{ top: 10, right: 14, left: 0, bottom: 4 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#5a6b7d' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#5a6b7d' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: 'rgba(15, 23, 42, 0.04)' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
+              <XAxis dataKey="year" tick={{ fontSize: 11, fill: CHART_AXIS_STROKE }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: CHART_AXIS_STROKE }} axisLine={false} tickLine={false} />
+              <Tooltip cursor={{ fill: CHART_TOOLTIP_CURSOR }} />
               <Bar dataKey="a" fill="#3a78bf" />
               <Bar dataKey="b" fill="#5fa1d6" />
               <Bar dataKey="c" fill="#9bb8ce" />
@@ -342,10 +360,10 @@ const ChartsPage = ({ basePath = '/admin/charts' }) => {
         return (
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={BAR_PREVIEW_DATA} margin={{ top: 10, right: 14, left: 0, bottom: 4 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-              <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#5a6b7d' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#5a6b7d' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: 'rgba(15, 23, 42, 0.04)' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
+              <XAxis dataKey="year" tick={{ fontSize: 11, fill: CHART_AXIS_STROKE }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: CHART_AXIS_STROKE }} axisLine={false} tickLine={false} />
+              <Tooltip cursor={{ fill: CHART_TOOLTIP_CURSOR }} />
               <Bar dataKey="a" stackId="s" fill="#3a78bf" />
               <Bar dataKey="b" stackId="s" fill="#5fa1d6" />
               <Bar dataKey="c" stackId="s" fill="#9bb8ce" />
@@ -357,7 +375,7 @@ const ChartsPage = ({ basePath = '/admin/charts' }) => {
         return (
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={PIE_PREVIEW_DATA} dataKey="value" nameKey="name" outerRadius={95} stroke="#ffffff" strokeWidth={1}>
+              <Pie data={PIE_PREVIEW_DATA} dataKey="value" nameKey="name" outerRadius={95} stroke={CHART_SLICE_STROKE} strokeWidth={1}>
                 {PIE_PREVIEW_DATA.map((entry, index) => (
                   <Cell key={entry.name} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                 ))}
@@ -371,7 +389,7 @@ const ChartsPage = ({ basePath = '/admin/charts' }) => {
           <div className="cc-donut-preview">
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={PIE_PREVIEW_DATA} dataKey="value" nameKey="name" innerRadius={62} outerRadius={92} stroke="#ffffff" strokeWidth={2}>
+                <Pie data={PIE_PREVIEW_DATA} dataKey="value" nameKey="name" innerRadius={62} outerRadius={92} stroke={CHART_SLICE_STROKE} strokeWidth={2}>
                   {PIE_PREVIEW_DATA.map((entry, index) => (
                     <Cell key={entry.name} fill={['#3a5a99', '#4d77b8', '#6c97d3', '#8ab2e1', '#a8c5e8', '#c0d5ed', '#d8e4f1'][index % 7]} />
                   ))}
@@ -390,7 +408,7 @@ const ChartsPage = ({ basePath = '/admin/charts' }) => {
             <FunnelChart>
               <Tooltip />
               <Funnel dataKey="value" data={FUNNEL_PREVIEW_DATA} isAnimationActive>
-                <LabelList position="center" fill="#ffffff" stroke="none" dataKey="name" formatter={(name) => {
+                <LabelList position="center" fill={CHART_LABEL_FILL} stroke="none" dataKey="name" formatter={(name) => {
                   const entry = FUNNEL_PREVIEW_DATA.find((item) => item.name === name)
                   return entry ? `${entry.name}: ${entry.value}` : name
                 }} />

@@ -4,16 +4,6 @@ export const ACCOUNT_ACTION_DROPDOWN_LABEL = 'Actions'
 
 const actionConfig = [
   {
-    key: 'bulk-upload-accounts',
-    order: 0,
-    label: 'Bulk Upload Accounts',
-    route: `${actionBaseRoute}/bulk-upload-accounts`,
-    placeholderTitle: 'Bulk Upload',
-    heading: 'Bulk Upload Account Data',
-    description: 'Upload multiple account records from a CSV file with field mapping and verification.',
-    isWizard: true,
-  },
-  {
     key: 'add-note-remarks',
     order: 1,
     label: 'Add Notes/Remarks',
@@ -58,6 +48,16 @@ const actionConfig = [
     heading: 'Re-Assign Account',
     description: 'Assign the selected account to another owner.',
   },
+  {
+    key: 'generate-quotation',
+    order: 6,
+    label: 'Generate Quotation',
+    route: '',
+    placeholderTitle: 'Generate Quotation',
+    heading: 'Generate Quotation',
+    description: 'Open the quotation generator for the selected account.',
+    behavior: 'quotationGenerator',
+  },
 
   {
     key: 'view-account',
@@ -85,7 +85,7 @@ const actionConfig = [
     route: '',
     placeholderTitle: 'View Deal',
     heading: 'View Deal',
-    description: 'Open the linked deal created from this account.',
+    description: 'Open the deal linked with the selected account.',
     behavior: 'viewDeal',
   },
   {
@@ -108,6 +108,7 @@ const userAccountActionKeys = [
   'add-reminder',
   'change-status',
   'add-document',
+  'generate-quotation',
   'view-account',
   'converted-deal',
   'view-linked-deal',

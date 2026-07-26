@@ -1,8 +1,8 @@
 .remark-report-builder-page {
   margin: -1rem -1.25rem 0;
   min-height: 100%;
-  background: #eef8fd;
-  color: #1f2d3a;
+  background: var(--surface-muted);
+  color: var(--text-primary);
 }
 
 .remark-report-builder-topbar {
@@ -11,13 +11,13 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.45rem 0.8rem;
-  border-bottom: 1px solid #39a4d6;
-  background: #ffffff;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-card);
 }
 
 .remark-report-builder-topbar h1 {
   margin: 0;
-  color: #174e72;
+  color: var(--text-primary);
   font-size: 0.95rem;
   font-weight: 800;
 }
@@ -57,8 +57,8 @@
 
 .remark-report-builder-panel {
   position: relative;
-  border: 1px solid #2098d1;
-  background: #eef8fd;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-muted);
   margin-bottom: 0.8rem;
   padding: 1.05rem 1.55rem;
   box-sizing: border-box;
@@ -92,14 +92,14 @@
 .remark-report-builder-row-inline label,
 .remark-report-meta-row > label,
 .remark-report-section-label {
-  color: #263a4a;
+  color: var(--text-primary);
   font-size: 0.78rem;
   font-weight: 800;
 }
 
 .remark-report-builder-row-inline label svg,
 .remark-report-meta-row > label svg {
-  color: #168ac7;
+  color: var(--text-primary);
   margin-left: 0.25rem;
 }
 
@@ -111,9 +111,9 @@
 .remark-report-filter-row input {
   width: 100%;
   min-height: 1.95rem;
-  border: 1px solid #aebdca;
-  background: #ffffff;
-  color: #2b3d4e;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-size: 0.8rem;
   padding: 0.25rem 0.55rem;
 }
@@ -132,9 +132,9 @@
   gap: 0.22rem;
   width: 3.1rem;
   height: 1.35rem;
-  border: 1px solid #aebdca;
+  border: 1px solid var(--border-subtle);
   border-radius: 2px;
-  background: #ffffff;
+  background: var(--surface-card);
   padding: 0 0.22rem;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
@@ -145,12 +145,12 @@
   width: 1rem;
   height: 0.82rem;
   border-radius: 1px;
-  background: #f27652;
+  background: var(--surface-card);
   transition: background 0.15s ease;
 }
 
 .remark-report-toggle-text {
-  color: #1f2d3a;
+  color: var(--text-primary);
   font-size: 0.62rem;
   font-weight: 800;
   line-height: 1;
@@ -160,7 +160,7 @@
 
 .remark-report-toggle-yes {
   grid-template-columns: 1fr 1.05rem;
-  background: #f7fff4;
+  background: var(--surface-card);
 }
 
 .remark-report-toggle-yes .remark-report-toggle-knob {
@@ -175,7 +175,7 @@
 }
 
 .remark-report-toggle-line strong {
-  color: #1f2d3a;
+  color: var(--text-primary);
   font-size: 0.82rem;
   font-weight: 800;
 }
@@ -234,7 +234,7 @@
 }
 
 .remark-report-trash-btn {
-  background: #d74a3a;
+  background: var(--surface-muted);
 }
 
 .remark-report-filter-panel,
@@ -247,8 +247,8 @@
 
 .remark-report-blue-box {
   min-width: 0;
-  border: 1px solid #1595d0;
-  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
 }
 
 .remark-report-blue-heading {
@@ -266,7 +266,7 @@
 .remark-report-filter-inner {
   margin: 0.75rem;
   padding: 0.75rem;
-  background: #eeeeee;
+  background: var(--surface-muted);
   overflow-x: auto;
 }
 
@@ -275,14 +275,14 @@
   align-items: center;
   gap: 0.3rem;
   margin-bottom: 0.45rem;
-  color: #2298ce;
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 800;
 }
 
 .remark-report-filter-title::before {
   content: '▼';
-  color: #2298ce;
+  color: var(--text-primary);
   font-size: 0.75rem;
 }
 
@@ -295,7 +295,7 @@
 }
 
 .remark-report-filter-row span {
-  color: #1f2d3a;
+  color: var(--text-primary);
   font-size: 0.75rem;
 }
 
@@ -303,7 +303,7 @@
   display: flex;
   align-items: center;
   gap: 0.18rem;
-  color: #1f2d3a;
+  color: var(--text-primary);
   font-size: 0.68rem;
 }
 
@@ -317,8 +317,8 @@
 
 .remark-report-field-box {
   min-width: 0;
-  border: 1px solid #168ed0;
-  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
 }
 
 .remark-report-field-box-heading {
@@ -342,7 +342,7 @@
 
 .remark-report-field-subtitle {
   margin: 0.15rem 0 0.35rem;
-  color: #4aa8df;
+  color: var(--text-primary);
   font-size: 1.12rem;
   font-weight: 800;
   line-height: 1.15;
@@ -361,7 +361,7 @@
   padding: 0.05rem 0 0.05rem 1.55rem;
   border: none;
   background: transparent;
-  color: #111111;
+  color: var(--text-primary);
   text-align: left;
   font-size: 0.92rem;
   line-height: 1.25;
@@ -370,7 +370,7 @@
 
 .remark-report-field-row svg {
   flex: 0 0 auto;
-  color: #222222;
+  color: var(--text-primary);
   font-size: 0.78rem;
 }
 
@@ -390,7 +390,7 @@
 
 .remark-report-field-empty {
   padding: 0.8rem;
-  color: #64788a;
+  color: var(--text-primary);
   font-size: 0.78rem;
   text-align: center;
 }
@@ -406,7 +406,7 @@
   margin-top: 0;
   border: none;
   background: transparent;
-  color: #1684bd;
+  color: var(--text-primary);
   font-size: 1.35rem;
   cursor: pointer;
 }
@@ -419,9 +419,9 @@
   min-height: 1.55rem;
   margin-bottom: 0.25rem;
   padding: 0.15rem 0.4rem;
-  border: 1px solid #d7e3ec;
-  background: #fbfdff;
-  color: #253645;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-size: 0.72rem;
 }
 
@@ -433,7 +433,7 @@
 .remark-report-selected-item button {
   border: none;
   background: transparent;
-  color: #176f9e;
+  color: var(--text-primary);
   font-size: 0.64rem;
   font-weight: 800;
   cursor: pointer;

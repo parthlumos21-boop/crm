@@ -8,7 +8,6 @@ import {
   FaPlug,
   FaRegFileAlt,
   FaTicketAlt,
-  FaWhatsapp,
 } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
@@ -33,31 +32,21 @@ const normalizeActionLabel = (value = '') => {
 }
 
 const buildSupportActions = (isAdmin, integrationStatus, isLoadingIntegrations) => {
-  const whatsapp = integrationStatus?.whatsapp
   const outlook = integrationStatus?.outlook
-  const whatsappEnabled = Boolean(whatsapp?.enabled)
   const outlookConnected = Boolean(outlook?.connected)
   const outlookConfigured = Boolean(outlook?.configured)
+  const outlookShared = Boolean(outlook?.shared)
   const outlookActive = outlookConnected || outlookConfigured
 
   return [
     {
-      key: 'whatsapp',
-      label: 'WhatsApp',
-      status: isLoadingIntegrations ? 'Checking' : whatsappEnabled ? 'Active' : 'Not active',
-      statusClass: whatsappEnabled ? 'rp-integration-status--active' : 'rp-integration-status--warning',
-      route: isAdmin ? '/admin/integrations/whatsapp' : '/integrations/whatsapp',
-      icon: FaWhatsapp,
-      cta: whatsappEnabled ? 'QR' : 'Manage',
-    },
-    {
       key: 'outlook',
-      label: 'Outlook',
-      status: isLoadingIntegrations ? 'Checking' : outlookConnected ? 'Connected' : outlookActive ? 'Active' : 'Not ready',
+      label: 'Outlook Mail',
+      status: isLoadingIntegrations ? 'Checking' : outlookConnected ? (outlookShared ? 'Shared' : 'Connected') : outlookActive ? 'Active' : 'Not ready',
       statusClass: outlookActive ? 'rp-integration-status--active' : 'rp-integration-status--warning',
-      route: isAdmin ? '/admin/integrations/outlook' : '/integrations/outlook',
+      route: isAdmin ? '/admin/settings' : '/integrations/outlook',
       icon: FaEnvelope,
-      cta: outlookConnected ? 'Manage' : 'Outlook',
+      cta: outlookConnected ? (outlookShared ? 'CRM Outlook' : 'Manage') : 'Connect Outlook',
     },
   ]
 }
@@ -86,7 +75,7 @@ const buildLiveEntries = (onlineUsers = [], activities = [], nowLabel = '') => {
   const onlineEntries = onlineUsers.map((entry) => ({
     id: `online-${entry.id}`,
     name: entry.name,
-    action: 'is online now',
+    action: 'is online',
     time: formatDateTime(entry.connectedAt, nowLabel),
   }))
 
@@ -144,7 +133,7 @@ const RightPanel = () => {
       } catch (_error) {
         if (isMounted) {
           setIntegrationStatus(null)
-          addNotification?.('error', 'Integration status unavailable', 'Unable to load WhatsApp or Outlook status.')
+        addNotification?.('error', 'Integration status unavailable', 'Unable to load Outlook status.')
         }
       } finally {
         if (isMounted) setIsLoadingIntegrations(false)
@@ -165,11 +154,6 @@ const RightPanel = () => {
   const supportActions = buildSupportActions(isAdmin, integrationStatus, isLoadingIntegrations)
 
   const handleActionClick = async (action) => {
-    if (action.key === 'whatsapp') {
-      navigate(action.route)
-      return
-    }
-
     if (action.key === 'outlook') {
       navigate(action.route)
     }
@@ -206,7 +190,7 @@ const RightPanel = () => {
                   </span>
                   <span className="rp-action-card__cta">
                     {action.cta}
-                    {action.key === 'whatsapp' && integrationStatus?.whatsapp?.enabled ? <FaExternalLinkAlt /> : <FaPlug />}
+                    {action.key === 'outlook' && integrationStatus?.outlook?.connected ? <FaExternalLinkAlt /> : <FaPlug />}
                   </span>
                 </span>
               </button>
@@ -221,8 +205,8 @@ const RightPanel = () => {
               <FaTicketAlt />
             </span>
             <span>
-              <strong>Add Ticket</strong>
-              <small>Open ticket module</small>
+              <strong>CRM Support</strong>
+              <small>Open support module</small>
             </span>
           </button>
         </div>
@@ -240,7 +224,7 @@ const RightPanel = () => {
 
             return (
               <div key={entry.id} className="rp-entry">
-                <span className={`rp-badge rp-badge--vertical ${badge.cls}`}>{badge.label}</span>
+                <span className={`rp-badge ${badge.cls}`}>{badge.label}</span>
                 <div className="rp-entry-main">
                   <div className="rp-entry-topline">
                     <div className="rp-entry-icon-wrap">
@@ -264,6 +248,7 @@ const RightPanel = () => {
           })}
         </div>
       </div>
+
     </aside>
   )
 }

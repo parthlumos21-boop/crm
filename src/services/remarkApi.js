@@ -16,6 +16,23 @@ const normalizeRemark = (remark = {}) => ({
   assignedUserGroups: remark.assignedUserGroups || remark.assigned_user_groups || [],
 })
 
+const normalizeRemarkReminder = (reminder = {}) => ({
+  ...reminder,
+  id: reminder.id,
+  accountId: reminder.accountId || reminder.account_id || '',
+  remarkId: reminder.remarkId || reminder.remark_id || '',
+  reminderDate: reminder.reminderDate || reminder.reminder_date || '',
+  reminderTime: reminder.reminderTime || reminder.reminder_time || '',
+  assignedTo: reminder.assignedTo || reminder.assigned_to || '',
+  assignedOwnerName: reminder.assignedOwnerName || reminder.assigned_owner_name || '',
+  assignedOwnerCode: reminder.assignedOwnerCode || reminder.assigned_owner_code || '',
+  reminderNote: reminder.reminderNote || reminder.reminder_note || '',
+  isCompleted: Boolean(reminder.isCompleted || reminder.is_completed),
+  ownerUserId: reminder.ownerUserId || reminder.owner_user_id || '',
+  createdBy: reminder.createdBy || reminder.created_by || '',
+  remarkContent: reminder.remarkContent || reminder.remark_content || '',
+})
+
 export const remarkApi = {
   async createRemark(payload) {
     const response = await apiClient.post('/remarks', payload)
@@ -31,5 +48,17 @@ export const remarkApi = {
       remarks: remarks.map(normalizeRemark),
       total: Number(data.total || remarks.length),
     }
+  },
+
+  async getRemarkReminders() {
+    const response = await apiClient.get('/remark-reminders')
+    const data = response?.data?.data ?? response?.data ?? []
+    return Array.isArray(data) ? data.map(normalizeRemarkReminder) : []
+  },
+
+  async updateRemarkReminder(reminderId, payload) {
+    const response = await apiClient.put(`/remark-reminders/${encodeURIComponent(reminderId)}`, payload)
+    const data = response?.data?.data ?? response?.data ?? null
+    return normalizeRemarkReminder(data || {})
   },
 }

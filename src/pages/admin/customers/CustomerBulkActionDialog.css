@@ -12,14 +12,14 @@
 .customer-bulk-action-dialog {
   width: min(31rem, 100%);
   padding: 1.4rem;
-  border: 1px solid #d6e2ed;
-  background: linear-gradient(180deg, #ffffff 0%, #f9fbfd 100%);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-app);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
 }
 
 .customer-bulk-action-dialog-eyebrow {
   margin: 0 0 0.3rem;
-  color: #4f83af;
+  color: var(--text-primary);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -28,22 +28,22 @@
 
 .customer-bulk-action-dialog h2 {
   margin: 0;
-  color: #1f3652;
+  color: var(--text-primary);
   font-size: 1.25rem;
 }
 
 .customer-bulk-action-dialog-description {
   margin: 0.6rem 0 1rem;
-  color: #596f87;
+  color: var(--text-primary);
   line-height: 1.55;
 }
 
 .customer-bulk-action-dialog-count {
   margin-bottom: 1rem;
   padding: 0.7rem 0.85rem;
-  border: 1px solid #d8e4ef;
-  background: #f5faff;
-  color: #29415b;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-size: 0.9rem;
 }
 
@@ -60,7 +60,7 @@
 }
 
 .customer-bulk-action-dialog-field span {
-  color: #1e334c;
+  color: var(--text-primary);
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -69,15 +69,15 @@
   width: 100%;
   min-height: 2.4rem;
   padding: 0.65rem 0.8rem;
-  border: 1px solid #c8d7e5;
-  background: #ffffff;
-  color: #1e293b;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-size: 0.92rem;
 }
 
 .customer-bulk-action-dialog-input:focus {
   outline: none;
-  border-color: #4a88bc;
+  border-color: var(--text-primary);
   box-shadow: 0 0 0 3px rgba(74, 136, 188, 0.14);
 }
 
@@ -89,7 +89,7 @@
 .customer-bulk-action-dialog-error {
   padding: 0.75rem 0.9rem;
   border: 1px solid var(--color-danger-border);
-  background: #fff1f1;
+  background: var(--surface-card);
   color: #b91c1c;
   font-size: 0.84rem;
   font-weight: 700;
@@ -113,6 +113,6 @@
 }
 
 .customer-bulk-action-dialog-button-secondary {
-  border-color: #8aaacc;
+  border-color: var(--text-primary);
   background: linear-gradient(180deg, #99b8d4 0%, #7499c0 100%);
 }

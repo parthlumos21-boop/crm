@@ -47,7 +47,7 @@
 }
 
 .sr-step-number.completed {
-  background-color: #6f5bd6;
+  background-color: var(--text-primary);
   color: #ffffff;
 }
 

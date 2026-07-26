@@ -23,6 +23,7 @@ import {
 import Badge from '../../../components/common/Badge'
 import Button from '../../../components/common/Button'
 import { useData } from '../../../context/DataContext'
+import { buildAdminDealDetailUrl } from '../../../features/adminDeals/config/adminDealViews'
 import { ACCOUNT_ACTION_MAP, ACCOUNT_ROW_ACTIONS } from '../../../features/adminAccounts/config/accountActions'
 import { buildAdminAccountActionUrl, buildAdminAccountBoardReturnUrl, openAdminAccountActionPage } from '../../../features/adminAccounts/utils/accountNavigation'
 import { buildCrmAccountActionUrl } from '../crm-actions/CRMActionPage'
@@ -40,6 +41,7 @@ const ACTION_ICON_BY_KEY = {
   'upload-quotation': FaUpload,
   're-assign-account': FaExchangeAlt,
   'change-account-category': FaLayerGroup,
+  'view-linked-deal': FaExternalLinkAlt,
   'converted-deal': FaExchangeAlt,
   'send-mail': FaEnvelope,
   'manage-account': FaExternalLinkAlt,
@@ -54,6 +56,7 @@ const DETAIL_ACTION_ITEMS = [
   { key: 'upload-quotation', label: 'Upload Quotation' },
   { key: 're-assign-account', label: 'Re-Assign Account' },
   { key: 'change-account-category', label: 'Change Account Category' },
+  { key: 'view-linked-deal', label: 'View Deal' },
   { key: 'converted-deal', label: 'Converted Deal' },
   { key: 'send-mail', label: 'Send Mail' },
   { key: 'manage-account', label: 'Manage Account' },
@@ -93,7 +96,7 @@ const AccountDetailsPage = () => {
   const navigate = useNavigate()
   const { accountId } = useParams()
   const [searchParams] = useSearchParams()
-  const { accounts, addNotification, deleteAccount } = useData()
+  const { accounts, convertedDeals, addNotification, deleteAccount } = useData()
   const [isActionsOpen, setIsActionsOpen] = useState(false)
   const [activeActionKey, setActiveActionKey] = useState(null)
   const [, setRefreshKey] = useState(0)
@@ -101,6 +104,24 @@ const AccountDetailsPage = () => {
 
   const account = getAccountById(accounts, accountId)
   const boardUrl = useMemo(() => buildAdminAccountBoardReturnUrl(searchParams), [searchParams])
+  const relatedConvertedDeals = useMemo(() => (
+    (Array.isArray(convertedDeals) ? convertedDeals : [])
+      .filter((entry) => String(entry.accountId || '') === String(account?.id || ''))
+      .sort((left, right) => (
+        new Date(right.convertedAt || right.createdAt || 0).getTime()
+        - new Date(left.convertedAt || left.createdAt || 0).getTime()
+      ))
+  ), [account?.id, convertedDeals])
+  const linkedDealId = account?.dealId
+    || relatedConvertedDeals[0]?.sourceDealId
+    || relatedConvertedDeals[0]?.dealId
+    || account?.convertedDealId
+    || ''
+  const isConvertedAccount = Boolean(account?.isConverted || account?.dealId || account?.convertedDealId || relatedConvertedDeals.length > 0)
+  const visibleDetailActionItems = DETAIL_ACTION_ITEMS.filter((action) => (
+    (action.key !== 'converted-deal' || !isConvertedAccount)
+    && (action.key !== 'view-linked-deal' || isConvertedAccount)
+  ))
 
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -146,16 +167,21 @@ const AccountDetailsPage = () => {
       return
     }
 
+    if (action.key === 'view-linked-deal') {
+      if (!linkedDealId) {
+        addNotification('warning', 'Deal not found', 'This account does not have a linked deal yet.')
+        return
+      }
+
+      navigate(buildAdminDealDetailUrl(linkedDealId), { state: { fromPath: boardUrl } })
+      return
+    }
+
     setActiveActionKey(action.key)
   }
 
   const handleDetailAction = async (action) => {
     setIsActionsOpen(false)
-
-    if (ACCOUNT_ACTION_MAP[action.key]) {
-      handleOpenAction(action)
-      return
-    }
 
     if (action.key === 'generate-quotation') {
       navigate('/admin/quotations', {
@@ -164,6 +190,11 @@ const AccountDetailsPage = () => {
           preselectedAccountId: account.id,
         },
       })
+      return
+    }
+
+    if (ACCOUNT_ACTION_MAP[action.key]) {
+      handleOpenAction(action)
       return
     }
 
@@ -263,7 +294,7 @@ const AccountDetailsPage = () => {
 
               {isActionsOpen ? (
                 <div className="account-details-actions-menu">
-                  {DETAIL_ACTION_ITEMS.map((action) => {
+                  {visibleDetailActionItems.map((action) => {
                     const Icon = ACTION_ICON_BY_KEY[action.key] || FaPlus
 
                     return (

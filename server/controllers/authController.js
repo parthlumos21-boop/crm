@@ -66,6 +66,58 @@ const login = async (req, res, next) => {
   }
 }
 
+const microsoftLoginUrl = async (req, res, next) => {
+  try {
+    res.json({
+      success: true,
+      data: {
+        authUrl: authService.buildMicrosoftLoginAuthUrl(req.query?.returnUrl || req.body?.returnUrl),
+      },
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const microsoftLoginRedirect = async (req, res, next) => {
+  try {
+    const authUrl = authService.buildMicrosoftLoginAuthUrl(req.query?.returnUrl || req.body?.returnUrl)
+    res.redirect(authUrl)
+  } catch (error) {
+    next(error)
+  }
+}
+
+const microsoftCallback = async (req, res, next) => {
+  try {
+    const callbackData = {
+      ...(req.query || {}),
+      ...(req.body || {}),
+    }
+    const result = await authService.loginWithMicrosoftCallback(callbackData, getRequestMeta(req))
+    setSessionCookies(res, result)
+
+    const redirectUrl = new URL(result.returnUrl || env.clientUrl)
+    redirectUrl.searchParams.set('microsoft', 'success')
+    if (result.outlookConnected) {
+      redirectUrl.searchParams.set('outlook', 'connected')
+      if (result.outlookEmail) redirectUrl.searchParams.set('outlookEmail', result.outlookEmail)
+    }
+    res.redirect(redirectUrl.toString())
+  } catch (error) {
+    try {
+      const fallbackUrl = new URL(env.clientUrl || 'http://localhost:5173')
+      fallbackUrl.pathname = '/login'
+      fallbackUrl.searchParams.set('microsoft', 'failed')
+      fallbackUrl.searchParams.set('message', error.message || 'Microsoft login failed.')
+      res.redirect(fallbackUrl.toString())
+      return
+    } catch (_redirectError) {
+      next(error)
+    }
+  }
+}
+
 const refresh = async (req, res, next) => {
   try {
     const result = await authService.refreshSession(req.cookies?.refreshToken || req.body?.refreshToken)
@@ -107,6 +159,12 @@ const me = async (req, res, next) => {
     }
 
     const user = await authService.getCurrentUser(req.user.id)
+    if (req.user.canActAsUser && req.user.role !== user.role) {
+      user.actualRole = req.user.actualRole || user.role
+      user.role = req.user.role
+      user.canActAsUser = true
+      user.userRoleMode = req.user.userRoleMode || user.userRoleMode || 'both'
+    }
     const token = extractToken(req)
     if (token) {
       res.cookie('token', token, cookieOptions())
@@ -209,6 +267,9 @@ const notImplemented = (featureName) => (_req, res) => {
 
 module.exports = {
   login,
+  microsoftLoginUrl,
+  microsoftLoginRedirect,
+  microsoftCallback,
   refresh,
   register,
   me,

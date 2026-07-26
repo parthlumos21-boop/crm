@@ -26,9 +26,7 @@
   left: -10rem;
   width: 24rem;
   height: 24rem;
-  background:
-    radial-gradient(circle at 35% 35%, rgba(34, 197, 193, 0.28), rgba(34, 197, 193, 0) 68%),
-    radial-gradient(circle at 68% 62%, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0) 64%);
+  background: var(--surface-app);
   animation: chromeFloat 18s var(--ease-in-out) infinite;
 }
 
@@ -37,9 +35,7 @@
   top: 13rem;
   width: 30rem;
   height: 30rem;
-  background:
-    radial-gradient(circle at 28% 30%, rgba(59, 130, 246, 0.18), rgba(59, 130, 246, 0) 44%),
-    radial-gradient(circle at 62% 54%, rgba(251, 146, 60, 0.24), rgba(251, 146, 60, 0) 66%);
+  background: var(--surface-app);
   animation: chromeFloat 22s var(--ease-in-out) infinite reverse;
 }
 
@@ -48,9 +44,7 @@
   bottom: -10rem;
   width: 22rem;
   height: 22rem;
-  background:
-    radial-gradient(circle, rgba(20, 184, 166, 0.18), rgba(20, 184, 166, 0) 62%),
-    radial-gradient(circle at 70% 30%, rgba(249, 115, 22, 0.16), rgba(249, 115, 22, 0) 52%);
+  background: var(--surface-app);
   animation: chromeFloat 24s var(--ease-in-out) infinite;
 }
 
@@ -59,10 +53,10 @@
   z-index: 1;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: clamp(4px, 0.55vw, 8px);
-  width: min(var(--page-max-width), calc(100% - 8px));
-  margin: 0 auto;
-  padding-top: calc(var(--header-height) + 2px);
+  gap: 0px;
+  width: 100%;
+  margin: 0;
+  padding-top: calc(var(--header-height) + 24px);
   align-items: start;
   min-width: 0;
 }
@@ -139,9 +133,9 @@
   border: none;
   border-radius: var(--radius-lg);
   background: var(--surface-card);
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 .layout-main::before,
@@ -162,7 +156,7 @@
   bottom: -0.85rem;
   height: 2rem;
   border-radius: 9999px;
-  background: radial-gradient(circle at center, rgba(16, 62, 76, 0.18), rgba(16, 62, 76, 0) 70%);
+  background: var(--surface-app);
   filter: blur(16px);
 }
 
@@ -194,7 +188,7 @@
   right: 1rem;
   width: 7rem;
   height: 7rem;
-  background: radial-gradient(circle, rgba(34, 197, 193, 0.22), rgba(34, 197, 193, 0) 72%);
+  background: var(--surface-app);
   animation: chromePulse 6s ease-in-out infinite;
 }
 
@@ -203,7 +197,7 @@
   bottom: 1rem;
   width: 8rem;
   height: 8rem;
-  background: radial-gradient(circle, rgba(249, 115, 22, 0.16), rgba(249, 115, 22, 0) 72%);
+  background: var(--surface-app);
   animation: chromePulse 7.5s ease-in-out infinite;
 }
 
@@ -377,7 +371,7 @@
     inset: 0;
     z-index: 1150;
     border: 0;
-    background: rgba(8, 28, 46, 0.4);
+    background: rgba(15, 23, 42, 0.45);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     cursor: pointer;

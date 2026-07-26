@@ -6,12 +6,21 @@ import { useAuth } from '../../context/AuthContext'
 import { getAdminReminders } from '../../features/adminReminders/getAdminReminders'
 import { getAdminReminderStates, subscribeAdminReminderStates } from '../../features/adminReminders/reminderStorage'
 import { getStandaloneReminders, subscribeStandaloneReminders } from '../../features/standaloneReminders/standaloneReminderStorage'
+import { calendarApi } from '../../services/calendarApi'
 import './AdminCalendarPage.css'
 
 const REMINDER_SOURCE_ROUTE = {
   account: '/admin/accounts',
   customer: '/admin/customers/search',
   deal: '/admin/deals/view',
+}
+
+const CALENDAR_SOURCE_ROUTE = {
+  account: '/admin/accounts',
+  customer: '/admin/customers/search',
+  deal: '/admin/deals/view',
+  supportRequest: '/admin/support-requests',
+  'support-request': '/admin/support-requests',
 }
 
 const toDateKey = (value) => {
@@ -86,6 +95,8 @@ const AdminCalendarPage = () => {
   const { user } = useAuth()
   const [reminderStatesById, setReminderStatesById] = useState(() => getAdminReminderStates())
   const [standaloneReminders, setStandaloneReminders] = useState(() => getStandaloneReminders())
+  const [calendarEvents, setCalendarEvents] = useState([])
+  const [selectedDateKey, setSelectedDateKey] = useState(() => toDateKey(new Date()))
   const [now, setNow] = useState(() => new Date())
   const [todayKey, setTodayKey] = useState(() => toDateKey(new Date()))
   const [visibleMonth, setVisibleMonth] = useState(() => {
@@ -106,6 +117,23 @@ const AdminCalendarPage = () => {
 
   useEffect(() => subscribeAdminReminderStates(setReminderStatesById), [])
   useEffect(() => subscribeStandaloneReminders(setStandaloneReminders), [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    calendarApi.listEvents()
+      .then((events) => {
+        if (!isMounted) return
+        setCalendarEvents(Array.isArray(events) ? events : [])
+      })
+      .catch(() => {
+        if (isMounted) setCalendarEvents([])
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const remindersByDate = useMemo(() => {
     const reminders = getAdminReminders({
@@ -129,7 +157,19 @@ const AdminCalendarPage = () => {
       }))
 
     const lookup = new Map()
-    ;[...reminders, ...activeStandalone].forEach((reminder) => {
+    const apiCalendarReminders = calendarEvents.map((event) => ({
+      id: `calendar-${event.id || event._id || event.startAt || event.title}`,
+      sourceType: event.relatedEntityType || event.data?.relatedEntityType || 'calendar',
+      sourceLabel: event.category || 'Calendar',
+      name: event.title || event.data?.title || 'Calendar event',
+      ownerName: event.ownerName || event.createdByName || event.assignedToName || '',
+      reminderDate: event.startAt || event.start_at || event.data?.startAt || '',
+      reminderTime: String(event.startAt || event.start_at || event.data?.startAt || '').slice(11, 16),
+      calendarEvent: true,
+      relatedEntityId: event.relatedEntityId || event.related_entity_id || event.data?.relatedEntityId || '',
+    }))
+
+    ;[...reminders, ...activeStandalone, ...apiCalendarReminders].forEach((reminder) => {
       const key = toDateKey(reminder.reminderDate)
       if (!key) return
       const list = lookup.get(key) || []
@@ -137,16 +177,22 @@ const AdminCalendarPage = () => {
       lookup.set(key, list)
     })
     return lookup
-  }, [accounts, deals, reminderStatesById, standaloneReminders, user])
+  }, [accounts, calendarEvents, deals, reminderStatesById, standaloneReminders, user])
 
   const calendarDays = useMemo(() => (
     buildCalendarDays(visibleMonth, new Date(todayKey + 'T00:00:00'))
   ), [visibleMonth, todayKey])
 
+  const selectedDateReminders = useMemo(
+    () => remindersByDate.get(selectedDateKey) || [],
+    [remindersByDate, selectedDateKey]
+  )
+
   const handleReminderClick = (reminder) => {
     const route = REMINDER_SOURCE_ROUTE[reminder.sourceType]
+      || CALENDAR_SOURCE_ROUTE[reminder.sourceType]
     if (!route) return
-    navigate(route, { state: { fromCalendarReminderId: reminder.id, fromCalendarReminderName: reminder.name } })
+    navigate(route, { state: { fromCalendarReminderId: reminder.id, fromCalendarReminderName: reminder.name, relatedEntityId: reminder.relatedEntityId } })
   }
 
   const handlePreviousMonth = () => {
@@ -205,6 +251,29 @@ const AdminCalendarPage = () => {
           </button>
         </div>
 
+        <div className="admin-calendar-date-panel">
+          <div className="admin-calendar-date-panel-title">
+            <FaCalendarAlt />
+            <span>{selectedDateKey || todayKey}</span>
+          </div>
+          <div className="admin-calendar-date-panel-list">
+            {selectedDateReminders.length > 0 ? selectedDateReminders.map((reminder) => (
+              <button
+                key={`selected-${reminder.id}`}
+                type="button"
+                className={`admin-calendar-date-panel-item admin-calendar-reminder--${reminder.sourceType}`}
+                onClick={() => handleReminderClick(reminder)}
+              >
+                <FaCalendarAlt aria-hidden="true" />
+                <strong>{reminder.sourceLabel}</strong>
+                <span>{reminder.name}</span>
+              </button>
+            )) : (
+              <span className="admin-calendar-date-panel-empty">No reminders for this date.</span>
+            )}
+          </div>
+        </div>
+
         <div className="admin-calendar-grid">
           {WEEKDAY_LABELS.map((label) => (
             <div key={label} className="admin-calendar-weekday">
@@ -226,7 +295,14 @@ const AdminCalendarPage = () => {
                   dayReminders.length > 0 ? 'admin-calendar-day--has-reminders' : '',
                 ].filter(Boolean).join(' ')}
               >
-                <div className="admin-calendar-day-number">{day.dayNumber}</div>
+                <button
+                  type="button"
+                  className="admin-calendar-day-number"
+                  onClick={() => setSelectedDateKey(toDateKey(day.date))}
+                  aria-label={`Show reminders for ${toDateKey(day.date)}`}
+                >
+                  {day.dayNumber}
+                </button>
                 {day.isToday ? (
                   <div className="admin-calendar-day-pill">Current Day</div>
                 ) : null}
@@ -240,6 +316,7 @@ const AdminCalendarPage = () => {
                         onClick={() => handleReminderClick(reminder)}
                         title={`${reminder.sourceLabel}: ${reminder.name} (${reminder.ownerName})`}
                       >
+                        <FaCalendarAlt className="admin-calendar-reminder-icon" aria-hidden="true" />
                         <span className="admin-calendar-reminder-source">{reminder.sourceLabel}</span>
                         <span className="admin-calendar-reminder-name">{reminder.name}</span>
                       </button>

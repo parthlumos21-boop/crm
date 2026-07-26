@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   FaArrowLeft,
@@ -82,6 +82,21 @@ const DEAL_CONTACT_PREFIX_OPTIONS = [
   { value: 'Dr.', label: 'Dr.' },
 ]
 
+const LOST_ORDER_REASON_OPTIONS = [
+  { value: '', label: 'Select Reason', shortLabel: 'Select Reason' },
+  { value: 'Intense Competition', label: 'A - Intense Competition', shortLabel: 'A - Intense Com' },
+  { value: 'On Hold', label: 'B - On Hold', shortLabel: 'B - On Hold' },
+  { value: 'Payment Terms not matching.', label: 'C - Payment Terms not matching.', shortLabel: 'C - Payment' },
+  { value: 'Delivery not matching.', label: 'D - Delivery not matching.', shortLabel: 'D - Delivery' },
+  { value: 'Budgetory Offer.', label: 'E - Budgetory Offer.', shortLabel: 'E - Budgetory' },
+]
+
+const LOST_ORDER_DUPLICATE_MESSAGE = 'A deal with the same title already exists for this account or customer.'
+const LOST_ORDER_REASON_LABELS = LOST_ORDER_REASON_OPTIONS.reduce((lookup, option) => ({
+  ...lookup,
+  [option.value]: option.label,
+}), {})
+
 const normalizeDealMarketingValue = (value = '') => {
   const normalized = String(value || '').trim().toUpperCase()
   if (normalized === 'MARKETING-LUMOS') return 'LUMOS'
@@ -89,22 +104,43 @@ const normalizeDealMarketingValue = (value = '') => {
   return String(value || '').trim()
 }
 
+const parseAndDeduplicateMessages = (message, fallback = 'An error occurred') => {
+  let parsedMessages = []
+  if (Array.isArray(message)) {
+    parsedMessages = message.map(String)
+  } else if (typeof message === 'string') {
+    parsedMessages = message.split(/(?:\r?\n|,)/)
+  } else {
+    parsedMessages = [String(message || fallback)]
+  }
+  const uniqueMessages = [...new Set(parsedMessages.map(s => s.trim()).filter(Boolean))]
+  return uniqueMessages.join(' | ') || fallback
+}
+
 const DEAL_SEARCH_FIELD_CATALOG = [
-  { key: 'dealId', label: 'Deal ID', placeholder: 'Search Deal ID', sourceField: 'id' },
-  { key: 'customerName', label: 'Customer Name', placeholder: 'Search Customer Name', sourceField: 'customer_name' },
-  { key: 'poValue', label: 'PO Value', placeholder: 'Search PO Value', sourceField: 'po_value' },
-  { key: 'customerNumber', label: 'Customer No.', placeholder: 'Search Customer No.', sourceField: 'customer_number' },
   { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search Deal No.', sourceField: 'deal_number' },
-  { key: 'dealDate', label: 'Deal Date', placeholder: 'Search Deal Date', sourceField: 'deal_date' },
+  { key: 'quotationNumber', label: 'Quotation Number', placeholder: 'Search Quotation No.', sourceField: 'quotation_number' },
+  { key: 'dealDate', label: 'Quotation Date', placeholder: 'Search Quotation Date', sourceField: 'quotation_date' },
+  { key: 'dealOwner', label: 'Quotation Owner', placeholder: 'Search Quotation Owner', sourceField: 'owner' },
+  { key: 'companyCustomerName', label: 'Company / Customer Name', placeholder: 'Search Company / Customer', sourceField: 'company_customer_name' },
+  { key: 'companyName', label: 'Company Name', placeholder: 'Search Company Name', sourceField: 'company_name' },
+  { key: 'customerName', label: 'Customer Name', placeholder: 'Search Customer Name', sourceField: 'customer_name' },
+  { key: 'projectName', label: 'Project Name', placeholder: 'Search Project Name', sourceField: 'project_name' },
+  { key: 'dealValue', label: 'Amount', placeholder: 'Search Amount', sourceField: 'deal_value' },
+  { key: 'dealStatus', label: 'Status', placeholder: 'Search Status', sourceField: 'status' },
+  { key: 'orderCustomerStatusOld', label: 'Old', groupLabel: 'Customer Order Status', placeholder: 'Search Old Status', sourceField: 'order_customer_status_old' },
+  { key: 'orderCustomerStatusNew', label: 'New', groupLabel: 'Customer Order Status', placeholder: 'Search New Status', sourceField: 'order_customer_status_new' },
+  { key: 'convertToPo', label: 'Convert to PO', placeholder: 'Search Convert to PO', sourceField: 'convert_to_po' },
+  { key: 'poValue', label: 'PO Value', placeholder: 'Search PO Value', sourceField: 'po_value' },
+  { key: 'jobNo', label: 'Job No.', placeholder: 'Search Job No.', sourceField: 'job_no' },
+  { key: 'reasonForLostOrder', label: 'Lost Order Reason', placeholder: 'Search Lost Order Reason', sourceField: 'reason_for_lost_order' },
+  { key: 'customerNumber', label: 'Customer No.', placeholder: 'Search Customer No.', sourceField: 'customer_number' },
   { key: 'dealType', label: 'Deal Type', placeholder: 'Search Deal Type', sourceField: 'deal_type' },
   { key: 'dealName', label: 'Deal Name', placeholder: 'Search Deal Name', sourceField: 'deal_name' },
-  { key: 'dealOwner', label: 'Deal Owner', placeholder: 'Search Deal Owner', sourceField: 'owner' },
-  { key: 'dealStatus', label: 'Deal Status', placeholder: 'Search Deal Status', sourceField: 'status' },
   { key: 'address', label: 'Address', placeholder: 'Search Address', sourceField: 'address' },
   { key: 'dealCoOwners', label: 'Deal Co-Owners', placeholder: 'Search Deal Co-Owners', sourceField: 'deal_co_owners' },
   { key: 'actualClosureDate', label: 'Actual Closure Date', placeholder: 'Search Actual Closure Date', sourceField: 'actual_closure_date' },
   { key: 'expectedClosureDate', label: 'Expected Closure Date', placeholder: 'Search Expected Closure Date', sourceField: 'expected_closure_date' },
-  { key: 'dealValue', label: 'Deal Value', placeholder: 'Search Deal Value', sourceField: 'deal_value' },
   { key: 'probability', label: 'Probability', placeholder: 'Search Probability', sourceField: 'probability' },
   { key: 'dealScore', label: 'Deal Score', placeholder: 'Search Deal Score', sourceField: 'deal_score' },
   { key: 'description', label: 'Description', placeholder: 'Search Description', sourceField: 'description' },
@@ -116,90 +152,89 @@ const DEAL_SEARCH_FIELD_CATALOG = [
   { key: 'email', label: 'Email', placeholder: 'Search Email', sourceField: 'email' },
   { key: 'quotationCustomerStatus', label: 'Status Of Customer as per Quotation Given', placeholder: 'Search Quotation Status', sourceField: 'quotation_customer_status' },
   { key: 'orderCustomerStatus', label: 'Status Of Customer as per Order Received', placeholder: 'Search Order Status', sourceField: 'order_customer_status' },
-  { key: 'jobNo', label: 'Job No', placeholder: 'Search Job No', sourceField: 'job_no' },
   { key: 'accountName', label: 'Linked Account Name', placeholder: 'Search Linked Account Name', sourceField: 'account_name' },
   { key: 'accountNumber', label: 'Account No.', placeholder: 'Search Account No.', sourceField: 'account_number' },
-  { key: 'projectName', label: 'Project Name', placeholder: 'Search Project Name', sourceField: 'project_name' },
   { key: 'city', label: 'City', placeholder: 'Search City', sourceField: 'city' },
-  { key: 'companyName', label: 'Company Name', placeholder: 'Search Company Name', sourceField: 'company_name' },
   { key: 'companyProfile', label: 'Company Profile', placeholder: 'Search Company Profile', sourceField: 'company_profile' },
   { key: 'latestRemark', label: 'Latest Remark', placeholder: 'Search Latest Remark', sourceField: 'latest_remark' },
   { key: 'createdDate', label: 'Created Date', placeholder: 'Search Created Date', sourceField: 'created_at' },
+  { key: 'location', label: 'Location', placeholder: 'Search Location', sourceField: 'location' },
 ]
 
 const DEAL_GRID_COLUMNS = [
-  { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search Deal No.', sourceField: 'deal_number' },
-  { key: 'dealName', label: 'Deal Name', placeholder: 'Search Deal Name', sourceField: 'deal_name' },
-  { key: 'dealDate', label: 'Deal Date', placeholder: 'Search Deal Date', sourceField: 'deal_date' },
-  { key: 'dealOwner', label: 'Deal Owner', placeholder: 'Search Deal Owner', sourceField: 'owner' },
-  { key: 'dealType', label: 'Deal Type', placeholder: 'Search Deal Type', sourceField: 'deal_type' },
-  { key: 'dealStatus', label: 'Deal Status', placeholder: 'Search Deal Status', sourceField: 'status' },
-  { key: 'dealValue', label: 'Deal Value', placeholder: 'Search Deal Value', sourceField: 'deal_value' },
-  { key: 'quotationCustomerStatus', label: 'Status Of Customer as per Quotation Given', placeholder: 'Search Quotation Status', sourceField: 'quotation_customer_status' },
-  { key: 'orderCustomerStatus', label: 'Status Of Customer as per Order Received', placeholder: 'Search Order Status', sourceField: 'order_customer_status' },
-  { key: 'poValue', label: 'PO Value', placeholder: 'Search PO Value', sourceField: 'po_value' },
-  { key: 'jobNo', label: 'Job No', placeholder: 'Search Job No', sourceField: 'job_no' },
+  { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search Deal No.' },
+  { key: 'quotationNumber', label: 'Quotation Number', placeholder: 'Search Quotation No.' },
+  { key: 'dealDate', label: 'Quotation Date', placeholder: 'Search Quotation Date' },
+  { key: 'dealOwner', label: 'Quotation Owner', placeholder: 'Search Quotation Owner' },
+  { key: 'companyCustomerName', label: 'Company / Customer Name', placeholder: 'Search Company / Customer' },
+  { key: 'projectName', label: 'Project Name', placeholder: 'Search Project Name' },
+  { key: 'dealValue', label: 'Amount', placeholder: 'Search Amount' },
+  { key: 'dealStatus', label: 'Status', placeholder: 'Search Status' },
+  { key: 'quotationCustomerStatus', label: 'Quotation Status', placeholder: 'Search Quotation Status' },
+  { key: 'orderCustomerStatusOld', label: 'Old', groupLabel: 'Customer Order Status', placeholder: 'Search Old Status' },
+  { key: 'orderCustomerStatusNew', label: 'New', groupLabel: 'Customer Order Status', placeholder: 'Search New Status' },
+  { key: 'convertToPo', label: 'Convert to PO', placeholder: 'Search Convert to PO' },
+  { key: 'poValue', label: 'PO Value', placeholder: 'Search PO Value' },
+  { key: 'jobNo', label: 'Job No.', placeholder: 'Search Job No' },
+  { key: 'reasonForLostOrder', label: 'Lost Order Reason', placeholder: 'Search Reason' },
+]
+
+const VIEW_DEAL_GRID_COLUMNS = [
+  { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search Deal No.' },
+  { key: 'quotationNumber', label: 'Quotation Number', placeholder: 'Search Quotation No.' },
+  { key: 'dealDate', label: 'Quotation Date', placeholder: 'Search Quotation Date' },
+  { key: 'dealOwner', label: 'Quotation Owner', placeholder: 'Search Quotation Owner' },
+  { key: 'companyCustomerName', label: 'Company / Customer Name', placeholder: 'Search Company / Customer' },
+  { key: 'projectName', label: 'Project Name', placeholder: 'Search Project Name' },
+  { key: 'dealValue', label: 'Amount', placeholder: 'Search Amount' },
+  { key: 'dealStatus', label: 'Status', placeholder: 'Search Status' },
+  { key: 'quotationCustomerStatus', label: 'Quotation Status', placeholder: 'Search Quotation Status' },
+  { key: 'orderCustomerStatusOld', label: 'Old', groupLabel: 'Customer Order Status', placeholder: 'Search Old Status' },
+  { key: 'orderCustomerStatusNew', label: 'New', groupLabel: 'Customer Order Status', placeholder: 'Search New Status' },
+  { key: 'convertToPo', label: 'Convert to PO (Yes / No)', placeholder: 'Search Convert to PO' },
+  { key: 'poValue', label: 'PO Value', placeholder: 'Search PO Value' },
+  { key: 'jobNo', label: 'Job No.', placeholder: 'Search Job No' },
+  { key: 'reasonForLostOrder', label: 'Lost Order Reason', placeholder: 'Search Reason' },
+]
+
+const CUSTOM_LOCATION_SELECT_OPTIONS = [
+  { value: '', label: 'Select Location' },
+  { value: 'Ahmedabad', label: 'Ahmedabad Deal' },
+  { value: 'Vadodara', label: 'Vadodara Deal' },
 ]
 
 const SEARCH_DEAL_REQUIRED_GRID_KEYS = [
   'dealNumber',
-  'dealName',
+  'quotationNumber',
   'dealDate',
   'dealOwner',
-  'dealType',
-  'dealStatus',
+  'companyCustomerName',
+  'projectName',
   'dealValue',
+  'dealStatus',
   'quotationCustomerStatus',
-  'orderCustomerStatus',
+  'orderCustomerStatusOld',
+  'orderCustomerStatusNew',
+  'convertToPo',
   'poValue',
   'jobNo',
+  'reasonForLostOrder',
 ]
 
 const OWNER_WISE_COLUMNS = [
-  { key: 'dealNumber', label: 'Deal Number', placeholder: 'Search here ...' },
-  { key: 'dealName', label: 'Deal Name', placeholder: 'Search here ...' },
-  { key: 'dealDate', label: 'Deal Date', placeholder: 'Search here ...' },
-  { key: 'dealType', label: 'Deal Type', placeholder: 'Search here ...' },
-  { key: 'address', label: 'Address', placeholder: 'Search here ...' },
-  { key: 'lastUpdated', label: 'Last  Updated', placeholder: 'Search here ...' },
-  { key: 'latestRemark', label: 'Latest Remark', placeholder: 'Search here ...' },
+  ...VIEW_DEAL_GRID_COLUMNS,
 ]
 
 const PROJECT_DETAILS_COLUMNS = [
-  { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search here ...' },
-  { key: 'customerName', label: 'Customer Name', placeholder: 'Search here ...' },
-  { key: 'dealName', label: 'Deal Name', placeholder: 'Search here ...' },
-  { key: 'dealStatus', label: 'Deal Status', placeholder: 'Search here ...' },
-  { key: 'dealValue', label: 'Deal Value', placeholder: 'Search here ...' },
-  { key: 'jobNo', label: 'Job No', placeholder: 'Search here ...' },
-  { key: 'projectName', label: 'Project Name', placeholder: 'Search here ...' },
-  { key: 'consultantName', label: 'Consultant Name', placeholder: 'Search here ...' },
-  { key: 'address', label: 'Address', placeholder: 'Search here ...' },
+  ...VIEW_DEAL_GRID_COLUMNS,
 ]
 
 const AHMADABAD_COLUMNS = [
-  { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search here ...' },
-  { key: 'customerName', label: 'Customer Name', placeholder: 'Search here ...' },
-  { key: 'dealName', label: 'Deal Name', placeholder: 'Search here ...' },
-  { key: 'dealStatus', label: 'Deal Status', placeholder: 'Search here ...' },
-  { key: 'projectName', label: 'Project Name', placeholder: 'Search here ...' },
-  { key: 'jobNo', label: 'Job No', placeholder: 'Search here ...' },
-  { key: 'poValue', label: 'PO Value', placeholder: 'Search here ...' },
-  { key: 'reasonForLost', label: 'Reason For Lost', placeholder: 'Search here ...' },
-  { key: 'latestRemark', label: 'Latest Remark', placeholder: 'Search here ...' },
+  ...VIEW_DEAL_GRID_COLUMNS,
 ]
 
 const VADODARA_COLUMNS = [
-  { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search here ...' },
-  { key: 'customerName', label: 'Customer Name', placeholder: 'Search here ...' },
-  { key: 'dealName', label: 'Deal Name', placeholder: 'Search here ...' },
-  { key: 'dealStatus', label: 'Deal Status', placeholder: 'Search here ...' },
-  { key: 'dealValue', label: 'Deal Value', placeholder: 'Search here ...' },
-  { key: 'projectName', label: 'Project Name', placeholder: 'Search here ...' },
-  { key: 'jobNo', label: 'Job No', placeholder: 'Search here ...' },
-  { key: 'poValue', label: 'PO Value', placeholder: 'Search here ...' },
-  { key: 'reasonForLost', label: 'Reason For Lost', placeholder: 'Search here ...' },
-  { key: 'latestRemark', label: 'Latest Remark', placeholder: 'Search here ...' },
+  ...VIEW_DEAL_GRID_COLUMNS,
 ]
 
 // Explicit column-type metadata for the deal export. Replaces the previous
@@ -228,6 +263,7 @@ const DEAL_EXPORT_FIELD_META = {
   // Wider text columns that should always wrap
   customerName:     { width: 28 },
   companyName:      { width: 28 },
+  companyCustomerName: { width: 34 },
   dealName:         { width: 28 },
   projectName:      { width: 24 },
   accountOwner:     { width: 22 },
@@ -243,13 +279,18 @@ const DEAL_EXPORT_FIELD_META = {
 
 const DEAL_BOARD_COLUMNS = [
   { key: 'new', label: 'New', headerClassName: 'deals-board-column-header-new' },
-  { key: 'closedWon', label: 'Closed-Won', headerClassName: 'deals-board-column-header-won' },
-  { key: 'closedLost', label: 'Closed-Lost', headerClassName: 'deals-board-column-header-lost' },
+  { key: 'closedWon', label: 'Closed Won', headerClassName: 'deals-board-column-header-won' },
+  { key: 'closedLost', label: 'Closed Lost', headerClassName: 'deals-board-column-header-lost' },
   { key: 'quotationSent', label: 'Quotation Sent', headerClassName: 'deals-board-column-header-sent' },
   { key: 'quotationRevision', label: 'Quotation Revision', headerClassName: 'deals-board-column-header-revision' },
 ]
 
-const ROWS_PER_PAGE = 25
+const DEAL_STATUS_FILTER_OPTIONS = [
+  { key: 'all', label: 'All Deal Status' },
+  ...DEAL_BOARD_COLUMNS.map((column) => ({ key: column.key, label: column.label })),
+]
+
+const ROWS_PER_PAGE = 6
 const BOARD_INITIAL_LIMIT = 8
 const BOARD_LOAD_MORE_COUNT = 6
 let dealContactSequence = 0
@@ -309,37 +350,45 @@ const getPrimaryDealContact = (contacts = []) => {
   return includedContacts.find((contact) => contact.isPrimary) || includedContacts[0] || null
 }
 
-const buildInitialFormData = (overrides = {}) => ({
-  dealDate: new Date().toISOString().slice(0, 10),
-  name: '',
-  dealType: '',
-  dealSource: '',
-  dealSubsource: '',
-  expectedClosureDate: '',
-  value: '',
-  valueCurrency: 'INR',
-  status: 'new',
-  stage: '',
-  closeDate: '',
-  projectName: '',
-  city: '',
-  description: '',
-  address: '',
-  dealCoOwners: '',
-  dealScore: '',
-  consultantName: '',
-  customerQuotationStatus: '',
-  probability: '',
-  productCategory: '',
-  customerRefNo: '',
-  customerRefDate: '',
-  gstin: '',
-  jobNo: '',
-  customerOrderStatus: '',
-  contacts: normalizeDealContacts(),
-  ownerUserId: '',
-  ...overrides,
-})
+const buildInitialFormData = (overrides = {}) => {
+  const todayDate = new Date().toISOString().slice(0, 10)
+
+  return {
+    dealDate: todayDate,
+    name: '',
+    dealType: '',
+    dealSource: '',
+    dealSubsource: '',
+    expectedClosureDate: todayDate,
+    value: '',
+    valueCurrency: 'INR',
+    status: 'new',
+    stage: '',
+    closeDate: todayDate,
+    projectName: '',
+    city: '',
+    description: '',
+    address: '',
+    dealCoOwners: '',
+    dealScore: '',
+    consultantName: '',
+    customerQuotationStatus: '',
+    probability: '',
+    productCategory: '',
+    customerRefNo: '',
+    customerRefDate: todayDate,
+    gstin: '',
+    jobNo: '',
+    customerOrderStatusOld: '',
+    customerOrderStatusNew: '',
+    convertToPo: '',
+    poValueJobNo: '',
+    reasonForLostOrder: '',
+    contacts: normalizeDealContacts(),
+    ownerUserId: '',
+    ...overrides,
+  }
+}
 
 const buildInitialGridFilters = () => (
   DEAL_SEARCH_FIELD_CATALOG.reduce((accumulator, column) => ({
@@ -368,6 +417,7 @@ const DEAL_FILTER_ACTION_OPTIONS = [
   { key: 'viewDeal', label: 'View Deal' },
   { key: 'manageDeal', label: 'Manage Deal' },
   { key: 'addRemark', label: 'Add Remark' },
+  { key: 'changeStatus', label: 'Change Status' },
   { key: 'generateQuotation', label: 'Generate Quotation' },
   { key: 'uploadQuotation', label: 'Upload Quotation' },
   { key: 'reassignDeal', label: 'Re-Assign Deal' },
@@ -375,9 +425,9 @@ const DEAL_FILTER_ACTION_OPTIONS = [
   { key: 'sendMail', label: 'Send Mail' },
 ]
 
-const DEFAULT_DEAL_FILTER_ACTION_KEYS = ['viewDeal', 'manageDeal', 'addRemark', 'generateQuotation', 'uploadQuotation', 'reassignDeal', 'addReminder']
+const DEFAULT_DEAL_FILTER_ACTION_KEYS = ['viewDeal', 'manageDeal', 'addRemark', 'changeStatus', 'generateQuotation', 'uploadQuotation', 'reassignDeal', 'addReminder']
 const DEFAULT_GRID_SORT_CONFIG = {
-  key: 'dealDate',
+  key: 'dealNumber',
   direction: 'asc',
 }
 
@@ -442,23 +492,14 @@ const hasAnyRuleFilters = (rules = []) => (
   Array.isArray(rules) && rules.some((rule) => rule?.fieldKey && (rule.operator === 'empty' || normalizeSearchValue(rule.value) !== ''))
 )
 
-const getGridSortConfigForKey = (columnKey, currentDirection = DEFAULT_GRID_SORT_CONFIG.direction) => {
+const getGridSortConfigForKey = (columnKey) => {
   if (!columnKey) {
     return DEFAULT_GRID_SORT_CONFIG
   }
 
-  const normalizedKey = normalizeSearchValue(columnKey)
-  const prefersDescending = (
-    normalizedKey.includes('date')
-    || normalizedKey.includes('value')
-    || normalizedKey.includes('probability')
-    || normalizedKey.includes('score')
-    || normalizedKey.includes('po')
-  )
-
   return {
     key: columnKey,
-    direction: currentDirection || (prefersDescending ? 'desc' : 'asc'),
+    direction: 'asc',
   }
 }
 
@@ -525,7 +566,74 @@ const buildInitialBoardVisibleCounts = () => (
   }), {})
 )
 
-const normalizeSearchValue = (value) => String(value || '').trim().toLowerCase()
+const normalizeSearchValue = (value) => String(value || '').trim().replace(/\s+/g, ' ').toLowerCase()
+const COMPANY_CUSTOMER_FILTER_KEYS = new Set(['companyCustomerName', 'companyName', 'customerName', 'accountName'])
+const getCompanyCustomerFilterText = (row = {}) => {
+  const rawDeal = row.rawDeal || {}
+
+  return normalizeSearchValue([
+    row.companyCustomerName,
+    row.companyName,
+    row.customerName,
+    row.accountName,
+    row.accountNumber,
+    row.customerNumber,
+    rawDeal.companyCustomerName,
+    rawDeal.companyName,
+    rawDeal.customerName,
+    rawDeal.linkedAccountName,
+    rawDeal.accountName,
+    rawDeal.linkedAccountNumber,
+    rawDeal.accountNumber,
+    rawDeal.customerNumber,
+  ].filter(Boolean).join(' '))
+}
+const getDealGridFilterText = (row = {}, columnKey = '') => (
+  COMPANY_CUSTOMER_FILTER_KEYS.has(columnKey)
+    ? getCompanyCustomerFilterText(row)
+    : normalizeSearchValue(row[columnKey])
+)
+const matchesDealGridFilterText = (row = {}, columnKey = '', filterValue = '') => (
+  getDealGridFilterText(row, columnKey).includes(filterValue)
+)
+const matchesOwnerScopedFilterText = (row = {}, filterableRow = {}, columnKey = '', filterValue = '') => (
+  matchesDealGridFilterText(row, columnKey, filterValue)
+  || matchesDealGridFilterText(filterableRow, columnKey, filterValue)
+)
+const DEAL_TABLE_SYSTEM_ONLY_KEYS = new Set([
+  'actions',
+  'id',
+  'dealId',
+  'dealNumber',
+  'dealDate',
+  'createdDate',
+  'updatedDate',
+  'lastUpdated',
+  'dealOwner',
+  'accountOwner',
+  'dealCoOwners',
+  'dealStatus',
+  'quotationCustomerStatus',
+  'orderCustomerStatus',
+  'orderCustomerStatusOld',
+  'orderCustomerStatusNew',
+  'convertToPo',
+])
+const isFilledDealTableValue = (value) => {
+  const normalizedValue = String(value ?? '').trim()
+  if (!normalizedValue) return false
+  return !['-', '0', '0.0', '0.00', 'select reason'].includes(normalizedValue.toLowerCase())
+}
+const hasDealTableData = (row = {}, columns = []) => {
+  const columnKeys = columns.length > 0
+    ? columns.map((column) => column.key)
+    : Object.keys(row)
+
+  return columnKeys.some((key) => (
+    !DEAL_TABLE_SYSTEM_ONLY_KEYS.has(key)
+    && isFilledDealTableValue(row[key])
+  ))
+}
 const normalizeOwnerValue = (value) => normalizeCrmUserName(value)
 const OWNER_FILTER_FIELD_KEYS = ['dealOwner', 'dealCoOwners']
 const isOwnerFilterField = (fieldKey) => OWNER_FILTER_FIELD_KEYS.includes(String(fieldKey || '').trim())
@@ -539,8 +647,10 @@ const getOwnerTokenSet = (value) => new Set(getNormalizedOwnerTokens(value))
 const getResolvedOwnerName = (row = {}) => (
   row.dealOwner
   || row.ownerName
+  || row.accountOwner
   || row.rawDeal?.dealOwner
   || row.rawDeal?.ownerName
+  || row.rawDeal?.accountOwner
   || ''
 )
 const getResolvedCoOwnerValue = (row = {}) => (
@@ -567,6 +677,7 @@ const matchesOwnerSelection = (row, ownerUserId, ownerName = '') => {
 
   return rowOwnerId === String(ownerUserId)
     || (Boolean(normalizedOwnerName) && (normalizedRowOwnerName === normalizedOwnerName || coOwnerTokenSet.has(normalizedOwnerName)))
+    || (Boolean(normalizedRowOwnerName) && normalizeOwnerValue(ownerUserId) === normalizedRowOwnerName)
 }
 const hasAnyActiveFilters = (filters = {}) => Object.values(filters).some((value) => normalizeSearchValue(value) !== '')
 const DEAL_SEARCH_PREFERENCES_KEY = 'crm_search_deal_preferences'
@@ -632,12 +743,6 @@ const normalizeVisibleColumnKeys = (columnKeys = [], availableColumns = []) => {
   })
 
   const nextKeys = uniqueKeys.length > 0 ? uniqueKeys : availableKeys
-
-  if (availableKeySet.has('dealId')) {
-    return nextKeys.includes('dealId')
-      ? ['dealId', ...nextKeys.filter((key) => key !== 'dealId')]
-      : ['dealId', ...nextKeys]
-  }
 
   if (!availableKeySet.has('dealNumber')) {
     return nextKeys
@@ -718,6 +823,122 @@ const toDealGridValue = (value, { uppercase = false, numeric = false } = {}) => 
   return uppercase ? stringValue.toUpperCase() : stringValue
 }
 
+const getQuotationNumberFromRecord = (record = {}) => (
+  String(
+    record.quotationNumber
+    || record.quoteNumber
+    || record.latestQuotationNumber
+    || record.latestQuoteNumber
+    || record.data?.quotationNumber
+    || record.data?.quoteNumber
+    || ''
+  ).trim()
+)
+
+const isDealNumberFallback = (value = '', deal = {}) => {
+  const normalizedValue = normalizeSearchValue(value)
+  return normalizedValue && normalizedValue === normalizeSearchValue(deal.dealNumber)
+}
+
+const getDealQuotationNumber = (deal = {}, quotationNumberByDealId = {}, quotationNumberByDealNumber = {}) => {
+  const directCandidates = [
+    deal.quotationNumber,
+    deal.quoteNumber,
+    deal.latestQuotationNumber,
+    deal.latestQuoteNumber,
+    ...(Array.isArray(deal.quotationHistory)
+      ? deal.quotationHistory.map((entry) => getQuotationNumberFromRecord(entry))
+      : []),
+  ]
+
+  const directQuotationNumber = directCandidates
+    .map((value) => String(value || '').trim())
+    .find((value) => value && !isDealNumberFallback(value, deal))
+
+  if (directQuotationNumber) return directQuotationNumber
+
+  const lookupQuotationNumber = (
+    quotationNumberByDealId[String(deal.id || '')]
+    || quotationNumberByDealNumber[String(deal.dealNumber || '')]
+    || ''
+  )
+
+  return lookupQuotationNumber && !isDealNumberFallback(lookupQuotationNumber, deal)
+    ? lookupQuotationNumber
+    : '-'
+}
+
+const cleanDealNameCellValue = (value = '') => (
+  String(value || '')
+    .trim()
+    .replace(/^\s*#?\d+\s*[-:|]\s*/, '')
+    .replace(/\s*[-:|]\s*#?\d+\s*$/, '')
+    .replace(/\b#?\d{3,}\b/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+)
+
+const getApiIntegerId = (value) => {
+  const normalizedValue = String(value || '').trim()
+  return /^\d+$/.test(normalizedValue) ? normalizedValue : ''
+}
+
+const getDealCustomerName = (deal = {}, linkedCustomer = null) => (
+  cleanDealNameCellValue(deal.customerName || linkedCustomer?.customerName || '')
+)
+
+const getDealCompanyName = (deal = {}, linkedCustomer = null) => (
+  cleanDealNameCellValue(deal.companyName || linkedCustomer?.companyName || '')
+)
+
+const getDealCompanyCustomerName = (deal = {}, linkedCustomer = null) => (
+  [...new Set([
+    getDealCompanyName(deal, linkedCustomer),
+    getDealCustomerName(deal, linkedCustomer),
+    cleanDealNameCellValue(deal.linkedAccountName || deal.accountName || ''),
+  ].filter(Boolean))].join(' / ')
+)
+
+const getDealBranchLocation = (deal = {}, linkedCustomer = null) => normalizeDealCity(
+  deal.city
+  || deal.location
+  || deal.branch
+  || deal.branchLocation
+  || deal.projectLocation
+  || linkedCustomer?.city
+  || linkedCustomer?.location
+  || ''
+)
+
+const getDealPoConversionValue = (deal = {}) => {
+  const explicitValue = deal.convertToPo ?? deal.convertPo ?? ''
+  if (String(explicitValue || '').trim()) return toDealGridValue(explicitValue)
+  return (deal.poValue || deal.jobNo || deal.poValueJobNo) ? 'Yes' : 'No'
+}
+
+const getDealPoValueJobNo = (deal = {}) => {
+  if (deal.poValueJobNo) return toDealGridValue(deal.poValueJobNo)
+  const poValue = toDealGridValue(deal.poValue, { numeric: true })
+  const jobNo = toDealGridValue(deal.jobNo)
+  if (poValue && jobNo) return `${poValue} / ${jobNo}`
+  return poValue || jobNo
+}
+
+const normalizeLostOrderReason = (value = '') => {
+  const normalizedValue = String(value || '').trim()
+  const matchedOption = LOST_ORDER_REASON_OPTIONS.find((option) => (
+    normalizeSearchValue(option.value) === normalizeSearchValue(normalizedValue)
+    || normalizeSearchValue(option.label) === normalizeSearchValue(normalizedValue)
+    || normalizeSearchValue(option.shortLabel) === normalizeSearchValue(normalizedValue)
+  ))
+  return matchedOption?.value || normalizedValue
+}
+
+const getLostOrderReasonLabel = (value = '') => {
+  const normalized = normalizeLostOrderReason(value)
+  return LOST_ORDER_REASON_LABELS[normalized] || (normalized ? String(value).trim() : 'Select Reason')
+}
+
 const buildDealViewConfig = (variantKey, customViewDefinition) => {
   const baseConfig = {
     title: 'Deals',
@@ -779,13 +1000,13 @@ const buildDealViewConfig = (variantKey, customViewDefinition) => {
       ...baseConfig,
       title: 'Ahmedabad Deal',
       subtitle: 'This view shows only deals tagged for Ahmedabad.',
-      filterFn: (deal) => normalizeDealCity(deal.city) === 'Ahmedabad',
+      filterFn: (deal) => getDealBranchLocation(deal) === 'Ahmedabad',
     },
     vadodara: {
       ...baseConfig,
       title: 'Vadodara Deal',
       subtitle: 'This view shows only deals tagged for Vadodara.',
-      filterFn: (deal) => String(deal.city || '').toLowerCase() === 'vadodara',
+      filterFn: (deal) => getDealBranchLocation(deal) === 'Vadodara',
     },
   }
 
@@ -844,7 +1065,7 @@ const isConvertedDealRecord = (deal = {}) => Boolean(
 const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition = null }) => {
   const location = useLocation()
   const navigate = useNavigate()
-  const { accounts, deals, createDeal, updateDeal, deleteDeal, createConvertedDeal, addNotification, refreshData } = useData()
+  const { accounts, deals, quotations, createDeal, updateDeal, deleteDeal, createConvertedDeal, addNotification, refreshData } = useData()
   const { user } = useAuth()
   const { isOpen, data, open, close } = useModal()
   const [hasAutoOpened, setHasAutoOpened] = useState(false)
@@ -874,6 +1095,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   const [appliedBoardStatuses, setAppliedBoardStatuses] = useState(() => DEAL_BOARD_COLUMNS.map((column) => column.key))
   const [isBoardOwnershipOpen, setIsBoardOwnershipOpen] = useState(false)
   const [boardOwnership, setBoardOwnership] = useState('overall')
+  const [dealStatusTableFilter, setDealStatusTableFilter] = useState('all')
 
   const viewConfig = useMemo(
     () => buildDealViewConfig(customViewDefinition ? customViewDefinition.baseViewKey : variantKey, customViewDefinition),
@@ -886,10 +1108,9 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       : [],
     [customViewDefinition]
   )
-  // Show board view only when an admin custom view explicitly requests a 'board' type.
-  // Default admin 'view' should render the tabular/list view.
-  const isBoardView = isAdmin && effectiveVariantKey === 'view' && customViewDefinition?.viewType === 'board'
-  const isSearchAdminView = isAdmin && effectiveVariantKey === 'search' && !customViewDefinition
+  const isBoardView = effectiveVariantKey === 'view' && customViewDefinition?.viewType === 'board'
+  const isSearchAdminView = effectiveVariantKey === 'search' && !customViewDefinition
+  const isViewAdminView = effectiveVariantKey === 'view' && !customViewDefinition
   const isOwnerScopedAdminView = isAdmin && (
     effectiveVariantKey === 'ownerWise'
     || effectiveVariantKey === 'projectDetails'
@@ -897,8 +1118,8 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     || effectiveVariantKey === 'vadodara'
   )
   const baseGridColumns = useMemo(
-    () => (customViewColumns.length > 0 ? customViewColumns : DEAL_SEARCH_FIELD_CATALOG),
-    [customViewColumns]
+    () => (customViewColumns.length > 0 ? customViewColumns : isViewAdminView ? VIEW_DEAL_GRID_COLUMNS : DEAL_SEARCH_FIELD_CATALOG),
+    [customViewColumns, isViewAdminView]
   )
   const [visibleGridColumnKeys, setVisibleGridColumnKeys] = useState(() => {
     const savedPreferences = loadDealSearchPreferences()
@@ -942,11 +1163,11 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   const [pendingFilterRows, setPendingFilterRows] = useState(() => buildFilterRowsFromFilters())
   const [appliedOwnerWiseOwnerId, setAppliedOwnerWiseOwnerId] = useState(() => {
     const savedPreferences = loadDealSearchPreferences()
-    return savedPreferences?.ownerWiseOwnerId ? String(savedPreferences.ownerWiseOwnerId) : ''
+    return savedPreferences?.ownerWiseOwnerId ? String(savedPreferences.ownerWiseOwnerId) : 'all'
   })
   const [pendingOwnerWiseOwnerId, setPendingOwnerWiseOwnerId] = useState(() => {
     const savedPreferences = loadDealSearchPreferences()
-    return savedPreferences?.ownerWiseOwnerId ? String(savedPreferences.ownerWiseOwnerId) : ''
+    return savedPreferences?.ownerWiseOwnerId ? String(savedPreferences.ownerWiseOwnerId) : 'all'
   })
   const [selectedDealFilterActionKeys, setSelectedDealFilterActionKeys] = useState(() => {
     const savedPreferences = loadDealSearchPreferences()
@@ -964,18 +1185,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       ? savedPreferences.sortKey
       : ''
   })
-  const [gridSortConfig, setGridSortConfig] = useState(() => {
-    const savedPreferences = loadDealSearchPreferences()
-    const defaultColumnKey = DEFAULT_GRID_SORT_CONFIG.key
-    const nextColumnKey = DEAL_SEARCH_FIELD_CATALOG.some((column) => column.key === savedPreferences?.sortKey)
-      ? savedPreferences.sortKey
-      : defaultColumnKey
-
-    return {
-      key: nextColumnKey,
-      direction: savedPreferences?.sortDirection === 'asc' ? 'asc' : DEFAULT_GRID_SORT_CONFIG.direction,
-    }
-  })
+  const [gridSortConfig, setGridSortConfig] = useState(DEFAULT_GRID_SORT_CONFIG)
   const [dashboardDealDrilldown, setDashboardDealDrilldown] = useState(null)
 
   const availableUsers = useMemo(
@@ -1051,6 +1261,55 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       return lookup
     }, {})
   ), [availableUsers])
+  const quotationNumberByDealId = useMemo(() => (
+    (quotations || []).reduce((lookup, quotation) => {
+      const quotationNumber = getQuotationNumberFromRecord(quotation)
+      if (!quotationNumber) return lookup
+
+      const linkedDealIds = [
+        quotation.dealId,
+        quotation.selectedDealId,
+        quotation.linkedDealId,
+        quotation.sourceDealId,
+        quotation.data?.dealId,
+        quotation.data?.selectedDealId,
+        quotation.data?.linkedDealId,
+      ]
+
+      linkedDealIds.forEach((dealId) => {
+        const key = String(dealId || '').trim()
+        if (key && !lookup[key]) {
+          lookup[key] = quotationNumber
+        }
+      })
+
+      return lookup
+    }, {})
+  ), [quotations])
+  const quotationNumberByDealNumber = useMemo(() => (
+    (quotations || []).reduce((lookup, quotation) => {
+      const quotationNumber = getQuotationNumberFromRecord(quotation)
+      if (!quotationNumber) return lookup
+
+      const linkedDealNumbers = [
+        quotation.dealNumber,
+        quotation.selectedDealNumber,
+        quotation.linkedDealNumber,
+        quotation.data?.dealNumber,
+        quotation.data?.selectedDealNumber,
+        quotation.data?.linkedDealNumber,
+      ]
+
+      linkedDealNumbers.forEach((dealNumber) => {
+        const key = String(dealNumber || '').trim()
+        if (key && !lookup[key]) {
+          lookup[key] = quotationNumber
+        }
+      })
+
+      return lookup
+    }, {})
+  ), [quotations])
   const classificationOwnerIdLookup = useMemo(
     () => availableUsers.reduce((lookup, entry) => {
       const normalizedName = normalizeOwnerValue(entry.ownerDisplayName || entry.name)
@@ -1071,6 +1330,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         const linkedAccount = accountDirectory[String(deal.accountId || '')]
           || accountNameDirectory[normalizeSearchValue(deal.accountName || deal.customerName || '')]
           || null
+        const linkedCustomer = customerDirectory[deal.customerId] || null
         const resolvedCompanyProfile = resolveDealCompanyProfile(deal, linkedAccount)
         const resolvedOwnerUserId = String(
           deal.ownerUserId
@@ -1090,7 +1350,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
           ...deal,
           projectName: deal.projectName || linkedAccount?.projectName || '',
           accountOwner: deal.accountOwnerDisplay || deal.accountOwner || linkedAccount?.accountOwnerDisplay || linkedAccount?.accountOwnerName || linkedAccount?.accountOwner || deal.customerOwnerDisplay || deal.customerOwner || '',
-          city: normalizeDealCity(deal.city || linkedAccount?.raw?.city || linkedAccount?.location || ''),
+          city: normalizeDealCity(deal.city || deal.location || deal.branch || deal.branchLocation || deal.projectLocation || linkedAccount?.raw?.city || linkedAccount?.location || linkedCustomer?.city || linkedCustomer?.location || ''),
           ownerUserId: resolvedOwnerUserId,
           ownerId: resolvedOwnerUserId,
           assignedTo: String(deal.assignedTo || deal.assignedUserId || resolvedOwnerUserId || ''),
@@ -1110,9 +1370,10 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
           reminderTime: deal.reminderTime || '09:00',
           reminderMode: deal.reminderMode || '',
           reminderNote: deal.reminderNote || '',
+          customerName: getDealCustomerName(deal, linkedCustomer),
           accountName: deal.linkedAccountName || deal.accountName || linkedAccount?.name || deal.customerName || '',
           accountNumber: deal.linkedAccountNumber || deal.accountNumber || linkedAccount?.accountNumber || '',
-          companyName: deal.companyName || deal.linkedAccountName || linkedAccount?.company || linkedAccount?.name || deal.customerName || '',
+          companyName: getDealCompanyName(deal, linkedCustomer) || cleanDealNameCellValue(linkedAccount?.company || linkedAccount?.raw?.companyName || ''),
           companyProfile: resolvedCompanyProfile,
           companyLogo: deal.companyLogo || linkedAccount?.companyLogo || linkedAccount?.raw?.companyLogo || '',
           contactPerson: deal.contactPerson || linkedAccount?.contactPerson || '',
@@ -1130,6 +1391,42 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
     return customViewDeals.sort(viewConfig.sortFn)
   }, [accountDirectory, accountNameDirectory, customViewDefinition, customerDirectory, deals, userDirectory, viewConfig.filterFn, viewConfig.sortFn])
+  const roleSelectionOptions = useMemo(() => {
+    const availableUserByOwnerName = availableUsers.reduce((lookup, entry) => {
+      const normalizedName = normalizeOwnerValue(entry.ownerDisplayName || entry.name)
+      if (normalizedName && !lookup[normalizedName]) {
+        lookup[normalizedName] = entry
+      }
+      return lookup
+    }, {})
+    const normalizedOptionLabels = new Set(
+      ownerFilterOptions.map((option) => normalizeOwnerValue(option.label))
+    )
+    const rowOwnerOptions = scopedDeals
+      .map((deal) => getResolvedOwnerName(deal))
+      .map((ownerName) => getCrmOwnerDisplay(ownerName) || ownerName)
+      .map((ownerName) => String(ownerName || '').trim())
+      .filter((ownerName) => ownerName && ownerName !== 'Unassigned' && ownerName !== '-')
+      .reduce((options, ownerName) => {
+        const normalizedOwnerName = normalizeOwnerValue(ownerName)
+        if (!normalizedOwnerName || normalizedOptionLabels.has(normalizedOwnerName)) {
+          return options
+        }
+        normalizedOptionLabels.add(normalizedOwnerName)
+        const matchedUser = availableUserByOwnerName[normalizedOwnerName]
+        options.push({
+          value: matchedUser?.id ? String(matchedUser.id) : ownerName,
+          label: matchedUser?.ownerDisplayName || ownerName,
+        })
+        return options
+      }, [])
+      .sort((left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }))
+
+    return [
+      ...ownerFilterOptions,
+      ...rowOwnerOptions,
+    ]
+  }, [availableUsers, ownerFilterOptions, scopedDeals])
   const drilldownScopedDeals = useMemo(() => {
     const dealIds = Array.isArray(dashboardDealDrilldown?.dealIds)
       ? dashboardDealDrilldown.dealIds.map((dealId) => String(dealId))
@@ -1245,51 +1542,64 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   )
 
   const adminGridRows = useMemo(() => (
-    displayedDeals.map((deal) => ({
-      id: deal.id,
-      rawDeal: deal,
-      dealId: deal.id || '',
-      dealNumber: deal.dealNumber || '',
-      customerName: deal.customerName || customerDirectory[deal.customerId]?.customerName || '',
-      customerNumber: deal.customerNumber || customerDirectory[deal.customerId]?.customerNumber || '',
-      accountName: deal.linkedAccountName || deal.accountName || '',
-      accountNumber: deal.accountNumber || '',
-      dealName: deal.name || '',
-      dealDate: formatGridDate(deal.dealDate || deal.createdAt || ''),
-      createdDate: formatGridDate(deal.createdAt || ''),
-      dealOwner: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
-      dealType: toDealGridValue(deal.dealType || deal.customerCategory || deal.stage || '', { uppercase: true }),
-      dealStatus: capitalize(String(deal.status || '').replace(/_/g, ' ')),
-      dealValue: toDealGridValue(deal.value, { numeric: true }),
-      actualClosureDate: formatGridDate(deal.actualClosureDate || ''),
-      expectedClosureDate: formatGridDate(deal.expectedClosureDate || deal.closeDate || ''),
-      probability: toDealGridValue(deal.probability, { numeric: true }),
-      dealScore: toDealGridValue(deal.dealScore, { numeric: true }),
-      description: deal.description || '',
-      productCategory: deal.productCategory || deal.customerCategory || '',
-      projectName: deal.projectName || '',
-      consultantName: deal.consultantName || '',
-      quotationCustomerStatus: toDealGridValue(deal.quotationCustomerStatus, { uppercase: true }),
-      orderCustomerStatus: toDealGridValue(deal.orderCustomerStatus, { uppercase: true }),
-      poValue: toDealGridValue(deal.poValue, { numeric: true }),
-      jobNo: toDealGridValue(deal.jobNo),
-      dealCoOwners: deal.dealCoOwners || '',
-      reasonForLost: deal.reasonForLost || '',
-      companyName: deal.companyName || '',
-      companyProfile: deal.companyProfile || '',
-      companyLogo: deal.companyLogo || '',
-      contactPerson: deal.contactPerson || '',
-      contactName: deal.contactName || deal.contactPerson || '',
-      contactPhone: deal.contactPhone || '',
-      phone: deal.phone || deal.contactPhone || deal.contactMobile || '',
-      contactMobile: deal.contactMobile || '',
-      contactEmail: deal.contactEmail || '',
-      email: deal.email || deal.contactEmail || '',
-      gstin: deal.gstin || '',
-      latestRemark: deal.remark || deal.description || customerDirectory[deal.customerId]?.remark || '',
-      address: deal.address || customerDirectory[deal.customerId]?.address || '',
-    }))
-  ), [customerDirectory, displayedDeals])
+    displayedDeals.map((deal) => {
+      const linkedCustomer = customerDirectory[deal.customerId] || null
+
+      return {
+        id: deal.id,
+        rawDeal: deal,
+        dealId: deal.id || '',
+        dealNumber: deal.dealNumber || '',
+        quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
+        location: deal.city || deal.location || linkedCustomer?.city || linkedCustomer?.location || '',
+        customerNumber: deal.customerNumber || linkedCustomer?.customerNumber || '',
+        accountName: deal.linkedAccountName || deal.accountName || '',
+        accountNumber: deal.accountNumber || '',
+        dealName: deal.name || '',
+        dealDate: formatGridDate(deal.quotationDate || deal.dealDate || deal.createdAt || ''),
+        createdDate: formatGridDate(deal.createdAt || ''),
+        dealOwner: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
+        dealType: toDealGridValue(deal.dealType || deal.customerCategory || deal.stage || '', { uppercase: true }),
+        dealStatus: capitalize(String(deal.status || '').replace(/_/g, ' ')),
+        dealValue: toDealGridValue(deal.value ?? deal.dealValue ?? deal.amount, { numeric: true }),
+        actualClosureDate: formatGridDate(deal.actualClosureDate || ''),
+        expectedClosureDate: formatGridDate(deal.expectedClosureDate || deal.closeDate || ''),
+        probability: toDealGridValue(deal.probability, { numeric: true }),
+        dealScore: toDealGridValue(deal.dealScore, { numeric: true }),
+        description: deal.description || '',
+        productCategory: deal.productCategory || deal.customerCategory || '',
+        projectName: deal.projectName || '',
+        consultantName: deal.consultantName || '',
+        quotationCustomerStatus: toDealGridValue(deal.quotationCustomerStatus, { uppercase: true }),
+        orderCustomerStatus: toDealGridValue(deal.orderCustomerStatus, { uppercase: true }),
+        orderCustomerStatusOld: toDealGridValue(deal.orderCustomerStatusOld || deal.oldStatus, { uppercase: true }),
+        orderCustomerStatusNew: toDealGridValue(deal.orderCustomerStatusNew || deal.newStatus, { uppercase: true }),
+        convertToPo: getDealPoConversionValue(deal),
+        poValueJobNo: getDealPoValueJobNo(deal),
+        reasonForLostOrder: normalizeLostOrderReason(deal.reasonForLostOrder || deal.reasonForLost),
+        poValue: toDealGridValue(deal.poValue ?? deal.po_value, { numeric: true }),
+        jobNo: toDealGridValue(deal.jobNo),
+        dealCoOwners: deal.dealCoOwners || '',
+        reasonForLost: deal.reasonForLost || '',
+        companyCustomerName: getDealCompanyCustomerName(deal, linkedCustomer),
+        companyName: getDealCompanyName(deal, linkedCustomer),
+        customerName: getDealCustomerName(deal, linkedCustomer),
+        companyProfile: deal.companyProfile || '',
+        companyLogo: deal.companyLogo || '',
+        contactPerson: deal.contactPerson || '',
+        contactName: deal.contactName || deal.contactPerson || '',
+        contactPhone: deal.contactPhone || '',
+        phone: deal.phone || deal.contactPhone || deal.contactMobile || '',
+        contactMobile: deal.contactMobile || '',
+        contactEmail: deal.contactEmail || '',
+        email: deal.email || deal.contactEmail || '',
+        gstin: deal.gstin || '',
+        latestRemark: deal.remark || deal.description || linkedCustomer?.remark || '',
+        address: deal.address || linkedCustomer?.address || '',
+        updatedDate: formatGridDate(deal.updatedAt || deal.lastUpdated || deal.createdAt || ''),
+      }
+    })
+  ), [customerDirectory, displayedDeals, quotationNumberByDealId, quotationNumberByDealNumber])
   const adminGridRowById = useMemo(
     () => adminGridRows.reduce((lookup, row) => {
       lookup[row.id] = row
@@ -1349,39 +1659,35 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       return baseGridColumns
     }
 
-    const filteredColumns = orderColumnsByKeys(
-      DEAL_SEARCH_FIELD_CATALOG,
-      normalizeVisibleColumnKeys(
-        [
-          ...SEARCH_DEAL_REQUIRED_GRID_KEYS,
-          ...visibleGridColumnKeys.filter((key) => !SEARCH_DEAL_REQUIRED_GRID_KEYS.includes(key)),
-        ],
-        DEAL_SEARCH_FIELD_CATALOG
-      )
-    )
-    return filteredColumns.length > 0 ? filteredColumns : DEAL_GRID_COLUMNS
-  }, [baseGridColumns, isSearchAdminView, visibleGridColumnKeys])
+    return DEAL_GRID_COLUMNS
+  }, [baseGridColumns, isSearchAdminView])
   const filteredGridRows = useMemo(() => (
     adminGridRows.filter((row) => {
       const selectedOwnerName = ownerNameById[String(appliedOwnerWiseOwnerId)] || ''
 
       return (
         matchesOwnerSelection(row, appliedOwnerWiseOwnerId, selectedOwnerName)
-        && DEAL_SEARCH_FIELD_CATALOG.every((column) => {
-        const filterValue = normalizeSearchValue(gridFilters[column.key])
-        if (!filterValue) return true
-        return normalizeSearchValue(row[column.key]).includes(filterValue)
-      })
+        && (dealStatusTableFilter === 'all' || getDealBoardStatusKey(row.rawDeal || row) === dealStatusTableFilter)
+        && Object.entries(gridFilters).every(([columnKey, rawFilterValue]) => {
+          const filterValue = normalizeSearchValue(rawFilterValue)
+          if (!filterValue) return true
+
+          return matchesDealGridFilterText(row, columnKey, filterValue)
+        })
         && gridFilterRules.every((rule) => matchGridFilterRule(row, rule))
       )
     })
-  ), [adminGridRows, appliedOwnerWiseOwnerId, gridFilterRules, gridFilters, ownerNameById])
+  ), [adminGridRows, appliedOwnerWiseOwnerId, dealStatusTableFilter, gridFilterRules, gridFilters, ownerNameById])
+  const displayGridRows = useMemo(
+    () => filteredGridRows.filter((row) => hasDealTableData(row, activeGridColumns)),
+    [activeGridColumns, filteredGridRows]
+  )
 
   const getGridSortValue = (row, columnKey) => {
     const rawDeal = row.rawDeal || {}
 
     if (columnKey === 'dealDate') {
-      return new Date(rawDeal.dealDate || rawDeal.createdAt || 0).getTime()
+      return new Date(rawDeal.quotationDate || rawDeal.dealDate || rawDeal.createdAt || 0).getTime()
     }
 
     if (columnKey === 'createdDate') {
@@ -1421,12 +1727,12 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       : activeGridColumns[0]?.key
 
     if (!activeSortKey) {
-      return filteredGridRows
+      return displayGridRows
     }
 
     const sortDirectionMultiplier = gridSortConfig.direction === 'asc' ? 1 : -1
 
-    return [...filteredGridRows].sort((left, right) => {
+    return [...displayGridRows].sort((left, right) => {
       const leftValue = getGridSortValue(left, activeSortKey)
       const rightValue = getGridSortValue(right, activeSortKey)
 
@@ -1436,7 +1742,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
       return String(leftValue).localeCompare(String(rightValue), undefined, { numeric: true, sensitivity: 'base' }) * sortDirectionMultiplier
     })
-  }, [activeGridColumns, filteredGridRows, gridSortConfig.direction, gridSortConfig.key])
+  }, [activeGridColumns, displayGridRows, gridSortConfig.direction, gridSortConfig.key])
 
   const getDealUpdatesForBoardColumn = (columnKey) => {
     switch (columnKey) {
@@ -1567,18 +1873,28 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         id: deal.id,
         rawDeal: deal,
         ownerKey: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
+        dealId: deal.id || '',
         dealNumber: deal.dealNumber || '',
-        customerName: deal.customerName || linkedCustomer?.customerName || '',
+        quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
+        location: getDealBranchLocation(deal, linkedCustomer),
+        customerName: getDealCustomerName(deal, linkedCustomer),
         customerNumber: deal.customerNumber || linkedCustomer?.customerNumber || '',
-        companyName: deal.companyName || '',
+        companyName: getDealCompanyName(deal, linkedCustomer),
+        companyCustomerName: getDealCompanyCustomerName(deal, linkedCustomer),
         companyProfile: deal.companyProfile || '',
-        dealDate: formatGridDate(deal.dealDate || deal.createdAt || ''),
+        dealDate: formatGridDate(deal.quotationDate || deal.dealDate || deal.createdAt || ''),
         dealOwner: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
         dealType: toDealGridValue(deal.dealType || deal.customerCategory || deal.stage || '', { uppercase: true }),
         dealName: deal.name || '',
         dealCoOwners: deal.dealCoOwners || '',
         dealStatus: capitalize(String(deal.status || '').replace(/_/g, ' ')),
         dealValue: toDealGridValue(deal.value, { numeric: true }),
+        quotationCustomerStatus: toDealGridValue(deal.quotationCustomerStatus, { uppercase: true }),
+        orderCustomerStatusOld: toDealGridValue(deal.orderCustomerStatusOld || deal.oldStatus, { uppercase: true }),
+        orderCustomerStatusNew: toDealGridValue(deal.orderCustomerStatusNew || deal.newStatus, { uppercase: true }),
+        convertToPo: getDealPoConversionValue(deal),
+        poValueJobNo: getDealPoValueJobNo(deal),
+        reasonForLostOrder: normalizeLostOrderReason(deal.reasonForLostOrder || deal.reasonForLost),
         projectName: deal.projectName || '',
         accountOwner: deal.accountOwnerDisplay || getCrmOwnerDisplay(deal.accountOwner || '') || deal.accountOwner || '',
         consultantName: deal.consultantName || '',
@@ -1590,7 +1906,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         latestRemark: deal.remark || deal.description || linkedCustomer?.remark || '',
       }
     })
-  ), [customerDirectory, displayedDeals])
+  ), [customerDirectory, displayedDeals, quotationNumberByDealId, quotationNumberByDealNumber])
 
   const projectDetailsAllRows = useMemo(() => (
     displayedDeals
@@ -1602,18 +1918,27 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
           id: deal.id,
           rawDeal: deal,
           ownerKey: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
+          dealId: deal.id || '',
           dealNumber: deal.dealNumber || '',
-          customerName: deal.customerName || linkedCustomer?.customerName || '',
+          quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
+          location: deal.city || deal.location || linkedCustomer?.city || linkedCustomer?.location || '',
+          customerName: getDealCustomerName(deal, linkedCustomer),
           customerNumber: deal.customerNumber || linkedCustomer?.customerNumber || '',
-          companyName: deal.companyName || '',
+          companyName: getDealCompanyName(deal, linkedCustomer),
+          companyCustomerName: getDealCompanyCustomerName(deal, linkedCustomer),
           companyProfile: deal.companyProfile || '',
-          dealDate: formatGridDate(deal.dealDate || deal.createdAt || ''),
+          dealDate: formatGridDate(deal.quotationDate || deal.dealDate || deal.createdAt || ''),
           dealOwner: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
           dealType: toDealGridValue(deal.dealType || deal.customerCategory || deal.stage || '', { uppercase: true }),
           dealName: deal.name || '',
           dealCoOwners: deal.dealCoOwners || '',
           dealStatus: capitalize(String(deal.status || '').replace(/_/g, ' ')),
           dealValue: toDealGridValue(deal.value, { numeric: true }),
+          quotationCustomerStatus: toDealGridValue(deal.quotationCustomerStatus, { uppercase: true }),
+          orderCustomerStatusOld: toDealGridValue(deal.orderCustomerStatusOld || deal.oldStatus, { uppercase: true }),
+          orderCustomerStatusNew: toDealGridValue(deal.orderCustomerStatusNew || deal.newStatus, { uppercase: true }),
+          convertToPo: getDealPoConversionValue(deal),
+          reasonForLostOrder: normalizeLostOrderReason(deal.reasonForLostOrder || deal.reasonForLost),
           jobNo: toDealGridValue(deal.jobNo),
           projectName: deal.projectName || '',
           accountOwner: deal.accountOwnerDisplay || getCrmOwnerDisplay(deal.accountOwner || '') || deal.accountOwner || '',
@@ -1624,7 +1949,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
           latestRemark: deal.remark || deal.description || linkedCustomer?.remark || '',
         }
       })
-  ), [customerDirectory, displayedDeals])
+  ), [customerDirectory, displayedDeals, quotationNumberByDealId, quotationNumberByDealNumber])
 
   const ahmadabadAllRows = useMemo(() => (
     displayedDeals.map((deal) => {
@@ -1634,18 +1959,28 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         id: deal.id,
         rawDeal: deal,
         ownerKey: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
+        dealId: deal.id || '',
         dealNumber: deal.dealNumber || '',
-        customerName: deal.customerName || linkedCustomer?.customerName || '',
+        quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
+        location: getDealBranchLocation(deal, linkedCustomer),
+        customerName: getDealCustomerName(deal, linkedCustomer),
         customerNumber: deal.customerNumber || linkedCustomer?.customerNumber || '',
-        companyName: deal.companyName || '',
+        companyName: getDealCompanyName(deal, linkedCustomer),
+        companyCustomerName: getDealCompanyCustomerName(deal, linkedCustomer),
         companyProfile: deal.companyProfile || '',
-        dealDate: formatGridDate(deal.dealDate || deal.createdAt || ''),
+        dealDate: formatGridDate(deal.quotationDate || deal.dealDate || deal.createdAt || ''),
         dealOwner: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
         dealType: toDealGridValue(deal.dealType || deal.customerCategory || deal.stage || '', { uppercase: true }),
         dealName: deal.name || '',
         dealCoOwners: deal.dealCoOwners || '',
         dealStatus: capitalize(String(deal.status || '').replace(/_/g, ' ')),
         dealValue: toDealGridValue(deal.value, { numeric: true }),
+        quotationCustomerStatus: toDealGridValue(deal.quotationCustomerStatus, { uppercase: true }),
+        orderCustomerStatusOld: toDealGridValue(deal.orderCustomerStatusOld || deal.oldStatus, { uppercase: true }),
+        orderCustomerStatusNew: toDealGridValue(deal.orderCustomerStatusNew || deal.newStatus, { uppercase: true }),
+        convertToPo: getDealPoConversionValue(deal),
+        poValueJobNo: getDealPoValueJobNo(deal),
+        reasonForLostOrder: normalizeLostOrderReason(deal.reasonForLostOrder || deal.reasonForLost),
         projectName: deal.projectName || '',
         accountOwner: deal.accountOwnerDisplay || getCrmOwnerDisplay(deal.accountOwner || '') || deal.accountOwner || '',
         consultantName: deal.consultantName || '',
@@ -1656,7 +1991,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         latestRemark: deal.remark || deal.description || linkedCustomer?.remark || '',
       }
     })
-  ), [customerDirectory, displayedDeals])
+  ), [customerDirectory, displayedDeals, quotationNumberByDealId, quotationNumberByDealNumber])
 
   const vadodaraAllRows = useMemo(() => (
     displayedDeals.map((deal) => {
@@ -1666,18 +2001,28 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         id: deal.id,
         rawDeal: deal,
         ownerKey: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
+        dealId: deal.id || '',
         dealNumber: deal.dealNumber || '',
-        customerName: deal.customerName || linkedCustomer?.customerName || '',
+        quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
+        location: getDealBranchLocation(deal, linkedCustomer),
+        customerName: getDealCustomerName(deal, linkedCustomer),
         customerNumber: deal.customerNumber || linkedCustomer?.customerNumber || '',
-        companyName: deal.companyName || '',
+        companyName: getDealCompanyName(deal, linkedCustomer),
+        companyCustomerName: getDealCompanyCustomerName(deal, linkedCustomer),
         companyProfile: deal.companyProfile || '',
-        dealDate: formatGridDate(deal.dealDate || deal.createdAt || ''),
+        dealDate: formatGridDate(deal.quotationDate || deal.dealDate || deal.createdAt || ''),
         dealOwner: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
         dealType: toDealGridValue(deal.dealType || deal.customerCategory || deal.stage || '', { uppercase: true }),
         dealName: deal.name || '',
         dealCoOwners: deal.dealCoOwners || '',
         dealStatus: capitalize(String(deal.status || '').replace(/_/g, ' ')),
         dealValue: toDealGridValue(deal.value, { numeric: true }),
+        quotationCustomerStatus: toDealGridValue(deal.quotationCustomerStatus, { uppercase: true }),
+        orderCustomerStatusOld: toDealGridValue(deal.orderCustomerStatusOld || deal.oldStatus, { uppercase: true }),
+        orderCustomerStatusNew: toDealGridValue(deal.orderCustomerStatusNew || deal.newStatus, { uppercase: true }),
+        convertToPo: getDealPoConversionValue(deal),
+        poValueJobNo: getDealPoValueJobNo(deal),
+        reasonForLostOrder: normalizeLostOrderReason(deal.reasonForLostOrder || deal.reasonForLost),
         projectName: deal.projectName || '',
         accountOwner: deal.accountOwnerDisplay || getCrmOwnerDisplay(deal.accountOwner || '') || deal.accountOwner || '',
         consultantName: deal.consultantName || '',
@@ -1688,7 +2033,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         latestRemark: deal.remark || deal.description || linkedCustomer?.remark || '',
       }
     })
-  ), [customerDirectory, displayedDeals])
+  ), [customerDirectory, displayedDeals, quotationNumberByDealId, quotationNumberByDealNumber])
 
   const ownerScopedColumns = useMemo(
     () => {
@@ -1701,8 +2046,17 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     [customViewColumns, effectiveVariantKey]
   )
   const activeOwnerScopedColumns = useMemo(() => {
+    if (
+      effectiveVariantKey === 'ownerWise'
+      || effectiveVariantKey === 'projectDetails'
+      || effectiveVariantKey === 'ahmadabad'
+      || effectiveVariantKey === 'vadodara'
+    ) {
+      return ownerScopedColumns
+    }
+
     const normalizedColumnKeys = normalizeVisibleColumnKeys(visibleGridColumnKeys, ownerScopedColumns)
-    const shouldForceOwnerColumns = ['projectDetails', 'ahmadabad', 'vadodara'].includes(effectiveVariantKey)
+    const shouldForceOwnerColumns = effectiveVariantKey === 'projectDetails'
     const nextColumnKeys = shouldForceOwnerColumns && normalizedColumnKeys.includes('projectName')
       ? [
         ...normalizedColumnKeys.filter((key) => !['accountOwner', 'dealOwner'].includes(key)).flatMap((key) => (
@@ -1721,6 +2075,10 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     () => orderColumnsByKeys(fieldSelectorColumns, pendingVisibleGridColumnKeys),
     [fieldSelectorColumns, pendingVisibleGridColumnKeys]
   )
+  const filterDialogColumns = useMemo(() => {
+    const columns = isOwnerScopedAdminView ? activeOwnerScopedColumns : activeGridColumns
+    return [...columns].sort((left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }))
+  }, [activeGridColumns, activeOwnerScopedColumns, isOwnerScopedAdminView])
 
   const ownerScopedAllRows = useMemo(
     () => {
@@ -1744,24 +2102,48 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         && activeOwnerScopedColumns.every((column) => {
         const filterValue = normalizeSearchValue(ownerScopedFilters[column.key])
         if (!filterValue) return true
-        return normalizeSearchValue(row[column.key]).includes(filterValue)
+        return matchesOwnerScopedFilterText(row, filterableRow, column.key, filterValue)
       })
         && DEAL_SEARCH_FIELD_CATALOG.every((column) => {
         const filterValue = normalizeSearchValue(gridFilters[column.key])
         if (!filterValue) return true
-        return normalizeSearchValue(filterableRow[column.key]).includes(filterValue)
+        return matchesOwnerScopedFilterText(row, filterableRow, column.key, filterValue)
       })
         && gridFilterRules.every((rule) => matchGridFilterRule(filterableRow, rule))
       )
     })
   ), [activeOwnerScopedColumns, adminGridRowById, appliedOwnerWiseOwnerId, gridFilterRules, gridFilters, ownerNameById, ownerScopedFilters, ownerScopedRows])
+  const displayOwnerScopedRows = useMemo(
+    () => filteredOwnerScopedRows.filter((row) => hasDealTableData(row, activeOwnerScopedColumns)),
+    [activeOwnerScopedColumns, filteredOwnerScopedRows]
+  )
 
-  const ownerScopedTotalPages = Math.max(1, Math.ceil(filteredOwnerScopedRows.length / ROWS_PER_PAGE))
+  const sortedOwnerScopedRows = useMemo(() => {
+    const activeSortKey = activeOwnerScopedColumns.some((column) => column.key === gridSortConfig.key)
+      ? gridSortConfig.key
+      : 'dealNumber'
+    const sortDirectionMultiplier = gridSortConfig.direction === 'asc' ? 1 : -1
+
+    return [...displayOwnerScopedRows].sort((left, right) => {
+      const leftValue = normalizeSearchValue(left[activeSortKey])
+      const rightValue = normalizeSearchValue(right[activeSortKey])
+      const leftNumeric = Number(String(left[activeSortKey] || '').replace(/,/g, ''))
+      const rightNumeric = Number(String(right[activeSortKey] || '').replace(/,/g, ''))
+
+      if (Number.isFinite(leftNumeric) && Number.isFinite(rightNumeric) && leftValue && rightValue) {
+        return (leftNumeric - rightNumeric) * sortDirectionMultiplier
+      }
+
+      return leftValue.localeCompare(rightValue) * sortDirectionMultiplier
+    })
+  }, [activeOwnerScopedColumns, displayOwnerScopedRows, gridSortConfig.direction, gridSortConfig.key])
+
+  const ownerScopedTotalPages = Math.max(1, Math.ceil(sortedOwnerScopedRows.length / ROWS_PER_PAGE))
   const ownerScopedCurrentPageSafe = Math.min(ownerScopedPage, ownerScopedTotalPages)
   const paginatedOwnerScopedRows = useMemo(() => {
     const startIndex = (ownerScopedCurrentPageSafe - 1) * ROWS_PER_PAGE
-    return filteredOwnerScopedRows.slice(startIndex, startIndex + ROWS_PER_PAGE)
-  }, [filteredOwnerScopedRows, ownerScopedCurrentPageSafe])
+    return sortedOwnerScopedRows.slice(startIndex, startIndex + ROWS_PER_PAGE)
+  }, [sortedOwnerScopedRows, ownerScopedCurrentPageSafe])
   const visibleOwnerScopedPages = useMemo(
     () => buildVisiblePages(ownerScopedCurrentPageSafe, ownerScopedTotalPages),
     [ownerScopedCurrentPageSafe, ownerScopedTotalPages]
@@ -1779,7 +2161,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [appliedClassificationOwners, appliedOwnerWiseOwnerId, gridFilters, gridFilterRules, variantKey, customViewDefinition?.id])
+  }, [appliedClassificationOwners, appliedOwnerWiseOwnerId, dealStatusTableFilter, gridFilters, gridFilterRules, variantKey, customViewDefinition?.id])
 
   useEffect(() => {
     setOwnerScopedPage(1)
@@ -2084,6 +2466,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     const selectedOwner = availableUsers.find((entry) => String(entry.id) === String(formData.ownerUserId || user?.id || ''))
     const resolvedOwnerId = String(selectedOwner?.id || user?.id || '')
     const resolvedOwnerName = selectedOwner?.name || userDirectory[resolvedOwnerId] || data?.dealOwnerName || data?.dealOwner || data?.ownerName || user?.name || ''
+    const apiOwnerId = getApiIntegerId(resolvedOwnerId)
     const normalizedDealValue = normalizeOptionalNumberInput(formData.value)
     const normalizedDealScore = normalizeOptionalNumberInput(formData.dealScore)
     const normalizedProbability = normalizeOptionalNumberInput(formData.probability)
@@ -2113,10 +2496,12 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       value: normalizedDealValue,
       valueCurrency: formData.valueCurrency || 'INR',
       userId: resolvedOwnerId,
-      ownerUserId: resolvedOwnerId,
-      ownerId: resolvedOwnerId,
-      assignedTo: resolvedOwnerId,
-      assignedUserId: resolvedOwnerId,
+      ...(apiOwnerId ? {
+        ownerUserId: apiOwnerId,
+        ownerId: apiOwnerId,
+        assignedTo: apiOwnerId,
+        assignedUserId: apiOwnerId,
+      } : {}),
       ownerName: resolvedOwnerName,
       dealOwner: resolvedOwnerName,
       status: formData.status,
@@ -2135,7 +2520,11 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       customerRefDate: formData.customerRefDate,
       gstin: formData.gstin.trim(),
       jobNo: formData.jobNo.trim(),
-      orderCustomerStatus: formData.customerOrderStatus.trim(),
+      orderCustomerStatusOld: formData.customerOrderStatusOld.trim(),
+      orderCustomerStatusNew: formData.customerOrderStatusNew.trim(),
+      convertToPo: formData.convertToPo.trim(),
+      poValueJobNo: formData.poValueJobNo.trim(),
+      reasonForLostOrder: formData.reasonForLostOrder.trim(),
       contactPerson: primaryContact?.name || '',
       contactName: primaryContact?.name || '',
       contactMobile: primaryContact?.phone || '',
@@ -2163,7 +2552,14 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       addNotification('success', 'Success', `Deal ${data ? 'updated' : 'created'} successfully`)
       handleModalClose()
     } else {
-      addNotification('error', 'Error', result.message)
+      const finalMessage = parseAndDeduplicateMessages(result.message, 'Unable to save deal.')
+
+      setFormErrors((currentValue) => ({
+        ...currentValue,
+        submit: finalMessage,
+      }))
+      setDealFormStep(0)
+      addNotification('error', 'Error', finalMessage)
     }
   }
 
@@ -2199,7 +2595,11 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       customerRefDate: deal.customerRefDate || deal.customerReferenceDate || '',
       gstin: deal.gstin || '',
       jobNo: deal.jobNo || '',
-      customerOrderStatus: deal.orderCustomerStatus || '',
+      customerOrderStatusOld: deal.orderCustomerStatusOld || '',
+      customerOrderStatusNew: deal.orderCustomerStatusNew || '',
+      convertToPo: deal.convertToPo || '',
+      poValueJobNo: deal.poValueJobNo || '',
+      reasonForLostOrder: normalizeLostOrderReason(deal.reasonForLostOrder || deal.reasonForLost),
       contacts: normalizeDealContacts(deal.contacts, {
         name: deal.contactPerson || deal.contactName || '',
         phone: deal.contactMobile || deal.contactPhone || deal.phone || '',
@@ -2263,14 +2663,10 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
       if (sourceDeal?.id) {
         if (!isAdmin) {
-          navigate('/deals/search', {
+          navigate(`/deals/view/${encodeURIComponent(sourceDeal.id)}`, {
             state: {
-              editDealId: sourceDeal.id,
-              quotationDealLookup: {
-                dealNumber: sourceDeal.dealNumber || activeDeal.dealNumber || '',
-                projectName: sourceDeal.projectName || activeDeal.projectName || '',
-                companyName: sourceDeal.companyName || sourceDeal.accountName || activeDeal.accountName || activeDeal.customerName || '',
-              },
+              fromPath: `${location.pathname}${location.search || ''}`,
+              dealSnapshot: sourceDeal,
             },
           })
           return
@@ -2313,14 +2709,10 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     }
 
     if (!isAdmin) {
-      navigate('/deals/search', {
+      navigate(`/deals/view/${encodeURIComponent(activeDeal.id)}`, {
         state: {
-          editDealId: activeDeal.id,
-          quotationDealLookup: {
-            dealNumber: activeDeal.dealNumber || '',
-            projectName: activeDeal.projectName || '',
-            companyName: activeDeal.companyName || activeDeal.accountName || activeDeal.customerName || '',
-          },
+          fromPath: `${location.pathname}${location.search || ''}`,
+          dealSnapshot: activeDeal,
         },
       })
       return
@@ -2418,7 +2810,6 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     const payload = {
       title: activeDeal.title || activeDeal.name || activeDeal.projectName || 'Converted Deal',
       name: activeDeal.name || activeDeal.title || activeDeal.projectName || 'Converted Deal',
-      dealNumber: activeDeal.dealNumber || '',
       accountId: activeDeal.accountId || activeDeal.customerId || '',
       sourceDealId: activeDeal.id,
       accountName: activeDeal.accountName || activeDeal.linkedAccountName || activeDeal.companyName || '',
@@ -2429,10 +2820,17 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       stage: 'converted',
       status: 'converted',
       ownerName: activeDeal.ownerName || activeDeal.dealOwner || '',
-      assignedTo: activeDeal.assignedTo || activeDeal.ownerUserId || activeDeal.ownerId || '',
-      ownerUserId: activeDeal.ownerUserId || activeDeal.assignedTo || activeDeal.ownerId || '',
+      ...(getApiIntegerId(activeDeal.assignedTo || activeDeal.ownerUserId || activeDeal.ownerId) ? {
+        assignedTo: getApiIntegerId(activeDeal.assignedTo || activeDeal.ownerUserId || activeDeal.ownerId),
+        ownerUserId: getApiIntegerId(activeDeal.ownerUserId || activeDeal.assignedTo || activeDeal.ownerId),
+      } : {}),
       convertedAt: new Date().toISOString(),
       notes: activeDeal.notes || activeDeal.description || '',
+      orderCustomerStatusOld: activeDeal.orderCustomerStatusOld || '',
+      orderCustomerStatusNew: activeDeal.orderCustomerStatusNew || '',
+      convertToPo: activeDeal.convertToPo || '',
+      poValueJobNo: activeDeal.poValueJobNo || '',
+      reasonForLostOrder: normalizeLostOrderReason(activeDeal.reasonForLostOrder || activeDeal.reasonForLost),
     }
 
     const result = await createConvertedDeal(payload)
@@ -2463,7 +2861,14 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     setOpenBoardActionMenuDealId('')
     setDealTableMenuPosition(null)
     closeBoardActionModal()
-    navigate(buildCrmDealActionUrl(actionKey, activeDeal.id, `${location.pathname}${location.search || ''}`))
+    const returnTo = `${location.pathname}${location.search || ''}`
+    if (isAdmin) {
+      navigate(buildCrmDealActionUrl(actionKey, activeDeal.id, returnTo))
+      return
+    }
+
+    const actionParams = new URLSearchParams({ module: 'deal', dealId: String(activeDeal.id), returnTo })
+    navigate(`/deals/actions/${actionKey}?${actionParams.toString()}`)
   }
 
   const handleOpenDealModalActionFromMenu = (type, deal) => {
@@ -2515,7 +2920,11 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         customerRefDate: matchedDeal.customerRefDate || matchedDeal.customerReferenceDate || '',
         gstin: matchedDeal.gstin || '',
         jobNo: matchedDeal.jobNo || '',
-        customerOrderStatus: matchedDeal.orderCustomerStatus || '',
+        customerOrderStatusOld: matchedDeal.orderCustomerStatusOld || '',
+        customerOrderStatusNew: matchedDeal.orderCustomerStatusNew || '',
+        convertToPo: matchedDeal.convertToPo || '',
+        poValueJobNo: matchedDeal.poValueJobNo || '',
+        reasonForLostOrder: normalizeLostOrderReason(matchedDeal.reasonForLostOrder || matchedDeal.reasonForLost),
         contacts: normalizeDealContacts(matchedDeal.contacts, {
           name: matchedDeal.contactPerson || matchedDeal.contactName || '',
           phone: matchedDeal.contactMobile || matchedDeal.contactPhone || matchedDeal.phone || '',
@@ -2568,14 +2977,17 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   }
 
   const handleGridSort = (columnKey) => {
-    setGridSortConfig((currentValue) => ({
+    setGridSortConfig({
       key: columnKey,
-      direction: currentValue.key === columnKey && currentValue.direction === 'asc' ? 'desc' : 'asc',
-    }))
+      direction: 'asc',
+    })
   }
 
   const handleOwnerFilterChange = (ownerUserId) => {
-    setFilter('ownerUserId', ownerUserId)
+    const nextOwnerUserId = ownerUserId || 'all'
+    setFilter('ownerUserId', nextOwnerUserId)
+    setAppliedOwnerWiseOwnerId(nextOwnerUserId)
+    setPendingOwnerWiseOwnerId(nextOwnerUserId)
     setCurrentPage(1)
     setOwnerScopedPage(1)
   }
@@ -2591,7 +3003,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
   const handleExportDeals = (format = 'excel') => {
     const exportColumns = (isOwnerScopedAdminView ? activeOwnerScopedColumns : activeGridColumns) || []
-    const filteredRows = isOwnerScopedAdminView ? filteredOwnerScopedRows : sortedGridRows
+    const filteredRows = isOwnerScopedAdminView ? sortedOwnerScopedRows : sortedGridRows
     const fallbackRows = isOwnerScopedAdminView ? ownerScopedAllRows : adminGridRows
     const exportRows = (filteredRows && filteredRows.length > 0) ? filteredRows : fallbackRows
 
@@ -2606,7 +3018,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     }
 
     const timestamp = new Date().toISOString().slice(0, 10)
-    const baseName = isOwnerScopedAdminView ? viewConfig.title : 'Search Deal'
+    const baseName = viewConfig.title || (isSearchAdminView ? 'Search Deal' : 'View Deal')
     const workbookColumns = exportColumns.map((column) => {
       const meta = DEAL_EXPORT_FIELD_META[column.key]
       const type = meta?.type
@@ -2640,7 +3052,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     //   View Ã¢â€ â€™ Branch (deals only) Ã¢â€ â€™ Owner (when filtered) Ã¢â€ â€™ Total Records Ã¢â€ â€™ Total Deal Value
     // (auto-added by the util: Company Name, Report Title, Export Date, Generated By)
     const baseMetadata = [
-      { label: 'View', value: isOwnerScopedAdminView ? viewConfig.title : 'Search Deal' },
+      { label: 'View', value: baseName },
     ]
     if (branchLabel) baseMetadata.push({ label: 'Branch', value: branchLabel })
     if (ownerLabel)  baseMetadata.push({ label: 'Owner',  value: ownerLabel })
@@ -2651,14 +3063,18 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
     const hasDealValueColumn = workbookColumns.some((column) => column.key === 'dealValue')
     const hasPoValueColumn   = workbookColumns.some((column) => column.key === 'poValue')
+    const displayExportRows = exportRows.map((row) => ({
+      ...row,
+      reasonForLostOrder: getLostOrderReasonLabel(row.reasonForLostOrder),
+    }))
 
     const sharedOptions = {
-      title: isOwnerScopedAdminView ? viewConfig.title : 'Deal Management Report',
-      subtitle: isOwnerScopedAdminView ? 'Owner-wise deal export' : 'Filtered deal export',
+      title: `${baseName} Report`,
+      subtitle: `${baseName} export`,
       sheetName: 'Deals',
       metadata: baseMetadata,
       columns: workbookColumns,
-      rows: exportRows,
+      rows: displayExportRows,
       summary: [
         ...(hasDealValueColumn ? [{ label: 'Total Deal Value', key: 'dealValue', type: 'currency' }] : []),
         ...(hasPoValueColumn   ? [{ label: 'Total PO Value',   key: 'poValue',   type: 'currency' }] : []),
@@ -2746,18 +3162,20 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   }
 
   const applyOwnerWiseDealFilter = ({ persistPreferences = false } = {}) => {
-    setAppliedOwnerWiseOwnerId(pendingOwnerWiseOwnerId)
+    const nextOwnerUserId = pendingOwnerWiseOwnerId || 'all'
+    setAppliedOwnerWiseOwnerId(nextOwnerUserId)
+    setFilter('ownerUserId', nextOwnerUserId)
     setCurrentPage(1)
     setOwnerScopedPage(1)
 
     if (persistPreferences) {
-      persistDealSearchSettings({ ownerWiseOwnerId: pendingOwnerWiseOwnerId })
+      persistDealSearchSettings({ ownerWiseOwnerId: nextOwnerUserId })
     }
 
     addNotification(
       'success',
       'Success',
-      pendingOwnerWiseOwnerId && pendingOwnerWiseOwnerId !== 'all'
+      nextOwnerUserId && nextOwnerUserId !== 'all'
         ? 'Owner wise deal filter applied successfully'
         : 'Owner wise deal filter cleared successfully'
     )
@@ -2843,15 +3261,17 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   }
 
   const handleApplyFilterDialog = () => {
+    const nextOwnerUserId = pendingOwnerWiseOwnerId || 'all'
     setGridFilterRules(buildFilterRulesFromRows(pendingFilterRows))
-    setAppliedOwnerWiseOwnerId(pendingOwnerWiseOwnerId)
+    setAppliedOwnerWiseOwnerId(nextOwnerUserId)
+    setPendingOwnerWiseOwnerId(nextOwnerUserId)
+    setFilter('ownerUserId', nextOwnerUserId)
     setAppliedClassificationOwners(pendingClassificationOwners)
     setSelectedDealFilterActionKeys(pendingDealFilterActionKeys)
     setGridSortConfig((currentValue) => (
       pendingOrderByKey
         ? getGridSortConfigForKey(
-          pendingOrderByKey,
-          currentValue.key === pendingOrderByKey ? currentValue.direction : ''
+          pendingOrderByKey
         )
         : currentValue
     ))
@@ -2870,8 +3290,9 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     setGridFilterRules([])
     setPendingFilterRows([createDealFilterRow()])
     setDashboardDealDrilldown(null)
-    setAppliedOwnerWiseOwnerId('')
-    setPendingOwnerWiseOwnerId('')
+    setAppliedOwnerWiseOwnerId('all')
+    setPendingOwnerWiseOwnerId('all')
+    setFilter('ownerUserId', 'all')
     setAppliedClassificationOwners([])
     setPendingClassificationOwners([])
     setCurrentPage(1)
@@ -2928,8 +3349,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
     setGridSortConfig((currentValue) => (
       getGridSortConfigForKey(
-        pendingOrderByKey,
-        currentValue.key === pendingOrderByKey ? currentValue.direction : ''
+        pendingOrderByKey
       )
     ))
   }
@@ -3131,7 +3551,24 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   ]
 
   const searchColumns = [
-    { key: 'dealNumber', label: 'Deal No.' },
+    {
+      key: 'dealNumber',
+      label: 'Deal No.',
+      render: (_, row) => (
+        <div className="deals-crm-number-menu" data-deal-card-menu>
+          <button
+            type="button"
+            className="deals-crm-number-button deals-crm-number-button-label"
+            onClick={() => handleViewDeal(row)}
+          >
+            <span className="deals-crm-number-button-content">
+              <span>{row.dealNumber || ''}</span>
+            </span>
+          </button>
+          {renderInlineDealActionMenu(row)}
+        </div>
+      ),
+    },
     { key: 'name', label: 'Deal Name' },
     {
       key: 'dealDate',
@@ -3166,16 +3603,6 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     },
     { key: 'jobNo', label: 'Job No.' },
     { key: 'customerName', label: 'Customer Name' },
-    {
-      key: 'actions',
-      label: 'Actions',
-      width: '100px',
-      render: (_, row) => (
-        <Button size="small" variant="outline" onClick={() => handleEdit(row)}>
-          Edit
-        </Button>
-      ),
-    },
   ]
 
   const columns = effectiveVariantKey === 'search' ? searchColumns : defaultColumns
@@ -3195,7 +3622,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
           aria-label={`Deal ${activeDeal?.dealNumber || ''}`}
           onClick={(event) => handleToggleDealMenu(event, activeDeal?.id)}
         >
-          <FaChevronDown />
+          <FaEllipsisV />
         </button>
 
         {isMenuOpen && dealTableMenuPosition ? createPortal(
@@ -3216,37 +3643,27 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                 <FaTable />
                 <span>{isConvertedDeal ? 'View Converted Deal' : 'View Deal'}</span>
               </button>
-              <button type="button" className="deals-board-card-action-item" onClick={() => handleManageDeal(activeDeal)} disabled={isConvertedDeal}>
-                <FaEdit />
-                <span>Manage Deal</span>
-              </button>
-              <button type="button" className="deals-board-card-action-item deals-board-card-action-item-green" onClick={() => handleGenerateQuotationForDeal(activeDeal)} disabled={isConvertedDeal}>
-                <FaFileAlt />
-                <span>Generate Quotation</span>
-              </button>
-              <button type="button" className="deals-board-card-action-item deals-board-card-action-item-green" onClick={() => handleCreateConvertedDealFromMenu(activeDeal)} disabled={isConvertedDeal}>
-                <FaTable />
-                <span>Converted Deal</span>
-              </button>
-              <button type="button" className="deals-board-card-action-item" onClick={() => handleOpenDealActionPage('upload-deal-quotation', activeDeal)} disabled={isConvertedDeal}>
-                <FaFileAlt />
-                <span>Upload Quotation</span>
-              </button>
-              <button type="button" className="deals-board-card-action-item" onClick={() => handleOpenDealModalActionFromMenu('reminder', activeDeal)} disabled={isConvertedDeal}>
+              {effectiveVariantKey === 'view' || effectiveVariantKey === 'search' ? null : (
+                <button type="button" className="deals-board-card-action-item" onClick={() => handleManageDeal(activeDeal)} disabled={isConvertedDeal}>
+                  <FaEdit />
+                  <span>Manage Deal</span>
+                </button>
+              )}
+              <button type="button" className="deals-board-card-action-item deals-board-card-action-item-orange" onClick={() => handleOpenDealModalActionFromMenu('reminder', activeDeal)} disabled={isConvertedDeal}>
                 <FaBell />
                 <span>Add Reminder</span>
+              </button>
+              <button type="button" className="deals-board-card-action-item" onClick={() => handleOpenDealActionPage('change-status', activeDeal)} disabled={isConvertedDeal}>
+                <FaSyncAlt />
+                <span>Change Status</span>
+              </button>
+              <button type="button" className="deals-board-card-action-item" onClick={() => handleGenerateQuotationForDeal(activeDeal)} disabled={isConvertedDeal}>
+                <FaFileAlt />
+                <span>Generate Quotation</span>
               </button>
               <button type="button" className="deals-board-card-action-item" onClick={() => handleOpenDealActionPage('re-assign-deal', activeDeal)} disabled={isConvertedDeal}>
                 <FaUser />
                 <span>Re-Assign Deal</span>
-              </button>
-              <button type="button" className="deals-board-card-action-item" onClick={() => handleOpenDealActionPage('send-mail', activeDeal)} disabled={isConvertedDeal}>
-                <FaEnvelope />
-                <span>Send Mail</span>
-              </button>
-              <button type="button" className="deals-board-card-action-item deals-board-card-action-item-danger" onClick={() => handleOpenDealModalActionFromMenu('delete', activeDeal)} disabled={isConvertedDeal}>
-                <FaTrash />
-                <span>Delete Deal</span>
               </button>
             </div>
           ),
@@ -3254,6 +3671,21 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         ) : null}
       </>
     )
+  }
+
+  const renderDealGridCellContent = (row, columnKey) => {
+    if (columnKey === 'reasonForLostOrder') {
+      const selectedReason = normalizeLostOrderReason(row.reasonForLostOrder)
+      return (
+        <span className="deals-crm-lost-reason-display" title={getLostOrderReasonLabel(selectedReason)}>
+          <span className="deals-crm-lost-reason-label">
+            {selectedReason ? getLostOrderReasonLabel(selectedReason) : ''}
+          </span>
+        </span>
+      )
+    }
+
+    return row[columnKey] || ''
   }
 
   const renderOwnerScopedCell = (row, columnKey) => {
@@ -3276,7 +3708,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       )
     }
 
-    return <td>{row[columnKey] || ''}</td>
+    return <td>{renderDealGridCellContent(row, columnKey)}</td>
   }
 
   const hasActiveAdvancedFilters = (
@@ -3287,7 +3719,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     || Boolean(appliedOwnerWiseOwnerId && appliedOwnerWiseOwnerId !== 'all')
     || appliedClassificationOwners.length > 0
   )
-  const showInlineGridFilters = showGridFilters && !isSearchAdminView
+  const showInlineGridFilters = showGridFilters
 
   const renderDealToolModals = () => (
     <>
@@ -3508,7 +3940,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                       aria-label="Order By Field"
                     >
                       <option value="">Select</option>
-                      {DEAL_SEARCH_FIELD_CATALOG.map((column) => (
+                      {filterDialogColumns.map((column) => (
                         <option key={column.key} value={column.key}>
                           {column.label}
                         </option>
@@ -3658,7 +4090,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
               <div className="deals-tool-config-body">
                 <div className="deals-tool-filter-grid">
                   {pendingFilterRows.map((row, index) => {
-                    const selectedColumn = DEAL_SEARCH_FIELD_CATALOG.find((column) => column.key === row.fieldKey) || null
+                    const selectedColumn = filterDialogColumns.find((column) => column.key === row.fieldKey) || null
                     const isOwnerRule = isOwnerFilterField(row.fieldKey)
                     const operatorOptions = isOwnerRule ? DEAL_OWNER_FILTER_OPERATORS : DEAL_FILTER_OPERATORS
                     const selectedFieldKeys = new Set(
@@ -3685,7 +4117,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                             aria-label="Select Field"
                           >
                             <option value="">Select</option>
-                            {DEAL_SEARCH_FIELD_CATALOG.map((column) => (
+                            {filterDialogColumns.map((column) => (
                               <option
                                 key={column.key}
                                 value={column.key}
@@ -3751,7 +4183,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                                 type="text"
                                 value={row.value}
                                 onChange={(event) => handlePendingFilterRowChange(row.id, { value: event.target.value })}
-                                placeholder={selectedColumn?.placeholder || 'Enter value'}
+                                placeholder={`Search ${selectedColumn?.label || 'Value'}`}
                                 disabled={!row.fieldKey || !row.operator}
                                 aria-label="Filter Value"
                               />
@@ -3819,7 +4251,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   )
 
   if (isOwnerScopedAdminView) {
-    const recordTitle = `${viewConfig.title} - ${ownerScopedAllRows.length} records`
+    const recordTitle = `${viewConfig.title} - ${sortedOwnerScopedRows.length} records`
     const emptyStateMessage = effectiveVariantKey === 'projectDetails'
       ? 'No project-linked deals match the current filters.'
       : effectiveVariantKey === 'ahmadabad'
@@ -3837,15 +4269,6 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
             <div className="deals-ownerwise-toolbar">
               <button type="button" className="deals-ownerwise-toolbar-icon deals-ownerwise-toolbar-icon-orange" onClick={() => navigate('/admin/deals/add')} aria-label="Add deal" title="Add Deal">
                 <FaPlus />
-              </button>
-              <button
-                type="button"
-                className="deals-ownerwise-toolbar-icon"
-                onClick={() => setCompactGrid((currentValue) => !currentValue)}
-                aria-label="List/View"
-                title={compactGrid ? 'Show normal view' : 'Show compact view'}
-              >
-                <FaListAlt />
               </button>
               <button
                 type="button"
@@ -3874,26 +4297,14 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
               >
                 <FaFileExport />
               </button>
-              <button
-                type="button"
-                className="deals-ownerwise-toolbar-icon deals-ownerwise-toolbar-icon-cyan deals-ownerwise-toolbar-icon-combo"
-                onClick={openFieldSelector}
-                aria-label="Column/Grid"
-                title="Column/Grid"
-              >
-                <span className="deals-toolbar-icon-combo">
-                  <FaTable />
-                  <FaChevronDown />
-                </span>
-              </button>
             </div>
           </div>
 
           <div className="deals-ownerwise-filters">
             <label className="deals-ownerwise-owner-filter">
               <span>Role Selection</span>
-              <select value={filters.ownerUserId} onChange={(event) => handleOwnerFilterChange(event.target.value)} aria-label="Filter deals by owner">
-                {ownerFilterOptions.map((option) => (
+              <select value={appliedOwnerWiseOwnerId || filters.ownerUserId || 'all'} onChange={(event) => handleOwnerFilterChange(event.target.value)} aria-label="Filter deals by owner">
+                {roleSelectionOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -3906,17 +4317,14 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
             {effectiveVariantKey === 'projectDetails' ? (
               <>
                 <div className="deals-ownerwise-summary-line">Criteria: <strong>Project Name is not empty</strong></div>
-                <div className="deals-ownerwise-summary-line">Total Records: <strong>{filteredOwnerScopedRows.length}</strong></div>
+                <div className="deals-ownerwise-summary-line">Total Records: <strong>{sortedOwnerScopedRows.length}</strong></div>
               </>
             ) : (
-              <div className="deals-ownerwise-summary-line">Total Records: <strong>{filteredOwnerScopedRows.length}</strong></div>
+              <div className="deals-ownerwise-summary-line">Total Records: <strong>{sortedOwnerScopedRows.length}</strong></div>
             )}
           </div>
 
-          {filteredOwnerScopedRows.length === 0 ? (
-            <div className="deals-crm-empty-state">{emptyStateMessage}</div>
-          ) : (
-            <div className={`deals-crm-grid-shell ${compactGrid ? 'deals-crm-grid-shell-compact' : ''}`}>
+          <div className={`deals-crm-grid-shell ${compactGrid ? 'deals-crm-grid-shell-compact' : ''}`}>
               <div className="deals-crm-table-wrap">
                 <table
                   className={`deals-crm-table deals-ownerwise-table ${
@@ -3930,26 +4338,113 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                   }`}
                 >
                   <thead>
-                    <tr className="deals-crm-head-row">
-                      {activeOwnerScopedColumns.map((column) => (
-                        <th key={column.key} title={column.label}>{column.label}</th>
-                      ))}
-                    </tr>
+                    {activeOwnerScopedColumns.some((col) => col.groupLabel) ? (
+                      <>
+                        <tr className="deals-crm-head-row">
+                          {activeOwnerScopedColumns.map((column, index, arr) => {
+                            if (column.groupLabel) {
+                              if (index === 0 || arr[index - 1].groupLabel !== column.groupLabel) {
+                                const colSpan = arr.filter((c) => c.groupLabel === column.groupLabel).length;
+                                return (
+                                  <th key={`group-${column.groupLabel}`} colSpan={colSpan} title={column.groupLabel} style={{ textAlign: 'center' }}>
+                                    {column.groupLabel}
+                                  </th>
+                                );
+                              }
+                              return null;
+                            }
+                            return (
+                              <th key={column.key} title={column.label} rowSpan={2}>
+                                <button
+                                  type="button"
+                                  className={`deals-crm-sort-button ${column.key === 'reasonForLostOrder' ? 'deals-crm-sort-button-no-indicator' : ''} ${gridSortConfig.key === column.key ? 'deals-crm-sort-button-active' : ''}`}
+                                  onClick={() => handleGridSort(column.key)}
+                                >
+                                  <span>{column.label}</span>
+                                  <span className="deals-crm-sort-indicator">
+                                    {gridSortConfig.key === column.key
+                                      ? (gridSortConfig.direction === 'asc' ? '▲' : '▼')
+                                      : '↕'}
+                                  </span>
+                                </button>
+                              </th>
+                            );
+                          })}
+                        </tr>
+                        <tr className="deals-crm-head-row">
+                          {activeOwnerScopedColumns.map((column) => {
+                            if (column.groupLabel) {
+                              return (
+                                <th key={column.key} title={column.label}>
+                                  <button
+                                    type="button"
+                                    className={`deals-crm-sort-button ${column.key === 'reasonForLostOrder' ? 'deals-crm-sort-button-no-indicator' : ''} ${gridSortConfig.key === column.key ? 'deals-crm-sort-button-active' : ''}`}
+                                    onClick={() => handleGridSort(column.key)}
+                                  >
+                                    <span>{column.label}</span>
+                                    <span className="deals-crm-sort-indicator">
+                                      {gridSortConfig.key === column.key
+                                        ? (gridSortConfig.direction === 'asc' ? '▲' : '▼')
+                                        : '↕'}
+                                    </span>
+                                  </button>
+                                </th>
+                              );
+                            }
+                            return null;
+                          })}
+                        </tr>
+                      </>
+                    ) : (
+                      <tr className="deals-crm-head-row">
+                        {activeOwnerScopedColumns.map((column) => (
+                          <th key={column.key} title={column.label}>
+                            <button
+                              type="button"
+                              className={`deals-crm-sort-button ${column.key === 'reasonForLostOrder' ? 'deals-crm-sort-button-no-indicator' : ''} ${gridSortConfig.key === column.key ? 'deals-crm-sort-button-active' : ''}`}
+                              onClick={() => handleGridSort(column.key)}
+                            >
+                              <span>{column.label}</span>
+                              <span className="deals-crm-sort-indicator">
+                                {gridSortConfig.key === column.key
+                                  ? (gridSortConfig.direction === 'asc' ? '▲' : '▼')
+                                  : '↕'}
+                              </span>
+                            </button>
+                          </th>
+                        ))}
+                      </tr>
+                    )}
 
                     {showInlineGridFilters ? (
                       <tr className="deals-crm-filter-row">
                         {activeOwnerScopedColumns.map((column) => (
                           <th key={column.key}>
-                            <input
-                              type="text"
-                              value={ownerScopedFilters[column.key] || ''}
-                              onChange={(event) => setOwnerScopedFilters((currentValue) => ({
-                                ...currentValue,
-                                [column.key]: event.target.value,
-                              }))}
-                              placeholder={column.placeholder || `Search ${column.label}`}
-                              className="deals-crm-filter-input"
-                            />
+                            {column.key === 'location' || column.key === 'city' ? (
+                              <select
+                                value={ownerScopedFilters[column.key] || ''}
+                                onChange={(event) => setOwnerScopedFilters((currentValue) => ({
+                                  ...currentValue,
+                                  [column.key]: event.target.value,
+                                }))}
+                                className="deals-crm-filter-input"
+                              >
+                                {CUSTOM_LOCATION_SELECT_OPTIONS.map((option) => (
+                                  <option key={option.value || 'empty-city'} value={option.value}>{option.label}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                value={ownerScopedFilters[column.key] || ''}
+                                onChange={(event) => setOwnerScopedFilters((currentValue) => ({
+                                  ...currentValue,
+                                  [column.key]: event.target.value,
+                                }))}
+                                placeholder={`Search ${column.label}`}
+                                className="deals-crm-filter-input"
+                              />
+                            )}
                           </th>
                         ))}
                       </tr>
@@ -3957,7 +4452,13 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                   </thead>
 
                   <tbody>
-                    {paginatedOwnerScopedRows.map((row) => (
+                    {paginatedOwnerScopedRows.length === 0 ? (
+                      <tr className="deals-crm-row">
+                        <td colSpan={activeOwnerScopedColumns.length} className="deals-crm-empty-table-cell">
+                          No Records Found
+                        </td>
+                      </tr>
+                    ) : paginatedOwnerScopedRows.map((row) => (
                       <tr key={row.id} className="deals-crm-row">
                         {activeOwnerScopedColumns.map((column) => (
                           <React.Fragment key={`${row.id}-${column.key}`}>
@@ -3985,7 +4486,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
                 <div className="deals-crm-footer-right">
                   <div className="deals-crm-footer-total">
-                    Total records: <strong>{filteredOwnerScopedRows.length}</strong>
+                    Total records: <strong>{sortedOwnerScopedRows.length}</strong>
                   </div>
 
                   <div className="deals-crm-pagination">
@@ -4021,7 +4522,6 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                 </div>
               </div>
             </div>
-          )}
         </section>
 
         {renderDealToolModals()}
@@ -4354,9 +4854,6 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
               <Button type="button" onClick={() => handleViewDeal(boardActionModal.deal)}>
                 View Deal
               </Button>
-              <Button type="button" variant="outline" onClick={handleLaunchDealEdit}>
-                Edit Deal
-              </Button>
               <Button type="button" variant="outline" onClick={() => handleOpenBoardActionModal('reminder', boardActionModal.deal)}>
                 Add Reminder
               </Button>
@@ -4588,7 +5085,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     )
   }
 
-  if (isAdmin && variantKey !== 'default' && variantKey !== 'add') {
+  if ((isAdmin && variantKey !== 'default' && variantKey !== 'add') || isSearchAdminView || isViewAdminView) {
     const drilldownStatusLabel = dashboardDealDrilldown?.statusType === 'won'
       ? 'Closed-Won'
       : dashboardDealDrilldown?.statusType === 'lost'
@@ -4614,19 +5111,21 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
               <span className="deals-crm-drilldown-title">{drilldownTitle}</span>
             </div>
           ) : null}
-          <div className="deals-crm-header">
+      <div className="deals-crm-header">
             <h1>{viewConfig.title} - {sortedGridRows.length} records</h1>
 
             <div className="deals-crm-toolbar">
-              <button
-                type="button"
-                className="deals-crm-toolbar-icon deals-crm-toolbar-icon-orange"
-                onClick={() => navigate('/admin/deals/add')}
-                aria-label="Add deal"
-                title="Add Deal"
-              >
-                <FaPlus />
-              </button>
+              {isAdmin ? (
+                <button
+                  type="button"
+                  className="deals-crm-toolbar-icon deals-crm-toolbar-icon-orange"
+                  onClick={() => navigate('/admin/deals/add')}
+                  aria-label="Add deal"
+                  title="Add Deal"
+                >
+                  <FaPlus />
+                </button>
+              ) : null}
               <button
                 type="button"
                 className={`deals-crm-toolbar-icon deals-crm-toolbar-icon-green ${hasActiveAdvancedFilters ? 'deals-crm-toolbar-icon-active' : ''}`}
@@ -4654,27 +5153,25 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
               >
                 <FaFileExport />
               </button>
-              <button
-                type="button"
-                className="deals-crm-toolbar-icon deals-crm-toolbar-icon-cyan deals-crm-toolbar-icon-combo"
-                onClick={openFieldSelector}
-                aria-label="Column/Grid"
-                title="Column/Grid"
-              >
-                <span className="deals-toolbar-icon-combo">
-                  <FaTable />
-                  <FaChevronDown />
-                </span>
-              </button>
             </div>
           </div>
 
           <div className="deals-crm-owner-filter-bar">
             <label className="deals-crm-owner-filter">
-              <span>Owner</span>
-              <select value={filters.ownerUserId} onChange={(event) => handleOwnerFilterChange(event.target.value)} aria-label="Filter deals by owner">
-                {ownerFilterOptions.map((option) => (
+              <span>Role Selection</span>
+              <select value={appliedOwnerWiseOwnerId || filters.ownerUserId || 'all'} onChange={(event) => handleOwnerFilterChange(event.target.value)} aria-label="Filter deals by owner">
+                {roleSelectionOptions.map((option) => (
                   <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="deals-crm-owner-filter">
+              <span>Deal Status</span>
+              <select value={dealStatusTableFilter} onChange={(event) => setDealStatusTableFilter(event.target.value)} aria-label="Filter deals by status">
+                {DEAL_STATUS_FILTER_OPTIONS.map((option) => (
+                  <option key={option.key} value={option.key}>
                     {option.label}
                   </option>
                 ))}
@@ -4682,44 +5179,125 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
             </label>
           </div>
 
-          {sortedGridRows.length === 0 ? (
-            <div className="deals-crm-empty-state">No deals match the current filters.</div>
-          ) : (
-            <div className={`deals-crm-grid-shell ${compactGrid ? 'deals-crm-grid-shell-compact' : ''}`}>
+          <div className={`deals-crm-grid-shell ${compactGrid ? 'deals-crm-grid-shell-compact' : ''}`}>
               <div className="deals-crm-table-wrap">
                 <table className="deals-crm-table">
                   <thead>
-                    <tr className="deals-crm-head-row">
-                      {activeGridColumns.map((column) => (
-                        <th key={column.key} title={column.label}>
-                          <button
-                            type="button"
-                            className={`deals-crm-sort-button ${gridSortConfig.key === column.key ? 'deals-crm-sort-button-active' : ''}`}
-                            onClick={() => handleGridSort(column.key)}
-                            title={column.label}
-                          >
-                            <span>{column.label}</span>
-                            <span className="deals-crm-sort-indicator" aria-hidden="true">
-                              {gridSortConfig.key === column.key
-                                ? (gridSortConfig.direction === 'asc' ? '▲' : '▼')
-                                : '↕'}
-                            </span>
-                          </button>
-                        </th>
-                      ))}
-                    </tr>
+                    {activeGridColumns.some((col) => col.groupLabel) ? (
+                      <>
+                        <tr className="deals-crm-head-row">
+                          {activeGridColumns.map((column, index, arr) => {
+                            if (column.groupLabel) {
+                              if (index === 0 || arr[index - 1].groupLabel !== column.groupLabel) {
+                                const colSpan = arr.filter((c) => c.groupLabel === column.groupLabel).length;
+                                return (
+                                  <th key={`group-${column.groupLabel}`} colSpan={colSpan} title={column.groupLabel} style={{ textAlign: 'center' }}>
+                                    {column.groupLabel}
+                                  </th>
+                                );
+                              }
+                              return null;
+                            }
+                            return (
+                              <th key={column.key} title={column.label} rowSpan={2}>
+                                <button
+                                  type="button"
+                                  className={`deals-crm-sort-button ${column.key === 'reasonForLostOrder' ? 'deals-crm-sort-button-no-indicator' : ''} ${gridSortConfig.key === column.key ? 'deals-crm-sort-button-active' : ''}`}
+                                  onClick={() => handleGridSort(column.key)}
+                                  title={column.label}
+                                >
+                                  <span>{column.label}</span>
+                                  <span className="deals-crm-sort-indicator" aria-hidden="true">
+                                    {gridSortConfig.key === column.key
+                                      ? (gridSortConfig.direction === 'asc' ? '▲' : '▼')
+                                      : '↕'}
+                                  </span>
+                                </button>
+                              </th>
+                            );
+                          })}
+                        </tr>
+                        <tr className="deals-crm-head-row">
+                          {activeGridColumns.map((column) => {
+                            if (column.groupLabel) {
+                              return (
+                                <th key={column.key} title={column.label}>
+                                  <button
+                                    type="button"
+                                    className={`deals-crm-sort-button ${column.key === 'reasonForLostOrder' ? 'deals-crm-sort-button-no-indicator' : ''} ${gridSortConfig.key === column.key ? 'deals-crm-sort-button-active' : ''}`}
+                                    onClick={() => handleGridSort(column.key)}
+                                    title={column.label}
+                                  >
+                                    <span>{column.label}</span>
+                                    <span className="deals-crm-sort-indicator" aria-hidden="true">
+                                      {gridSortConfig.key === column.key
+                                        ? (gridSortConfig.direction === 'asc' ? '▲' : '▼')
+                                        : '↕'}
+                                    </span>
+                                  </button>
+                                </th>
+                              );
+                            }
+                            return null;
+                          })}
+                        </tr>
+                      </>
+                    ) : (
+                      <tr className="deals-crm-head-row">
+                        {activeGridColumns.map((column) => {
+                          if (column.key === 'actions') {
+                            return (
+                              <th key={column.key} title={column.label}>
+                                <div className="deals-crm-sort-button">
+                                  <span>{column.label}</span>
+                                </div>
+                              </th>
+                            )
+                          }
+                          return (
+                            <th key={column.key} title={column.label}>
+                              <button
+                                type="button"
+                                className={`deals-crm-sort-button ${column.key === 'reasonForLostOrder' ? 'deals-crm-sort-button-no-indicator' : ''} ${gridSortConfig.key === column.key ? 'deals-crm-sort-button-active' : ''}`}
+                                onClick={() => handleGridSort(column.key)}
+                                title={column.label}
+                              >
+                                <span>{column.label}</span>
+                                <span className="deals-crm-sort-indicator" aria-hidden="true">
+                                  {gridSortConfig.key === column.key
+                                    ? (gridSortConfig.direction === 'asc' ? '▲' : '▼')
+                                    : '⇵'}
+                                </span>
+                              </button>
+                            </th>
+                          )
+                        })}
+                      </tr>
+                    )}
 
                     {showInlineGridFilters ? (
                       <tr className="deals-crm-filter-row">
                         {activeGridColumns.map((column) => (
                           <th key={column.key}>
-                            <input
-                              type="text"
-                              value={gridFilters[column.key] || ''}
-                              onChange={(event) => handleGridFilterChange(column.key, event.target.value)}
-                              placeholder={column.placeholder || `Search ${column.label}`}
-                              className="deals-crm-filter-input"
-                            />
+                            {column.key === 'actions' ? null : column.key === 'location' || column.key === 'city' ? (
+                              <select
+                                value={gridFilters[column.key] || ''}
+                                onChange={(event) => handleGridFilterChange(column.key, event.target.value)}
+                                className="deals-crm-filter-input"
+                              >
+                                {CUSTOM_LOCATION_SELECT_OPTIONS.map((option) => (
+                                  <option key={option.value || 'empty-city'} value={option.value}>{option.label}</option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                value={gridFilters[column.key] || ''}
+                                onChange={(event) => handleGridFilterChange(column.key, event.target.value)}
+                                placeholder={column.placeholder || `Search ${column.label}`}
+                                className="deals-crm-filter-input"
+                              />
+                            )}
                           </th>
                         ))}
                       </tr>
@@ -4727,25 +5305,35 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                   </thead>
 
                   <tbody>
-                    {paginatedGridRows.map((row) => (
-                      <tr key={row.id} className="deals-crm-row">
-                        <td className="deals-crm-number-cell">
-                          <div className="deals-crm-number-menu" data-deal-card-menu>
-                            <button
-                              type="button"
-                              className="deals-crm-number-button deals-crm-number-button-label"
-                              onClick={() => handleViewDeal(row)}
-                            >
-                              <span className="deals-crm-number-button-content">
-                                <span>{row.dealNumber}</span>
-                              </span>
-                            </button>
-                            {renderInlineDealActionMenu(row)}
-                          </div>
+                    {paginatedGridRows.length === 0 ? (
+                      <tr className="deals-crm-row">
+                        <td colSpan={activeGridColumns.length} className="deals-crm-empty-table-cell">
+                          No Records Found
                         </td>
-                        {activeGridColumns.filter((column) => column.key !== 'dealNumber').map((column) => (
-                          <td key={`${row.id}-${column.key}`}>{row[column.key] || ''}</td>
-                        ))}
+                      </tr>
+                    ) : paginatedGridRows.map((row) => (
+                      <tr key={row.id} className="deals-crm-row">
+                        {activeGridColumns.map((column) => {
+                          if (column.key === 'dealNumber') {
+                            return (
+                              <td key={`${row.id}-${column.key}`} className="deals-crm-number-cell">
+                                <div className="deals-crm-number-menu" data-deal-card-menu>
+                                  <button
+                                    type="button"
+                                    className="deals-crm-number-button deals-crm-number-button-label"
+                                    onClick={() => handleViewDeal(row)}
+                                  >
+                                    <span className="deals-crm-number-button-content">
+                                      <span>{row[column.key] || ''}</span>
+                                    </span>
+                                  </button>
+                                  {renderInlineDealActionMenu(row)}
+                                </div>
+                              </td>
+                            )
+                          }
+                          return <td key={`${row.id}-${column.key}`}>{renderDealGridCellContent(row, column.key)}</td>
+                        })}
                       </tr>
                     ))}
                   </tbody>
@@ -4803,7 +5391,6 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                 </div>
               </div>
             </div>
-          )}
         </section>
 
         {renderDealToolModals()}
@@ -4860,8 +5447,11 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
           columns={columns}
           data={displayedDeals}
           emptyMessage={viewConfig.emptyMessage}
+          className={effectiveVariantKey === 'search' ? 'deals-search-table' : ''}
         />
       </Card>
+
+      {renderDealToolModals()}
 
       <Modal
         isOpen={isOpen}
@@ -4892,6 +5482,8 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
               <strong>Contacts</strong>
             </button>
           </div>
+
+          {formErrors.submit ? <div className="deal-form-alert">{formErrors.submit}</div> : null}
 
           {dealFormStep === 0 ? (
             <div className="deal-form-section">
@@ -4999,6 +5591,47 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                   label="Job No"
                   value={formData.jobNo}
                   onChange={(event) => handleFormFieldChange('jobNo', event.target.value)}
+                  fullWidth
+                />
+
+                <Input
+                  label="Order Status (Old)"
+                  value={formData.customerOrderStatusOld}
+                  onChange={(event) => handleFormFieldChange('customerOrderStatusOld', event.target.value)}
+                  fullWidth
+                />
+
+                <Input
+                  label="Order Status (New)"
+                  value={formData.customerOrderStatusNew}
+                  onChange={(event) => handleFormFieldChange('customerOrderStatusNew', event.target.value)}
+                  fullWidth
+                />
+
+                <Select
+                  label="Convert to PO"
+                  value={formData.convertToPo}
+                  onChange={(event) => handleFormFieldChange('convertToPo', event.target.value)}
+                  options={[
+                    { value: '', label: 'Select...' },
+                    { value: 'Yes', label: 'Yes' },
+                    { value: 'No', label: 'No' },
+                  ]}
+                  fullWidth
+                />
+
+                <Input
+                  label="If Yes, PO Value/Job No."
+                  value={formData.poValueJobNo}
+                  onChange={(event) => handleFormFieldChange('poValueJobNo', event.target.value)}
+                  fullWidth
+                />
+
+                <Select
+                  label="If No, Reason for Lost Order"
+                  value={formData.reasonForLostOrder}
+                  onChange={(event) => handleFormFieldChange('reasonForLostOrder', event.target.value)}
+                  options={LOST_ORDER_REASON_OPTIONS}
                   fullWidth
                 />
 

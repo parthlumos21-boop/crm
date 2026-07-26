@@ -26,11 +26,7 @@ const Logout = () => {
   return (
     <div className="login-shell">
       <section className="logout-confirm-card">
-        <span className="login-kicker">Secure Logout</span>
-        <h1 className="login-title">Are you really sure you want to logout?</h1>
-        <p className="login-subtitle">
-          Your current session will be invalidated on this device. Other active sessions remain available unless you use logout all sessions.
-        </p>
+        <h1 className="login-title">Are you sure logout?</h1>
         <div className="logout-confirm-actions">
           <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
             Cancel

@@ -29,6 +29,49 @@ const formatLegacyBoardDate = (value) => {
   return format(date, 'dd-MM-yyyy')
 }
 
+export const GROUP_ACCOUNTS_COLUMNS = [
+  { key: 'accountNumber', label: 'Account No.', filterPlaceholder: 'Search Account No.', width: '150px', searchable: true, exportable: true, clickable: true },
+  { key: 'name', label: 'Account Name', filterPlaceholder: 'Search Account Name', width: '220px', searchable: true, exportable: true },
+  { key: 'accountDate', label: 'Account Date', filterPlaceholder: 'Search Account Date', width: '150px', searchable: true, exportable: true, cellFormatter: (value) => formatLegacyBoardDate(value), exportFormatter: (value) => formatLegacyBoardDate(value) },
+  { key: 'accountCategory', label: 'Account Category', filterPlaceholder: 'Search Account Category', width: '180px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'status', label: 'Account Status', filterPlaceholder: 'Search Account Status', width: '150px', searchable: true, exportable: true },
+  { key: 'accountState', label: 'Account State', filterPlaceholder: 'Search Account State', width: '150px', searchable: true, exportable: true },
+  { key: 'phone', label: 'Phone', filterPlaceholder: 'Search Phone', width: '155px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'email', label: 'Email', filterPlaceholder: 'Search Email', width: '165px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'contactPerson', label: 'Contact Person', filterPlaceholder: 'Search Contact Person', width: '165px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'projectName', label: 'Project Name', filterPlaceholder: 'Search Project Name', width: '210px', searchable: true, exportable: true, cellFormatter: formatProjectNameDisplay, exportFormatter: formatProjectNameDisplay },
+  { key: 'poValue', label: 'PO Value', filterPlaceholder: 'Search PO Value', width: '155px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'jobNo', label: 'Job No', filterPlaceholder: 'Search Job No', width: '155px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+]
+
+export const VIEW_ALL_COLUMNS = [
+  { key: 'accountNumber', label: 'Account No.', filterPlaceholder: 'Search Account No.', width: '150px', searchable: true, exportable: true, clickable: true },
+  { key: 'accountDate', label: 'Account Date', filterPlaceholder: 'Search Account Date', width: '150px', searchable: true, exportable: true, cellFormatter: (value) => formatLegacyBoardDate(value), exportFormatter: (value) => formatLegacyBoardDate(value) },
+  { key: 'name', label: 'Account Name', filterPlaceholder: 'Search Account Name', width: '220px', searchable: true, exportable: true },
+  { key: 'accountOwner', label: 'Account Owner', filterPlaceholder: 'Search Account Owner', width: '180px', searchable: true, exportable: true, cellFormatter: formatAccountOwnerDisplay, exportFormatter: formatAccountOwnerDisplay },
+  { key: 'status', label: 'Account Status', filterPlaceholder: 'Search Account Status', width: '150px', searchable: true, exportable: true },
+  { key: 'accountState', label: 'Account State', filterPlaceholder: 'Search Account State', width: '150px', searchable: true, exportable: true },
+  { key: 'accountSource', label: 'Account Source', filterPlaceholder: 'Search Account Source', width: '150px', searchable: true, exportable: true },
+  { key: 'contactPerson', label: 'Contact Person', filterPlaceholder: 'Search Contact Person', width: '165px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'phone', label: 'Phone', filterPlaceholder: 'Search Phone', width: '155px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'email', label: 'Email', filterPlaceholder: 'Search Email', width: '165px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'addedBy', label: 'Added By', filterPlaceholder: 'Search Added By', width: '150px', searchable: true, exportable: true, cellFormatter: formatAddedByDisplay, exportFormatter: formatAddedByDisplay },
+  { key: 'latestRemark', label: 'Latest Remark', filterPlaceholder: 'Search Latest Remark', width: '210px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+]
+
+export const NO_FOLLOW_LEAD_COLUMNS = [
+  { key: 'latestRemark', label: 'Latest Remark', filterPlaceholder: 'Search Latest Remark', width: '210px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'accountNumber', label: 'Account No.', filterPlaceholder: 'Search Account No.', width: '150px', searchable: true, exportable: true, clickable: true },
+  { key: 'name', label: 'Account Name', filterPlaceholder: 'Search Account Name', width: '220px', searchable: true, exportable: true },
+  { key: 'accountDate', label: 'Account Date', filterPlaceholder: 'Search Account Date', width: '150px', searchable: true, exportable: true, cellFormatter: (value) => formatLegacyBoardDate(value), exportFormatter: (value) => formatLegacyBoardDate(value) },
+  { key: 'accountCategory', label: 'Account Category', filterPlaceholder: 'Search Account Category', width: '180px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'status', label: 'Account Status', filterPlaceholder: 'Search Account Status', width: '150px', searchable: true, exportable: true },
+  { key: 'accountSource', label: 'Account Source', filterPlaceholder: 'Search Account Source', width: '150px', searchable: true, exportable: true },
+  { key: 'poValue', label: 'PO Value', filterPlaceholder: 'Search PO Value', width: '155px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'jobNo', label: 'Job No', filterPlaceholder: 'Search Job No', width: '155px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
+  { key: 'reasonForLost', label: 'Reason For Lost', filterPlaceholder: 'Search Reason For Lost', width: '210px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue, exportFormatter: (value) => value || '' },
+]
+
 export const ACCOUNT_LIST_BOARD_COLUMNS = [
   {
     key: 'accountNumber',
@@ -713,9 +756,9 @@ export const CONVERTED_ACCOUNTS_COLUMNS = [
 ]
 
 const BOARD_COLUMNS_BY_VARIANT = {
-  viewAll: ACCOUNT_LIST_BOARD_COLUMNS,
-  myGroup: ACCOUNT_LIST_BOARD_COLUMNS,
-  myAccounts: ACCOUNT_LIST_BOARD_COLUMNS,
+  viewAll: VIEW_ALL_COLUMNS,
+  myGroup: GROUP_ACCOUNTS_COLUMNS,
+  myAccounts: GROUP_ACCOUNTS_COLUMNS,
   searchAccount: ACCOUNT_LIST_BOARD_COLUMNS,
   accountSourceView: ACCOUNT_SOURCE_VIEW_COLUMNS,
   weeklyReportsAll: WEEKLY_REPORTS_ALL_COLUMNS,
@@ -723,7 +766,7 @@ const BOARD_COLUMNS_BY_VARIANT = {
   userWiseLeads: USER_WISE_LEADS_COLUMNS,
   convertedAccounts: CONVERTED_ACCOUNTS_COLUMNS,
   dailyFreshLeads: WEEKLY_REPORTS_ALL_COLUMNS,
-  noFollowLeads: WEEKLY_REPORTS_ALL_COLUMNS,
+  noFollowLeads: NO_FOLLOW_LEAD_COLUMNS,
 }
 
 export const getAccountBoardColumns = (variantKey = 'myGroup') =>

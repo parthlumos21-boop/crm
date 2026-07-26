@@ -14,7 +14,7 @@ const getInitialState = () => ({
   reminderTime: '09:00',
   reminderMode: 'Call',
   note: '',
-  createTask: false,
+  createTask: true,
 })
 
 const AddReminderPage = () => {

@@ -30,6 +30,11 @@ const resolveReminderOwnerName = (value) => {
   return canonicalName || titleize(value || 'Unassigned')
 }
 
+const normalizeReminderOwnerName = (value) =>
+  String(resolveReminderOwnerName(value) || '')
+    .trim()
+    .toLowerCase()
+
 const resolveAccountStatusLabel = (account = {}) =>
   titleize(account.stageLabel || account.accountStatus || account.status || '') || '-'
 
@@ -40,6 +45,7 @@ export const getAdminReminders = ({
   user = null,
   variantKey = 'active',
   reminderStatesById = {},
+  isAdmin = false,
 }) => {
   const accountReminders = getAccountsBoardData(accounts).records
     .filter((account) => account.reminderDate)
@@ -126,11 +132,17 @@ export const getAdminReminders = ({
 
   const filteredReminders = allReminders.filter((reminder) => {
     if (variantKey === 'my') {
-      return reminder.ownerName === (user?.name || '')
+      return isAdmin
+        ? reminder.status === 'active'
+        : normalizeReminderOwnerName(reminder.ownerName) === normalizeReminderOwnerName(user?.name || user?.username || '')
     }
 
     if (variantKey === 'closed') {
       return reminder.status === 'closed'
+    }
+
+    if (!isAdmin && normalizeReminderOwnerName(reminder.ownerName) !== normalizeReminderOwnerName(user?.name || user?.username || '')) {
+      return false
     }
 
     return reminder.status === 'active'

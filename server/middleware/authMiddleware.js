@@ -42,9 +42,17 @@ const authenticateToken = async (token) => {
     }
   }
 
+  const tokenRole = String(payload.role || '').trim().toLowerCase()
+  const effectiveRole = tokenRole === 'user' && currentUser.canActAsUser && isPrivilegedRole(currentUser.role)
+    ? 'user'
+    : currentUser.role
+
   const user = {
     id: currentUser.id,
-    role: currentUser.role,
+    role: effectiveRole,
+    actualRole: currentUser.role,
+    userRoleMode: currentUser.userRoleMode,
+    canActAsUser: currentUser.canActAsUser,
     companyId: currentUser.companyId,
     name: currentUser.name,
     email: currentUser.email,

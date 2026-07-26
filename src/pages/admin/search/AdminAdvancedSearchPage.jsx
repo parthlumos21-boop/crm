@@ -13,6 +13,7 @@ import { useData } from '../../../context/DataContext'
 import { normalizeAccountRecord } from '../../../features/adminAccounts/adapters/normalizeAccountRecord'
 import { ACCOUNT_ACTION_MAP } from '../../../features/adminAccounts/config/accountActions'
 import { buildAdminAccountActionUrl, openAdminAccountActionPage } from '../../../features/adminAccounts/utils/accountNavigation'
+import { buildAdminDealDetailUrl } from '../../../features/adminDeals/config/adminDealViews'
 import { getCrmOwnerDisplay } from '../../../features/users/crmUserDirectory'
 import { useClickOutside } from '../../../hooks'
 import { customerService } from '../../../services/customerService'
@@ -144,12 +145,37 @@ const SearchSection = ({ title, columns, rows, emptyMessage = 'No matching recor
 const AdminAdvancedSearchPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const { accounts, deals, projects, deleteAccount, addNotification } = useData()
+  const { accounts, deals, projects, convertedDeals, deleteAccount, addNotification } = useData()
   const [selectedAccount, setSelectedAccount] = useState(null)
   const [isActionsOpen, setIsActionsOpen] = useState(false)
   const actionsRef = useClickOutside(() => setIsActionsOpen(false))
   const query = useMemo(() => new URLSearchParams(location.search).get('query') || '', [location.search])
   const normalizedSearchQuery = normalizeQuery(query)
+  const selectedAccountId = selectedAccount?.raw?.id || selectedAccount?.id || ''
+  const selectedRelatedConvertedDeals = useMemo(() => (
+    (Array.isArray(convertedDeals) ? convertedDeals : [])
+      .filter((entry) => String(entry.accountId || '') === String(selectedAccountId || ''))
+      .sort((left, right) => (
+        new Date(right.convertedAt || right.createdAt || 0).getTime()
+        - new Date(left.convertedAt || left.createdAt || 0).getTime()
+      ))
+  ), [convertedDeals, selectedAccountId])
+  const selectedLinkedDealId = selectedAccount?.dealId
+    || selectedAccount?.raw?.dealId
+    || selectedRelatedConvertedDeals[0]?.sourceDealId
+    || selectedRelatedConvertedDeals[0]?.dealId
+    || selectedAccount?.convertedDealId
+    || selectedAccount?.raw?.convertedDealId
+    || ''
+  const selectedAccountIsConverted = Boolean(
+    selectedAccount?.isConverted
+    || selectedAccount?.raw?.isConverted
+    || selectedAccount?.dealId
+    || selectedAccount?.raw?.dealId
+    || selectedAccount?.convertedDealId
+    || selectedAccount?.raw?.convertedDealId
+    || selectedRelatedConvertedDeals.length > 0
+  )
 
   const normalizedAccounts = useMemo(
     () => accounts.map((account, index) => normalizeAccountRecord(account, index, { recordSource: 'admin-global-search' })),
@@ -383,6 +409,16 @@ const AdminAdvancedSearchPage = () => {
       return
     }
 
+    if (actionKey === 'view-linked-deal') {
+      if (!selectedLinkedDealId) {
+        addNotification('warning', 'Deal not found', 'This account does not have a linked deal yet.')
+        return
+      }
+
+      closeAndNavigate(() => navigate(buildAdminDealDetailUrl(selectedLinkedDealId)))
+      return
+    }
+
     if (actionKey === 'manage-account') {
       openAdminAccountActionPage(ACCOUNT_ACTION_MAP['manage-account'].route, accountId, '')
       return
@@ -412,16 +448,20 @@ const AdminAdvancedSearchPage = () => {
     { key: 'upload-quotation', label: 'Upload Quotation' },
     { key: 're-assign-account', label: 'Re-Assign Account' },
     { key: 'change-account-category', label: 'Change Account Category' },
+    { key: 'view-linked-deal', label: 'View Deal' },
     { key: 'converted-deal', label: 'Converted Deal' },
     { key: 'manage-account', label: 'Manage Account' },
     { key: 'delete', label: 'Delete' },
-  ]
+  ].filter((action) => (
+    (action.key !== 'converted-deal' || !selectedAccountIsConverted)
+    && (action.key !== 'view-linked-deal' || selectedAccountIsConverted)
+  ))
 
   const sectionColumns = {
     accounts: [
       { key: 'accountNumber', label: 'Account No.', isRecordNumber: true, onClick: (row) => setSelectedAccount(row.account) },
       { key: 'accountName', label: 'Account Name' },
-      { key: 'projectName', label: 'Project Name' },
+      { key: 'projectName', label: 'Project Name', isRecordNumber: true, onClick: (row) => setSelectedAccount(row.account) },
       { key: 'email', label: 'Email' },
       { key: 'phone', label: 'Phone' },
       { key: 'accountOwner', label: 'Account Owner' },
@@ -463,7 +503,7 @@ const AdminAdvancedSearchPage = () => {
     ],
     projects: [
       { key: 'projectCode', label: 'Project Code', isRecordNumber: true, onClick: (row) => handleOpenProject(row.id) },
-      { key: 'projectName', label: 'Project Name' },
+      { key: 'projectName', label: 'Project Name', isRecordNumber: true, onClick: (row) => handleOpenProject(row.id) },
       { key: 'accountName', label: 'Account Name' },
       { key: 'consultantName', label: 'Consultant' },
       { key: 'architectName', label: 'Architect' },

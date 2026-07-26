@@ -91,6 +91,12 @@
   width: min(980px, 100%);
 }
 
+.login-layout--single {
+  grid-template-columns: 1fr;
+  width: min(480px, 100%);
+  margin: 0 auto;
+}
+
 .login-chooser {
   width: min(1040px, 100%);
   padding: clamp(24px, 3vw, 36px);
@@ -140,12 +146,23 @@
   margin-bottom: 1.2rem;
 }
 
+.login-brand-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .login-header .login-brand-mark {
   margin-bottom: 0.25rem;
   border: 0;
   background: transparent;
   box-shadow: none;
   outline: none;
+}
+
+.login-shell--single {
+  align-items: center;
+  justify-content: center;
 }
 
 .login-panel--intro {
@@ -247,8 +264,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--app-logo-size);
-  height: var(--app-logo-size);
+  width: 110px;
+  height: 110px;
   flex-shrink: 0;
   padding: 0;
   border-radius: 0;
@@ -289,6 +306,35 @@
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+.login-brand-crm {
+  display: block;
+  width: 100%;
+  margin: 12px 0 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 5vw, 2rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  text-shadow: 0 0 10px var(--crm-glow-color, rgba(34, 197, 193, 0.5)),
+               0 0 20px var(--crm-glow-color, rgba(34, 197, 193, 0.3));
+}
+
+.login-brand-login-title {
+  margin: 8px 0 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 5vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .login-kicker {
@@ -361,6 +407,8 @@
 .login-form-header {
   display: grid;
   gap: 8px;
+  justify-items: center;
+  text-align: center;
 }
 
 .login-form-header h2 {
@@ -605,6 +653,10 @@
     align-items: flex-start;
   }
 
+  .login-shell--single {
+    align-items: center;
+  }
+
   .login-panel--intro {
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.16);
@@ -635,13 +687,18 @@
   }
 
   .login-brand-mark {
-    width: var(--app-logo-size);
-    height: var(--app-logo-size);
+    width: 90px;
+    height: 90px;
   }
 
   .login-brand-image,
   .login-brand-fallback {
     width: 100%;
     height: 100%;
+  }
+
+  .login-brand-crm {
+    margin-top: 10px;
+    font-size: clamp(1.75rem, 14vw, 2.5rem);
   }
 }

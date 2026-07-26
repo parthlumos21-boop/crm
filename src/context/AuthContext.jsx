@@ -93,7 +93,8 @@ export const AuthProvider = ({ children }) => {
 
       try {
         let result = await authApi.getCurrentUser()
-        if (!result.user) {
+        const hasSavedLoginState = Boolean(savedToken || authService.getCurrentUser())
+        if (!result.user && hasSavedLoginState) {
           try {
             await authApi.refreshSession()
             result = await authApi.getCurrentUser()

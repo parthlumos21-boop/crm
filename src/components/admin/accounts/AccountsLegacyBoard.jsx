@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { FiChevronDown } from 'react-icons/fi'
 import { useClickOutside } from '../../../hooks'
 import { ACCOUNT_ROW_ACTIONS } from '../../../features/adminAccounts/config/accountActions'
@@ -41,6 +42,7 @@ const AccountsLegacyBoard = ({
   onConvertToDeal,
   onViewDeal,
 }) => {
+  const navigate = useNavigate()
   const [openMenuId, setOpenMenuId] = useState(null)
   const [menuStyle, setMenuStyle] = useState(null)
   const closeRowMenu = () => {
@@ -87,6 +89,13 @@ const AccountsLegacyBoard = ({
 
     if (action.behavior === 'drawer') {
       onAccountOpen(row)
+      return
+    }
+
+    if (action.behavior === 'quotationGenerator' || action.key === 'generate-quotation') {
+      navigate('/admin/quotations', {
+        state: { openGenerator: true, preselectedAccountId: row.id }
+      })
       return
     }
 
@@ -239,12 +248,7 @@ const AccountsLegacyBoard = ({
                 ) : null}
                 {columns.map((column) => {
                   const cellValue = renderCellValue(column, row)
-                  const cellContent = column.key === 'accountNumber' && row.isConverted ? (
-                    <span className="admin-accounts-converted-cell">
-                      <span>{cellValue}</span>
-                      <span className="admin-accounts-converted-badge">Converted</span>
-                    </span>
-                  ) : cellValue
+                  const cellContent = cellValue
 
                   return (
                     <td key={column.key}>

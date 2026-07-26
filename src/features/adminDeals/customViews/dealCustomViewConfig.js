@@ -21,6 +21,9 @@ export const DEAL_CUSTOM_VIEW_FIELD_DEFINITIONS = {
   dealOwner: { key: 'dealOwner', label: 'Deal Owner', filterPlaceholder: 'Search Deal Owner' },
   dealType: { key: 'dealType', label: 'Deal Type', filterPlaceholder: 'Search Deal Type' },
   dealStatus: { key: 'dealStatus', label: 'Deal Status', filterPlaceholder: 'Search Deal Status' },
+  location: { key: 'location', label: 'Location', filterPlaceholder: 'Search Location' },
+  quotationCustomerStatus: { key: 'quotationCustomerStatus', label: 'Status Of Customer as per Quotation Given', filterPlaceholder: 'Search Quotation Status' },
+  orderCustomerStatus: { key: 'orderCustomerStatus', label: 'Status Of Customer as per Order Received', filterPlaceholder: 'Search Order Status' },
   dealValue: { key: 'dealValue', label: 'Deal Value', filterPlaceholder: 'Search Deal Value' },
   projectName: { key: 'projectName', label: 'Project Name', filterPlaceholder: 'Search Project Name' },
   consultantName: { key: 'consultantName', label: 'Consultant Name', filterPlaceholder: 'Search Consultant Name' },
@@ -39,6 +42,9 @@ export const DEAL_CUSTOM_VIEW_FIELD_OPTIONS = [
   'dealOwner',
   'dealType',
   'dealStatus',
+  'location',
+  'quotationCustomerStatus',
+  'orderCustomerStatus',
   'dealValue',
   'projectName',
   'consultantName',
@@ -58,6 +64,9 @@ const TABULAR_DEFAULT_FIELDS = [
   'dealDate',
   'dealName',
   'dealStatus',
+  'location',
+  'quotationCustomerStatus',
+  'orderCustomerStatus',
   'dealValue',
 ]
 
@@ -67,6 +76,9 @@ const GRID_DEFAULT_FIELDS = [
   'dealName',
   'dealOwner',
   'dealStatus',
+  'location',
+  'quotationCustomerStatus',
+  'orderCustomerStatus',
   'projectName',
 ]
 

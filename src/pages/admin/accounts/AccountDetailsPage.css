@@ -5,7 +5,7 @@
   width: 100%;
   min-height: 100%;
   margin: 0;
-  background: #ffffff;
+  background: var(--surface-card);
   padding: 0;
 }
 
@@ -14,9 +14,9 @@
   flex: 1 1 auto;
   flex-direction: column;
   width: 100%;
-  background: #ffffff;
+  background: var(--surface-card);
   min-height: 0;
-  border: 1px solid #cdd7e1;
+  border: 1px solid var(--border-subtle);
 }
 
 .account-details-header {
@@ -25,15 +25,15 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.2rem;
-  border-bottom: 1px solid #d7dde5;
-  background: linear-gradient(180deg, #fbfbfb 0%, #f2f2f2 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .account-details-header h1 {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--text-primary);
 }
 
 .account-details-close {
@@ -55,7 +55,7 @@
 .account-details-account-number {
   border: none;
   background: transparent;
-  color: #2b84c6;
+  color: var(--text-primary);
   font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
@@ -92,15 +92,15 @@
 }
 
 .account-details-quick-action:nth-child(3) {
-  color: #8db343;
+  color: var(--text-primary);
 }
 
 .account-details-quick-action:nth-child(4) {
-  color: #1f84be;
+  color: var(--text-primary);
 }
 
 .account-details-quick-action:nth-child(5) {
-  color: #7f8c8d;
+  color: var(--text-primary);
 }
 
 .account-details-actions {
@@ -113,7 +113,7 @@
   justify-content: space-between;
   min-width: 92px;
   min-height: 30px;
-  border: 1px solid #1a6fa0;
+  border: 1px solid var(--border-subtle);
   background: linear-gradient(180deg, var(--color-primary) 0%, #2171b5 100%);
   color: #ffffff;
   font-size: 0.84rem;
@@ -137,8 +137,8 @@
   top: calc(100% + 0.35rem);
   right: 0;
   min-width: 200px;
-  background: #ffffff;
-  border: 1px solid #ced6df;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
   z-index: 20;
 }
@@ -150,9 +150,9 @@
   width: 100%;
   padding: 0.8rem 1rem;
   border: none;
-  border-bottom: 1px solid #eef2f6;
-  background: #ffffff;
-  color: #2c3e50;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-primary);
   font-size: 0.82rem;
   text-align: left;
   cursor: pointer;
@@ -163,7 +163,7 @@
 }
 
 .account-details-actions-item:hover {
-  background: #f4f9fd;
+  background: var(--surface-card);
 }
 
 .account-details-actions-item-icon {
@@ -183,14 +183,14 @@
 
 .account-details-summary-card {
   padding: 0.8rem 0.9rem;
-  border: 1px solid #e5ebf2;
-  background: #fafcfe;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
 }
 
 .account-details-summary-card span {
   display: block;
   margin-bottom: 0.25rem;
-  color: #74879a;
+  color: var(--text-primary);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -217,7 +217,7 @@
 }
 
 .account-details-section {
-  border-top: 1px solid #d8dde4;
+  border-top: 1px solid var(--border-subtle);
   padding-top: 0.9rem;
 }
 
@@ -227,7 +227,7 @@
 
 .account-details-section-header h2 {
   margin: 0;
-  color: #2b84c6;
+  color: var(--text-primary);
   font-size: 0.95rem;
   font-weight: 700;
 }
@@ -240,14 +240,14 @@
 
 .account-details-field {
   padding: 0.35rem 0;
-  border-bottom: 1px solid #f1f4f7;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .account-details-field-label {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  color: #6c7a89;
+  color: var(--text-primary);
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -259,7 +259,7 @@
 
 .account-details-field-value {
   margin-top: 0.18rem;
-  color: #243746;
+  color: var(--text-primary);
   font-size: 0.88rem;
   line-height: 1.45;
   word-break: break-word;
@@ -281,7 +281,7 @@
 
 .account-details-empty p {
   margin: 0 0 1rem;
-  color: #566573;
+  color: var(--text-primary);
 }
 
 @media (max-width: 980px) {

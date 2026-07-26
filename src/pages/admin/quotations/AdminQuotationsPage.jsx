@@ -9,8 +9,6 @@ import {
   FaEye,
   FaEllipsisV,
   FaFilePdf,
-  FaFilter,
-  FaListUl,
   FaPlus,
   FaPrint,
   FaSearch,
@@ -34,7 +32,7 @@ import { customViewApi } from '../../../services/customViewApi'
 import { ExcelExportActionButton, ExcelExportMenuButton } from '../../../components/common/ExcelExportButton'
 import './AdminQuotationsPage.css'
 
-const PAGE_SIZE = 25
+const PAGE_SIZE = 6
 const ACCOUNT_LIST_PAGE_SIZE = 8
 const ADMIN_QUOTATION_LAYOUT_STORAGE_KEY = 'crm-admin-quotation-manager-layout'
 const ADMIN_QUOTATION_LAYOUT_VIEW_ENTITY_TYPE = 'quotation_layout_preferences'
@@ -122,25 +120,40 @@ const createInitialUploadQuotationForm = () => {
 }
 
 const ADMIN_QUOTATION_FIELD_DEFINITIONS = [
-  { key: 'num', label: 'Quotation No.', exportValue: (row) => row.num },
-  { key: 'owner', label: 'Quotation Owner', exportValue: (row) => row.owner },
+  { key: 'num', label: 'Quotation Number', exportValue: (row) => row.num },
   { key: 'date', label: 'Quotation Date', exportValue: (row) => row.date },
+  { key: 'owner', label: 'Quotation Owner', exportValue: (row) => row.owner },
   { key: 'company', label: 'Company Name', exportValue: (row) => row.company },
+  { key: 'project', label: 'Project Name', exportValue: (row) => row.project },
   { key: 'amount', label: 'Amount', exportValue: (row) => row.amountLabel },
   { key: 'status', label: 'Status', exportValue: (row) => row.statusLabel },
-  { key: 'project', label: 'Project Name', exportValue: (row) => row.project },
 ]
 
 const ADMIN_QUOTATION_MANAGER_EXPORT_COLUMNS = [
-  { key: 'num', label: 'Quotation No.', type: 'text', width: 18 },
-  { key: 'owner', label: 'Quotation Owner', type: 'text', width: 22 },
+  { key: 'num', label: 'Quotation Number', type: 'text', width: 18 },
   { key: 'date', label: 'Quotation Date', type: 'date', align: 'center', width: 18 },
+  { key: 'owner', label: 'Quotation Owner', type: 'text', width: 22 },
   { key: 'company', label: 'Company Name', type: 'text', width: 28 },
-  { key: 'status', label: 'Status', type: 'text', width: 16 },
   { key: 'project', label: 'Project Name', type: 'text', width: 28 },
+  { key: 'amountLabel', label: 'Amount', type: 'text', width: 18 },
+  { key: 'statusLabel', label: 'Status', type: 'text', width: 16 },
 ]
 
-const DEFAULT_SELECTED_ADMIN_QUOTATION_FIELDS = ['num', 'owner', 'date', 'company', 'amount', 'status', 'project']
+const DEFAULT_SELECTED_ADMIN_QUOTATION_FIELDS = [
+  'num', 'owner', 'date', 'amount', 'status', 'company', 'project'
+]
+
+const orderQuotationNumberFirst = (fieldKeys = [], activeTab = 'deal') => {
+  const cleanKeys = fieldKeys.filter(Boolean)
+  const preferredOrder = activeTab === 'account'
+    ? ['num', 'owner', 'date', 'company', 'amount', 'status', 'project']
+    : ['num', 'owner', 'date', 'amount', 'status', 'company', 'project']
+  const orderedKeys = preferredOrder.filter((fieldKey) => cleanKeys.includes(fieldKey))
+  cleanKeys.forEach((fieldKey) => {
+    if (!orderedKeys.includes(fieldKey)) orderedKeys.push(fieldKey)
+  })
+  return orderedKeys
+}
 
 const readAdminQuotationLayout = () => {
   try {
@@ -150,7 +163,7 @@ const readAdminQuotationLayout = () => {
       ? parsedValue.selectedFields.filter((fieldKey) => ADMIN_QUOTATION_FIELD_DEFINITIONS.some((field) => field.key === fieldKey))
       : DEFAULT_SELECTED_ADMIN_QUOTATION_FIELDS
 
-    return { selectedFields }
+    return { selectedFields: orderQuotationNumberFirst(selectedFields) }
   } catch {
     return { selectedFields: DEFAULT_SELECTED_ADMIN_QUOTATION_FIELDS }
   }
@@ -162,7 +175,7 @@ const sanitizeAdminQuotationLayout = (layoutValue = {}) => {
     : DEFAULT_SELECTED_ADMIN_QUOTATION_FIELDS
 
   return {
-    selectedFields: selectedFields.length > 0 ? selectedFields : DEFAULT_SELECTED_ADMIN_QUOTATION_FIELDS,
+    selectedFields: orderQuotationNumberFirst(selectedFields.length > 0 ? selectedFields : DEFAULT_SELECTED_ADMIN_QUOTATION_FIELDS),
   }
 }
 
@@ -837,10 +850,10 @@ export const buildPrintableHtml = (doc) => {
         }
         .logo {
           display: block;
-          width: 54px;
-          height: 54px;
+          width: 213px;
+          height: 142px;
           max-width: 100%;
-          max-height: 54px;
+          max-height: 152px;
           object-fit: contain;
           object-position: center;
           padding: 0;
@@ -851,13 +864,14 @@ export const buildPrintableHtml = (doc) => {
           opacity: 1;
         }
         .logo--swati {
-          width: 54px;
-          max-height: 54px;
+          width: 196px;
+          height: 148px;
+          max-height: 159px;
         }
         .logo--lumos {
-          width: 112px;
-          height: 44px;
-          max-height: 44px;
+          width: 311px;
+          height: 142px;
+          max-height: 152px;
           background: transparent;
           border-radius: 0;
           padding: 0;
@@ -1608,7 +1622,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
   }, [isAuthorized, navigate])
 
   const [activeTab, setActiveTab] = useState('account')
-  const [showFilterRow, setShowFilterRow] = useState(true)
+  const [showFilterRow] = useState(false)
   const [isFieldPanelOpen, setIsFieldPanelOpen] = useState(false)
   const [quotationLayout, setQuotationLayout] = useState(readAdminQuotationLayout)
   const [fieldPanelDraft, setFieldPanelDraft] = useState(readAdminQuotationLayout)
@@ -1638,10 +1652,10 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
   const viewQuotationId = searchParams.get('view') || ''
 
   const selectedFieldDefinitions = useMemo(() => (
-    quotationLayout.selectedFields
+    orderQuotationNumberFirst(quotationLayout.selectedFields, activeTab)
       .map((fieldKey) => ADMIN_QUOTATION_FIELD_DEFINITIONS.find((field) => field.key === fieldKey))
       .filter(Boolean)
-  ), [quotationLayout.selectedFields])
+  ), [quotationLayout.selectedFields, activeTab])
 
   const availableFieldDefinitions = useMemo(() => (
     ADMIN_QUOTATION_FIELD_DEFINITIONS.filter((field) => !fieldPanelDraft.selectedFields.includes(field.key))
@@ -2120,12 +2134,18 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
     ]
 
     const structuredExportRows = filteredRows.map((row) => ({
-      num: row.num || '',
-      owner: row.owner || '',
       date: row.dateSort || row.raw?.quotationDate || row.raw?.createdAt || '',
+      owner: row.owner || '',
       company: row.company || '',
-      status: row.statusLabel || formatStatusLabel(row.status),
       project: row.project || '',
+      num: row.num || '',
+      amountLabel: row.amountLabel || '',
+      statusLabel: row.statusLabel || formatStatusLabel(row.status),
+      oldStatus: row.oldStatus || '',
+      newStatus: row.newStatus || '',
+      convertToPo: row.convertToPo || '',
+      poValueJobNo: row.poValueJobNo || '',
+      reasonForLostOrder: row.reasonForLostOrder || '',
     }))
 
     if (format === 'csv') {
@@ -2337,39 +2357,14 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
         <div className="aqp-main-content">
           <div className="aqp-report-controls">
             <div className="aqp-report-controls-left">
-              <button
-                type="button"
-                className={`aqp-report-refine-btn${showFilterRow ? ' aqp-report-refine-btn--active' : ''}`}
-                onClick={() => setShowFilterRow((currentValue) => !currentValue)}
-              >
-                <FaFilter />
-                Refine Filter
-              </button>
-
-              <button
-                type="button"
-                className={`aqp-report-icon-btn aqp-report-icon-btn--blue${isFieldPanelOpen ? ' aqp-report-icon-btn--active' : ''}`}
-                title="Select Quotation Report Fields"
-                onClick={handleOpenFieldPanel}
-                aria-pressed={isFieldPanelOpen}
-              >
-                <FaListUl />
-              </button>
-
               <div className="aqp-report-export">
                 <ExcelExportMenuButton
                   label="Export"
                   title="Export quotation manager"
                   className="aqp-report-export"
-                  buttonClassName="aqp-report-icon-btn aqp-report-icon-btn--green aqp-report-icon-btn--export"
+                  buttonClassName="aqp-report-icon-btn aqp-report-icon-btn--blue aqp-report-icon-btn--export"
                   menuClassName="aqp-report-export-menu"
                   items={[
-                    {
-                      key: 'quotation-manager-csv',
-                      label: 'Export to CSV',
-                      badge: 'CSV',
-                      onClick: () => handleExportRows('csv'),
-                    },
                     {
                       key: 'quotation-manager-excel',
                       label: 'Export to Excel',
@@ -2392,7 +2387,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
                 </th>
               ))}
             </tr>
-            {showFilterRow ? (
+            {activeTab === 'deal' && (
             <tr className="aqp-search-row">
               {selectedFieldDefinitions.map((field) => (
                 <th key={field.key} className={`aqp-search-th aqp-field--${field.key}`}>
@@ -2403,12 +2398,12 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
                       setFilters((current) => ({ ...current, [field.key]: event.target.value }))
                       setPage(1)
                     }}
-                    placeholder="Search here ..."
+                    placeholder={"Search " + field.label}
                   />
                 </th>
               ))}
             </tr>
-            ) : null}
+            )}
           </thead>
           <tbody>
             {quotationsLoading && paginatedRows.length === 0 ? (
@@ -2589,7 +2584,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
 
             <div className="aqp-upload-grid">
               <label className="aqp-form-field aqp-upload-grid__full">
-                <span className="aqp-form-label">Select Account</span>
+                <span className="aqp-form-label aqp-form-label--required">Select Account</span>
                 <div className="aqp-upload-account-picker">
                   <input
                     className={`aqp-upload-input${uploadQuotationErrors.selectedAccountId ? ' aqp-upload-input--error' : ''}`}
@@ -2644,7 +2639,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
               ) : null}
 
               <label className="aqp-form-field">
-                <span className="aqp-form-label">Quote Number</span>
+                <span className="aqp-form-label aqp-form-label--required">Quote Number</span>
                 <input
                   className={`aqp-upload-input${uploadQuotationErrors.quoteNumber ? ' aqp-upload-input--error' : ''}`}
                   value={uploadQuotationForm.quoteNumber}
@@ -2654,7 +2649,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
               </label>
 
               <label className="aqp-form-field">
-                <span className="aqp-form-label">Quotation Date</span>
+                <span className="aqp-form-label aqp-form-label--required">Quotation Date</span>
                 <input
                   type="date"
                   className={`aqp-upload-input${uploadQuotationErrors.quotationDate ? ' aqp-upload-input--error' : ''}`}
@@ -2665,7 +2660,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
               </label>
 
               <label className="aqp-form-field">
-                <span className="aqp-form-label">Total Amount</span>
+                <span className="aqp-form-label aqp-form-label--required">Total Amount</span>
                 <div className="aqp-upload-field-inline">
                   <input
                     type="number"
@@ -2712,7 +2707,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
               </label>
 
               <label className="aqp-form-field">
-                <span className="aqp-form-label">Quotation Status</span>
+                <span className="aqp-form-label aqp-form-label--required">Quotation Status</span>
                 <select
                   className={`aqp-upload-select${uploadQuotationErrors.quotationStatus ? ' aqp-upload-select--error' : ''}`}
                   value={uploadQuotationForm.quotationStatus}
@@ -2773,7 +2768,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
               </label>
 
               <label className="aqp-form-field aqp-upload-grid__full">
-                <span className="aqp-form-label">Quote File</span>
+                <span className="aqp-form-label aqp-form-label--required">Quote File</span>
                 <input
                   type="file"
                   accept=".pdf,.xls,.xlsx,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -2952,7 +2947,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
 
       {viewDocument ? (
         <ModalShell
-          title={`View Quote - ${viewDocument.quotationNumber}`}
+          title={`View Quotation - ${viewDocument.quotationNumber}`}
           onClose={closeQuotationView}
           size="aqp-modal--xl"
         >
@@ -2961,88 +2956,15 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
               <button type="button" className="aqp-btn aqp-btn--gray" onClick={closeQuotationView}>
                 Close
               </button>
-              <ExcelExportActionButton
-                label="Export CSV"
-                busyLabel="Generating..."
-                successLabel="CSV downloaded"
-                title="Download this quotation as a formatted CSV file"
-                onClick={() => handleViewQuotationExport('csv')}
-              />
-              <ExcelExportActionButton
-                label="Export Excel"
-                busyLabel="Generating..."
-                successLabel="Excel downloaded"
-                title="Download this quotation as a formatted Excel file"
-                onClick={() => handleViewQuotationExport('excel')}
-              />
               <button type="button" className="aqp-btn aqp-btn--blue" onClick={() => triggerBrowserPdfSave(viewDocument)}>
                 <FaPrint className="aqp-btn-icon" />
                 Print
               </button>
             </div>
           </div>
-          <div className="aqp-view-summary">
-            <div className="aqp-view-summary__header">
-              <div className="aqp-view-summary__header-crm">
-                <div className="aqp-view-summary__crm-badge">
-                  <img
-                    src={swatiLogo}
-                    alt="Swati Switchgears"
-                    className="aqp-view-summary__crm-logo"
-                  />
-                </div>
-              </div>
-              <div className="aqp-view-summary__header-info">
-                <div className="aqp-view-summary__quotation-actions">
-                  <div className="aqp-num-cell aqp-num-cell--inline">
-                    <span className={`aqp-num-badge ${getActionBadgeClassName(viewRow?.status || viewDocument.statusLabel)}`}>
-                      {sectionValue(viewDocument.quotationNumber)}
-                    </span>
-                  </div>
-                </div>
-                <div className="aqp-view-summary__quotation-company">
-                  {sectionValue(viewDocument.companyName)}
-                </div>
-              </div>
-              <div className="aqp-view-summary__header-status">
-                <StatusBadge status={viewDocument.statusLabel} />
-              </div>
-            </div>
-            <div className="aqp-view-summary__actions" role="toolbar" aria-label="Quotation actions">
-              <span className="aqp-view-summary__actions-title">Quotation Actions</span>
-              {viewActions.filter((action) => action.key !== 'view').map((action) => {
-                const Icon = action.icon
-                const isLoading = actionLoadingId === viewRow?.id
-                return (
-                  <button
-                    key={action.key}
-                    type="button"
-                    className={`aqp-view-action-btn aqp-view-action-btn--${action.key}`}
-                    onClick={() => handleViewModalAction(action.key)}
-                    disabled={isLoading}
-                    title={action.label}
-                  >
-                    <Icon className={`aqp-view-action-btn__icon${action.iconClass ? ` ${action.iconClass}` : ''}`} />
-                    <span className="aqp-view-action-btn__label">{action.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-            <div className="aqp-view-summary__grid">
-              <div><strong>Date:</strong> {sectionValue(viewDocument.quotationDate)}</div>
-              <div><strong>Valid Until:</strong> {sectionValue(viewDocument.validUntil)}</div>
-              <div><strong>Profile:</strong> {sectionValue(viewDocument.profileName)}</div>
-              <div><strong>Currency:</strong> {viewDocument.currency}</div>
-              <div><strong>Total:</strong> {formatCurrency(viewDocument.total, viewDocument.currency)}</div>
-              <div><strong>Inquiry Ref:</strong> {sectionValue(viewDocument.customerReferenceNumber)}</div>
-            </div>
-            {viewDocument.rejectionReason ? (
-              <div className="aqp-view-summary__alert">
-                <strong>Rejection Reason:</strong> {viewDocument.rejectionReason}
-              </div>
-            ) : null}
+          <div className="aqp-view-quotation-document">
+            <QuotationDocument documentData={viewDocument} />
           </div>
-          <QuotationDocument documentData={viewDocument} />
         </ModalShell>
       ) : null}
 

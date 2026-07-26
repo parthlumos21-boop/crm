@@ -33,6 +33,8 @@ const attachmentRoutes = require('./routes/attachmentRoutes')
 const remarkRoutes = require('./routes/remarkRoutes')
 const projectRoutes = require('./routes/projectRoutes')
 const userTypeRoutes = require('./routes/userTypeRoutes')
+const jobPlanningRoutes = require('./routes/jobPlanningRoutes')
+const productRoutes = require('./routes/productRoutes')
 const openapiSpec = require('./docs/openapi')
 const jobQueue = require('./services/jobQueue')
 const emailService = require('./services/emailService')
@@ -74,6 +76,11 @@ if (helmet) {
 }
 
 app.use(requestLogger)
+
+app.use('/api', (_req, res, next) => {
+  res.set('Cache-Control', 'no-store')
+  next()
+})
 
 app.use(cors({
   origin: allowedOrigins,
@@ -186,9 +193,26 @@ app.get('/api/setup-status', async (_req, res) => {
     await ensureDatabaseSetup()
   }
 
+  let loginBrandGlowColor = null
+  if (isBackendReady()) {
+    try {
+      const { getMongoModel } = require('./models/mongoModels')
+      const AppSettings = getMongoModel('app_settings')
+      const setting = await AppSettings.findOne({ scope: 'global', key: 'loginBrandGlowColor' }).lean()
+      if (setting && setting.value) {
+        loginBrandGlowColor = setting.value
+      }
+    } catch (err) {
+      // Ignore errors when fetching settings
+    }
+  }
+
   res.json({
     success: true,
-    data: getPublicSetupStatus(),
+    data: {
+      ...getPublicSetupStatus(),
+      loginBrandGlowColor,
+    },
   })
 })
 
@@ -221,6 +245,8 @@ app.use('/api/search', requireBackendReady, searchRoutes)
 app.use('/api/attachments', requireBackendReady, attachmentRoutes)
 app.use('/api/projects', requireBackendReady, projectRoutes)
 app.use('/api/user-types', requireBackendReady, userTypeRoutes)
+app.use('/api/job-plannings', requireBackendReady, jobPlanningRoutes)
+app.use('/api/products', requireBackendReady, productRoutes)
 app.use('/api/ovrc', requireBackendReady, requireAuth, ovrcRoutes)
 app.use('/api', requireBackendReady, remarkRoutes)
 

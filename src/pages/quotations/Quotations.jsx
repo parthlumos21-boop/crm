@@ -44,6 +44,7 @@ import {
   safeLower,
   triggerBrowserPdfSave,
 } from '../admin/quotations/AdminQuotationsPage'
+import { AddProductModal, AddOtherProductModal, AddOtherServiceModal } from './LineItemModals'
 import { dataService } from '../../services/dataService'
 import { exportExcelWorkbook, exportCsvWorkbook } from '../../utils/excelExport'
 import { formatCurrency, formatDate, generateId } from '../../utils/helpers'
@@ -492,7 +493,7 @@ const INITIAL_QUOTATION_FILTERS = {
 const getVisibleQuotationActions = () => QUOTATION_ACTIONS
 
 const QUOTATION_FIELD_DEFINITIONS = [
-  { key: 'num', label: 'Quotation No.', exportValue: (row) => row.num, sortValue: (row) => row.num },
+  { key: 'num', label: 'Quotation Number', exportValue: (row) => row.num, sortValue: (row) => row.num },
   { key: 'owner', label: 'Quotation Owner', exportValue: (row) => row.owner, sortValue: (row) => row.owner },
   { key: 'date', label: 'Quotation Date', exportValue: (row) => row.date, sortValue: (row) => row.dateSort },
   { key: 'company', label: 'Company Name', exportValue: (row) => row.company, sortValue: (row) => row.company },
@@ -562,6 +563,7 @@ const Quotations = ({ autoOpen = false }) => {
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const [activeTab, setActiveTab] = useState('account')
+  const [profileFilter, setProfileFilter] = useState('all')
   const [showFilterRow, setShowFilterRow] = useState(true)
   const [isFieldPanelOpen, setIsFieldPanelOpen] = useState(false)
   const [quotationLayout, setQuotationLayout] = useState(readQuotationLayout)
@@ -589,6 +591,30 @@ const Quotations = ({ autoOpen = false }) => {
   const [accountListPage, setAccountListPage] = useState(1)
   const [generatorError, setGeneratorError] = useState('')
   const [quotationForm, setQuotationForm] = useState(() => createInitialQuotationForm())
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+  const [isOtherProductModalOpen, setIsOtherProductModalOpen] = useState(false)
+  const [isOtherServiceModalOpen, setIsOtherServiceModalOpen] = useState(false)
+
+  const handleAddModalLineItem = (item) => {
+    setQuotationForm(prev => {
+      const newLineItem = {
+        id: generateId('QLI'),
+        description: item.description || item.name || '',
+        quantity: item.quantity || '1',
+        unit: item.unit || 'Nos',
+        rate: String(item.rate || item.price || '0'),
+        amount: String((Number(item.quantity || 1) || 0) * (Number(item.rate || item.price || 0) || 0))
+      }
+      
+      const existingItems = prev.lineItems || [];
+      // Replace empty row if it's the only one
+      if (existingItems.length === 1 && !existingItems[0].description) {
+        return { ...prev, lineItems: [newLineItem] }
+      }
+      
+      return { ...prev, lineItems: [...existingItems, newLineItem] }
+    })
+  }
   const [builderError, setBuilderError] = useState('')
   const [builderMessage, setBuilderMessage] = useState('')
   const [savingQuotation, setSavingQuotation] = useState(false)
@@ -691,6 +717,11 @@ const Quotations = ({ autoOpen = false }) => {
   const filteredQuotationRows = useMemo(() => (
     quotationRows
       .filter((row) => row.quotationScope === activeTab)
+      .filter((row) => {
+        if (profileFilter === 'swati') return row.raw.profileKey === 'swati-switch'
+        if (profileFilter === 'lumos') return row.raw.profileKey === 'lumos-building' || row.raw.profileKey === 'lumos'
+        return true
+      })
       .filter((row) => Object.entries(quotationFilters).every(([key, value]) => {
         const query = safeLower(value)
         if (!query) return true
@@ -722,7 +753,7 @@ const Quotations = ({ autoOpen = false }) => {
         const compareValue = String(leftValue || '').localeCompare(String(rightValue || ''), undefined, { sensitivity: 'base' })
         return direction === 'asc' ? compareValue : compareValue * -1
       })
-  ), [activeTab, quotationFilters, quotationLayout.addOrderBy, quotationLayout.showLatestQuotations, quotationRows, quotationSort])
+  ), [activeTab, profileFilter, quotationFilters, quotationLayout.addOrderBy, quotationLayout.showLatestQuotations, quotationRows, quotationSort])
 
   const quotationTotalPages = useMemo(
     () => Math.max(1, Math.ceil(filteredQuotationRows.length / QUOTATION_PAGE_SIZE)),
@@ -1633,6 +1664,7 @@ const Quotations = ({ autoOpen = false }) => {
             </button>
           </div>
 
+
           <div className="aqp-tab-actions">
             <button type="button" className="aqp-btn aqp-btn--gray" onClick={() => fileInputRef.current?.click()}>
               <FaUpload className="aqp-btn-icon" />
@@ -1658,24 +1690,8 @@ const Quotations = ({ autoOpen = false }) => {
 
             <div className="quotation-report-controls">
               <div className="quotation-report-controls-left">
-                <button
-                  type="button"
-                  className={`quotation-report-refine-btn${showFilterRow ? ' quotation-report-refine-btn--active' : ''}`}
-                  onClick={() => setShowFilterRow((currentValue) => !currentValue)}
-                >
-                  <FaFilter />
-                  Refine Filter
-                </button>
 
-                <button
-                  type="button"
-                  className={`quotation-report-icon-btn quotation-report-icon-btn--blue${isFieldPanelOpen ? ' quotation-report-icon-btn--active' : ''}`}
-                  onClick={handleOpenFieldPanel}
-                  title="Select Quotation Report Fields"
-                  aria-pressed={isFieldPanelOpen}
-                >
-                  <FaListUl />
-                </button>
+
 
                 <div className="quotation-report-export">
                   <ExcelExportMenuButton
@@ -1685,12 +1701,6 @@ const Quotations = ({ autoOpen = false }) => {
                     buttonClassName="quotation-report-icon-btn quotation-report-icon-btn--green quotation-report-icon-btn--export"
                     menuClassName="quotation-report-export-menu"
                     items={[
-                      {
-                        key: 'quotation-report-csv',
-                        label: 'Export to CSV',
-                        badge: 'CSV',
-                        onClick: () => handleExportRows('csv'),
-                      },
                       {
                         key: 'quotation-report-excel',
                         label: 'Export to Excel',
@@ -1851,7 +1861,7 @@ const Quotations = ({ autoOpen = false }) => {
 
       {viewDocument ? (
         <ModalShell
-          title={`View Quote - ${viewDocument.quotationNumber}`}
+          title={`View Quote - ${viewDocument.companyName || 'Company'}`}
           onClose={closeQuotationView}
           size="aqp-modal--xl"
         >
@@ -2436,21 +2446,21 @@ const Quotations = ({ autoOpen = false }) => {
             <button
               type="button"
               className="quotation-builder-top-action"
-              onClick={() => scrollToBuilderSection(productSectionRef)}
+              onClick={() => setIsProductModalOpen(true)}
             >
               Product
             </button>
             <button
               type="button"
               className="quotation-builder-top-action"
-              onClick={() => scrollToBuilderSection(otherProductSectionRef)}
+              onClick={() => setIsOtherProductModalOpen(true)}
             >
               Other Product
             </button>
             <button
               type="button"
               className="quotation-builder-top-action"
-              onClick={() => scrollToBuilderSection(otherServiceSectionRef)}
+              onClick={() => setIsOtherServiceModalOpen(true)}
             >
               Other Service
             </button>
@@ -2463,6 +2473,8 @@ const Quotations = ({ autoOpen = false }) => {
             className="quotation-builder-hidden-input"
             onChange={handleUploadLineItems}
           />
+
+
 
           <section className="quotation-builder-section quotation-builder-section--compact">
             <div className="quotation-builder-main-grid">
@@ -2650,6 +2662,8 @@ const Quotations = ({ autoOpen = false }) => {
             </div>
           </section>
 
+
+
           <section className="quotation-builder-section quotation-builder-section--compact">
             <div className="quotation-builder-blue-title quotation-builder-blue-title--with-action">
               <span>Quote Items Table</span>
@@ -2746,164 +2760,26 @@ const Quotations = ({ autoOpen = false }) => {
             </div>
           </section>
 
-          <section className="quotation-builder-section quotation-builder-section--compact">
-            <div className="quotation-builder-blue-title">Inquiry Reference</div>
-            <div className="quotation-builder-grid quotation-builder-grid-three">
-              <label className="quotation-builder-field">
-                <span>Reference No.</span>
-                <input
-                  value={quotationForm.customerReferenceNumber}
-                  onChange={(event) => handleBuilderFieldChange('customerReferenceNumber', event.target.value)}
-                />
-              </label>
-              <label className="quotation-builder-field">
-                <span>Reference Date</span>
-                <input
-                  type="date"
-                  value={quotationForm.customerReferenceDate}
-                  onChange={(event) => handleBuilderFieldChange('customerReferenceDate', event.target.value)}
-                />
-              </label>
-              <label className="quotation-builder-field quotation-builder-field-wide">
-                <span>Reference Subject</span>
-                <input
-                  value={quotationForm.customerReferenceSubject}
-                  onChange={(event) => handleBuilderFieldChange('customerReferenceSubject', event.target.value)}
-                />
-              </label>
-            </div>
-
-            {additionalSections.length > 0 ? (
-              <div className="quotation-builder-additional-sections">
-                {additionalSections.map((section) => (
-                  <label key={section.id} className="quotation-builder-field quotation-builder-field-wide">
-                    <span>{section.title}</span>
-                    <textarea
-                      rows="3"
-                      value={section.content}
-                      onChange={(event) => handleAdditionalSectionChange(section.id, event.target.value)}
-                      placeholder="Add additional section details..."
-                    />
-                  </label>
-                ))}
-              </div>
-            ) : null}
-
-            <div className="quotation-builder-section-footer">
-              <button type="button" className="quotation-builder-top-action" onClick={handleAddSection}>
-                <FaPlus />
-                Add Section
-              </button>
-            </div>
-          </section>
-
-          <section className="quotation-builder-section">
-            <div className="quotation-builder-blue-title">Upload Line Items</div>
-            <div className="quotation-builder-upload-card">
-              <strong>{quotationForm.uploadedLineItemsName || 'No file uploaded yet.'}</strong>
-              <span>Accepted format: CSV or TXT with columns like Description, Quantity, Unit, Rate.</span>
-            </div>
-          </section>
-
-          <section className="quotation-builder-section" ref={productSectionRef}>
-            <div className="quotation-builder-blue-title">Product</div>
-            <div className="quotation-builder-grid quotation-builder-grid-two">
-              <label className="quotation-builder-field quotation-builder-field-wide">
-                <span>Project Name</span>
-                <input
-                  value={quotationForm.projectName}
-                  onChange={(event) => handleBuilderFieldChange('projectName', event.target.value)}
-                />
-              </label>
-              <label className="quotation-builder-field quotation-builder-field-wide">
-                <span>Quotation Subject</span>
-                <input
-                  value={quotationForm.quotationSubject}
-                  onChange={(event) => handleBuilderFieldChange('quotationSubject', event.target.value)}
-                />
-              </label>
-              <label className="quotation-builder-field quotation-builder-field-wide">
-                <span>Product</span>
-                <textarea
-                  rows="4"
-                  value={quotationForm.product}
-                  onChange={(event) => handleBuilderFieldChange('product', event.target.value)}
-                />
-              </label>
-              <label className="quotation-builder-field">
-                <span>Status</span>
-                <select
-                  value={quotationForm.status}
-                  onChange={(event) => handleBuilderFieldChange('status', event.target.value)}
-                >
-                  {QUOTATION_STATUS_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="quotation-builder-field quotation-builder-field-wide">
-                <span>Quotation Notes</span>
-                <textarea
-                  rows="4"
-                  value={quotationForm.quotationNotes}
-                  onChange={(event) => handleBuilderFieldChange('quotationNotes', event.target.value)}
-                />
-              </label>
-              <label className="quotation-builder-field">
-                <span>Delivery Terms</span>
-                <textarea
-                  rows="3"
-                  value={quotationForm.deliveryTerms}
-                  onChange={(event) => handleBuilderFieldChange('deliveryTerms', event.target.value)}
-                />
-              </label>
-              <label className="quotation-builder-field">
-                <span>Payment Terms</span>
-                <textarea
-                  rows="3"
-                  value={quotationForm.paymentTerms}
-                  onChange={(event) => handleBuilderFieldChange('paymentTerms', event.target.value)}
-                />
-              </label>
-              <label className="quotation-builder-field">
-                <span>Warranty</span>
-                <textarea
-                  rows="3"
-                  value={quotationForm.warrantyTerms}
-                  onChange={(event) => handleBuilderFieldChange('warrantyTerms', event.target.value)}
-                />
-              </label>
-            </div>
-          </section>
-
-          <section className="quotation-builder-section" ref={otherProductSectionRef}>
-            <div className="quotation-builder-blue-title">Other Product</div>
-            <label className="quotation-builder-field quotation-builder-field-wide">
-              <span>Other Product</span>
-              <textarea
-                rows="4"
-                value={quotationForm.otherProduct}
-                onChange={(event) => handleBuilderFieldChange('otherProduct', event.target.value)}
-              />
-            </label>
-          </section>
-
-          <section className="quotation-builder-section" ref={otherServiceSectionRef}>
-            <div className="quotation-builder-blue-title">Other Service</div>
-            <label className="quotation-builder-field quotation-builder-field-wide">
-              <span>Other Service</span>
-              <textarea
-                rows="4"
-                value={quotationForm.otherService}
-                onChange={(event) => handleBuilderFieldChange('otherService', event.target.value)}
-              />
-            </label>
-          </section>
-
           {builderError ? <div className="quotation-generator-error">{builderError}</div> : null}
           {builderMessage ? <div className="quotation-builder-message">{builderMessage}</div> : null}
         </form>
       </Modal>
+
+      <AddProductModal 
+        isOpen={isProductModalOpen} 
+        onClose={() => setIsProductModalOpen(false)} 
+        onAdd={handleAddModalLineItem} 
+      />
+      <AddOtherProductModal 
+        isOpen={isOtherProductModalOpen} 
+        onClose={() => setIsOtherProductModalOpen(false)} 
+        onAdd={handleAddModalLineItem} 
+      />
+      <AddOtherServiceModal 
+        isOpen={isOtherServiceModalOpen} 
+        onClose={() => setIsOtherServiceModalOpen(false)} 
+        onAdd={handleAddModalLineItem} 
+      />
     </div>
   )
 }

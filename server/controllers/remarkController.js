@@ -52,6 +52,19 @@ class RemarkController {
     }
   }
 
+  async listRemarkReminders(req, res, next) {
+    try {
+      const reminders = await remarkService.listRemarkReminders(req.user)
+
+      res.status(200).json({
+        success: true,
+        data: reminders
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   async updateRemark(req, res, next) {
     try {
       const { remarkId } = req.params

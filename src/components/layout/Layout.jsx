@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { useTheme } from '../../context/ThemeContext'
 import { motion } from 'framer-motion'
 import Header from './Header'
 import Sidebar from './Sidebar'
@@ -14,10 +15,19 @@ const shellMotion = {
 const Layout = ({ isAdmin = false }) => {
   const location = useLocation()
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const { theme } = useTheme()
 
   useEffect(() => {
     setMobileSidebarOpen(false)
-  }, [location.pathname, location.search])
+    document.documentElement.setAttribute('data-theme', theme)
+    if (isAdmin) {
+      document.documentElement.classList.add('is-admin')
+      document.documentElement.classList.remove('is-user')
+    } else {
+      document.documentElement.classList.add('is-user')
+      document.documentElement.classList.remove('is-admin')
+    }
+  }, [location.pathname, location.search, theme, isAdmin])
 
   return (
     <div className={`layout ${isAdmin ? 'layout--admin' : 'layout--user'}`}>

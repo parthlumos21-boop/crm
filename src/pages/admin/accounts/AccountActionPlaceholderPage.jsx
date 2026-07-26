@@ -5,7 +5,6 @@ import AddRemarksModal from '../../../components/common/AddRemarksModal'
 import RemarksTimeline from '../../../components/common/RemarksTimeline'
 import { useData } from '../../../context/DataContext'
 import { useAuth } from '../../../context/AuthContext'
-import { authService } from '../../../services/authService'
 import { remarkApi } from '../../../services/remarkApi'
 import { reminderApi } from '../../../services/reminderApi'
 import { calendarApi } from '../../../services/calendarApi'
@@ -21,29 +20,43 @@ import {
 import { buildAdminAccountBoardReturnUrl, buildAdminAccountDrawerUrl } from '../../../features/adminAccounts/utils/accountNavigation'
 import { getAccountsBoardData } from '../../../features/adminAccounts/selectors/getAccountsBoardData'
 import { getAccountById } from '../../../features/adminAccounts/selectors/getAccountById'
+import { getAccountOwnerOptionLabel, getCachedAccountOwnerOptions, loadAccountOwnerOptions } from '../../../features/adminAccounts/utils/accountOwnerOptions'
 import { buildCrmAccountActionUrl } from '../crm-actions/CRMActionPage'
 import BulkUploadAccountsPage from './BulkUploadAccountsPage'
+import AccountDetailsDrawer from './AccountDetailsDrawer'
 import './MyGroupAccounts.css'
 
 const reminderModes = ['Call', 'Email', 'Meeting', 'Visit', 'WhatsApp', 'Follow Up']
 const documentTypes = ['Proposal', 'Quotation', 'PO', 'Drawing', 'Site Photo', 'Other']
 const reminderTimes = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
+const getTodayInputValue = () => new Date().toISOString().slice(0, 10)
+const ACTION_CHANGE_STATUS_OPTIONS = ACCOUNT_CHANGE_STATUS_OPTIONS.filter((entry) => (
+  !['converted', 'closed', 'contacted', 'order_lost'].includes(entry.value)
+)).map((entry) => ({
+  ...entry,
+  label: entry.value === 'convert_to_po' ? 'PO Converted' : entry.label,
+}))
+const getAllowedActionStatusOption = (value) => {
+  const selectedOption = getAccountChangeStatusOption(value)
+  return ACTION_CHANGE_STATUS_OPTIONS.some((entry) => entry.value === selectedOption.value)
+    ? selectedOption
+    : ACTION_CHANGE_STATUS_OPTIONS[0]
+}
 
 const AccountActionPlaceholderPage = () => {
   const navigate = useNavigate()
   const { actionKey } = useParams()
   const [searchParams] = useSearchParams()
-  const { accounts, addNotification, updateAccount, findConvertedDealForAccount } = useData()
+  const { accounts, addNotification, updateAccount, findConvertedDealForAccount, convertAccountToDeal } = useData()
   const { user } = useAuth()
   const isAdminUser = user?.role === 'admin'
-  const addDealPagePath = isAdminUser ? '/admin/deals/add' : '/deals/add'
   const searchDealPagePath = isAdminUser ? '/admin/deals/search' : '/deals/search'
   const conversionStartedRef = useRef(false)
   const [conversionError, setConversionError] = useState('')
   const [isRemarkModalOpen, setIsRemarkModalOpen] = useState(false)
   const [isSavingRemark, setIsSavingRemark] = useState(false)
   const [remarkRefreshKey, setRemarkRefreshKey] = useState(0)
-  const [reminderDate, setReminderDate] = useState('')
+  const [reminderDate, setReminderDate] = useState(getTodayInputValue)
   const [reminderTime, setReminderTime] = useState('09:00')
   const [reminderMode, setReminderMode] = useState(reminderModes[0])
   const [reminderNote, setReminderNote] = useState('')
@@ -63,6 +76,7 @@ const AccountActionPlaceholderPage = () => {
   const [emailMessage, setEmailMessage] = useState('')
   const [formError, setFormError] = useState('')
   const [isSavingAction, setIsSavingAction] = useState(false)
+  const [ownerOptions, setOwnerOptions] = useState(getCachedAccountOwnerOptions)
 
   const action = ACCOUNT_ACTION_MAP[actionKey]
   const boardData = useMemo(() => getAccountsBoardData(accounts), [accounts])
@@ -77,13 +91,6 @@ const AccountActionPlaceholderPage = () => {
     () => (selectedAccount ? buildAdminAccountDrawerUrl(searchParams, selectedAccount.id) : ''),
     [searchParams, selectedAccount]
   )
-  const ownerOptions = useMemo(() => (
-    authService
-      .getAvailableUsers()
-      .filter((entry) => entry.name !== 'System Administrator')
-      .sort((left, right) => left.name.localeCompare(right.name))
-  ), [])
-
   useEffect(() => {
     if (actionKey === 'add-note-remarks' && selectedAccount) {
       setIsRemarkModalOpen(true)
@@ -91,10 +98,20 @@ const AccountActionPlaceholderPage = () => {
   }, [actionKey, selectedAccount])
 
   useEffect(() => {
-    if (actionKey === 'manage-account' && selectedAccount && accountDetailUrl) {
-      navigate(accountDetailUrl, { replace: true })
+    let isMounted = true
+
+    loadAccountOwnerOptions()
+      .then((options) => {
+        if (isMounted) setOwnerOptions(options)
+      })
+      .catch(() => {
+        if (isMounted) setOwnerOptions(getCachedAccountOwnerOptions())
+      })
+
+    return () => {
+      isMounted = false
     }
-  }, [accountDetailUrl, actionKey, navigate, selectedAccount])
+  }, [])
 
   useEffect(() => {
     if (isAdminUser && actionKey === 'send-mail' && selectedAccount) {
@@ -133,41 +150,41 @@ const AccountActionPlaceholderPage = () => {
         return
       }
 
-      const addDealSearch = new URLSearchParams({
-        accountId: String(accountId),
-        conversion: 'account',
-        returnTo: searchDealPagePath,
-      })
+      const conversionResult = await convertAccountToDeal(accountId)
 
-      navigate(`${addDealPagePath}?${addDealSearch.toString()}`, {
+      if (!conversionResult.success) {
+        setConversionError(conversionResult.message || 'Unable to convert this account into a deal.')
+        return
+      }
+
+      const createdDeal = conversionResult.data?.deal || {}
+      const createdConvertedDeal = conversionResult.data?.convertedDeal || {}
+
+      addNotification('success', 'Account converted', 'Deal and Converted Deal were created successfully. Opening Search Deal.')
+      navigate(searchDealPagePath, {
         replace: true,
         state: {
-          convertedAccount: {
-            ...selectedAccount,
-            id: accountId,
-            accountId,
-            name: selectedAccount.name || selectedAccount.customerName || '',
-            accountName: selectedAccount.name || selectedAccount.customerName || '',
-            customerName: selectedAccount.customerName || selectedAccount.name || '',
-            accountOwner: selectedAccount.accountOwnerName || selectedAccount.accountOwner || '',
-            assignedUserId: selectedAccount.assignedUserId || selectedAccount.ownerUserId || selectedAccount.userId || '',
-            targetDealRoute: searchDealPagePath,
+          editDealId: createdDeal.id || '',
+          quotationDealLookup: {
+            dealNumber: createdDeal.dealNumber || createdConvertedDeal.dealNumber || '',
+            projectName: createdDeal.dealName || createdDeal.projectName || createdConvertedDeal.name || createdConvertedDeal.projectName || '',
+            companyName: createdDeal.customerName || createdDeal.accountName || createdConvertedDeal.accountName || selectedAccount.name || '',
           },
         },
       })
     }
 
     runConversion()
-  }, [actionKey, addNotification, addDealPagePath, findConvertedDealForAccount, navigate, searchDealPagePath, selectedAccount])
+  }, [actionKey, addNotification, convertAccountToDeal, findConvertedDealForAccount, navigate, searchDealPagePath, selectedAccount])
 
   useEffect(() => {
     if (!selectedAccount) return
 
-    setReminderDate(selectedAccount.reminderDate || '')
+    setReminderDate(selectedAccount.reminderDate || getTodayInputValue())
     setReminderTime(selectedAccount.raw?.reminderTime || '09:00')
     setReminderMode(selectedAccount.reminderMode || reminderModes[0])
     setReminderNote(selectedAccount.raw?.reminderNote || '')
-    setStage(getAccountChangeStatusOption(selectedAccount.status || selectedAccount.stage)?.value || ACCOUNT_CHANGE_STATUS_OPTIONS[0]?.value || 'new')
+    setStage(getAllowedActionStatusOption(selectedAccount.status || selectedAccount.stage)?.value || ACTION_CHANGE_STATUS_OPTIONS[0]?.value || 'new')
     setStatusNote('')
     setPoValue(selectedAccount.poValue || '')
     setOrderReceivedStatus(selectedAccount.statusAsPerOrderReceived || '')
@@ -186,6 +203,16 @@ const AccountActionPlaceholderPage = () => {
 
   const closeRemarkModal = () => {
     setIsRemarkModalOpen(false)
+  }
+
+  const handleSaveManagedAccount = async (accountId, updates) => {
+    const result = await updateAccount(accountId, updates)
+    if (result.success) {
+      addNotification('success', 'Manage Account saved', 'Account details updated successfully.')
+    } else {
+      addNotification('error', 'Manage Account failed', result.message || 'Unable to update account details.')
+    }
+    return result
   }
 
   const handleSaveRemark = async (remarkData) => {
@@ -395,7 +422,7 @@ const AccountActionPlaceholderPage = () => {
             <label className="admin-accounts-bulk-field">
               Account Status
               <select value={stage} onChange={(event) => setStage(event.target.value)}>
-                {ACCOUNT_CHANGE_STATUS_OPTIONS.map((entry) => <option key={entry.value} value={entry.value}>{entry.label}</option>)}
+                {ACTION_CHANGE_STATUS_OPTIONS.map((entry) => <option key={entry.value} value={entry.value}>{entry.label}</option>)}
               </select>
             </label>
             <label className="admin-accounts-bulk-field admin-accounts-action-field-full">
@@ -457,7 +484,7 @@ const AccountActionPlaceholderPage = () => {
           <label className="admin-accounts-bulk-field admin-accounts-action-field-full">
             Account Owner
             <select value={ownerName} onChange={(event) => setOwnerName(event.target.value)}>
-              {ownerOptions.map((owner) => <option key={owner.id} value={owner.name}>{owner.ownerDisplayName || owner.name}</option>)}
+              {ownerOptions.map((owner) => <option key={owner.id} value={owner.name}>{getAccountOwnerOptionLabel(owner)}</option>)}
             </select>
           </label>
         </div>
@@ -539,7 +566,22 @@ const AccountActionPlaceholderPage = () => {
     )
   }
 
-  if (actionKey === 'manage-account' && selectedAccount && accountDetailUrl) return null
+  if (actionKey === 'manage-account' && selectedAccount) {
+    return (
+      <div className="admin-accounts-manage-action-page">
+        <AccountDetailsDrawer
+          account={selectedAccount}
+          isOpen
+          inline
+          onClose={() => navigate(boardUrl)}
+          boardStateQuery={searchParams}
+          onSaveAccount={handleSaveManagedAccount}
+          onRefresh={() => Promise.resolve()}
+          canEdit={isAdminUser || selectedAccount?.recordSource === 'live'}
+        />
+      </div>
+    )
+  }
 
   // Render wizard pages with specialized components
   if (action.isWizard) {
@@ -557,24 +599,6 @@ const AccountActionPlaceholderPage = () => {
 
           {selectedAccount ? (
             <>
-              <div className="admin-accounts-placeholder-context">
-                <h2>Selected Account</h2>
-                <div className="admin-accounts-placeholder-context-grid">
-                  <div>
-                    <span>Account Name</span>
-                    <strong>{selectedAccount.name}</strong>
-                  </div>
-                  <div>
-                    <span>Account No.</span>
-                    <strong>{selectedAccount.accountNumber}</strong>
-                  </div>
-                  <div>
-                    <span>Owner</span>
-                    <strong>{selectedAccount.accountOwnerDisplay || selectedAccount.accountOwner || '-'}</strong>
-                  </div>
-                </div>
-              </div>
-
               <RemarksTimeline accountId={selectedAccount.id} refreshKey={remarkRefreshKey} />
 
               <AddRemarksModal
@@ -614,7 +638,7 @@ const AccountActionPlaceholderPage = () => {
             </>
           ) : (
             <>
-              <p>Opening Deal creation for {selectedAccount.name} with account details linked...</p>
+              <p>Converting {selectedAccount.name} into a deal and opening Search Deal...</p>
               <div className="admin-accounts-placeholder-actions">
                 <Button variant="outline" onClick={() => navigate(searchDealPagePath)}>Open Search Deal</Button>
               </div>
@@ -632,37 +656,7 @@ const AccountActionPlaceholderPage = () => {
       <div className={`admin-accounts-placeholder-card${isReminderAction ? ' admin-accounts-placeholder-card--reminder' : ''}`}>
         <p className="admin-accounts-placeholder-eyebrow">{action.placeholderTitle}</p>
         <h1>{action.heading}</h1>
-        {isReminderAction && selectedAccount ? (
-          <p className="admin-accounts-reminder-subtitle">
-            {selectedAccount.name || 'Account'} | {selectedAccount.accountNumber || '-'}
-          </p>
-        ) : (
-          <p>{action.description}</p>
-        )}
-
-        {selectedAccount && !isReminderAction ? (
-          <div className="admin-accounts-placeholder-context">
-            <h2>Selected Account</h2>
-            <div className="admin-accounts-placeholder-context-grid">
-              <div>
-                <span>Account</span>
-                <strong>{selectedAccount.name}</strong>
-              </div>
-              <div>
-                <span>Account No.</span>
-                <strong>{selectedAccount.accountNumber}</strong>
-              </div>
-              <div>
-                <span>Stage</span>
-                <strong>{selectedAccount.stageLabel}</strong>
-              </div>
-              <div>
-                <span>Owner</span>
-                <strong>{selectedAccount.accountOwnerDisplay || selectedAccount.accountOwner || '-'}</strong>
-              </div>
-            </div>
-          </div>
-        ) : null}
+        <p>{action.description}</p>
 
         {selectedAccount && renderActionFields() ? (
           <form className="admin-accounts-action-form" onSubmit={handleSaveAccountAction}>

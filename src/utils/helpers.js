@@ -1,4 +1,6 @@
 // ID Generation
+import * as XLSX from 'xlsx'
+
 export const generateId = (prefix = 'ID') => {
   const timestamp = Date.now().toString(36)
   const random = Math.random().toString(36).substring(2, 7)
@@ -231,28 +233,18 @@ const csvEscapeValue = (value) => {
   return text
 }
 
-export const downloadCSV = (data, filename = 'export.csv') => {
+export const downloadExcel = (data, filename = 'export.xlsx') => {
   if (!data || data.length === 0) return
 
-  const headers = Object.keys(data[0])
-  const csv = [
-    headers.map(csvEscapeValue).join(','),
-    ...data.map(row => headers.map(header => csvEscapeValue(row[header])).join(',')),
-  ].join('\r\n')
-
-  // UTF-8 BOM so Excel auto-detects encoding for non-ASCII characters.
-  const blob = new Blob(['﻿', csv], { type: 'text/csv;charset=utf-8;' })
-  const safeName = String(filename || 'export.csv').toLowerCase().endsWith('.csv')
+  const worksheet = XLSX.utils.json_to_sheet(data)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1')
+  
+  const safeName = String(filename || 'export.xlsx').toLowerCase().endsWith('.xlsx')
     ? filename
-    : `${filename}.csv`
-  const url = window.URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = safeName
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  setTimeout(() => window.URL.revokeObjectURL(url), 0)
+    : `${filename}.xlsx`
+    
+  XLSX.writeFile(workbook, safeName)
 }
 
 export const downloadJSON = (data, filename = 'export.json') => {

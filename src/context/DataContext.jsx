@@ -6,6 +6,7 @@ import { leadApi } from '../services/leadApi'
 import { dealApi } from '../services/dealApi'
 import { supportRequestApi } from '../services/supportRequestApi'
 import { taskApi } from '../services/taskApi'
+import { reminderApi } from '../services/reminderApi'
 import { notificationApi } from '../services/notificationApi'
 import { messageApi } from '../services/messageApi'
 import { projectApi } from '../services/projectApi'
@@ -38,6 +39,31 @@ const replaceById = (items, record) => {
 }
 
 const ACCOUNT_FRONTEND_CACHE_PREFIX = 'crm_frontend_accounts'
+const DISMISSED_NOTIFICATIONS_KEY = 'crm_dismissed_notifications'
+
+const readDismissedNotificationIds = () => {
+  if (typeof window === 'undefined') return []
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(DISMISSED_NOTIFICATIONS_KEY) || '[]')
+    return Array.isArray(parsed) ? parsed.map(String) : []
+  } catch {
+    return []
+  }
+}
+
+const rememberDismissedNotificationId = (id) => {
+  if (!id || typeof window === 'undefined') return
+  const nextIds = Array.from(new Set([String(id), ...readDismissedNotificationIds()])).slice(0, 300)
+  window.localStorage.setItem(DISMISSED_NOTIFICATIONS_KEY, JSON.stringify(nextIds))
+}
+
+const isNotificationDismissed = (notification) => (
+  notification?.id && readDismissedNotificationIds().includes(String(notification.id))
+)
+
+const filterDismissedNotifications = (notifications = []) => (
+  notifications.filter((notification) => !notification?.isRead && !isNotificationDismissed(notification))
+)
 
 const getAccountFrontendCacheKey = (user) => (
   user ? `${ACCOUNT_FRONTEND_CACHE_PREFIX}_${user.role || 'user'}_${user.id || 'anonymous'}` : ''
@@ -82,6 +108,7 @@ export const DataProvider = ({ children }) => {
   const [convertedDeals, setConvertedDeals] = useState([])
   const [supportRequests, setSupportRequests] = useState([])
   const [tasks, setTasks] = useState([])
+  const [reminders, setReminders] = useState([])
   const [quotations, setQuotations] = useState([])
   const [projects, setProjects] = useState([])
   const [notifications, setNotifications] = useState([])
@@ -114,7 +141,12 @@ export const DataProvider = ({ children }) => {
   }, [])
 
   const clearNotification = useCallback((id) => {
+    rememberDismissedNotificationId(id)
     setNotifications((prev) => prev.filter((entry) => entry.id !== id))
+
+    if (/^\d+$/.test(String(id || ''))) {
+      notificationApi.markAsRead(id).catch(() => {})
+    }
   }, [])
 
   const getErrorMessage = useCallback((error, fallbackMessage = 'Something went wrong.') => (
@@ -214,6 +246,7 @@ export const DataProvider = ({ children }) => {
       setConvertedDeals([])
       setSupportRequests([])
       setTasks([])
+      setReminders([])
       setQuotations([])
       setProjects([])
       setNotifications([])
@@ -234,6 +267,7 @@ export const DataProvider = ({ children }) => {
         dealApi.getDeals(),
         supportRequestApi.getSupportRequests(),
         taskApi.getTasks(),
+        reminderApi.getReminders(),
         quotationApi.getQuotations(),
         projectApi.getProjects(),
         notificationApi.getNotifications(),
@@ -246,6 +280,7 @@ export const DataProvider = ({ children }) => {
         dealsResult,
         supportRequestsResult,
         tasksResult,
+        remindersResult,
         quotationsResult,
         projectsResult,
         notificationsResult,
@@ -279,6 +314,12 @@ export const DataProvider = ({ children }) => {
         setTasks([])
       }
 
+      if (remindersResult.status === 'fulfilled') {
+        setReminders(remindersResult.value.map((entry) => enrichRealtimeRecord(SOCKET_ENTITY_TYPES.REMINDER, entry)))
+      } else {
+        setReminders([])
+      }
+
       if (quotationsResult.status === 'fulfilled') {
         setQuotations(getVisibleRecords(quotationsResult.value))
         setQuotationsError('')
@@ -296,7 +337,7 @@ export const DataProvider = ({ children }) => {
       }
 
       if (notificationsResult.status === 'fulfilled') {
-        setNotifications(notificationsResult.value)
+        setNotifications(filterDismissedNotifications(notificationsResult.value))
       } else {
         setNotifications([])
       }
@@ -313,7 +354,7 @@ export const DataProvider = ({ children }) => {
         setConvertedDeals([])
       }
 
-      const firstFailedResult = results.find((result, index) => result.status === 'rejected' && index !== 4)
+      const firstFailedResult = results.find((result, index) => result.status === 'rejected' && index !== 5)
       if (firstFailedResult?.status === 'rejected') {
         addNotification('error', 'Failed to load data', getErrorMessage(firstFailedResult.reason))
       }
@@ -420,6 +461,29 @@ export const DataProvider = ({ children }) => {
     setTasks((prev) => prev.filter((entry) => entry.id !== id))
   }, [])
 
+  const handleReminderCreated = useCallback((payload) => {
+    if (!canUserAccessEntity(user, SOCKET_ENTITY_TYPES.REMINDER, payload)) {
+      return
+    }
+
+    const reminder = enrichRealtimeRecord(SOCKET_ENTITY_TYPES.REMINDER, payload?.record || payload)
+    setReminders((prev) => upsertToTop(prev, reminder))
+  }, [user])
+
+  const handleReminderUpdated = useCallback((payload) => {
+    if (!canUserAccessEntity(user, SOCKET_ENTITY_TYPES.REMINDER, payload)) {
+      return
+    }
+
+    const reminder = enrichRealtimeRecord(SOCKET_ENTITY_TYPES.REMINDER, payload?.record || payload)
+    setReminders((prev) => replaceById(prev, reminder))
+  }, [user])
+
+  const handleReminderDeleted = useCallback((payload) => {
+    const id = payload?.recordId || payload?.id || payload
+    setReminders((prev) => prev.filter((entry) => String(entry.id) !== String(id)))
+  }, [])
+
   const handleSupportRequestCreated = useCallback((record) => {
     if (!canUserAccessEntity(user, SOCKET_ENTITY_TYPES.SUPPORT_REQUEST, record)) {
       return
@@ -474,7 +538,15 @@ export const DataProvider = ({ children }) => {
       return
     }
 
-    setNotifications((prev) => [notificationApi.normalizeNotification(notification), ...prev].slice(0, 50))
+    const normalizedNotification = notificationApi.normalizeNotification(notification)
+    if (normalizedNotification.isRead) {
+      return
+    }
+    if (isNotificationDismissed(normalizedNotification)) {
+      return
+    }
+
+    setNotifications((prev) => [normalizedNotification, ...prev].slice(0, 50))
   }, [user?.id])
 
   const handleActivity = useCallback((activity) => {
@@ -517,6 +589,9 @@ export const DataProvider = ({ children }) => {
     socket.on(SOCKET_EVENTS.TASK_CREATED, handleTaskCreated)
     socket.on(SOCKET_EVENTS.TASK_UPDATED, handleTaskUpdated)
     socket.on(SOCKET_EVENTS.TASK_DELETED, handleTaskDeleted)
+    socket.on(SOCKET_EVENTS.REMINDER_CREATED, handleReminderCreated)
+    socket.on(SOCKET_EVENTS.REMINDER_UPDATED, handleReminderUpdated)
+    socket.on(SOCKET_EVENTS.REMINDER_DELETED, handleReminderDeleted)
     socket.on(SOCKET_EVENTS.SUPPORT_REQUEST_CREATED, handleSupportRequestCreated)
     socket.on(SOCKET_EVENTS.SUPPORT_REQUEST_UPDATED, handleSupportRequestUpdated)
     socket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, handleMessageCreated)
@@ -544,6 +619,9 @@ export const DataProvider = ({ children }) => {
       socket.off(SOCKET_EVENTS.TASK_CREATED, handleTaskCreated)
       socket.off(SOCKET_EVENTS.TASK_UPDATED, handleTaskUpdated)
       socket.off(SOCKET_EVENTS.TASK_DELETED, handleTaskDeleted)
+      socket.off(SOCKET_EVENTS.REMINDER_CREATED, handleReminderCreated)
+      socket.off(SOCKET_EVENTS.REMINDER_UPDATED, handleReminderUpdated)
+      socket.off(SOCKET_EVENTS.REMINDER_DELETED, handleReminderDeleted)
       socket.off(SOCKET_EVENTS.SUPPORT_REQUEST_CREATED, handleSupportRequestCreated)
       socket.off(SOCKET_EVENTS.SUPPORT_REQUEST_UPDATED, handleSupportRequestUpdated)
       socket.off(SOCKET_EVENTS.RECEIVE_MESSAGE, handleMessageCreated)
@@ -570,6 +648,9 @@ export const DataProvider = ({ children }) => {
     handleTaskCreated,
     handleTaskDeleted,
     handleTaskUpdated,
+    handleReminderCreated,
+    handleReminderDeleted,
+    handleReminderUpdated,
     handleUserOffline,
     handleUserOnline,
     socket,
@@ -907,6 +988,46 @@ export const DataProvider = ({ children }) => {
     }
   }
 
+  const createReminder = async (reminderData) => {
+    try {
+      const created = await reminderApi.createReminder({
+        ...reminderData,
+        assignedTo: reminderData.assignedTo || user?.id,
+      })
+      const reminder = enrichRealtimeRecord(SOCKET_ENTITY_TYPES.REMINDER, created)
+
+      setReminders((prev) => upsertToTop(prev, reminder))
+
+      return { success: true, data: reminder }
+    } catch (error) {
+      return { success: false, message: getErrorMessage(error) }
+    }
+  }
+
+  const updateReminder = async (id, updates) => {
+    try {
+      const updated = await reminderApi.updateReminder(id, updates)
+      const reminder = enrichRealtimeRecord(SOCKET_ENTITY_TYPES.REMINDER, updated)
+
+      setReminders((prev) => replaceById(prev, reminder))
+
+      return { success: true, data: reminder }
+    } catch (error) {
+      return { success: false, message: getErrorMessage(error) }
+    }
+  }
+
+  const deleteReminder = async (id) => {
+    try {
+      await reminderApi.deleteReminder(id)
+      setReminders((prev) => prev.filter((entry) => String(entry.id) !== String(id)))
+
+      return { success: true }
+    } catch (error) {
+      return { success: false, message: getErrorMessage(error) }
+    }
+  }
+
   const createQuotation = async (quotationData) => {
     try {
       const quotation = await quotationApi.createQuotation({ ...quotationData, userId: user.id })
@@ -990,6 +1111,7 @@ export const DataProvider = ({ children }) => {
     convertedDeals,
     supportRequests,
     tasks,
+    reminders,
     quotations,
     projects,
     notifications,
@@ -1020,6 +1142,9 @@ export const DataProvider = ({ children }) => {
     createTask,
     updateTask,
     deleteTask,
+    createReminder,
+    updateReminder,
+    deleteReminder,
     createQuotation,
     updateQuotation,
     sendMessage,

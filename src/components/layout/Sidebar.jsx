@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import swatiLogo from '../../assets/swati-logo.png'
 import {
   FaBell,
   FaCalendarAlt,
@@ -15,6 +16,7 @@ import {
   FaUserCircle,
   FaUsers,
   FaUserTie,
+  FaBox,
 } from 'react-icons/fa'
 import { FiChevronDown, FiChevronRight, FiChevronUp } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
@@ -70,31 +72,19 @@ const LumosRailMark = () => (
 )
 
 const SidebarTopCard = ({ isAdmin, isCollapsed, displayName }) => {
-  const firstName = displayName.split(' ')[0] || (isAdmin ? 'Admin' : 'User')
-
   return (
-    <div className="sb-top-card">
-      <div className="sb-top-card-copy">
-        <span className="sb-top-card-kicker">
-          {isAdmin ? 'Admin control' : 'User workspace'}
-        </span>
-        <strong className="sb-top-card-title">
-          {isCollapsed ? <LumosRailMark /> : firstName}
-        </strong>
-        {!isCollapsed ? (
-          <p className="sb-top-card-text">
-            {isAdmin
-              ? 'Navigate launch modules, reports, and live CRM tools.'
-              : 'Move across your assigned CRM modules without changing any data flow.'}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="sb-top-card-radar" aria-hidden="true">
-        <span className="sb-top-card-ring sb-top-card-ring--one" />
-        <span className="sb-top-card-ring sb-top-card-ring--two" />
-        <span className="sb-top-card-pulse" />
-      </div>
+    <div className="sb-top-card" style={{ padding: '20px 16px', background: 'transparent', borderBottom: 'none' }}>
+      <img 
+        src={swatiLogo} 
+        alt="Swati Switchgears Logo" 
+        style={{ 
+          width: '100%', 
+          maxHeight: '60px', 
+          objectFit: 'contain',
+          opacity: isCollapsed ? 0.5 : 1,
+          transition: 'opacity 0.2s ease'
+        }} 
+      />
     </div>
   )
 }
@@ -167,6 +157,7 @@ const Sidebar = ({ isAdmin = false }) => {
   const [userRemindersOpen, setUserRemindersOpen] = useState(isUserRemindersRoute)
   const [userReportsOpen, setUserReportsOpen] = useState(isUserReportsRoute)
   const [userQuotationManagerOpen, setUserQuotationManagerOpen] = useState(isUserQuotationRoute)
+  const [productCatalogueOpen, setProductCatalogueOpen] = useState(location.pathname.startsWith('/admin/products'))
 
   const todayKey = todayDateKey()
   const todayAccounts = useMemo(() => (
@@ -200,6 +191,7 @@ const Sidebar = ({ isAdmin = false }) => {
   useEffect(() => { if (isUserRemindersRoute) setUserRemindersOpen(true) }, [isUserRemindersRoute])
   useEffect(() => { if (isUserReportsRoute) setUserReportsOpen(true) }, [isUserReportsRoute])
   useEffect(() => { if (isUserQuotationRoute) setUserQuotationManagerOpen(true) }, [isUserQuotationRoute])
+  useEffect(() => { if (location.pathname.startsWith('/admin/products')) setProductCatalogueOpen(true) }, [location.pathname])
   useEffect(() => subscribeAdminCustomViews(setCustomViews), [])
   useEffect(() => subscribeAdminDealCustomViews(setDealCustomViews), [])
   useEffect(() => {
@@ -645,6 +637,18 @@ const Sidebar = ({ isAdmin = false }) => {
             <SubLink to="/admin/reports/quotation-summary" label="Summary Report" />
           </SidebarGroup>
 
+          <SidebarGroup
+            icon={<FaBox />}
+            label="Product Catalogue"
+            isActive={location.pathname.startsWith('/admin/products')}
+            isOpen={productCatalogueOpen}
+            isCollapsed={isSidebarCollapsed}
+            onToggle={() => setProductCatalogueOpen((previous) => !previous)}
+          >
+            <SubLink to="/admin/products" label="View Catalogue" />
+            <SubLink to="/admin/products/add" label="Add Product" />
+          </SidebarGroup>
+
           <NavLink
             to="/admin/data-manager"
             className={({ isActive }) => `sb-plain-link ${isActive ? 'sb-plain-link--active' : ''}`}
@@ -653,6 +657,7 @@ const Sidebar = ({ isAdmin = false }) => {
             <FaCloud className="sb-plain-icon" />
             <span>Data Manager</span>
           </NavLink>
+
         </div>
 
         {!isSidebarCollapsed && (

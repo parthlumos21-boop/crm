@@ -621,7 +621,7 @@ const TeamViewPage = ({ isAdminView = true }) => {
                           {notLoggedInUsers.map((u) => (
                             <div key={u.id} className="ug-idle-user-row">
                               <span><FaUserTimes className="ug-idle-user-icon" /> {u.name}</span>
-                              <span className="ug-idle-user-meta">{u.userType} — {u.userGroup}</span>
+                              <span className="ug-idle-user-meta">{u.userType} - {u.userGroup}</span>
                             </div>
                           ))}
                         </div>

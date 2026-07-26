@@ -11,6 +11,8 @@ import {
   FaEdit,
   FaExchangeAlt,
   FaExclamationCircle,
+  FaEye,
+  FaEyeSlash,
   FaHistory,
   FaInfoCircle,
   FaKey,
@@ -38,7 +40,7 @@ import Table from '../../../components/common/Table'
 import { useAuth } from '../../../context/AuthContext'
 import { useData } from '../../../context/DataContext'
 import { SOCKET_EVENTS } from '../../../constants/socketEvents'
-import { CRM_FILTER_USERS, normalizeCrmUserName } from '../../../features/users/crmUserDirectory'
+import { CRM_FILTER_USERS, normalizeCrmUserName, getCanonicalCrmUserName } from '../../../features/users/crmUserDirectory'
 import { userApi } from '../../../services/userApi'
 import ManageUserTypesModule from './ManageUserTypesModule'
 import './AdminUserManagementPage.css'
@@ -248,7 +250,7 @@ const isPrivilegedUserRole = (role = '') => (
 )
 
 const canManageUserApproval = (user = {}) => (
-  /^\d+$/.test(String(user?.id || '')) && !isPrivilegedUserRole(user?.role)
+  /^\d+$/.test(String(user?.id || ''))
 )
 
 const slugifyValue = (value = '') => String(value || '')
@@ -298,23 +300,15 @@ const getCurrentView = (pathname) => {
 
 const buildDirectoryUsers = (users = []) => {
   const mergedUsers = new Map()
-  const linkedDirectoryKeys = new Set()
-
-  CRM_FILTER_USERS.forEach((entry) => {
-    const key = `directory-${normalizeCrmUserName(entry.name) || String(entry.id)}`
-    mergedUsers.set(key, { ...entry })
-  })
 
   users.forEach((entry) => {
-    const directoryKey = `directory-${normalizeCrmUserName(entry.name || entry.username || entry.email) || String(entry.id)}`
-    const previousEntry = mergedUsers.get(directoryKey) || {}
-    const key = `user-${entry.id || entry.email || entry.username || normalizeCrmUserName(entry.name) || Date.now()}`
+    const canonicalName = getCanonicalCrmUserName(entry.name || entry.username || entry.email)
+    const normalizedTarget = canonicalName ? normalizeCrmUserName(canonicalName) : normalizeCrmUserName(entry.name || entry.username || entry.email)
+    const directoryKey = `directory-${normalizedTarget || String(entry.id)}`
+    const directoryEntry = CRM_FILTER_USERS.find((crmUser) => normalizeCrmUserName(crmUser.name) === normalizedTarget) || {}
+    const previousEntry = mergedUsers.get(directoryKey) || directoryEntry
 
-    if (mergedUsers.has(directoryKey)) {
-      linkedDirectoryKeys.add(directoryKey)
-    }
-
-    mergedUsers.set(key, {
+    mergedUsers.set(directoryKey, {
       ...previousEntry,
       ...entry,
       id: entry.id || previousEntry.id,
@@ -329,7 +323,7 @@ const buildDirectoryUsers = (users = []) => {
   })
 
   return Array.from(mergedUsers.entries())
-    .filter(([key, entry]) => !key.startsWith('directory-') || !linkedDirectoryKeys.has(key) || !entry?.id)
+    .filter(([, entry]) => entry?.id)
     .map(([, entry]) => entry)
 }
 
@@ -750,13 +744,28 @@ const ManageUsersCardView = ({
   onlineUserIds,
   liveStatus,
   lastLiveUpdate,
+  currentUserId,
 }) => {
+  const [visiblePasswordIds, setVisiblePasswordIds] = useState(() => new Set())
+
   const getStatusTone = (status = '') => {
     const normalizedStatus = String(status || '').toLowerCase()
     if (normalizedStatus === 'pending') return 'pending'
     if (['rejected', 'disabled', 'inactive'].includes(normalizedStatus)) return 'inactive'
     return 'active'
   }
+
+  const togglePasswordVisibility = useCallback((userId) => {
+    setVisiblePasswordIds((current) => {
+      const next = new Set(current)
+      if (next.has(userId)) {
+        next.delete(userId)
+      } else {
+        next.add(userId)
+      }
+      return next
+    })
+  }, [])
 
   return (
     <Card
@@ -815,9 +824,6 @@ const ManageUsersCardView = ({
           <button type="button" className="manage-users-secondary-button" onClick={onUserHistory}>
             <FaHistory /> User History
           </button>
-          <button type="button" className="manage-users-secondary-button" onClick={onLoginHistory}>
-            <FaHistory /> Login History
-          </button>
           <button
             type="button"
             className="manage-users-secondary-button"
@@ -845,7 +851,11 @@ const ManageUsersCardView = ({
             const statusTone = getStatusTone(user.status)
             const isOnline = onlineUserIds.has(String(user.id))
             const canApproveUser = canManageUserApproval(user)
+            const isCurrentUser = String(user.id || '') === String(currentUserId || '')
             const statusLabel = isOnline ? 'Online' : formatStatusLabel(user.status || 'pending')
+            const passwordKey = String(userId)
+            const assignedPassword = user.assignedPassword || ''
+            const isPasswordVisible = visiblePasswordIds.has(passwordKey)
 
             return (
               <article key={userId} className="manage-users-card-item">
@@ -867,8 +877,8 @@ const ManageUsersCardView = ({
 
                 <dl className="manage-users-card-fields">
                   <div className="manage-users-card-row">
-                    <dt>Employee ID</dt>
-                    <dd>{user.employeeId || user.employee_id || `EMP-${user.id || '---'}`}</dd>
+                    <dt>Email ID</dt>
+                    <dd>{user.email || user.username || '-'}</dd>
                   </div>
                   <div className="manage-users-card-row">
                     <dt>Department</dt>
@@ -877,6 +887,25 @@ const ManageUsersCardView = ({
                   <div className="manage-users-card-row">
                     <dt>Role</dt>
                     <dd>{formatStatusLabel(user.role || 'user')}</dd>
+                  </div>
+                  <div className="manage-users-card-row">
+                    <dt>Password</dt>
+                    <dd className="manage-users-password-cell">
+                      <span className="manage-users-password-value">
+                        {assignedPassword ? (isPasswordVisible ? assignedPassword : '********') : '-'}
+                      </span>
+                      {assignedPassword ? (
+                        <button
+                          type="button"
+                          className="manage-users-password-toggle"
+                          onClick={() => togglePasswordVisibility(passwordKey)}
+                          aria-label={`${isPasswordVisible ? 'Hide' : 'Show'} password for ${user.name || user.email || 'user'}`}
+                          title={isPasswordVisible ? 'Hide password' : 'Show password'}
+                        >
+                          {isPasswordVisible ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      ) : null}
+                    </dd>
                   </div>
                   <div className="manage-users-card-row">
                     <dt>Mobile</dt>
@@ -898,16 +927,16 @@ const ManageUsersCardView = ({
                     className="manage-users-approval-button is-approve"
                     disabled={!canApproveUser || user.status === 'approved'}
                     onClick={() => onUserStatusAction('approve', user)}
-                    title={canApproveUser ? 'Approve this user' : 'Only normal managed users can be approved here'}
+                    title={canApproveUser ? 'Approve this user for login' : 'Only saved MongoDB users can be approved here'}
                   >
                     <FaCheck /> Approve
                   </button>
                   <button
                     type="button"
                     className="manage-users-approval-button is-reject"
-                    disabled={!canApproveUser || user.status === 'rejected'}
+                    disabled={!canApproveUser || user.status === 'rejected' || isCurrentUser}
                     onClick={() => onUserStatusAction('reject', user)}
-                    title={canApproveUser ? 'Mark this user as not approved' : 'Only normal managed users can be approved here'}
+                    title={isCurrentUser ? 'You cannot deny your own account' : canApproveUser ? 'Deny login for this user' : 'Only saved MongoDB users can be denied here'}
                   >
                     <FaTimes /> Not Approve
                   </button>
@@ -1256,6 +1285,7 @@ const UserInsightView = ({
         { key: 'lastLogin', label: 'Last Login', render: (_, user) => formatCardDate(user.lastLogin || user.updatedAt) },
         { key: 'timeZone', label: 'Time Zone', render: (_, user) => user.timeZone || DEFAULT_TIME_ZONE },
         { key: 'loginId', label: 'Login ID', render: (_, user) => user.email || user.username || '-' },
+        { key: 'assignedPassword', label: 'Password', render: (_, user) => user.assignedPassword || '-' },
       ],
     },
     'user-base-locations': {
@@ -1321,7 +1351,7 @@ const AdminUserManagementPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { addNotification, onlineUsers } = useData()
-  const { socket } = useAuth()
+  const { socket, user } = useAuth()
   const [liveStatus, setLiveStatus] = useState('connecting')
   const [lastLiveUpdate, setLastLiveUpdate] = useState(null)
   const currentView = useMemo(() => getCurrentView(location.pathname), [location.pathname])
@@ -1728,7 +1758,7 @@ const AdminUserManagementPage = () => {
     setOpenCardMenuId(null)
 
     const userName = user?.name || user?.username || user?.email || 'This user'
-    const isDirectoryEntry = !user?.id
+    const isDirectoryEntry = !user?.id || String(user?.id).startsWith('crm-')
 
     if (actionKey === 'edit-user') {
       if (isDirectoryEntry) {
@@ -1797,7 +1827,7 @@ const AdminUserManagementPage = () => {
     const userName = user?.name || user?.username || user?.email || 'This user'
 
     if (!canManageUserApproval(user)) {
-      addNotification('info', 'Approval not available', `${userName} cannot be approved here. Only normal managed users can be changed from this screen.`)
+      addNotification('info', 'Approval not available', `${userName} cannot be approved here. Only saved MongoDB users can be changed from this screen.`)
       return
     }
 
@@ -2014,6 +2044,7 @@ const AdminUserManagementPage = () => {
             onlineUserIds={onlineUserIds}
             liveStatus={liveStatus}
             lastLiveUpdate={lastLiveUpdate}
+            currentUserId={user?.id}
           />
         </>
       )

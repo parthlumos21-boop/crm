@@ -9,6 +9,10 @@ import {
   FaEdit,
   FaEye,
   FaFilter,
+  FaFileCsv,
+  FaFileExcel,
+  FaFilePdf,
+  FaFileCode,
   FaObjectGroup,
   FaPlay,
   FaTable,
@@ -182,7 +186,12 @@ const getReportGroupName = (report) => {
 const getReportType = (report) => report.type || report.typeLabel || report.entityType || getCustomReportContext(report.reportContext).label
 
 const getReportFields = (report) => {
-  if (report.fields) return report.fields
+  if (report.fields) {
+    if (Array.isArray(report.fields)) {
+      return report.fields.map(f => typeof f === 'object' ? f.label : f).join(', ')
+    }
+    return report.fields
+  }
   return (report.selectedFields || [])
     .map((fieldKey) => getCustomReportFieldLabel(report.reportContext, fieldKey))
     .join(', ') || '-'
@@ -209,65 +218,150 @@ const getReportGroupBy = (report) => (
     : ''
 )
 
-const ReportCard = ({ report, canEdit, onView, onEdit, onDuplicate, onDelete, onExport }) => (
-  <article className="cr-list-card">
-    <header className="cr-list-card-header">
-      <div className="cr-list-card-title-row">
-        <button type="button" className="cr-list-card-title" onClick={() => onView(report)}>
-          {report.title || report.reportName}
-        </button>
-        {getReportType(report) && <span className="cr-list-card-type">{getReportType(report)}</span>}
-      </div>
-      <div className="cr-list-actions">
-        <button type="button" title="Run Report" onClick={() => onView(report)}><FaPlay /></button>
-        <button type="button" title="Settings" onClick={() => onView(report)}><FaCog /></button>
-        <button type="button" title="Edit" disabled={!canEdit} onClick={() => onEdit(report)}><FaEdit /></button>
-        <button type="button" title="Duplicate" onClick={() => onDuplicate(report)}><FaCopy /></button>
-        <button type="button" title="Export" onClick={() => onExport(report)}><FaDownload /></button>
-        <button type="button" title="Delete" disabled={!canEdit} onClick={() => onDelete(report)}><FaTrash /></button>
-      </div>
-    </header>
+const ReportCard = ({ report, onViewWeb, onExport }) => {
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const menuRef = useRef(null)
 
-    <div className="cr-list-card-body">
-      <div className="cr-list-card-left">
-        <div className="cr-list-row">
-          <FaTable />
-          <span><strong>Template Fields-</strong> {getReportFields(report)}</span>
-        </div>
-        {getReportFilters(report) && (
-          <div className="cr-list-row">
-            <FaFilter />
-            <span><strong>Filters-</strong> {getReportFilters(report)}</span>
-          </div>
-        )}
-        {getReportGroupBy(report) && (
-          <div className="cr-list-row">
-            <FaObjectGroup />
-            <span><strong>Group By-</strong> {getReportGroupBy(report)}</span>
-          </div>
-        )}
-      </div>
+  useEffect(() => {
+    const handleOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) setDropdownOpen(false)
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [])
 
-      <div className="cr-list-card-right">
-        <div className="cr-list-row">
-          <FaCreditCard />
-          <span><strong>Description-</strong> {report.description || `${getReportType(report)} Report Template`}</span>
+  return (
+    <article className="cr-list-card">
+      <header className="cr-list-card-header">
+        <div className="cr-list-card-title-row">
+          <button type="button" className="cr-list-card-title" onClick={() => onViewWeb(report)}>
+            {report.title || report.reportName}
+          </button>
         </div>
-        <div className="cr-list-row">
-          <FaCalendarAlt />
-          <span><strong>Created By-</strong> {report.createdBy || '-'} <strong>On-</strong> {formatStoredDate(report.createdOn)}</span>
+        <div className="cr-list-actions" ref={menuRef} style={{ position: 'relative' }}>
+          {getReportType(report) && <span className="cr-list-card-type">{getReportType(report)}</span>}
+          <span className="cr-list-card-divider" style={{ color: '#d0d8e4', margin: '0 0.25rem' }}>|</span>
+          <button 
+            type="button" 
+            title="Settings" 
+            className="cr-settings-btn cr-cog-btn" 
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+          >
+            <FaCog />
+          </button>
+          
+          {dropdownOpen && (
+            <div className="cr-card-dropdown-menu" style={{ padding: '0', minWidth: '170px' }}>
+              <button type="button" className="cr-dropdown-item" onClick={() => { setDropdownOpen(false); onExport(report, 'csv') }}>
+                <FaFileCsv className="cr-dropdown-export-icon" />
+                <span className="cr-dropdown-export-label">Export to CSV</span>
+              </button>
+              <button type="button" className="cr-dropdown-item" onClick={() => { setDropdownOpen(false); onExport(report, 'excel') }}>
+                <FaFileExcel className="cr-dropdown-export-icon" />
+                <span className="cr-dropdown-export-label">Export to Excel</span>
+              </button>
+              <button type="button" className="cr-dropdown-item" onClick={() => { setDropdownOpen(false); onExport(report, 'pdf') }}>
+                <FaFilePdf className="cr-dropdown-export-icon" />
+                <span className="cr-dropdown-export-label">Export to PDF</span>
+              </button>
+            </div>
+          )}
         </div>
-        <div className="cr-list-row">
-          <FaEye />
-          <span>
-            <strong>Visibility-</strong> {normalizeVisibility(report.visibility)}
-            {normalizeVisibility(report.visibility) === 'Custom' && <span className="cr-list-visibility-badge">v</span>}
-          </span>
+      </header>
+
+      <div className="cr-list-card-body">
+        <div className="cr-list-card-left">
+          <div className="cr-list-row">
+            <FaTable />
+            <span><strong>Template Fields-</strong> {getReportFields(report)}</span>
+          </div>
+          {getReportFilters(report) && (
+            <div className="cr-list-row">
+              <FaFilter />
+              <span><strong>Filters-</strong> {getReportFilters(report)}</span>
+            </div>
+          )}
+          {getReportGroupBy(report) && (
+            <div className="cr-list-row">
+              <FaObjectGroup />
+              <span><strong>Group By-</strong> {getReportGroupBy(report)}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="cr-list-card-right">
+          <div className="cr-list-row">
+            <FaCreditCard />
+            <span><strong>Description-</strong> {report.description || `${getReportType(report)} Report Template`}</span>
+          </div>
+          <div className="cr-list-row">
+            <FaCalendarAlt />
+            <span><strong>Created By-</strong> {report.createdBy || 'Admin'} <strong>On-</strong> {formatStoredDate(report.createdOn)}</span>
+          </div>
+          <div className="cr-list-row">
+            <FaEye />
+            <span>
+              <strong>Visibility-</strong> {normalizeVisibility(report.visibility)}
+              {normalizeVisibility(report.visibility) === 'Custom' && <span className="cr-list-visibility-badge">v</span>}
+            </span>
+          </div>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+const WebReportModal = ({ report, onClose }) => {
+  if (!report) return null
+
+  const fields = getReportFields(report).split(',').map(f => f.trim())
+
+  return (
+    <div className="cr-web-modal-overlay" style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem'
+    }}>
+      <div className="cr-web-modal" style={{
+        background: '#fff', width: '100%', maxWidth: '1200px', height: '80vh',
+        display: 'flex', flexDirection: 'column', borderRadius: '4px', overflow: 'hidden',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+      }}>
+        <header className="cr-web-modal-header" style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '0.75rem 1.25rem', borderBottom: '1px solid #ddd'
+        }}>
+          <h2 style={{ fontSize: '1rem', margin: 0, color: '#333' }}>Web Report (Total Records - 0)</h2>
+          <button type="button" onClick={onClose} style={{
+            background: 'transparent', border: 'none', fontSize: '1.25rem', cursor: 'pointer', color: '#555'
+          }}>&#10006;</button>
+        </header>
+        <div className="cr-web-modal-subhead" style={{
+          background: '#f9f9f9', padding: '0.75rem 1.25rem', borderBottom: '1px solid #eee'
+        }}>
+          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#333' }}>{report.title || report.reportName}</h3>
+        </div>
+        <div className="cr-web-modal-body" style={{ flex: 1, overflow: 'auto', padding: '1rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
+            <thead>
+              <tr>
+                {fields.map((field, idx) => (
+                  <th key={idx} style={{
+                    background: '#f4f4f4', color: '#333', padding: '0.65rem 0.5rem', textAlign: 'left',
+                    borderBottom: '2px solid #ccc', borderRight: '1px solid #ddd', fontSize: '0.85rem', fontWeight: 600
+                  }}>{field}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {/* Empty state for records */}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-  </article>
-)
+  )
+}
 
 const SplitDropdown = ({ label, options, isOpen, buttonRef, onToggle, onSelect }) => (
   <div className="cr-list-split" ref={buttonRef}>
@@ -300,6 +394,7 @@ const CustomReportsPage = ({ basePath = '/admin/reports' }) => {
   const [addOpen, setAddOpen] = useState(false)
   const [newOpen, setNewOpen] = useState(false)
   const [templates, setTemplates] = useState(() => getAdminReportTemplates())
+  const [webReport, setWebReport] = useState(null)
 
   useEffect(() => subscribeAdminReportTemplates(() => setTemplates(getAdminReportTemplates())), [])
 
@@ -408,27 +503,19 @@ const CustomReportsPage = ({ basePath = '/admin/reports' }) => {
 
   const handleExport = (report) => {
     const reportName = report.reportName || report.title || 'Custom Report'
+    const fields = getReportFields(report).split(',').map(f => f.trim())
+    
     exportExcelWorkbook({
       filename: `${reportName}.xlsx`,
-      title: 'Custom Report',
-      sheetName: 'Custom Reports',
+      title: reportName,
+      sheetName: 'Report Data',
       compact: false,
-      columns: [
-        { key: 'reportName', label: 'Report Name', width: 24 },
-        { key: 'module', label: 'Module', width: 16 },
-        { key: 'createdBy', label: 'Created By', width: 22 },
-        { key: 'visibility', label: 'Visibility', width: 14 },
-        { key: 'lastModified', label: 'Last Modified', width: 22 },
-      ],
-      rows: [
-        {
-          reportName,
-          module: getReportType(report),
-          createdBy: report.createdBy || '-',
-          visibility: normalizeVisibility(report.visibility),
-          lastModified: formatStoredDate(report.updatedAt || report.createdOn),
-        },
-      ],
+      columns: fields.map(field => ({
+        key: field,
+        label: field,
+        width: 25
+      })),
+      rows: [],
     })
   }
 
@@ -491,11 +578,7 @@ const CustomReportsPage = ({ basePath = '/admin/reports' }) => {
                   <ReportCard
                     key={report.id}
                     report={report}
-                    canEdit={!report.systemReport && canUserEditReportTemplate(report, user)}
-                    onView={handleView}
-                    onEdit={handleEdit}
-                    onDuplicate={handleDuplicate}
-                    onDelete={handleDelete}
+                    onViewWeb={setWebReport}
                     onExport={handleExport}
                   />
                 ))}
@@ -504,6 +587,7 @@ const CustomReportsPage = ({ basePath = '/admin/reports' }) => {
           ))}
         </main>
       </div>
+      <WebReportModal report={webReport} onClose={() => setWebReport(null)} />
     </div>
   )
 }

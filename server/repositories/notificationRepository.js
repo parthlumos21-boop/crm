@@ -38,13 +38,15 @@ const createNotification = async ({ senderId, receiverId, message, companyId }) 
 
 const listNotificationsByReceiver = async (actor, includeAdminFeed = false) => {
   const receiverFilter = includeAdminFeed
-    ? { $or: [{ receiverId: actor.id }, { receiverId: null }, { receiverId: { $exists: false } }] }
+    ? {}
     : { receiverId: actor.id }
 
   const records = await Notification
     .find({
       companyId: actor.companyId || 1,
       ...receiverFilter,
+      isRead: { $ne: true },
+      is_read: { $ne: true },
     })
     .sort({ createdAt: -1, legacyId: -1 })
     .lean()
@@ -53,13 +55,14 @@ const listNotificationsByReceiver = async (actor, includeAdminFeed = false) => {
 }
 
 const markNotificationRead = async (notificationId, actor) => {
+  const isAdmin = actor.role === 'admin' || actor.role === 'super_admin'
   const record = await Notification.findOneAndUpdate(
     {
       ...byLegacyId(notificationId),
-      receiverId: actor.id,
       companyId: actor.companyId || 1,
+      ...(isAdmin ? {} : { receiverId: actor.id }),
     },
-    { $set: { isRead: true } },
+    { $set: { isRead: true, is_read: true } },
     { new: true }
   ).lean()
 

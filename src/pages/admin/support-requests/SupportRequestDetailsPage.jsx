@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../../../components/common/Button'
 import { useData } from '../../../context/DataContext'
+import integrationApi from '../../../services/integrationApi'
 import {
   formatDateTime,
   formatShortDate,
@@ -13,6 +14,7 @@ import {
   FaBell,
   FaBook,
   FaCalendarAlt,
+  FaClock,
   FaEnvelope,
   FaFileAlt,
   FaHome,
@@ -111,11 +113,50 @@ const SupportRequestDetailsPage = () => {
   const { supportRequestId } = useParams()
   const { supportRequests } = useData()
   const basePath = getSupportRequestBasePath(location.pathname)
+  const [emailLogs, setEmailLogs] = useState([])
+  const [emailLogsLoading, setEmailLogsLoading] = useState(false)
 
   const supportRequest = useMemo(
     () => supportRequests.find((entry) => entry.id === supportRequestId) || null,
     [supportRequestId, supportRequests]
   )
+
+  useEffect(() => {
+    if (!supportRequestId) return
+
+    let isMounted = true
+    const loadEmailLogs = async () => {
+      setEmailLogsLoading(true)
+      try {
+        const logs = await integrationApi.getCommunicationLogs({
+          targetId: supportRequestId,
+          limit: 100,
+        })
+        if (isMounted) {
+          setEmailLogs((Array.isArray(logs) ? logs : []).filter((log) => log.channel === 'outlook'))
+        }
+      } catch (_error) {
+        if (isMounted) setEmailLogs([])
+      } finally {
+        if (isMounted) setEmailLogsLoading(false)
+      }
+    }
+
+    loadEmailLogs()
+    return () => {
+      isMounted = false
+    }
+  }, [supportRequestId])
+
+  const formatEmailLogDate = (value, part) => {
+    if (!value) return '-'
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return '-'
+    if (part === 'time') {
+      return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+    }
+    return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+  }
 
   if (!supportRequest) {
     return (
@@ -183,6 +224,53 @@ const SupportRequestDetailsPage = () => {
             </div>
           </div>
         </dl>
+
+        <section className="support-request-email-history">
+          <div className="support-request-email-history__header">
+            <div>
+              <span>Email History</span>
+              <h2>Outlook Emails</h2>
+            </div>
+            <FaEnvelope />
+          </div>
+
+          <div className="support-request-email-history__table-wrap">
+            <table className="support-request-email-history__table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Recipient</th>
+                  <th>Subject</th>
+                  <th>Delivery Status</th>
+                  <th>Sent By</th>
+                </tr>
+              </thead>
+              <tbody>
+                {emailLogsLoading ? (
+                  <tr>
+                    <td colSpan="6">Loading email history...</td>
+                  </tr>
+                ) : emailLogs.length > 0 ? (
+                  emailLogs.map((log) => (
+                    <tr key={log.id || `${log.recipient}-${log.createdAt}`}>
+                      <td>{formatEmailLogDate(log.createdAt, 'date')}</td>
+                      <td>{formatEmailLogDate(log.createdAt, 'time')}</td>
+                      <td>{log.recipient || '-'}</td>
+                      <td>{log.subject || '-'}</td>
+                      <td>{log.status || '-'}</td>
+                      <td>{log.createdByName || '-'}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6">No Outlook email history found for this service request.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </section>
     </div>
   )

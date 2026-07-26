@@ -29,7 +29,7 @@ const createUser = async (req, res, next) => {
     broadcastUserEvent(SOCKET_EVENTS.USER_CREATED, { user: result.user })
     res.status(201).json({
       success: true,
-      message: 'User created. Admin approval is required before login.',
+      message: 'User created. Approve this user before login.',
       data: result.user,
     })
   } catch (error) {
@@ -94,9 +94,21 @@ const deleteUser = async (req, res, next) => {
 const listUsers = async (req, res, next) => {
   try {
     const { status } = req.query || {}
-    const users = status
+    let users = status
       ? await userRepository.listUsersByStatus(status, req.user.companyId)
       : await userRepository.listAllUsers(req.user.companyId)
+      
+    // Attach Outlook connection status
+    const integrationService = require('../services/integrationService')
+    users = await Promise.all(users.map(async (u) => {
+      try {
+        const outlook = await integrationService.getOutlookStatus(u)
+        return { ...u, outlookConnected: outlook.connected, outlookShared: outlook.shared }
+      } catch (err) {
+        return { ...u, outlookConnected: false, outlookShared: false }
+      }
+    }))
+
     res.json({
       success: true,
       data: users,
@@ -150,16 +162,12 @@ const changeUserStatus = (nextStatus) => async (req, res, next) => {
     }
 
     const target = await userRepository.findUserById(userId)
-    if (!target) {
+    if (!target || target.companyId !== req.user.companyId) {
       throw new AppError('User not found.', 404)
     }
 
-    if (isPrivilegedRole(target.role)) {
-      throw new AppError('Privileged accounts cannot be modified through this API.', 403)
-    }
-
-    if (target.id === req.user.id) {
-      throw new AppError('You cannot change the status of your own account.', 400)
+    if (target.id === req.user.id && nextStatus !== 'approved') {
+      throw new AppError('You cannot deny or disable your own account.', 400)
     }
 
     const updated = await userRepository.updateUserStatus(userId, nextStatus)

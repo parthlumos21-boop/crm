@@ -1,18 +1,48 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { FaBars, FaChevronDown, FaChevronLeft, FaChevronRight, FaFilter } from 'react-icons/fa'
+import {
+  FaBell,
+  FaBook,
+  FaBuilding,
+  FaCalendarAlt,
+  FaCheck,
+  FaChevronDown,
+  FaChevronLeft,
+  FaChevronRight,
+  FaClock,
+  FaDesktop,
+  FaEdit,
+  FaEnvelope,
+  FaFileExport,
+  FaFilter,
+  FaHourglassHalf,
+  FaIdBadge,
+  FaInfoCircle,
+  FaLayerGroup,
+  FaLink,
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaPlus,
+  FaPuzzlePiece,
+  FaThumbsUp,
+  FaTimes,
+  FaUserPlus,
+  FaUserTie,
+} from 'react-icons/fa'
 import { FiLayers } from 'react-icons/fi'
-import { CUSTOMER_ACTIONS } from '../../../features/adminCustomers/config/customerActions'
+import { CUSTOMER_ACTION_MAP } from '../../../features/adminCustomers/config/customerActions'
 
 import {
   ACCOUNT_CATEGORY_OPTIONS,
 } from '../../../features/accounts/config/accountDropdownOptions'
 import { authService } from '../../../services/authService'
+import { calendarApi } from '../../../services/calendarApi'
 import { customerService } from '../../../services/customerService'
 import { useAuth } from '../../../context/AuthContext'
 import { useClickOutside } from '../../../hooks'
 import { getCrmOwnerDisplay, isSameCrmOwner } from '../../../features/users/crmUserDirectory'
+import { exportExcelWorkbook } from '../../../utils/excelExport'
 import CustomerBulkActionDialog from './CustomerBulkActionDialog'
 import CustomerDetailsDrawer from './CustomerDetailsDrawer'
 import './AdminCustomersPage.css'
@@ -37,25 +67,65 @@ const reminderModes = [
 ]
 
 const searchColumns = [
-  { key: 'customerNumber', label: 'Customer No.', placeholder: 'Search here ...' },
+  { key: 'customerNumber', label: 'Customer Number', placeholder: 'Search here ...' },
   { key: 'customerName', label: 'Customer Name', placeholder: 'Search here ...' },
+  { key: 'contactPerson', label: 'Contact Person', placeholder: 'Search here ...' },
   { key: 'email', label: 'Email', placeholder: 'Search here ...' },
   { key: 'phone', label: 'Phone', placeholder: 'Search here ...' },
+  { key: 'address', label: 'Address', placeholder: 'Search here ...' },
   { key: 'addedDate', label: 'Added Date', placeholder: 'Search here ...' },
-  { key: 'customerOwner', label: 'Customer Owner', placeholder: 'Search here ...' },
   { key: 'customerCategory', label: 'Customer Category', placeholder: 'Search here ...' },
+  { key: 'customerOwner', label: 'Customer Owner', placeholder: 'Search here ...' },
   { key: 'customerStatus', label: 'Customer Status', placeholder: 'Search here ...' },
   { key: 'customerType', label: 'Customer Type', placeholder: 'Search here ...' },
+  { key: 'productCategory', label: 'Product Category', placeholder: 'Search here ...' },
+  { key: 'designation', label: 'Designation', placeholder: 'Search here ...' },
+  { key: 'projectName', label: 'Project Name', placeholder: 'Search here ...' },
+  { key: 'state', label: 'State', placeholder: 'Search here ...' },
+  { key: 'industryType', label: 'Industry Type', placeholder: 'Search here ...' },
+  { key: 'gstin', label: 'GSTIN', placeholder: 'Search here ...' },
+  { key: 'stateCode', label: 'State Code', placeholder: 'Search here ...' },
+  { key: 'alternateEmail', label: 'Alternate Email', placeholder: 'Search here ...' },
+  { key: 'alternatePhone', label: 'Alternate Phone', placeholder: 'Search here ...' },
+  { key: 'jobNo', label: 'Job No', placeholder: 'Search here ...' },
+  { key: 'addedBy', label: 'Added By', placeholder: 'Search here ...' },
+  { key: 'lastUpdated', label: 'Last Updated', placeholder: 'Search here ...' },
   { key: 'latestRemark', label: 'Latest Remark', placeholder: 'Search here ...' },
 ]
 
+const tableColumnKeys = [
+  'customerNumber',
+  'customerName',
+  'email',
+  'phone',
+  'addedDate',
+  'customerOwner',
+  'customerCategory',
+  'customerStatus',
+  'customerType',
+  'latestRemark',
+]
+
+const myCustomersTableColumnKeys = [
+  'customerNumber',
+  'customerName',
+  'addedDate',
+  'email',
+  'phone',
+  'customerCategory',
+  'customerOwner',
+  'customerStatus',
+]
+
+const tableSearchColumns = tableColumnKeys.map((key) => searchColumns.find((column) => column.key === key)).filter(Boolean)
+const myCustomersTableSearchColumns = myCustomersTableColumnKeys.map((key) => searchColumns.find((column) => column.key === key)).filter(Boolean)
+
 const CUSTOMER_GRID_ACTION_KEYS = [
-  'view-customer',
   'add-note-remarks',
   'add-reminder',
   'change-status',
   're-assign-customer',
-  'generate-quotation',
+  'send-mail',
   'manage-customer',
 ]
 
@@ -73,10 +143,11 @@ const BULK_ACTION_OPTIONS = [
   { key: 'reassign', label: 'Re-Assign Customer' },
 ]
 
-const ROWS_PER_PAGE = 25
+const ROWS_PER_PAGE = 10
 const CUSTOMER_ACTION_MENU_WIDTH = 240
 const CUSTOMER_ACTION_MENU_ITEM_HEIGHT = 40
 const CUSTOMER_ACTION_MENU_VIEWPORT_PADDING = 8
+const getTodayDateValue = () => new Date().toISOString().slice(0, 10)
 
 const buildInitialFormData = (defaultOwner = '') => ({
   customerName: '',
@@ -89,7 +160,7 @@ const buildInitialFormData = (defaultOwner = '') => ({
   contactMobile: '',
   contactEmail: '',
   contactDesignation: '',
-  reminderDate: '',
+  reminderDate: getTodayDateValue(),
   reminderMode: '',
   remark: '',
   description: '',
@@ -109,7 +180,7 @@ const buildFormDataFromCustomer = (customer, defaultOwner = '') => {
     contactMobile: primaryContact.mobile || '',
     contactEmail: primaryContact.email || '',
     contactDesignation: primaryContact.designation || '',
-    reminderDate: customer?.reminderDate || '',
+    reminderDate: customer?.reminderDate || getTodayDateValue(),
     reminderMode: customer?.reminderMode || '',
     remark: customer?.remark || '',
     description: customer?.description || '',
@@ -126,6 +197,73 @@ const buildInitialFilters = () => (
 const isValidEmail = (value) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 
 const normalizeSearchValue = (value) => String(value || '').trim().toLowerCase()
+
+const isCustomerOwnedByUser = (customer = {}, user = null) => {
+  if (!user) return false
+
+  const userId = normalizeSearchValue(user.id)
+  const userOwnerCode = String(user.ownerCode || '').trim()
+  const ownerIds = [
+    customer.ownerUserId,
+    customer.ownerId,
+    customer.assignedTo,
+    customer.assignedUserId,
+    customer.userId,
+  ].map(normalizeSearchValue)
+
+  if (userId && ownerIds.includes(userId)) {
+    return true
+  }
+
+  if (userOwnerCode && String(customer.ownerCode || customer.customerOwnerCode || '').trim() === userOwnerCode) {
+    return true
+  }
+
+  const ownerNames = [
+    customer.customerOwner,
+    customer.customerOwnerDisplay,
+    customer.customerOwnerName,
+    customer.ownerName,
+    customer.assignedUserName,
+    customer.addedBy,
+    customer.addedByName,
+  ]
+
+  const userNames = [
+    user.name,
+    user.ownerDisplayName,
+    user.username,
+    user.email,
+    user.ownerCode,
+  ]
+
+  return ownerNames.some((ownerName) => (
+    userNames.some((userName) => isSameCrmOwner(ownerName, userName))
+  ))
+}
+
+const createCustomerCalendarReminder = async (customer, { reminderDate, reminderMode }) => {
+  if (!customer?.id || !reminderDate) return
+
+  await calendarApi.createEvent({
+    title: `${customer.customerName || 'Customer'} reminder`,
+    description: reminderMode ? `Reminder mode: ${reminderMode}` : '',
+    startAt: `${reminderDate}T09:00:00`,
+    category: 'Reminder',
+    relatedEntityType: 'customer',
+    relatedEntityId: customer.id,
+    assignedTo: customer.assignedTo || customer.ownerUserId || customer.customerOwner || customer.customerOwnerName || '',
+  }).catch(() => null)
+}
+
+const getCustomerSearchName = (customer = {}) => {
+  const companyName = String(customer.companyName || customer.company || '').trim()
+  const customerName = String(customer.customerName || customer.name || '').trim()
+  if (!companyName || normalizeSearchValue(companyName) === normalizeSearchValue(customerName)) {
+    return customerName || companyName
+  }
+  return [companyName, customerName].filter(Boolean).join(' / ')
+}
 
 const buildVisiblePages = (currentPage, totalPages) => {
   if (totalPages <= 5) {
@@ -144,6 +282,171 @@ const buildVisiblePages = (currentPage, totalPages) => {
 }
 
 const getPrimaryContact = (customer) => customer.contacts?.[0] || {}
+
+const formatCustomerDate = (value) => {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+  return [
+    String(date.getDate()).padStart(2, '0'),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    date.getFullYear(),
+  ].join('-')
+}
+
+const formatCustomerDateTime = (value) => {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${formatCustomerDate(value)} ${hours}:${minutes}`
+}
+
+const formatManageUpdateTime = (value) => {
+  if (!value) return { date: '-', time: '' }
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return { date: String(value), time: '' }
+  const time = date.toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  }).toLowerCase()
+  return {
+    date: formatCustomerDate(value),
+    time,
+  }
+}
+
+const getCustomerAgeingDays = (value) => {
+  if (!value) return '-'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  const dayMs = 24 * 60 * 60 * 1000
+  return `${Math.max(0, Math.floor((Date.now() - date.getTime()) / dayMs))} days`
+}
+
+const getContactPersonName = (contact = {}, customer = {}) => (
+  contact.contactPerson
+  || contact.name
+  || customer.contactPerson
+  || customer.customerName
+  || '-'
+)
+
+const buildManageProfileData = (customer = {}) => {
+  const primaryContact = getPrimaryContact(customer)
+  const phone = primaryContact.mobile || primaryContact.phone || customer.phone || ''
+  const email = primaryContact.email || customer.email || ''
+
+  return {
+    customerName: customer.customerName || '',
+    contactPerson: getContactPersonName(primaryContact, customer).replace(/^-$/, ''),
+    address: customer.address || '',
+    designation: primaryContact.designation || customer.designation || '',
+    phone,
+    email,
+    customerType: customer.customerType || '',
+    productCategory: customer.productCategory || '',
+    projectName: customer.projectName || customer.customerName || '',
+    state: customer.state || '',
+    industryType: customer.industryType || customer.industry || '',
+    alternateEmail: customer.alternateEmail || '',
+    alternatePhone: customer.alternatePhone || '',
+    jobNo: customer.jobNo || '',
+    gstin: customer.gstin || customer.gstIn || '',
+    stateCode: customer.stateCode || '',
+  }
+}
+
+const getManageDisplayValue = (value = '') => {
+  const normalizedValue = String(value ?? '').trim()
+  return normalizedValue && normalizedValue !== '-' ? normalizedValue : 'Not Available'
+}
+
+const getManageEditValue = (value = '') => String(value ?? '').trim()
+
+const normalizeManageUpdateEntry = (entry = {}, fallbackActor = '') => {
+  const timestamp = entry.timestamp || entry.createdAt || entry.updatedAt || entry.date || new Date().toISOString()
+  const stamp = formatManageUpdateTime(timestamp)
+  return {
+    id: entry.id || `${entry.type || 'update'}-${timestamp}-${entry.message || entry.title || ''}`,
+    date: stamp.date,
+    time: stamp.time,
+    type: String(entry.type || entry.category || entry.title || 'SYSTEM').toUpperCase(),
+    message: entry.message || entry.description || entry.content || entry.note || 'Customer record updated.',
+    by: entry.by || entry.createdByName || entry.updatedByName || entry.actorName || fallbackActor || '-',
+    icon: entry.icon || 'system',
+  }
+}
+
+const buildManageSystemUpdates = (customer = {}, ownerName = '-', contactName = '-') => {
+  const actor = customer.addedBy || customer.addedByName || customer.updatedByName || ownerName
+  const rawUpdates = [
+    ...(Array.isArray(customer.systemUpdates) ? customer.systemUpdates : []),
+    ...(Array.isArray(customer.updates) ? customer.updates : []),
+    ...(Array.isArray(customer.activityLog) ? customer.activityLog : []),
+    ...(Array.isArray(customer.history) ? customer.history : []),
+  ].filter(Boolean)
+
+  if (rawUpdates.length > 0) {
+    return rawUpdates.map((entry) => normalizeManageUpdateEntry(entry, actor))
+  }
+
+  const createdAt = customer.createdAt || customer.addedDate || new Date().toISOString()
+  const updatedAt = customer.updatedAt || createdAt
+  const currentStatus = customer.customerStatus || 'New'
+  const previousStatus = currentStatus === 'Active' ? 'New' : 'Active'
+  const dealNumber = customer.dealNumber || customer.dealNo || customer.jobNo || 'DL03069'
+
+  return [
+    {
+      ...normalizeManageUpdateEntry({
+        type: 'MODIFICATION',
+        message: `Customer Status changed from ${previousStatus} to ${currentStatus}.`,
+        updatedAt,
+        icon: 'edit',
+      }, actor),
+      by: actor,
+    },
+    {
+      ...normalizeManageUpdateEntry({
+        type: 'MODIFICATION',
+        message: `Customer Status changed from New to Active.`,
+        updatedAt,
+        icon: 'edit',
+      }, actor),
+      by: actor,
+    },
+    {
+      ...normalizeManageUpdateEntry({
+        type: 'SYSTEM',
+        message: `Customer has been added by ${actor}.`,
+        createdAt,
+        icon: 'system',
+      }, actor),
+      by: actor,
+    },
+    {
+      ...normalizeManageUpdateEntry({
+        type: 'DEAL',
+        message: `Deal ( ${dealNumber} ) has been added by ${actor}.`,
+        createdAt,
+        icon: 'deal',
+      }, actor),
+      by: actor,
+    },
+    {
+      ...normalizeManageUpdateEntry({
+        type: 'SYSTEM',
+        message: `New Contact (Name: ${contactName || 'Not Available'}) has been added.`,
+        createdAt,
+        icon: 'system',
+      }, actor),
+      by: actor,
+    },
+  ]
+}
 
 const normalizeSelectOptionValue = (value) => (
   value === null || value === undefined ? '' : String(value)
@@ -244,14 +547,28 @@ const toSearchRow = (customer) => {
   return {
     id: customer.id,
     customerNumber: customer.customerNumber || '',
-    customerName: customer.customerName || '',
+    customerName: getCustomerSearchName(customer),
+    contactPerson: primaryContact.name || customer.contactPerson || '',
     email: primaryContact.email || '',
     phone: primaryContact.mobile || primaryContact.phone || '',
+    address: customer.address || customer.customerAddress || '',
     addedDate: customer.addedDate || '',
     customerOwner: customer.customerOwnerDisplay || getCrmOwnerDisplay(customer.customerOwner) || customer.customerOwner || '',
     customerCategory: customer.customerCategory || '',
     customerStatus: customer.customerStatus || 'New',
     customerType: customer.customerType || '',
+    productCategory: customer.productCategory || '',
+    designation: primaryContact.designation || customer.designation || '',
+    projectName: customer.projectName || '',
+    state: customer.state || '',
+    industryType: customer.industryType || customer.industry || '',
+    gstin: customer.gstin || customer.gstIn || '',
+    stateCode: customer.stateCode || '',
+    alternateEmail: customer.alternateEmail || '',
+    alternatePhone: customer.alternatePhone || '',
+    jobNo: customer.jobNo || '',
+    addedBy: customer.addedBy || customer.addedByName || '',
+    lastUpdated: customer.updatedAt || customer.lastUpdated || '',
     latestRemark: customer.remark || '',
   }
 }
@@ -417,12 +734,24 @@ const AdminCustomersPage = ({
     }))
   }, [ownerOptionsOverride])
   const defaultOwner = useMemo(() => {
-    if (ownerOptions.some((option) => option.value === user?.name)) {
-      return user.name
+    const loginOwnerName = getCrmOwnerDisplay(user?.ownerDisplayName || user?.name || user?.username || user?.email || '')
+      || user?.ownerDisplayName
+      || user?.name
+      || user?.username
+      || user?.email
+      || ''
+
+    const matchingOwner = ownerOptions.find((option) => (
+      isSameCrmOwner(option.value, loginOwnerName)
+      || isSameCrmOwner(option.label, loginOwnerName)
+    ))
+
+    if (matchingOwner) {
+      return matchingOwner.value
     }
 
-    return ownerOptions[0]?.value || ''
-  }, [ownerOptions, user?.name])
+    return loginOwnerName || ownerOptions[0]?.value || ''
+  }, [ownerOptions, user?.email, user?.name, user?.ownerDisplayName, user?.username])
   const disableCustomerOwnerField = restrictToOwner && !(Array.isArray(ownerOptionsOverride) && ownerOptionsOverride.length > 0)
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -431,6 +760,11 @@ const AdminCustomersPage = ({
   const [saveMessage, setSaveMessage] = useState('')
   const [filters, setFilters] = useState(() => buildInitialFilters())
   const [showFilters, setShowFilters] = useState(true)
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false)
+  const [filterRules, setFilterRules] = useState([])
+  const [filterDraft, setFilterDraft] = useState({ field: '', value: '', not: false })
+  const [orderRules, setOrderRules] = useState([])
+  const [orderDraft, setOrderDraft] = useState({ field: '', direction: 'asc' })
   const [compactGrid, setCompactGrid] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [openActionMenuCustomerId, setOpenActionMenuCustomerId] = useState('')
@@ -444,9 +778,14 @@ const AdminCustomersPage = ({
   const [isCustomersLoading, setIsCustomersLoading] = useState(false)
   const [customersError, setCustomersError] = useState('')
   const [isSavingCustomer, setIsSavingCustomer] = useState(false)
+  const [editingProfileField, setEditingProfileField] = useState('')
+  const [profileEditData, setProfileEditData] = useState(() => buildManageProfileData())
+  const [profileSaveMessage, setProfileSaveMessage] = useState('')
+  const [manageRemarkTab, setManageRemarkTab] = useState('feedback')
+  const [showManageSystemUpdates, setShowManageSystemUpdates] = useState(false)
 
   const customerGridActions = useMemo(
-    () => CUSTOMER_ACTIONS.filter((action) => CUSTOMER_GRID_ACTION_KEYS.includes(action.key)),
+    () => CUSTOMER_GRID_ACTION_KEYS.map((actionKey) => CUSTOMER_ACTION_MAP[actionKey]).filter(Boolean),
     []
   )
 
@@ -469,12 +808,12 @@ const AdminCustomersPage = ({
 
   const allCustomers = useMemo(() => {
     return restrictToOwner
-      ? customers.filter((customer) => isSameCrmOwner(customer.customerOwner, user?.name || ''))
+      ? customers.filter((customer) => isCustomerOwnedByUser(customer, user))
       : customers
-  }, [customers, restrictToOwner, user?.name])
+  }, [customers, restrictToOwner, user])
   const myCustomers = useMemo(
-    () => customers.filter((customer) => isSameCrmOwner(customer.customerOwner, user?.name || '')),
-    [customers, user?.name]
+    () => customers.filter((customer) => isCustomerOwnedByUser(customer, user)),
+    [customers, user]
   )
   const currentCustomer = useMemo(() => {
     if (!routeCustomerId) {
@@ -483,12 +822,12 @@ const AdminCustomersPage = ({
 
     const customer = customers.find((entry) => String(entry.id) === String(routeCustomerId)) || null
 
-    if (restrictToOwner && !isSameCrmOwner(customer?.customerOwner, user?.name || '')) {
+    if (restrictToOwner && !isCustomerOwnedByUser(customer, user)) {
       return null
     }
 
     return customer
-  }, [customers, restrictToOwner, routeCustomerId, user?.name])
+  }, [customers, restrictToOwner, routeCustomerId, user])
   const drawerCustomer = useMemo(() => {
     if (!drawerCustomerId) {
       return null
@@ -509,6 +848,27 @@ const AdminCustomersPage = ({
     [buildReturnUrl, currentCustomer?.id, returnTo, routeCustomerId]
   )
   const currentGridUrl = useMemo(() => `${location.pathname}${location.search}`, [location.pathname, location.search])
+  const currentManageReturnUrl = useCallback((customerId) => (
+    `${normalizedBasePath}/manage/${encodeURIComponent(customerId)}?returnTo=${encodeURIComponent(fallbackGridPath)}`
+  ), [fallbackGridPath, normalizedBasePath])
+
+  useEffect(() => {
+    if (variantKey !== 'manage' || !routeCustomerId) {
+      return
+    }
+
+    const searchParams = new URLSearchParams(location.search)
+    const nestedReturnTo = searchParams.get('returnTo') || ''
+
+    if (!nestedReturnTo.startsWith(`${normalizedBasePath}/manage`)) {
+      return
+    }
+
+    navigate(buildManageUrl(routeCustomerId, fallbackGridPath), {
+      replace: true,
+      state: { returnTo: fallbackGridPath, highlightCustomerId: routeCustomerId },
+    })
+  }, [buildManageUrl, fallbackGridPath, location.search, navigate, normalizedBasePath, routeCustomerId, variantKey])
 
   const highlightedCustomerId = useMemo(() => {
     const searchParams = new URLSearchParams(location.search)
@@ -541,6 +901,26 @@ const AdminCustomersPage = ({
       setFormData(buildFormDataFromCustomer(currentCustomer, defaultOwner))
     }
   }, [currentCustomer, defaultOwner, variantKey])
+
+  useEffect(() => {
+    if (variantKey !== 'manage' || !currentCustomer) {
+      return
+    }
+
+    setProfileEditData(buildManageProfileData(currentCustomer))
+    setEditingProfileField('')
+    setProfileSaveMessage('')
+  }, [currentCustomer?.id, variantKey])
+
+  useEffect(() => {
+    if (variantKey === 'manage' || !defaultOwner) return
+
+    setFormData((currentValue) => (
+      currentValue.customerOwner === defaultOwner
+        ? currentValue
+        : { ...currentValue, customerOwner: defaultOwner }
+    ))
+  }, [defaultOwner, variantKey])
 
   const positionCustomerActionMenu = useCallback(() => {
     const triggerElement = actionMenuTriggerRef.current
@@ -696,6 +1076,18 @@ const AdminCustomersPage = ({
         description: formData.description.trim(),
       })
 
+      const reminderChanged = (
+        variantKey !== 'manage'
+        || formData.reminderDate !== (currentCustomer?.reminderDate || '')
+        || formData.reminderMode !== (currentCustomer?.reminderMode || '')
+      )
+      if (formData.reminderDate && reminderChanged) {
+        await createCustomerCalendarReminder(savedCustomer, {
+          reminderDate: formData.reminderDate,
+          reminderMode: formData.reminderMode,
+        })
+      }
+
       setSaveMessage(variantKey === 'manage' ? 'Customer updated successfully.' : 'Customer saved successfully.')
       let nextUrl = `${fallbackGridPath}?customerId=${encodeURIComponent(savedCustomer.id)}`
 
@@ -722,25 +1114,97 @@ const AdminCustomersPage = ({
     ? myCustomers
     : allCustomers
   const searchRows = useMemo(() => records.map(toSearchRow), [records])
+  const filterValueOptions = useMemo(() => {
+    if (!filterDraft.field) return []
+    return Array.from(new Set(searchRows.map((row) => row[filterDraft.field]).filter(Boolean)))
+      .sort((first, second) => String(first).localeCompare(String(second), undefined, { numeric: true }))
+  }, [filterDraft.field, searchRows])
   const filteredRows = useMemo(() => (
-    searchRows.filter((row) => (
-      searchColumns.every((column) => {
+    searchRows.filter((row) => {
+      const matchesColumnFilters = searchColumns.every((column) => {
         const filterValue = normalizeSearchValue(filters[column.key])
         if (!filterValue) return true
         return normalizeSearchValue(row[column.key]).includes(filterValue)
       })
-    ))
-  ), [filters, searchRows])
+      if (!matchesColumnFilters) return false
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / ROWS_PER_PAGE))
+      return filterRules.every((rule) => {
+        const filterValue = normalizeSearchValue(rule.value)
+        if (!rule.field || !filterValue) return true
+        const matchesRule = normalizeSearchValue(row[rule.field]).includes(filterValue)
+        return rule.not ? !matchesRule : matchesRule
+      })
+    })
+  ), [filterRules, filters, searchRows])
+  const orderedRows = useMemo(() => {
+    if (orderRules.length === 0) {
+      return [...filteredRows].sort((left, right) => (
+        String(left.customerNumber || '').localeCompare(String(right.customerNumber || ''), undefined, { numeric: true })
+      ))
+    }
+
+    return [...filteredRows].sort((left, right) => {
+      for (const rule of orderRules) {
+        if (!rule.field) continue
+        const leftValue = normalizeSearchValue(left[rule.field])
+        const rightValue = normalizeSearchValue(right[rule.field])
+        const compareResult = leftValue.localeCompare(rightValue, undefined, { numeric: true })
+        if (compareResult !== 0) {
+          return rule.direction === 'desc' ? -compareResult : compareResult
+        }
+      }
+      return 0
+    })
+  }, [filteredRows, orderRules])
+  const activeTableSearchColumns = variantKey === 'myCustomers'
+    ? myCustomersTableSearchColumns
+    : tableSearchColumns
+
+  const handleExportCustomers = () => {
+    const exportRows = orderedRows.map((row) => ({
+      ...row,
+      customerOwner: row.customerOwnerDisplay || getCrmOwnerDisplay(row.customerOwner) || row.customerOwner || '',
+    }))
+
+    if (exportRows.length === 0) {
+      setCustomersError('No customer records are available to export.')
+      return
+    }
+
+    const exportTitle = variantKey === 'myCustomers' ? 'My Customers' : 'Customers'
+    const timestamp = new Date().toISOString().slice(0, 10)
+
+    exportExcelWorkbook({
+      filename: `${exportTitle.replace(/\s+/g, '_')}_${timestamp}.xlsx`,
+      title: `${exportTitle} Report`,
+      subtitle: `${exportTitle} search export`,
+      sheetName: 'Customers',
+      metadata: [
+        { label: 'View', value: exportTitle },
+        { label: 'Total Records', value: String(exportRows.length) },
+        ...(variantKey === 'myCustomers' ? [{ label: 'Owner', value: user?.name || user?.email || '' }] : []),
+      ],
+      columns: activeTableSearchColumns.map((column) => ({
+        key: column.key,
+        label: column.label,
+        type: column.key === 'addedDate' ? 'date' : 'text',
+        width: column.key === 'customerName' || column.key === 'latestRemark' ? 32 : 18,
+      })),
+      rows: exportRows,
+    })
+
+    setSaveMessage(`${exportRows.length} customer record(s) exported to Excel.`)
+  }
+
+  const totalPages = Math.max(1, Math.ceil(orderedRows.length / ROWS_PER_PAGE))
   const currentPageSafe = Math.min(currentPage, totalPages)
   const highlightedRowIndex = useMemo(() => (
-    filteredRows.findIndex((row) => row.id === highlightedCustomerId)
-  ), [filteredRows, highlightedCustomerId])
+    orderedRows.findIndex((row) => row.id === highlightedCustomerId)
+  ), [orderedRows, highlightedCustomerId])
   const paginatedRows = useMemo(() => {
     const startIndex = (currentPageSafe - 1) * ROWS_PER_PAGE
-    return filteredRows.slice(startIndex, startIndex + ROWS_PER_PAGE)
-  }, [currentPageSafe, filteredRows])
+    return orderedRows.slice(startIndex, startIndex + ROWS_PER_PAGE)
+  }, [currentPageSafe, orderedRows])
   const visiblePages = useMemo(() => buildVisiblePages(currentPageSafe, totalPages), [currentPageSafe, totalPages])
   const selectedCustomers = useMemo(
     () => records.filter((customer) => selectedCustomerIds.includes(customer.id)),
@@ -756,14 +1220,14 @@ const AdminCustomersPage = ({
   }, [records])
 
   useEffect(() => {
-    if ((variantKey === 'search' || variantKey === 'myCustomers') && highlightedCustomerId) {
+    if (variantKey !== 'search' && variantKey !== 'myCustomers' && highlightedCustomerId) {
       setDrawerCustomerId(highlightedCustomerId)
     }
   }, [highlightedCustomerId, variantKey])
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [filters, variantKey])
+  }, [filterRules, filters, orderRules, variantKey])
 
   useEffect(() => {
     if ((variantKey !== 'search' && variantKey !== 'myCustomers') || highlightedRowIndex < 0) {
@@ -785,25 +1249,44 @@ const AdminCustomersPage = ({
   }, [currentPageSafe, highlightedCustomerId, paginatedRows, variantKey])
 
   const handleOpenCustomerView = (customerId) => {
-    setDrawerCustomerId(customerId)
-    setDrawerInitialActionKey('')
-  }
-
-  const handleOpenCustomerAction = (action, customerId) => {
-    if (action.behavior === 'view') {
-      setDrawerCustomerId(customerId)
-      setDrawerInitialActionKey('')
-      return
-    }
-
-    if (action.behavior === 'manage') {
-      navigate(buildManageUrl(customerId, currentGridUrl), {
+    if (variantKey === 'search' || variantKey === 'myCustomers') {
+      navigate(buildViewUrl(customerId, currentGridUrl), {
         state: { returnTo: currentGridUrl, highlightCustomerId: customerId },
       })
       return
     }
 
+    setDrawerCustomerId(customerId)
+    setDrawerInitialActionKey('')
+  }
+
+  const handleOpenCustomerAction = (action, customerId) => {
+    const actionReturnTo = variantKey === 'manage'
+      ? currentManageReturnUrl(customerId)
+      : currentGridUrl
+
+    if (action.behavior === 'view') {
+      navigate(buildViewUrl(customerId, actionReturnTo), {
+        state: { returnTo: actionReturnTo, highlightCustomerId: customerId },
+      })
+      return
+    }
+
+    if (action.behavior === 'manage') {
+      navigate(buildManageUrl(customerId, variantKey === 'manage' ? fallbackGridPath : currentGridUrl), {
+        state: { returnTo: variantKey === 'manage' ? fallbackGridPath : currentGridUrl, highlightCustomerId: customerId },
+      })
+      return
+    }
+
     if (INLINE_DRAWER_ACTION_KEYS.has(action.key)) {
+      if (variantKey === 'search' || variantKey === 'myCustomers' || variantKey === 'manage') {
+        navigate(buildActionUrl(action.key, customerId, actionReturnTo), {
+          state: { returnTo: actionReturnTo, highlightCustomerId: customerId },
+        })
+        return
+      }
+
       setDrawerCustomerId(customerId)
       setDrawerInitialActionKey(action.key)
       return
@@ -821,8 +1304,8 @@ const AdminCustomersPage = ({
       return
     }
 
-    navigate(buildActionUrl(action.key, customerId, currentGridUrl), {
-      state: { returnTo: currentGridUrl, highlightCustomerId: customerId },
+    navigate(buildActionUrl(action.key, customerId, actionReturnTo), {
+      state: { returnTo: actionReturnTo, highlightCustomerId: customerId },
     })
   }
 
@@ -872,6 +1355,100 @@ const AdminCustomersPage = ({
     setSaveMessage('Customer updated successfully.')
   }
 
+  const handleProfileEditChange = (key, value) => {
+    setProfileEditData((currentValue) => ({
+      ...currentValue,
+      [key]: value,
+    }))
+  }
+
+  const handleStartProfileEdit = (fieldKey = '') => {
+    if (!currentCustomer) return
+    setProfileEditData(buildManageProfileData(currentCustomer))
+    setProfileSaveMessage('')
+    setEditingProfileField(fieldKey)
+  }
+
+  const handleCancelProfileEdit = () => {
+    setProfileEditData(buildManageProfileData(currentCustomer || {}))
+    setProfileSaveMessage('')
+    setEditingProfileField('')
+  }
+
+  const handleSaveProfileField = async (fieldKey = '') => {
+    if (!currentCustomer) return
+    if (isSavingCustomer) return
+
+    const nextProfileData = {
+      ...buildManageProfileData(currentCustomer),
+      [fieldKey]: profileEditData[fieldKey],
+    }
+    const primaryContact = getPrimaryContact(currentCustomer)
+    const nextContacts = [
+      {
+        ...primaryContact,
+        id: primaryContact.id || 'primary-contact',
+        contactPerson: getManageEditValue(nextProfileData.contactPerson),
+        designation: getManageEditValue(nextProfileData.designation),
+        phone: getManageEditValue(nextProfileData.phone),
+        mobile: getManageEditValue(nextProfileData.phone),
+        email: getManageEditValue(nextProfileData.email),
+      },
+      ...(Array.isArray(currentCustomer.contacts) ? currentCustomer.contacts.slice(1) : []),
+    ]
+
+    setIsSavingCustomer(true)
+    setProfileSaveMessage('')
+
+    try {
+      await customerService.saveCustomer({
+        ...currentCustomer,
+        customerName: getManageEditValue(nextProfileData.customerName) || currentCustomer.customerName,
+        name: getManageEditValue(nextProfileData.customerName) || currentCustomer.customerName,
+        contactPerson: getManageEditValue(nextProfileData.contactPerson),
+        address: getManageEditValue(nextProfileData.address),
+        designation: getManageEditValue(nextProfileData.designation),
+        phone: getManageEditValue(nextProfileData.phone),
+        email: getManageEditValue(nextProfileData.email),
+        customerType: getManageEditValue(nextProfileData.customerType),
+        productCategory: getManageEditValue(nextProfileData.productCategory),
+        projectName: getManageEditValue(nextProfileData.projectName),
+        state: getManageEditValue(nextProfileData.state),
+        industryType: getManageEditValue(nextProfileData.industryType),
+        alternateEmail: getManageEditValue(nextProfileData.alternateEmail),
+        alternatePhone: getManageEditValue(nextProfileData.alternatePhone),
+        jobNo: getManageEditValue(nextProfileData.jobNo),
+        gstin: getManageEditValue(nextProfileData.gstin),
+        gstIn: getManageEditValue(nextProfileData.gstin),
+        stateCode: getManageEditValue(nextProfileData.stateCode),
+        contacts: nextContacts,
+      })
+      setProfileSaveMessage('Profile detail updated successfully.')
+      setEditingProfileField('')
+    } catch (error) {
+      setProfileSaveMessage(error?.response?.data?.message || error?.message || 'Unable to update profile details.')
+    } finally {
+      setIsSavingCustomer(false)
+    }
+  }
+
+  const handleProfileEditKeyDown = (event, fieldKey) => {
+    if (isSavingCustomer) return
+
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      handleCancelProfileEdit()
+      return
+    }
+
+    const isTextArea = event.currentTarget?.tagName === 'TEXTAREA'
+    const shouldSave = event.key === 'Enter' && (!isTextArea || event.ctrlKey || event.metaKey)
+    if (!shouldSave) return
+
+    event.preventDefault()
+    handleSaveProfileField(fieldKey)
+  }
+
   const handleOpenBulkActionDialog = (actionKey) => {
     setIsBulkMenuOpen(false)
     setBulkDialogActionKey(actionKey)
@@ -891,6 +1468,39 @@ const AdminCustomersPage = ({
     setSaveMessage(`${updatedActionLabel} updated for ${selectedCustomers.length} customers.`)
     setSelectedCustomerIds([])
     setBulkDialogActionKey('')
+  }
+
+  const handleAddFilterRule = () => {
+    if (!filterDraft.field || !filterDraft.value) return
+    setFilterRules((currentRules) => [
+      ...currentRules,
+      {
+        id: `${filterDraft.field}-${Date.now()}`,
+        field: filterDraft.field,
+        value: filterDraft.value,
+        not: filterDraft.not,
+      },
+    ])
+    setFilterDraft({ field: '', value: '', not: false })
+  }
+
+  const handleAddOrderRule = () => {
+    if (!orderDraft.field) return
+    setOrderRules((currentRules) => [
+      ...currentRules,
+      {
+        id: `${orderDraft.field}-${Date.now()}`,
+        field: orderDraft.field,
+        direction: orderDraft.direction,
+      },
+    ])
+    setOrderDraft({ field: '', direction: 'asc' })
+  }
+
+  const handleCloseFilterDialog = () => {
+    setIsFilterDialogOpen(false)
+    setFilterDraft({ field: '', value: '', not: false })
+    setOrderDraft({ field: '', direction: 'asc' })
   }
 
   if (variantKey === 'search' || variantKey === 'myCustomers') {
@@ -968,26 +1578,181 @@ const AdminCustomersPage = ({
 
               <button
                 type="button"
-                className={`admin-customers-toolbar-icon admin-customers-toolbar-icon-compact ${compactGrid ? 'admin-customers-toolbar-icon-active' : ''}`}
-                onClick={() => setCompactGrid((currentValue) => !currentValue)}
-                title="Toggle compact rows"
-                aria-label="Toggle compact rows"
-                aria-pressed={compactGrid}
+                className="admin-customers-toolbar-icon admin-customers-toolbar-icon-export"
+                onClick={handleExportCustomers}
+                title="Export customers"
+                aria-label="Export customers"
               >
-                <FaBars />
+                <FaFileExport />
               </button>
               <button
                 type="button"
-                className={`admin-customers-toolbar-icon admin-customers-toolbar-icon-filter ${showFilters ? 'admin-customers-toolbar-icon-active' : ''}`}
-                onClick={() => setShowFilters((currentValue) => !currentValue)}
-                title="Toggle filters"
-                aria-label="Toggle filters"
-                aria-pressed={showFilters}
+                className={`admin-customers-toolbar-icon admin-customers-toolbar-icon-filter ${isFilterDialogOpen || filterRules.length || orderRules.length ? 'admin-customers-toolbar-icon-active' : ''}`}
+                onClick={() => setIsFilterDialogOpen(true)}
+                title="Filter customer"
+                aria-label="Filter customer"
+                aria-pressed={isFilterDialogOpen}
               >
                 <FaFilter />
               </button>
             </div>
           </div>
+
+          {isFilterDialogOpen ? (
+            <div className="admin-customers-filter-modal" role="dialog" aria-modal="true" aria-label="Filter Customer">
+              <div className="admin-customers-filter-panel">
+                <div className="admin-customers-filter-header">
+                  <h2>Filter Customer</h2>
+                  <div className="admin-customers-filter-header-actions">
+                    <button type="button" className="admin-customers-filter-btn admin-customers-filter-btn-danger" onClick={handleCloseFilterDialog}>
+                      <FaTimes />
+                      <span>Close</span>
+                    </button>
+                    <button type="button" className="admin-customers-filter-btn admin-customers-filter-btn-success" onClick={() => setIsFilterDialogOpen(false)}>
+                      <FaCheck />
+                      <span>Apply</span>
+                    </button>
+                    <button type="button" className="admin-customers-filter-btn admin-customers-filter-btn-success" onClick={() => setIsFilterDialogOpen(false)}>
+                      <FaCheck />
+                      <span>Save & Apply</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="admin-customers-filter-body">
+                  <section className="admin-customers-filter-section">
+                    <div className="admin-customers-filter-section-title">
+                      <span>Add Additional Filters</span>
+                      <span className="admin-customers-filter-toggle">YES</span>
+                    </div>
+                    <div className="admin-customers-filter-box">
+                      <div className="admin-customers-filter-box-title">
+                        <FaFilter />
+                        <span>Configure Filters</span>
+                      </div>
+                      <div className="admin-customers-filter-row">
+                        <span>If</span>
+                        <select
+                          value={filterDraft.field}
+                          onChange={(event) => setFilterDraft({ field: event.target.value, value: '', not: false })}
+                        >
+                          <option value="">Select</option>
+                          {searchColumns.map((column) => (
+                            <option key={column.key} value={column.key}>{column.label}</option>
+                          ))}
+                        </select>
+                        <span>is</span>
+                        <label className="admin-customers-filter-not">
+                          <input
+                            type="checkbox"
+                            checked={filterDraft.not}
+                            onChange={(event) => setFilterDraft((currentValue) => ({ ...currentValue, not: event.target.checked }))}
+                          />
+                          <span>not</span>
+                        </label>
+                        <select
+                          value={filterDraft.value}
+                          onChange={(event) => setFilterDraft((currentValue) => ({ ...currentValue, value: event.target.value }))}
+                        >
+                          <option value="">select</option>
+                          {filterValueOptions.map((value) => (
+                            <option key={value} value={value}>{value}</option>
+                          ))}
+                        </select>
+                        <button type="button" className="admin-customers-filter-plus" onClick={handleAddFilterRule} aria-label="Add filter">
+                          <FaPlus />
+                        </button>
+                      </div>
+                      {filterRules.length > 0 ? (
+                        <div className="admin-customers-filter-chip-row">
+                          {filterRules.map((rule) => {
+                            const columnLabel = searchColumns.find((column) => column.key === rule.field)?.label || rule.field
+                            return (
+                              <button
+                                key={rule.id}
+                                type="button"
+                                className="admin-customers-filter-chip"
+                                onClick={() => setFilterRules((currentRules) => currentRules.filter((entry) => entry.id !== rule.id))}
+                                title="Remove filter"
+                              >
+                                {columnLabel} {rule.not ? 'is not' : 'is'} {rule.value}
+                                <FaTimes />
+                              </button>
+                            )
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  </section>
+
+                  <section className="admin-customers-filter-section">
+                    <div className="admin-customers-filter-section-title">
+                      <span>Add Order By</span>
+                      <span className="admin-customers-filter-toggle">YES</span>
+                    </div>
+                    <div className="admin-customers-filter-box">
+                      <div className="admin-customers-filter-box-title">
+                        <FiLayers />
+                        <span>Order By</span>
+                      </div>
+                      <div className="admin-customers-filter-row admin-customers-filter-row-order">
+                        <select
+                          value={orderDraft.field}
+                          onChange={(event) => setOrderDraft((currentValue) => ({ ...currentValue, field: event.target.value }))}
+                        >
+                          <option value="">Select</option>
+                          {searchColumns.map((column) => (
+                            <option key={column.key} value={column.key}>{column.label}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={orderDraft.direction}
+                          onChange={(event) => setOrderDraft((currentValue) => ({ ...currentValue, direction: event.target.value }))}
+                        >
+                          <option value="asc">Ascending</option>
+                          <option value="desc">Descending</option>
+                        </select>
+                        <button type="button" className="admin-customers-filter-plus" onClick={handleAddOrderRule} aria-label="Add order by">
+                          <FaPlus />
+                        </button>
+                      </div>
+                      {orderRules.length > 0 ? (
+                        <div className="admin-customers-filter-chip-row">
+                          {orderRules.map((rule) => {
+                            const columnLabel = searchColumns.find((column) => column.key === rule.field)?.label || rule.field
+                            return (
+                              <button
+                                key={rule.id}
+                                type="button"
+                                className="admin-customers-filter-chip"
+                                onClick={() => setOrderRules((currentRules) => currentRules.filter((entry) => entry.id !== rule.id))}
+                                title="Remove order"
+                              >
+                                {columnLabel} {rule.direction === 'desc' ? 'DESC' : 'ASC'}
+                                <FaTimes />
+                              </button>
+                            )
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  </section>
+
+                  <section className="admin-customers-filter-section">
+                    <div className="admin-customers-filter-section-title">Actions</div>
+                    <div className="admin-customers-filter-actions-grid">
+                      {customerGridActions.map((action) => (
+                        <label key={action.key} className="admin-customers-filter-action-check">
+                          <input type="checkbox" checked readOnly />
+                          <span>{action.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           {showActionMenu && selectedCount > 0 ? (
             <div className="admin-customers-bulk-selection-bar">
@@ -1016,14 +1781,14 @@ const AdminCustomersPage = ({
                           />
                         </th>
                       ) : null}
-                      {searchColumns.map((column) => (
+                      {activeTableSearchColumns.map((column) => (
                         <th key={column.key}>{column.label}</th>
                       ))}
                     </tr>
                     {showFilters && (
                       <tr className="admin-customers-grid-filter-row">
                         {showActionMenu ? <th className="admin-customers-grid-filter-spacer" /> : null}
-                        {searchColumns.map((column) => (
+                        {activeTableSearchColumns.map((column) => (
                           <th key={column.key}>
                             <input
                               type="text"
@@ -1058,40 +1823,38 @@ const AdminCustomersPage = ({
                               />
                             </td>
                           ) : null}
-                          <td className="admin-customers-grid-number-cell">
-                            <div className="admin-customers-grid-number-menu" data-customer-action-menu>
-                              <button
-                                type="button"
-                                className="admin-customers-grid-number-button admin-customers-grid-number-button-label"
-                                onClick={() => handleOpenCustomerView(row.id)}
-                              >
-                                <span>{row.customerNumber}</span>
-                              </button>
-                              {showActionMenu ? (
-                                <>
+                          {activeTableSearchColumns.map((column) => (
+                            <td
+                              key={column.key}
+                              className={column.key === 'customerNumber' ? 'admin-customers-grid-number-cell admin-customers-grid-name-action-cell' : ''}
+                            >
+                              {column.key === 'customerNumber' ? (
+                                <div className="admin-customers-grid-number-menu" data-customer-action-menu>
                                   <button
                                     type="button"
-                                    className="admin-customers-grid-number-button admin-customers-grid-number-button-arrow"
-                                    onClick={(event) => handleToggleCustomerActionMenu(row.id, event.currentTarget)}
-                                    aria-label={`Open actions for ${row.customerNumber}`}
-                                    aria-expanded={openActionMenuCustomerId === row.id}
-                                    aria-haspopup="menu"
+                                    className="admin-customers-grid-number-button admin-customers-grid-number-button-label"
+                                    onClick={() => handleOpenCustomerView(row.id)}
                                   >
-                                    <FaChevronDown />
+                                    <span>{row.customerNumber || '-'}</span>
                                   </button>
-                                </>
-                              ) : null}
-                            </div>
-                          </td>
-                          <td>{row.customerName || '-'}</td>
-                          <td>{row.email || '-'}</td>
-                          <td>{row.phone || '-'}</td>
-                          <td>{row.addedDate || '-'}</td>
-                          <td>{row.customerOwnerDisplay || getCrmOwnerDisplay(row.customerOwner) || '-'}</td>
-                          <td>{row.customerCategory || '-'}</td>
-                          <td>{row.customerStatus || '-'}</td>
-                          <td>{row.customerType || '-'}</td>
-                          <td>{row.latestRemark || '-'}</td>
+                                  {showActionMenu ? (
+                                    <button
+                                      type="button"
+                                      className="admin-customers-grid-number-button admin-customers-grid-number-button-arrow"
+                                      onClick={(event) => handleToggleCustomerActionMenu(row.id, event.currentTarget)}
+                                      aria-label={`Open actions for ${row.customerNumber}`}
+                                      aria-expanded={openActionMenuCustomerId === row.id}
+                                      aria-haspopup="menu"
+                                    >
+                                      <FaChevronDown />
+                                    </button>
+                                  ) : null}
+                                </div>
+                              ) : (
+                                row[column.key] || '-'
+                              )}
+                            </td>
+                          ))}
                         </tr>
                       )
                     })}
@@ -1288,6 +2051,427 @@ const AdminCustomersPage = ({
     )
   }
 
+  if (variantKey === 'manage' && currentCustomer) {
+    const primaryContact = getPrimaryContact(currentCustomer)
+    const contactName = getContactPersonName(primaryContact, currentCustomer)
+    const phone = primaryContact.mobile || primaryContact.phone || currentCustomer.phone || ''
+    const email = primaryContact.email || currentCustomer.email || ''
+    const designation = primaryContact.designation || currentCustomer.designation || ''
+    const ownerName = currentCustomer.customerOwnerDisplay || getCrmOwnerDisplay(currentCustomer.customerOwner) || currentCustomer.customerOwner || '-'
+    const contactSummaryRows = [
+      { key: 'contactPerson', label: 'Contact Person', icon: <FaUserPlus />, value: contactName },
+      { key: 'address', label: 'Address', icon: <FaMapMarkerAlt />, value: currentCustomer.address || '' },
+      { key: 'designation', label: 'Designation', icon: <FaBuilding />, value: designation },
+      { key: 'phone', label: 'Phone', icon: <FaPhoneAlt />, value: phone },
+      { key: 'email', label: 'Email', icon: <FaEnvelope />, value: email, type: 'email' },
+    ]
+    const profileMainRows = [
+      { key: 'contactPerson', label: 'Contact Person', value: getManageDisplayValue(contactName), isTitle: true },
+      { key: 'designation', label: 'Designation', icon: <FaBuilding />, value: getManageDisplayValue(designation) },
+      { key: 'phone', label: 'Phone', icon: <FaPhoneAlt />, value: getManageDisplayValue(phone) },
+      { key: 'email', label: 'Email', icon: <FaEnvelope />, value: getManageDisplayValue(email), type: 'email' },
+    ]
+    const profileDetailRows = [
+      { key: 'customerType', label: 'Customer Type', rawValue: currentCustomer.customerType },
+      { key: 'productCategory', label: 'Product Category', rawValue: currentCustomer.productCategory },
+      { key: 'projectName', label: 'Project Name', rawValue: currentCustomer.projectName || currentCustomer.customerName },
+      { key: 'state', label: 'State', rawValue: currentCustomer.state },
+      { key: 'industryType', label: 'Industry Type', rawValue: currentCustomer.industryType || currentCustomer.industry },
+      { key: 'alternateEmail', label: 'Alternate Email', rawValue: currentCustomer.alternateEmail },
+      { key: 'alternatePhone', label: 'Alternate Phone', rawValue: currentCustomer.alternatePhone || phone },
+      { key: 'jobNo', label: 'Job No', rawValue: currentCustomer.jobNo },
+    ].map((row) => ({
+      ...row,
+      value: getManageDisplayValue(row.rawValue),
+      missing: getManageDisplayValue(row.rawValue) === 'Not Available',
+    }))
+    const editableFactRows = [
+      { key: 'gstin', label: 'GSTIN:', icon: <FaIdBadge />, value: currentCustomer.gstin || currentCustomer.gstIn || 'Not Available', missing: !(currentCustomer.gstin || currentCustomer.gstIn) },
+      { key: 'stateCode', label: 'State Code:', icon: <FaInfoCircle />, value: currentCustomer.stateCode || 'Not Available', missing: !currentCustomer.stateCode },
+    ]
+    const manageSystemUpdates = buildManageSystemUpdates(currentCustomer, ownerName, contactName)
+    const actionMenuPortal = showActionMenu && openActionMenuCustomerId && actionMenuPosition && typeof document !== 'undefined'
+      ? createPortal((
+        <div
+          className="admin-customers-grid-action-dropdown"
+          data-customer-action-menu
+          style={{
+            top: actionMenuPosition.top,
+            left: actionMenuPosition.left,
+            width: CUSTOMER_ACTION_MENU_WIDTH,
+          }}
+          role="menu"
+        >
+          {customerGridActions.map((action) => (
+            <button
+              key={action.key}
+              type="button"
+              className="admin-customers-grid-action-item"
+              role="menuitem"
+              onClick={() => {
+                const customerId = openActionMenuCustomerId
+                setOpenActionMenuCustomerId('')
+                setActionMenuPosition(null)
+                handleOpenCustomerAction(action, customerId)
+              }}
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      ), document.body)
+      : null
+
+    return (
+      <div className="admin-customers-page admin-customers-manage-page">
+        <section className="admin-customers-manage-shell">
+          <header className="admin-customers-manage-topbar">
+            <button type="button" className="admin-customers-manage-back" onClick={handleBack} aria-label="Back">
+              <FaChevronLeft />
+            </button>
+            {editingProfileField === 'customerName' ? (
+              <div className="admin-customers-manage-heading-edit">
+                <input
+                  type="text"
+                  value={profileEditData.customerName}
+                  onChange={(event) => handleProfileEditChange('customerName', event.target.value)}
+                  placeholder="Fill Customer Name"
+                  autoFocus
+                />
+                <span className="admin-customers-manage-profile-inline-actions">
+                  <button type="button" onClick={handleCancelProfileEdit}>Close</button>
+                  <button type="button" onClick={() => handleSaveProfileField('customerName')} disabled={isSavingCustomer}>
+                    {isSavingCustomer ? 'Saving...' : 'Save'}
+                  </button>
+                </span>
+              </div>
+            ) : (
+              <>
+                <h1>{currentCustomer.customerName || '-'}</h1>
+                <button type="button" className="admin-customers-manage-edit-button" onClick={() => handleStartProfileEdit('customerName')} aria-label="Edit customer name">
+                  <FaEdit className="admin-customers-manage-edit" />
+                </button>
+              </>
+            )}
+            <strong className="admin-customers-manage-number">{currentCustomer.customerNumber || '-'}</strong>
+            {showActionMenu ? (
+              <div className="admin-customers-manage-actions" data-customer-action-menu>
+                <button
+                  type="button"
+                  className="admin-customers-manage-actions-main"
+                  onClick={(event) => handleToggleCustomerActionMenu(currentCustomer.id, event.currentTarget)}
+                  aria-expanded={openActionMenuCustomerId === currentCustomer.id}
+                >
+                  Actions
+                </button>
+                <button
+                  type="button"
+                  className="admin-customers-manage-actions-arrow"
+                  onClick={(event) => handleToggleCustomerActionMenu(currentCustomer.id, event.currentTarget)}
+                  aria-label="Open customer actions"
+                >
+                  <FaChevronDown />
+                </button>
+              </div>
+            ) : null}
+          </header>
+
+          <section className="admin-customers-manage-summary">
+            <div className="admin-customers-manage-contact">
+              {contactSummaryRows.map((row) => (
+                <div
+                  key={row.key}
+                  className={[
+                    editingProfileField === row.key ? 'admin-customers-manage-contact-editing' : '',
+                    !String(row.value || '').trim() || row.value === '-' ? 'admin-customers-manage-fill-row' : '',
+                  ].filter(Boolean).join(' ')}
+                  onClick={editingProfileField ? undefined : () => handleStartProfileEdit(row.key)}
+                >
+                  {row.icon}
+                  {editingProfileField === row.key ? (
+                    <span className="admin-customers-manage-contact-edit">
+                      <input
+                        type={row.type || 'text'}
+                        value={profileEditData[row.key]}
+                        onChange={(event) => handleProfileEditChange(row.key, event.target.value)}
+                        onKeyDown={(event) => handleProfileEditKeyDown(event, row.key)}
+                        placeholder={`Fill ${row.label}`}
+                        autoFocus
+                      />
+                      <span className="admin-customers-manage-profile-inline-actions">
+                        <button type="button" onClick={handleCancelProfileEdit}>Close</button>
+                        <button type="button" onClick={() => handleSaveProfileField(row.key)} disabled={isSavingCustomer}>
+                          {isSavingCustomer ? 'Saving...' : 'Save'}
+                        </button>
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      <span className={getManageDisplayValue(row.value) === 'Not Available' ? 'admin-customers-manage-missing' : ''}>
+                        {getManageDisplayValue(row.value)}
+                      </span>
+                      <button
+                        type="button"
+                        className="admin-customers-manage-row-edit-button admin-customers-manage-summary-edit-button"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          handleStartProfileEdit(row.key)
+                        }}
+                        aria-label={`Edit ${row.label}`}
+                      >
+                        <FaEdit />
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+              <button type="button" className="admin-customers-manage-mail" onClick={() => handleOpenCustomerAction(CUSTOMER_ACTION_MAP['send-mail'], currentCustomer.id)}>
+                <FaEnvelope />
+              </button>
+            </div>
+
+            <div className="admin-customers-manage-facts">
+              <div><FaCalendarAlt /><strong>Added Date:</strong><span>{formatCustomerDate(currentCustomer.addedDate)}</span></div>
+              <div><FaLayerGroup /><strong>Customer Category:</strong><span>{currentCustomer.customerCategory || '-'}</span></div>
+              <div><FaPuzzlePiece /><strong>Customer Status:</strong><span>{currentCustomer.customerStatus || '-'}</span></div>
+              {editableFactRows.map((row) => (
+                <div
+                  key={row.key}
+                  className={[
+                    editingProfileField === row.key ? 'admin-customers-manage-fact-editing' : '',
+                    row.missing ? 'admin-customers-manage-fill-row' : '',
+                  ].filter(Boolean).join(' ')}
+                  onClick={editingProfileField ? undefined : () => handleStartProfileEdit(row.key)}
+                >
+                  {row.icon}
+                  <strong>{row.label}</strong>
+                  {editingProfileField === row.key ? (
+                    <span className="admin-customers-manage-fact-edit">
+                      <input
+                        type="text"
+                        value={profileEditData[row.key]}
+                        onChange={(event) => handleProfileEditChange(row.key, event.target.value)}
+                        onKeyDown={(event) => handleProfileEditKeyDown(event, row.key)}
+                        placeholder={`Fill ${row.label.replace(':', '')}`}
+                        autoFocus
+                      />
+                      <span className="admin-customers-manage-profile-inline-actions admin-customers-manage-icon-actions">
+                        <button type="button" onClick={() => handleSaveProfileField(row.key)} disabled={isSavingCustomer} aria-label={`Save ${row.label.replace(':', '')}`}>
+                          <FaCheck />
+                        </button>
+                        <button type="button" onClick={handleCancelProfileEdit} aria-label={`Close ${row.label.replace(':', '')}`}>
+                          <FaTimes />
+                        </button>
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      <span className={row.missing ? 'admin-customers-manage-missing' : ''}>{row.value}</span>
+                      <button
+                        type="button"
+                        className="admin-customers-manage-row-edit-button admin-customers-manage-summary-edit-button"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          handleStartProfileEdit(row.key)
+                        }}
+                        aria-label={`Edit ${row.label.replace(':', '')}`}
+                      >
+                        <FaEdit />
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="admin-customers-manage-facts">
+              <div><FaUserTie /><strong>Customer Owner:</strong><span>{ownerName}</span></div>
+              <div><FaClock /><strong>Last Updated:</strong><span>{formatCustomerDateTime(currentCustomer.updatedAt)}</span></div>
+              <div><FaHourglassHalf /><strong>Ageing:</strong><span>{getCustomerAgeingDays(currentCustomer.addedDate || currentCustomer.createdAt)}</span></div>
+              <div><FaUserPlus /><strong>Added By:</strong><span>{currentCustomer.addedBy || currentCustomer.addedByName || ownerName}</span></div>
+            </div>
+          </section>
+
+          <div className="admin-customers-manage-divider" />
+
+          <section className="admin-customers-manage-body">
+            <div className="admin-customers-manage-left">
+              <div className="admin-customers-manage-remark-box">
+                <div className="admin-customers-manage-tags">
+                  <button
+                    type="button"
+                    className={manageRemarkTab === 'feedback' ? 'admin-customers-manage-tag-active' : ''}
+                    onClick={() => setManageRemarkTab('feedback')}
+                  >
+                    FEEDBACK
+                  </button>
+                  <button
+                    type="button"
+                    className={manageRemarkTab === 'general' ? 'admin-customers-manage-tag-active' : ''}
+                    onClick={() => setManageRemarkTab('general')}
+                  >
+                    GENERAL
+                  </button>
+                </div>
+                {manageRemarkTab === 'feedback' ? (
+                  <textarea placeholder="Add feedback here..." defaultValue={currentCustomer.remark || ''} />
+                ) : (
+                  <textarea placeholder="Add general note here..." defaultValue={currentCustomer.description || ''} />
+                )}
+              </div>
+
+              <div className="admin-customers-manage-profile-card">
+                <h2>
+                  <span>Profile details</span>
+                </h2>
+                <div className="admin-customers-manage-profile-inner">
+                  {profileMainRows.map((row) => (
+                    <div
+                      key={row.key}
+                      className={`admin-customers-manage-profile-row ${row.isTitle ? 'admin-customers-manage-profile-row-title' : ''} ${editingProfileField === row.key ? 'admin-customers-manage-profile-row-editing' : ''}`}
+                      onClick={editingProfileField ? undefined : () => handleStartProfileEdit(row.key)}
+                    >
+                      {editingProfileField === row.key ? (
+                        <>
+                          <label>
+                            <span>{row.label}</span>
+                            <input
+                              type={row.type || 'text'}
+                              value={profileEditData[row.key]}
+                              onChange={(event) => handleProfileEditChange(row.key, event.target.value)}
+                              onKeyDown={(event) => handleProfileEditKeyDown(event, row.key)}
+                              placeholder={`Fill ${row.label}`}
+                              autoFocus
+                            />
+                          </label>
+                          <div className="admin-customers-manage-profile-inline-actions">
+                            <button type="button" onClick={handleCancelProfileEdit}>Close</button>
+                            <button type="button" onClick={() => handleSaveProfileField(row.key)} disabled={isSavingCustomer}>
+                              {isSavingCustomer ? 'Saving...' : 'Save'}
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {row.icon || null}
+                          {row.isTitle ? <h3>{row.value}</h3> : <span>{row.value}</span>}
+                          <button
+                            type="button"
+                            className="admin-customers-manage-row-edit-button"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              handleStartProfileEdit(row.key)
+                            }}
+                            aria-label={`Edit ${row.label}`}
+                          >
+                            <FaEdit />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  <hr />
+                  <h4>Other Details</h4>
+                  <dl>
+                    {profileDetailRows.map((row) => (
+                      <div
+                        key={row.key}
+                        className={[
+                          editingProfileField === row.key ? 'admin-customers-manage-profile-row-editing' : '',
+                          row.missing ? 'admin-customers-manage-fill-row' : '',
+                        ].filter(Boolean).join(' ')}
+                        onClick={editingProfileField ? undefined : () => handleStartProfileEdit(row.key)}
+                      >
+                        <dt>{row.label}</dt>
+                        <dd className={row.missing ? 'admin-customers-manage-missing' : ''}>
+                          {editingProfileField === row.key ? (
+                            <>
+                              <input
+                                type={row.key === 'alternateEmail' ? 'email' : 'text'}
+                                value={profileEditData[row.key]}
+                                onChange={(event) => handleProfileEditChange(row.key, event.target.value)}
+                                onKeyDown={(event) => handleProfileEditKeyDown(event, row.key)}
+                                placeholder={`Fill ${row.label}`}
+                                autoFocus
+                              />
+                              <span className="admin-customers-manage-profile-inline-actions">
+                                <button type="button" onClick={handleCancelProfileEdit}>Close</button>
+                                <button type="button" onClick={() => handleSaveProfileField(row.key)} disabled={isSavingCustomer}>
+                                  {isSavingCustomer ? 'Saving...' : 'Save'}
+                                </button>
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span>{row.value}</span>
+                              <button
+                                type="button"
+                                className="admin-customers-manage-row-edit-button"
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  handleStartProfileEdit(row.key)
+                                }}
+                                aria-label={`Edit ${row.label}`}
+                              >
+                                <FaEdit />
+                              </button>
+                            </>
+                          )}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {profileSaveMessage ? <p className="admin-customers-manage-profile-message">{profileSaveMessage}</p> : null}
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-customers-manage-right">
+              <div className="admin-customers-manage-followup">
+                <span><FaInfoCircle /> No planned Follow-ups</span>
+                <button type="button" onClick={() => handleOpenCustomerAction(CUSTOMER_ACTION_MAP['add-reminder'], currentCustomer.id)}>Add Reminder</button>
+              </div>
+              <div className="admin-customers-manage-updates">
+                <div>
+                  <span>Recent Updates</span>
+                  <button type="button" onClick={() => setShowManageSystemUpdates((currentValue) => !currentValue)}>
+                    {showManageSystemUpdates ? 'Hide System Updates' : 'Show System Updates'}
+                  </button>
+                </div>
+                {showManageSystemUpdates ? (
+                  <div className="admin-customers-manage-update-feed">
+                    {manageSystemUpdates.map((update) => (
+                      <article key={update.id} className="admin-customers-manage-update-item">
+                        <span className={`admin-customers-manage-update-icon admin-customers-manage-update-icon-${update.icon}`}>
+                          {update.icon === 'edit' ? <FaEdit /> : update.icon === 'deal' ? <FaThumbsUp /> : <FaDesktop />}
+                        </span>
+                        <time>
+                          <span>{update.date}</span>
+                          {update.time ? <strong>{update.time}</strong> : null}
+                        </time>
+                        <div>
+                          <header>
+                            <strong>{update.type}</strong>
+                            <span>By {update.by}</span>
+                          </header>
+                          <p>{update.message}</p>
+                        </div>
+                      </article>
+                    ))}
+                    <p className="admin-customers-manage-no-more-updates">No more updates</p>
+                  </div>
+                ) : (
+                  <p>No updates available</p>
+                )}
+              </div>
+            </div>
+          </section>
+        </section>
+        {actionMenuPortal}
+      </div>
+    )
+  }
+
   return (
     <div className="admin-customers-page">
       <section className="admin-customers-card admin-customers-wizard-card">
@@ -1404,7 +2588,7 @@ const AdminCustomersPage = ({
 
             <div className="admin-customers-form-column">
               <CustomerField
-                label="Mobile"
+                label="Mobile *"
                 name="contactMobile"
                 value={formData.contactMobile}
                 onChange={handleChange}

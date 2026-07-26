@@ -1,20 +1,20 @@
 .bulk-products-page {
   min-height: 100vh;
-  background: #f6f6f6;
+  background: var(--surface-card);
 }
 
 .bulk-products-header {
   padding: 18px 30px 14px;
-  border-top: 1px solid #d9d9d9;
-  border-bottom: 1px solid #d9d9d9;
-  background: linear-gradient(to bottom, #fafafa, #ededed);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-app);
 }
 
 .bulk-products-title {
   margin: 0;
   font-size: 19px;
   font-weight: 700;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .bulk-products-shell {
@@ -23,8 +23,8 @@
 
 .bulk-products-card {
   min-height: calc(100vh - 140px);
-  border: 1px solid #d2d2d2;
-  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
   box-shadow: inset 0 0 0 1px #f7f7f7;
   padding: 8px 14px 0;
   display: flex;
@@ -55,9 +55,9 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  border: 1px solid #c3c3c3;
-  background: linear-gradient(to bottom, #fafafa, #e7e7e7);
-  color: #555555;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-app);
+  color: var(--text-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -67,7 +67,7 @@
 
 .bulk-products-step-number--active,
 .bulk-products-step-number--completed {
-  border-color: #2ea2d4;
+  border-color: var(--text-primary);
   background: linear-gradient(to bottom, #4ac2f4, #2ea2d4);
   color: #ffffff;
 }
@@ -80,12 +80,12 @@
 
 .bulk-products-step-label--active,
 .bulk-products-step-label--completed {
-  color: #2a86c9;
+  color: var(--text-primary);
 }
 
 .bulk-products-divider {
   margin: 8px 0 0;
-  border-top: 1px solid #cfcfcf;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .bulk-products-content {
@@ -110,7 +110,7 @@
 }
 
 .bulk-products-label {
-  color: #111111;
+  color: var(--text-primary);
   font-size: 16px;
   font-weight: 700;
   text-align: right;
@@ -125,11 +125,11 @@
 .bulk-products-file-display {
   width: 185px;
   min-height: 32px;
-  border: 1px solid #c0c0c0;
+  border: 1px solid var(--border-subtle);
   border-right: 0;
-  background: #f5f5f5;
+  background: var(--surface-card);
   padding: 7px 10px;
-  color: #555555;
+  color: var(--text-primary);
   font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -139,9 +139,9 @@
 .bulk-products-file-button {
   min-height: 32px;
   padding: 7px 12px;
-  border: 1px solid #c0c0c0;
-  background: linear-gradient(to bottom, #ffffff, #ececec);
-  color: #222222;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-app);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 14px;
   display: inline-flex;
@@ -149,7 +149,7 @@
 }
 
 .bulk-products-file-button:hover {
-  background: linear-gradient(to bottom, #ffffff, #e3e3e3);
+  background: var(--surface-app);
 }
 
 .bulk-products-file-input {
@@ -157,13 +157,13 @@
 }
 
 .bulk-products-uniqueness-value {
-  color: #2a86c9;
+  color: var(--text-primary);
   font-size: 16px;
   font-weight: 700;
 }
 
 .bulk-products-placeholder {
-  color: #777777;
+  color: var(--text-primary);
   font-size: 16px;
   text-align: center;
 }
@@ -173,7 +173,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 18px;
-  border-top: 1px solid #d2d2d2;
+  border-top: 1px solid var(--border-subtle);
   margin-top: auto;
 }
 
@@ -195,19 +195,19 @@
 
 .bulk-products-btn--cancel {
   background: linear-gradient(to bottom, #ef5f5f, #cf3434);
-  border-color: #b02c2c;
+  border-color: var(--border-subtle);
   color: #ffffff;
 }
 
 .bulk-products-btn--secondary {
-  background: linear-gradient(to bottom, #fafafa, #e4e4e4);
-  border-color: #bdbdbd;
-  color: #333333;
+  background: var(--surface-app);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
 }
 
 .bulk-products-btn--primary {
   background: linear-gradient(to bottom, #4b9adb, #2d74b9);
-  border-color: #2a67a1;
+  border-color: var(--text-primary);
   color: #ffffff;
 }
 

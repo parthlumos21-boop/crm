@@ -17,6 +17,8 @@ import {
   FaUsers,
 } from 'react-icons/fa'
 import { normalizeAccountRecord } from '../../../features/adminAccounts/adapters/normalizeAccountRecord'
+import { ACCOUNT_OWNER_OPTIONS } from '../../../features/accounts/config/accountDropdownOptions'
+import { isSameCrmOwner } from '../../../features/users/crmUserDirectory'
 import { useData } from '../../../context/DataContext'
 import { exportExcelWorkbook, exportCsvWorkbook } from '../../../utils/excelExport'
 import {
@@ -139,6 +141,13 @@ const parseDateString = (dateStr) => {
     return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime()
   }
   return new Date(dateStr).getTime()
+}
+
+const parseInputDateBoundary = (value, endOfDay = false) => {
+  if (!value) return null
+  const date = new Date(`${value}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}`)
+  const time = date.getTime()
+  return Number.isNaN(time) ? null : time
 }
 
 const normalizeRow = (row, index) => {
@@ -585,6 +594,9 @@ const ResultsTable = ({
   showLatestQuotations,
   sortConfig,
   onSortChange,
+  ownerFilter,
+  statusFilter,
+  dateRangeLabel,
 }) => {
   const [page, setPage] = useState(1)
 
@@ -654,7 +666,10 @@ const ResultsTable = ({
   }
 
   const appliedType  = searchIn === 'account' ? 'All Accounts' : 'All Deals'
-  const filterLabel  = `${appliedType}, All Owners, All Status, All are active`
+  const appliedOwner = ownerFilter && ownerFilter !== 'all' ? ownerFilter : 'All Owners'
+  const appliedStatus = statusFilter || 'All Status'
+  const appliedDate = dateRangeLabel ? `Quotes Generated Between: ${dateRangeLabel}` : 'All Dates'
+  const filterLabel  = `${appliedType}, ${appliedOwner}, ${appliedStatus}, ${appliedDate}`
 
   return (
     <div className="qsr-results-phase">
@@ -669,7 +684,6 @@ const ResultsTable = ({
           <span className="qsr-summary-filter-value">{filterLabel}</span>
         </div>
         <div className="qsr-summary-actions">
-          <button type="button" className="qsr-refine-btn" onClick={onRefine}>Refine Filter</button>
           <button type="button" className="qsr-icon-tool-btn qsr-icon-tool-btn--blue" title="Select Fields" onClick={onOpenFieldPanel}>
             <FaListUl />
           </button>
@@ -678,15 +692,9 @@ const ResultsTable = ({
               label="Export"
               title="Export quotation summary"
               className="qsr-export-wrap"
-              buttonClassName="qsr-icon-tool-btn qsr-icon-tool-btn--green qsr-icon-tool-btn--export"
+              buttonClassName="qsr-icon-tool-btn qsr-icon-tool-btn--blue qsr-icon-tool-btn--export"
               menuClassName="qsr-export-menu"
               items={[
-                {
-                  key: 'quotation-summary-csv',
-                  label: 'Export to CSV',
-                  badge: 'CSV',
-                  onClick: () => onExportCsv(sorted, selectedColumns),
-                },
                 {
                   key: 'quotation-summary-excel',
                   label: 'Export to Excel',
@@ -1048,7 +1056,7 @@ const QuotationSummaryReportPage = ({ basePath }) => {
   /* Filter state */
   const [searchIn,      setSearchIn]      = useState('')
   const [listByEntity,  setListByEntity]  = useState(true)   // List by Account / Deal toggle
-  const [listByOwner,   setListByOwner]   = useState(false)  // List by Owner toggle
+  const [selectedOwner, setSelectedOwner] = useState('all')
   const [statusFilter,  setStatusFilter]  = useState('All Status')
   const [dateRangeOn,   setDateRangeOn]   = useState(false)  // Square toggle for date range
   const [dateFrom,      setDateFrom]      = useState('')
@@ -1170,6 +1178,33 @@ const QuotationSummaryReportPage = ({ basePath }) => {
 
   const sourceRows = liveRows.length > 0 ? liveRows : fallbackRows
 
+  const ownerOptions = useMemo(() => {
+    const uniqueOwners = new Map()
+    ACCOUNT_OWNER_OPTIONS.forEach((ownerOption) => {
+      const ownerName = String(ownerOption.label || ownerOption.value || '').trim()
+      if (!ownerName || ownerName === '-') return
+      const ownerKey = ownerName.toLowerCase().replace(/\s+/g, ' ')
+      if (!uniqueOwners.has(ownerKey)) {
+        uniqueOwners.set(ownerKey, ownerName)
+      }
+    })
+    sourceRows.forEach((row) => {
+      const ownerName = String(row.owner || '').trim()
+      if (!ownerName || ownerName === '-') return
+      const ownerKey = ownerName.toLowerCase().replace(/\s+/g, ' ')
+      if (!uniqueOwners.has(ownerKey)) {
+        uniqueOwners.set(ownerKey, ownerName)
+      }
+    })
+
+    return [
+      { value: 'all', label: 'All Owners' },
+      ...Array.from(uniqueOwners.values())
+        .sort((left, right) => left.localeCompare(right, undefined, { sensitivity: 'base' }))
+        .map((ownerName) => ({ value: ownerName, label: ownerName })),
+    ]
+  }, [sourceRows])
+
   const showToast = (msg, type = 'info') => {
     setToastMessage(msg)
     setToastType(type)
@@ -1178,12 +1213,36 @@ const QuotationSummaryReportPage = ({ basePath }) => {
     toastTimer.current = setTimeout(() => setToastVisible(false), 3000)
   }
 
+  const getFilteredSummaryRows = () => {
+    if (!searchIn) return []
+
+    let rows = sourceRows.filter((row) => row.quotationScope === searchIn)
+    if (statusFilter && statusFilter !== 'All Status') {
+      rows = rows.filter((r) => r.status === statusFilter)
+    }
+    if (selectedOwner && selectedOwner !== 'all') {
+      rows = rows.filter((r) => isSameCrmOwner(r.owner, selectedOwner))
+    }
+    if (dateRangeOn && (dateFrom || dateTo)) {
+      const fromTime = parseInputDateBoundary(dateFrom)
+      const toTime = parseInputDateBoundary(dateTo, true)
+      rows = rows.filter((row) => {
+        const rowTime = parseDateString(row.date)
+        if (!rowTime || Number.isNaN(rowTime)) return false
+        if (fromTime !== null && rowTime < fromTime) return false
+        if (toTime !== null && rowTime > toTime) return false
+        return true
+      })
+    }
+    return rows
+  }
+
   const handleSearchInChange = (val) => {
     setSearchIn(val)
     setPhase('filter')
     setResults([])
     setListByEntity(true)
-    setListByOwner(false)
+    setSelectedOwner('all')
     setStatusFilter('All Status')
     setDateRangeOn(false)
     setDateFrom('')
@@ -1192,24 +1251,15 @@ const QuotationSummaryReportPage = ({ basePath }) => {
 
   const handleView = () => {
     if (!searchIn) return
-    let rows = sourceRows.filter((row) => row.quotationScope === searchIn)
-    if (statusFilter && statusFilter !== 'All Status') {
-      rows = rows.filter((r) => r.status === statusFilter)
-    }
-    setResults(rows)
+    setResults(getFilteredSummaryRows())
     setSearchText('')
     setPhase('results')
   }
 
   useEffect(() => {
     if (phase !== 'results' || !searchIn) return
-
-    let rows = sourceRows.filter((row) => row.quotationScope === searchIn)
-    if (statusFilter && statusFilter !== 'All Status') {
-      rows = rows.filter((r) => r.status === statusFilter)
-    }
-    setResults(rows)
-  }, [phase, searchIn, sourceRows, statusFilter])
+    setResults(getFilteredSummaryRows())
+  }, [dateFrom, dateRangeOn, dateTo, phase, searchIn, selectedOwner, sourceRows, statusFilter])
 
   const handleAddSelectedField = (fieldKey) => {
     setFieldDraft((currentValue) => {
@@ -1343,7 +1393,12 @@ const QuotationSummaryReportPage = ({ basePath }) => {
       sheetName: 'Quotation Summary',
       metadata: [
         { label: 'Scope', value: searchIn === 'deal' ? 'Deal' : 'Account' },
+        { label: 'Owner', value: selectedOwner && selectedOwner !== 'all' ? selectedOwner : 'All Owners' },
         { label: 'Status', value: statusFilter },
+        ...(dateRangeOn ? [{
+          label: 'Quotes Generated Between',
+          value: `${dateFrom || 'Start'} to ${dateTo || 'Today'}`,
+        }] : []),
         { label: 'Records', value: String(exportRows.length) },
         { label: 'Generated On', value: new Date().toLocaleString('en-IN') },
       ],
@@ -1616,10 +1671,18 @@ const QuotationSummaryReportPage = ({ basePath }) => {
                 <TogglePill on={listByEntity} onToggle={() => setListByEntity((v) => !v)} />
                 <span className="qsr-toggle-label">List by {entityLabel}:</span>
               </div>
-              <div className="qsr-toggle-row">
-                <TogglePill on={listByOwner} onToggle={() => setListByOwner((v) => !v)} />
+              <label className="qsr-owner-filter">
                 <span className="qsr-toggle-label">List by Owner:</span>
-              </div>
+                <select
+                  className="qsr-status-select qsr-owner-select"
+                  value={selectedOwner}
+                  onChange={(event) => setSelectedOwner(event.target.value)}
+                >
+                  {ownerOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </label>
             </div>
 
             {/* Vertical divider */}
@@ -1691,6 +1754,9 @@ const QuotationSummaryReportPage = ({ basePath }) => {
           showLatestQuotations={showLatestQuotations}
           sortConfig={sortConfig}
           onSortChange={handleSortChange}
+          ownerFilter={selectedOwner}
+          statusFilter={statusFilter}
+          dateRangeLabel={dateRangeOn ? `${dateFrom || 'Start'} to ${dateTo || 'Today'}` : ''}
         />
       )}
 

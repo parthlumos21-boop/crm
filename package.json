@@ -14,13 +14,18 @@
     "server:test": "npm --prefix server test",
     "server:doctor": "npm --prefix server run doctor",
     "db:create": "npm --prefix server run db:create",
-    "admin:create": "npm --prefix server run admin:create"
+    "admin:create": "npm --prefix server run admin:create",
+    "users:seed-crm-image": "npm --prefix server run users:seed-crm-image"
   },
   "dependencies": {
+    "@heyputer/puter.js": "^2.5.4",
     "@vitejs/plugin-react": "^4.7.0",
     "axios": "^1.13.2",
     "date-fns": "^3.6.0",
+    "dotenv": "^17.4.2",
     "framer-motion": "^12.23.26",
+    "mongodb": "^7.5.0",
+    "qrcode-terminal": "^0.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.5.0",
@@ -29,6 +34,7 @@
     "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.3.1",
     "vite": "^5.4.21",
+    "whatsapp-web.js": "^1.34.7",
     "xlsx": "^0.18.5"
   }
 }

@@ -29,9 +29,12 @@ import { getNoFollowLeadsBoardData } from '../../../features/adminAccounts/selec
 import { buildAdminDealDetailUrl } from '../../../features/adminDeals/config/adminDealViews'
 import { leadApi } from '../../../services/leadApi'
 import { authService } from '../../../services/authService'
+import { getCityForUser } from '../../../features/adminAccounts/config/cityFilters'
+import { ACCOUNT_OWNER_OPTIONS } from '../../../features/accounts/config/accountDropdownOptions'
 import './MyGroupAccounts.css'
 
-const ROWS_PER_PAGE = 20
+const DEFAULT_ROWS_PER_PAGE = 10
+const SIX_ROW_ACCOUNT_VARIANTS = new Set(['viewAll', 'myAccounts', 'searchAccount'])
 const REQUIRED_ACCOUNT_TABLE_COLUMN_KEYS = ['projectName', 'accountOwner']
 const EXACT_ACCOUNT_LIST_VARIANTS = new Set(['viewAll', 'myGroup', 'myAccounts', 'searchAccount'])
 const DEFAULT_CONVERTED_FILTER_RULE = () => ({
@@ -350,6 +353,36 @@ const matchesColumnFilters = (row, filters, columns) =>
     return getColumnTextValue(column, row).toLowerCase().includes(filterValue)
   })
 
+const normalizeDropdownValue = (value) =>
+  String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+
+const resolveAccountOwnerFilterValue = (row = {}) => (
+  row.accountOwnerDisplay
+  || row.accountOwnerName
+  || row.accountOwner
+  || row.ownerName
+  || row.raw?.accountOwner
+  || row.raw?.ownerName
+  || row.raw?.assignedUserName
+  || ''
+)
+
+const accountOwnerFilterOptions = [
+  { value: 'All', label: 'All' },
+  ...ACCOUNT_OWNER_OPTIONS,
+]
+
+const matchesViewAllDropdownFilters = (row = {}, cityFilter = 'All', ownerFilter = 'All') => {
+  const ownerName = resolveAccountOwnerFilterValue(row)
+  const cityMatches = cityFilter === 'All' || getCityForUser(ownerName || row.createdByUserName || row.addedBy) === cityFilter
+  const ownerMatches = ownerFilter === 'All' || normalizeDropdownValue(ownerName) === normalizeDropdownValue(ownerFilter)
+
+  return cityMatches && ownerMatches
+}
+
 const filterBoardDataByHiddenStages = (boardData, hiddenStageKeys = []) => {
   if (!Array.isArray(hiddenStageKeys) || hiddenStageKeys.length === 0) {
     return boardData
@@ -384,7 +417,7 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const addAccountPath = location.pathname.startsWith('/admin') ? '/admin/accounts/new' : '/accounts/new'
-  const { accounts, loading, refreshData, refreshAccounts, addNotification, updateAccount, convertAccountToDeal } = useData()
+  const { accounts, convertedDeals, loading, refreshData, refreshAccounts, addNotification, updateAccount, convertAccountToDeal } = useData()
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const view = getAdminAccountsBoardView(variantKey)
@@ -400,7 +433,7 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
   const columns = useMemo(() => getAccountBoardColumns(variantKey), [variantKey])
   const isConvertedAccountsView = variantKey === 'convertedAccounts'
   const isSearchAccountView = variantKey === 'searchAccount'
-  const isAccountDirectoryView = variantKey === 'viewAll' || isSearchAccountView
+  const useStageDropdown = variantKey === 'myGroup' || variantKey === 'myAccounts'
   const supportsAdvancedFilter = isConvertedAccountsView || isSearchAccountView
   const useExactAccountListTable = EXACT_ACCOUNT_LIST_VARIANTS.has(variantKey)
   const [filters, setFilters] = useState(() => buildInitialFilters(columns))
@@ -426,6 +459,9 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
   const [bulkOwnerId, setBulkOwnerId] = useState('')
   const [bulkSaving, setBulkSaving] = useState(false)
   const [availableUsers, setAvailableUsers] = useState(() => authService.getAvailableUsers())
+  const [cityFilter, setCityFilter] = useState('All')
+  const [ownerFilter, setOwnerFilter] = useState('All')
+  const lastAccountUpdateToastRef = useRef({ key: '', at: 0 })
 
   const boardData = useMemo(() => {
     const nextBoardData = (
@@ -522,23 +558,32 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
   const filteredRows = useMemo(
     () => boardRows
       .filter((row) => matchesColumnFilters(row, filters, convertedColumnDefinitions))
-      .filter(matchesConvertedFilterRules),
-    [boardRows, convertedColumnDefinitions, filters, matchesConvertedFilterRules]
+      .filter(matchesConvertedFilterRules)
+      .filter((row) => {
+        if (variantKey !== 'viewAll') return true
+        return matchesViewAllDropdownFilters(row, cityFilter, ownerFilter)
+      }),
+    [boardRows, convertedColumnDefinitions, filters, matchesConvertedFilterRules, variantKey, cityFilter, ownerFilter]
   )
   const filteredAllStageRows = useMemo(
     () => convertedBoardRecords
       .filter((row) => matchesColumnFilters(row, filters, convertedColumnDefinitions))
-      .filter(matchesConvertedFilterRules),
-    [convertedBoardRecords, convertedColumnDefinitions, filters, matchesConvertedFilterRules]
+      .filter(matchesConvertedFilterRules)
+      .filter((row) => {
+        if (variantKey !== 'viewAll') return true
+        return matchesViewAllDropdownFilters(row, cityFilter, ownerFilter)
+      }),
+    [convertedBoardRecords, convertedColumnDefinitions, filters, matchesConvertedFilterRules, variantKey, cityFilter, ownerFilter]
   )
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / ROWS_PER_PAGE))
+  const rowsPerPage = SIX_ROW_ACCOUNT_VARIANTS.has(variantKey) ? 6 : DEFAULT_ROWS_PER_PAGE
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage))
   const currentPage = Number.isFinite(requestedPage) && requestedPage > 0
     ? Math.min(requestedPage, totalPages)
     : 1
   const menuResetKey = `${activeStage}-${currentPage}-${JSON.stringify(filters)}`
-  const pageStart = filteredRows.length === 0 ? 0 : ((currentPage - 1) * ROWS_PER_PAGE) + 1
-  const pageEnd = Math.min(filteredRows.length, currentPage * ROWS_PER_PAGE)
+  const pageStart = filteredRows.length === 0 ? 0 : ((currentPage - 1) * rowsPerPage) + 1
+  const pageEnd = Math.min(filteredRows.length, currentPage * rowsPerPage)
   const paginatedRows = filteredRows.slice(pageStart > 0 ? pageStart - 1 : 0, pageEnd)
   const selectedAccounts = useMemo(() => {
     const selectedIds = new Set(selectedAccountIds.map((id) => String(id)))
@@ -678,10 +723,19 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
     }
 
     addNotification('success', 'Account converted', 'Deal and Converted Deal were created successfully.')
+    await refreshData()
   }
 
   const handleViewLinkedDeal = (row) => {
-    const dealId = row?.dealId || row?.raw?.dealId || ''
+    const relatedConvertedDeal = (Array.isArray(convertedDeals) ? convertedDeals : [])
+      .find((entry) => String(entry.accountId || '') === String(row?.id || row?.raw?.id || ''))
+    const dealId = row?.dealId
+      || row?.raw?.dealId
+      || relatedConvertedDeal?.sourceDealId
+      || relatedConvertedDeal?.dealId
+      || row?.convertedDealId
+      || row?.raw?.convertedDealId
+      || ''
     if (!dealId) {
       addNotification('warning', 'Deal not found', 'This account does not have a linked deal yet.')
       return
@@ -703,7 +757,16 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
     const result = await updateAccount(accountId, updates)
 
     if (result.success) {
-      addNotification('success', 'Account updated', 'Account details saved successfully.')
+      const toastKey = `${accountId}:${JSON.stringify(updates)}`
+      const now = Date.now()
+      const isDuplicateToast = (
+        lastAccountUpdateToastRef.current.key === toastKey
+        && now - lastAccountUpdateToastRef.current.at < 2000
+      )
+      if (!isDuplicateToast) {
+        addNotification('success', 'Account updated', 'Account details saved successfully.')
+        lastAccountUpdateToastRef.current = { key: toastKey, at: now }
+      }
       await refreshData()
       return result
     }
@@ -895,18 +958,6 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
       {/* â”€â”€ Page title bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="mga-titlebar">
         <h1 className="mga-titlebar-heading">{pageTitle}</h1>
-        {isAdminPortal && isAccountDirectoryView ? (
-          <div className="mga-titlebar-views" aria-label="Account directory views">
-            <button
-              type="button"
-              className={`mga-view-btn${isSearchAccountView ? ' mga-view-btn--active' : ''}`}
-              onClick={() => navigate('/admin/accounts/search')}
-              aria-current={isSearchAccountView ? 'page' : undefined}
-            >
-              Search Account
-            </button>
-          </div>
-        ) : null}
         <AccountBoardHeaderActions
           view={view}
           currentStageRows={filteredRows}
@@ -931,7 +982,25 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
       </div>
 
       {/* â”€â”€ Stage tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-      {showStageTabs ? (
+      {showStageTabs && useStageDropdown ? (
+        <div className="admin-accounts-stage-dropdown-wrapper">
+          <label className="admin-accounts-stage-dropdown-label">
+            <span>View</span>
+            <select
+              className="admin-accounts-stage-dropdown-select"
+              value={activeStage}
+              onChange={(event) => handleStageChange(event.target.value)}
+              aria-label={`${view.heroTitle} stage`}
+            >
+              {visibleStages.map((stage) => (
+                <option key={stage.key} value={stage.key}>
+                  {stage.label} ({boardData.countsByStage[stage.key] || 0})
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      ) : showStageTabs ? (
         <AccountsStageTabs
           stages={visibleStages}
           activeStage={activeStage}
@@ -973,6 +1042,37 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
           </div>
 
           <div className="admin-accounts-board-toolbar-actions">
+            {variantKey === 'viewAll' ? (
+              <div className="mga-view-all-filter-group" aria-label="View all account filters">
+                <label className="mga-view-all-filter">
+                  <span>City</span>
+                  <select
+                    className="mga-view-all-filter-select"
+                    value={cityFilter}
+                    onChange={(event) => setCityFilter(event.target.value)}
+                    aria-label="City"
+                  >
+                    <option value="All">All</option>
+                    <option value="Baroda">Baroda</option>
+                    <option value="Ahemedabad">Ahemedabad</option>
+                    <option value="Mumbai">Mumbai</option>
+                  </select>
+                </label>
+                <label className="mga-view-all-filter">
+                  <span>Owner</span>
+                  <select
+                    className="mga-view-all-filter-select"
+                    value={ownerFilter}
+                    onChange={(event) => setOwnerFilter(event.target.value)}
+                    aria-label="Owner"
+                  >
+                    {accountOwnerFilterOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            ) : null}
             {showAddAccountButton ? (
               <Button size="small" onClick={() => navigate(addAccountPath)}>
                 Add Account
@@ -1214,7 +1314,7 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
                         onClick={() => removeConvertedColumnDraft(field.key)}
                         aria-label={`Remove ${field.label}`}
                       >
-                        Ã—
+                        &times;
                       </button>
                     </div>
                   )

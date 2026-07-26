@@ -7,6 +7,7 @@ import {
 import { ADMIN_CHART_CATEGORIES } from '../../../features/adminCharts/chartDefinitions'
 import { loadAllCharts } from '../../../features/adminCharts/chartStorage'
 import { useData } from '../../../context/DataContext'
+import ChartPreviewModal from './ChartPreviewModal'
 import './ChartsListPage.css'
 
 const CATEGORY_LINK_BY_FILTER = {
@@ -109,6 +110,7 @@ const ChartsListPage = ({ basePath = '/admin/charts' }) => {
   const [chartData, setChartData] = useState(() => loadAllCharts())
   const [expandedIds, setExpandedIds] = useState({})
   const [statusMessage, setStatusMessage] = useState(null)
+  const [previewChart, setPreviewChart] = useState(null)
 
   useEffect(() => {
     if (location.state?.newChartCategory) {
@@ -141,14 +143,7 @@ const ChartsListPage = ({ basePath = '/admin/charts' }) => {
   }
 
   const handleView = (chart) => {
-    const linkedPath = CATEGORY_LINK_BY_FILTER[activeFilter]
-    if (linkedPath) {
-      addNotification('info', 'Opening Chart', `Showing "${chart.title}" in ${activeFilter}.`)
-      navigate(linkedPath, { state: { fromChartId: chart.id, fromChartTitle: chart.title } })
-      return
-    }
-    setExpandedIds((current) => ({ ...current, [chart.id]: true }))
-    flashStatus('info', `Previewing "${chart.title}"`)
+    setPreviewChart(chart)
   }
 
   const handleToggleActive = (chart) => {
@@ -258,6 +253,12 @@ const ChartsListPage = ({ basePath = '/admin/charts' }) => {
           </div>
         </main>
       </div>
+      <ChartPreviewModal
+        isOpen={!!previewChart}
+        onClose={() => setPreviewChart(null)}
+        chart={previewChart}
+        category={activeFilter}
+      />
     </div>
   )
 }

@@ -7,9 +7,11 @@ import {
   FaUsers,
   FaCog,
   FaChevronDown,
+  FaEdit,
   FaFilePdf,
   FaEnvelope,
   FaSave,
+  FaTrash,
   FaTimes,
   FaCheck,
   FaCheckCircle,
@@ -30,6 +32,7 @@ import { authService } from '../../../services/authService'
 import { customerService } from '../../../services/customerService'
 import { buildCsvWorkbookText, exportCsvWorkbook, exportExcelWorkbook, exportSummaryReportHtml } from '../../../utils/excelExport'
 import { ExcelExportMenuButton } from '../../../components/common/ExcelExportButton'
+import { getCrmOwnerDisplay, isSameCrmOwner } from '../../../features/users/crmUserDirectory'
 import './SummaryReportsPage.css'
 
 const CATEGORY_ITEMS = ['Accounts', 'Customers', 'Deals']
@@ -124,6 +127,8 @@ const dedupeByNormalizedValue = (values = []) => {
   })
 }
 
+const normalizeOwnerDisplayValue = (value) => getCrmOwnerDisplay(value) || String(value || '').trim()
+
 const parseReportDate = (value) => {
   const parsed = new Date(value)
   return Number.isNaN(parsed.getTime()) ? null : parsed
@@ -190,7 +195,7 @@ const buildMonthlyStatusOwnerOptions = (normalizedRecords = [], availableUsers =
   ...MONTHLY_STATUS_OWNERS,
   ...availableUsers,
   ...normalizedRecords.map((record) => String(record.accountOwner || record.addedBy || '').trim()),
-])
+].map(normalizeOwnerDisplayValue))
 
 const buildMonthlyStatusExportData = (
   normalizedRecords = [],
@@ -215,10 +220,10 @@ const buildMonthlyStatusExportData = (
   })
 
   const recordOwners = filteredRecords.map((record) => (
-    String(record.accountOwner || record.addedBy || 'Unassigned').trim() || 'Unassigned'
+    normalizeOwnerDisplayValue(String(record.accountOwner || record.addedBy || 'Unassigned').trim() || 'Unassigned')
   ))
   const owners = dedupeByNormalizedValue([
-    ...configuredOwners,
+    ...configuredOwners.map(normalizeOwnerDisplayValue),
     ...recordOwners,
   ])
 
@@ -356,6 +361,9 @@ const USER_SUMMARY_VIEW_ROUTES = {
   Deals: '/deals',
 }
 
+const REPORT_EDIT_AUTHORIZED_USERS = ['Keval V Shah', 'Nita Bhavsar']
+const REPORT_EDIT_UNAUTHORIZED_MESSAGE = 'You are not authorized to edit reports. Please contact your Maple CRM administrator.'
+
 const getRequestedCategory = (search) => {
   const requestedCategory = new URLSearchParams(search).get('category')
   return CATEGORY_ITEMS.find((item) => item.toLowerCase() === String(requestedCategory || '').toLowerCase()) || null
@@ -367,22 +375,28 @@ const SummaryReportCard = ({
   onView,
   onRefresh,
   onOpenSettings,
+  onEdit,
+  onDelete,
   onToggleCollapse,
   onExportAction,
   detailContent,
 }) => (
-  <article className="summary-report-card">
+  <article className={`summary-report-card summary-report-card--${String(report.entityType || '').toLowerCase()}`}>
     <div className="summary-report-card-accent" aria-hidden="true" />
 
     <div className="summary-report-card-main">
       <div className="summary-report-card-header">
         <h2>{report.title}</h2>
         <div className="summary-report-card-actions">
-          {onOpenSettings ? (
-            <button type="button" className="summary-report-icon-btn summary-report-icon-btn-dark" title="Settings" onClick={onOpenSettings}>
-              <FaCog />
-            </button>
-          ) : null}
+          <button type="button" className="summary-report-icon-btn summary-report-icon-btn-settings" title="Settings" onClick={onOpenSettings}>
+            <FaCog />
+          </button>
+          <button type="button" className="summary-report-icon-btn summary-report-icon-btn-edit" title="Edit report" onClick={onEdit}>
+            <FaEdit />
+          </button>
+          <button type="button" className="summary-report-icon-btn summary-report-icon-btn-delete" title="Delete report" onClick={onDelete}>
+            <FaTrash />
+          </button>
           <ExcelExportMenuButton
             label="Export"
             title="Export actions"
@@ -391,12 +405,6 @@ const SummaryReportCard = ({
             menuClassName="summary-report-export-dropdown"
             responsiveHideLabel
             items={[
-              {
-                key: `${report.id}-csv`,
-                label: 'Export to CSV',
-                badge: 'CSV',
-                onClick: () => onExportAction('csv', report),
-              },
               {
                 key: `${report.id}-excel`,
                 label: 'Export to Excel',
@@ -862,6 +870,19 @@ const SummaryReportsPage = () => {
     () => buildMonthlyStatusOwnerOptions(normalizedAccountsBoard.records, availableUsers),
     [availableUsers, normalizedAccountsBoard.records],
   )
+  const canEditReports = useMemo(() => {
+    const userNames = [
+      user?.name,
+      user?.ownerDisplayName,
+      user?.username,
+      user?.email,
+      user?.ownerCode,
+    ]
+
+    return REPORT_EDIT_AUTHORIZED_USERS.some((authorizedName) => (
+      userNames.some((userName) => isSameCrmOwner(userName, authorizedName))
+    ))
+  }, [user?.email, user?.name, user?.ownerCode, user?.ownerDisplayName, user?.username])
 
   const reports = useMemo(() => {
     const baseReports = getSummaryReports({
@@ -1093,6 +1114,43 @@ const SummaryReportsPage = () => {
     })
   }
 
+  const showReportEditUnauthorized = useCallback(() => {
+    addNotification('warning', 'Report edit restricted', REPORT_EDIT_UNAUTHORIZED_MESSAGE)
+    showToast('error', REPORT_EDIT_UNAUTHORIZED_MESSAGE)
+  }, [addNotification, showToast])
+
+  const handleReportSettings = useCallback((report) => {
+    if (!canEditReports) {
+      showReportEditUnauthorized()
+      return
+    }
+
+    if (report.id === MONTHLY_STATUS_REPORT_ID) {
+      handleOpenMonthlyStatusSettings(report)
+      return
+    }
+
+    showToast('info', `${report.title} settings are available from the report builder.`)
+  }, [canEditReports, showReportEditUnauthorized, showToast])
+
+  const handleEditReport = useCallback((report) => {
+    if (!canEditReports) {
+      showReportEditUnauthorized()
+      return
+    }
+
+    if (report.id === MONTHLY_STATUS_REPORT_ID) {
+      handleOpenMonthlyStatusSettings(report)
+      return
+    }
+
+    showToast('info', `${report.title} can be edited from its report template.`)
+  }, [canEditReports, showReportEditUnauthorized, showToast])
+
+  const handleDeleteReport = useCallback((report) => {
+    showToast('info', `${report.title} is a default summary report and cannot be deleted.`)
+  }, [showToast])
+
   const handleCloseMonthlyStatusSettings = () => {
     setMonthlyStatusDraft(null)
   }
@@ -1223,7 +1281,9 @@ const SummaryReportsPage = () => {
                   report={report}
                   isCollapsed={collapsedReportIds.includes(report.id)}
                   detailContent={null}
-                  onOpenSettings={report.id === MONTHLY_STATUS_REPORT_ID ? () => handleOpenMonthlyStatusSettings(report) : null}
+                  onOpenSettings={() => handleReportSettings(report)}
+                  onEdit={() => handleEditReport(report)}
+                  onDelete={() => handleDeleteReport(report)}
                   onExportAction={handleSummaryExportAction}
                   onView={() => handleViewSummary(report)}
                   onRefresh={() => handleRefreshSummary(report)}
