@@ -1426,3 +1426,252 @@ html.is-user[data-theme="dark"] *::after {
   animation: none !important;
   transition: none !important;
 }
+
+/* ============================================================
+   Authenticated CRM theme refresh
+   Scoped to .layout so login/register screens keep their design.
+   ============================================================ */
+.layout {
+  --crm-shell-bg:
+    linear-gradient(135deg, rgba(14, 165, 233, 0.08), transparent 28%),
+    linear-gradient(225deg, rgba(16, 185, 129, 0.07), transparent 30%),
+    var(--surface-app);
+  --crm-shell-border: color-mix(in srgb, var(--border-subtle) 86%, transparent);
+  --crm-shell-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+  --crm-panel-bg: color-mix(in srgb, var(--surface-card) 92%, var(--surface-muted));
+  --crm-panel-bg-strong: var(--surface-card);
+  --crm-control-bg: var(--surface-raised);
+  --crm-accent: var(--color-primary);
+  --crm-accent-soft: var(--color-primary-soft);
+  --crm-accent-border: var(--color-primary-border);
+  color: var(--text-primary);
+  background: var(--crm-shell-bg);
+}
+
+[data-theme="dark"] .layout {
+  --crm-shell-bg:
+    radial-gradient(circle at 12% 8%, rgba(34, 211, 238, 0.12), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(99, 102, 241, 0.12), transparent 30%),
+    linear-gradient(160deg, #07111b 0%, #0d1722 42%, #08111a 100%);
+  --crm-shell-border: rgba(148, 163, 184, 0.16);
+  --crm-shell-shadow: 0 20px 42px rgba(0, 0, 0, 0.38);
+  --crm-panel-bg: rgba(15, 28, 40, 0.94);
+  --crm-panel-bg-strong: #111f2b;
+  --crm-control-bg: #132536;
+  --crm-accent: #22d3ee;
+  --crm-accent-soft: rgba(34, 211, 238, 0.13);
+  --crm-accent-border: rgba(34, 211, 238, 0.34);
+  --surface-app: #07111b;
+  --surface-card: #111f2b;
+  --surface-raised: #132536;
+  --surface-muted: #182b3b;
+  --surface-sunken: #0a1722;
+  --border-subtle: rgba(148, 163, 184, 0.16);
+  --border-default: rgba(148, 163, 184, 0.24);
+  --border-strong: rgba(148, 163, 184, 0.38);
+  --text-primary: #f4f8fb;
+  --text-secondary: #c7d3dd;
+  --text-muted: #8fa3b4;
+}
+
+.layout :where(.layout-main, .sidebar, .right-panel, .header) {
+  border-color: var(--crm-shell-border);
+  background: var(--crm-panel-bg);
+  box-shadow: var(--crm-shell-shadow);
+}
+
+.layout .layout-main {
+  overflow: hidden;
+}
+
+.layout .layout-main-inner {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-muted) 45%, transparent), transparent 18rem),
+    transparent;
+}
+
+.layout .layout-content-frame {
+  padding: clamp(10px, 1vw, 16px);
+}
+
+.layout :where(
+  .card,
+  .table-container,
+  .modal-content,
+  .page-header,
+  [class$="-card"],
+  [class*="-card "],
+  [class$="-panel"],
+  [class*="-panel "],
+  [class$="-section"],
+  [class*="-section "],
+  [class$="-toolbar"],
+  [class*="-toolbar "],
+  [class$="-titlebar"],
+  [class*="-titlebar "],
+  [class$="-table-wrap"],
+  [class*="-table-wrap "],
+  [class$="-table-container"],
+  [class*="-table-container "],
+  [class$="-table-scroll"],
+  [class*="-table-scroll "]
+) {
+  border-color: var(--crm-shell-border) !important;
+  background: var(--crm-panel-bg-strong) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 10px 22px rgba(15, 23, 42, 0.06) !important;
+}
+
+[data-theme="dark"] .layout :where(
+  .card,
+  .table-container,
+  .modal-content,
+  .page-header,
+  [class$="-card"],
+  [class*="-card "],
+  [class$="-panel"],
+  [class*="-panel "],
+  [class$="-section"],
+  [class*="-section "],
+  [class$="-toolbar"],
+  [class*="-toolbar "],
+  [class$="-titlebar"],
+  [class*="-titlebar "],
+  [class$="-table-wrap"],
+  [class*="-table-wrap "],
+  [class$="-table-container"],
+  [class*="-table-container "],
+  [class$="-table-scroll"],
+  [class*="-table-scroll "]
+) {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 26px rgba(0, 0, 0, 0.2) !important;
+}
+
+.layout :where(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .page-header-title,
+  [class$="-title"],
+  [class*="-title "],
+  [class$="-heading"],
+  [class*="-heading "]
+) {
+  color: var(--text-primary);
+  letter-spacing: 0;
+}
+
+.layout :where(
+  p,
+  small,
+  label,
+  [class$="-subtitle"],
+  [class*="-subtitle "],
+  [class$="-copy"],
+  [class*="-copy "],
+  [class$="-meta"],
+  [class*="-meta "],
+  [class$="-description"],
+  [class*="-description "]
+) {
+  color: var(--text-secondary);
+}
+
+.layout :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select,
+  .legacy-form-control
+) {
+  border-color: var(--border-default) !important;
+  background: var(--crm-control-bg) !important;
+  color: var(--text-primary) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+.layout :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea
+)::placeholder {
+  color: var(--text-muted);
+}
+
+.layout :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select,
+  .legacy-form-control
+):focus {
+  border-color: var(--crm-accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--crm-accent) 22%, transparent) !important;
+}
+
+.layout :where(.btn-primary, button.btn-primary, [class$="-primary-btn"], [class*="-primary-btn "]) {
+  background: linear-gradient(180deg, var(--crm-accent) 0%, color-mix(in srgb, var(--crm-accent) 72%, #0f172a) 100%) !important;
+  border-color: color-mix(in srgb, var(--crm-accent) 72%, #0f172a) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 20px color-mix(in srgb, var(--crm-accent) 24%, transparent) !important;
+}
+
+.layout :where(.btn-secondary, .btn-outline, .btn-ghost) {
+  border-color: var(--border-default) !important;
+  background: var(--crm-control-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.layout :where(.btn-secondary, .btn-outline, .btn-ghost):hover:not(:disabled) {
+  border-color: var(--crm-accent-border) !important;
+  background: var(--crm-accent-soft) !important;
+  color: var(--text-primary) !important;
+}
+
+.layout :where(table, .table) {
+  border-color: var(--crm-shell-border);
+}
+
+.layout :where(table th, .table-header-cell, [class*="table"] th) {
+  border-color: var(--crm-shell-border) !important;
+  background: color-mix(in srgb, var(--surface-muted) 82%, var(--surface-card)) !important;
+  color: var(--text-primary) !important;
+}
+
+.layout :where(table td, .table-cell, [class*="table"] td) {
+  border-color: var(--crm-shell-border) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .layout :where(table tbody tr:nth-child(odd) td, .table-striped .table-row:nth-child(odd)) {
+  background: rgba(255, 255, 255, 0.015) !important;
+}
+
+[data-theme="dark"] .layout :where(table tbody tr:nth-child(even) td, .table-striped .table-row:nth-child(even)) {
+  background: rgba(255, 255, 255, 0.035) !important;
+}
+
+.layout :where(table tbody tr:hover td, .table-hoverable .table-row:hover) {
+  background: var(--crm-accent-soft) !important;
+}
+
+.layout :where(.badge, [class$="-badge"], [class*="-badge "], [class$="-pill"], [class*="-pill "]) {
+  border-color: var(--crm-accent-border);
+}
+
+.layout :where(.header, .sidebar, .right-panel, .layout-main, .card, .table-container, .modal-content) {
+  border-radius: var(--radius-lg);
+}
+
+.layout :where(.header) {
+  border-radius: 0;
+}
+
+@media (max-width: 980px) {
+  .layout .layout-content-frame {
+    padding: 8px;
+  }
+
+  .layout :where(.layout-main, .card, .table-container, .modal-content) {
+    border-radius: var(--radius-md);
+  }
+}

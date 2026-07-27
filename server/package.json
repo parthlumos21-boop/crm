@@ -5,12 +5,18 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:prod": "pm2 start server.js --name crm-server",
+    "stop:prod": "pm2 stop crm-server",
+    "restart:prod": "pm2 restart crm-server",
     "dev": "nodemon server.js",
     "test": "jest --runInBand",
     "doctor": "node scripts/doctor.js",
     "admin:create": "node scripts/createAdmin.js",
     "db:create": "node scripts/createDatabase.js",
     "users:seed-crm-image": "node scripts/seedCrmImageUsers.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

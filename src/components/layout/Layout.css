@@ -8,7 +8,7 @@
   display: flex;
   flex-direction: column;
   isolation: isolate;
-  padding-bottom: 4px;
+  padding-bottom: 10px;
 }
 
 .layout-aura {
@@ -53,10 +53,10 @@
   z-index: 1;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 0px;
+  gap: var(--app-gutter);
   width: 100%;
   margin: 0;
-  padding-top: calc(var(--header-height) + 24px);
+  padding: calc(var(--header-height) + 12px) var(--app-gutter) 0;
   align-items: start;
   min-width: 0;
 }
@@ -130,10 +130,10 @@
   min-height: calc(100vh - var(--header-height) - 8px);
   height: auto;
   overflow: visible;
-  border: none;
+  border: 1px solid var(--crm-shell-border, var(--border-subtle));
   border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 4px 12px rgba(15, 23, 42, 0.05);
+  background: var(--crm-panel-bg, var(--surface-card));
+  box-shadow: var(--crm-shell-shadow, var(--shadow-sm));
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
 }
@@ -264,7 +264,7 @@
   .layout-column--sidebar,
   .layout-column--right {
     position: sticky;
-    top: calc(var(--header-height) + 4px);
+    top: calc(var(--header-height) + 12px);
     max-height: calc(100vh - var(--header-height) - 8px);
   }
 
@@ -343,7 +343,7 @@
   .layout-body {
     grid-template-columns: 1fr;
     width: min(var(--page-max-width), calc(100% - 6px));
-    padding-top: calc(var(--header-height) + 4px);
+    padding: calc(var(--header-height) + 8px) 0 0;
   }
 
   .layout--admin .layout-body,

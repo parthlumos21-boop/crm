@@ -5,10 +5,10 @@
   height: calc(100vh - var(--header-height) - (var(--app-gutter) * 1.35));
   flex-shrink: 0;
   overflow: hidden auto;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--crm-shell-border, var(--border-subtle));
   border-radius: var(--radius-lg);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-sm);
+  background: var(--crm-panel-bg, var(--surface-card));
+  box-shadow: var(--crm-shell-shadow, var(--shadow-sm));
 }
 
 .sidebar::before,
@@ -46,9 +46,11 @@
   min-height: 110px;
   padding: 12px;
   overflow: hidden;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--crm-shell-border, var(--border-subtle));
   border-radius: var(--radius-md);
-  background: var(--surface-muted);
+  background:
+    linear-gradient(135deg, var(--crm-accent-soft, var(--color-primary-soft)), transparent 70%),
+    var(--surface-muted);
   color: var(--text-primary);
   box-shadow: var(--shadow-xs);
   text-decoration: none;
@@ -170,9 +172,9 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 3px;
   padding: 3px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--crm-shell-border, var(--border-subtle));
   border-radius: var(--radius-md);
-  background: var(--surface-muted);
+  background: var(--crm-control-bg, var(--surface-muted));
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -204,9 +206,9 @@
 }
 
 .sb-view-toolbar-button:hover {
-  border-color: var(--border-subtle);
-  background: var(--surface-card);
-  color: var(--color-primary);
+  border-color: var(--crm-accent-border, var(--border-subtle));
+  background: var(--crm-accent-soft, var(--surface-card));
+  color: var(--crm-accent, var(--color-primary));
 }
 
 .sb-view-toolbar-button--active {
@@ -215,9 +217,9 @@
 }
 
 .sb-view-toolbar-button--route-active {
-  background: var(--color-primary-soft);
-  border-color: var(--color-primary-border);
-  color: var(--color-primary);
+  background: var(--crm-accent-soft, var(--color-primary-soft));
+  border-color: var(--crm-accent-border, var(--color-primary-border));
+  color: var(--crm-accent, var(--color-primary));
 }
 
 [data-theme="dark"] .sb-view-toolbar {
@@ -308,8 +310,8 @@
 .sb-link--team:hover,
 .sb-plain-link:hover,
 .sb-group-trigger:hover {
-  background: var(--surface-muted);
-  border-color: var(--border-subtle);
+  background: var(--crm-accent-soft, var(--surface-muted));
+  border-color: var(--crm-accent-border, var(--border-subtle));
   color: var(--text-primary);
   box-shadow: none;
 }
@@ -318,9 +320,9 @@
 .sb-link--team.sb-link--active,
 .sb-plain-link--active,
 .sb-group-trigger--route-active {
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  border-color: var(--color-primary-border);
+  background: var(--crm-accent-soft, var(--color-primary-soft));
+  color: var(--crm-accent, var(--color-primary));
+  border-color: var(--crm-accent-border, var(--color-primary-border));
   box-shadow: none;
 }
 
@@ -333,7 +335,7 @@
   inset: 5px auto 5px 4px;
   width: 3px;
   border-radius: 9999px;
-  background: var(--color-primary);
+  background: var(--crm-accent, var(--color-primary));
 }
 
 .sb-link-icon,
@@ -353,7 +355,7 @@
 .sb-link--team.sb-link--active .sb-link-icon,
 .sb-plain-link--active .sb-plain-icon,
 .sb-group-trigger--route-active .sb-group-icon {
-  color: var(--color-primary);
+  color: var(--crm-accent, var(--color-primary));
 }
 
 .sb-link > span,
@@ -441,15 +443,15 @@
 }
 
 .sb-sub-link:hover {
-  background: var(--surface-muted);
+  background: var(--crm-accent-soft, var(--surface-muted));
   color: var(--text-primary);
-  border-color: var(--border-subtle);
+  border-color: var(--crm-accent-border, var(--border-subtle));
 }
 
 .sb-sub-link--active {
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  border-color: var(--color-primary-border);
+  background: var(--crm-accent-soft, var(--color-primary-soft));
+  color: var(--crm-accent, var(--color-primary));
+  border-color: var(--crm-accent-border, var(--color-primary-border));
 }
 
 .sb-sub-link--accent {
@@ -476,8 +478,8 @@
 }
 
 [data-theme="dark"] .sidebar {
-  background: #121f29;
-  border-color: rgba(255, 255, 255, 0.06);
+  background: var(--crm-panel-bg);
+  border-color: var(--crm-shell-border);
 }
 
 [data-theme="dark"] .sb-section-label {
