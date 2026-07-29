@@ -345,7 +345,7 @@ const buildQuotationFormFromExisting = (quotation = {}, nextQuotationNumber = ''
     quotationNumber: nextQuotationNumber || quotation.quotationNumber || '',
     quotationDate,
     validUntil: addDaysToInputValue(quotationDate, 30),
-    status: 'draft',
+    status: 'approved',
     lineItems: clonedLineItems,
   }
 }
@@ -1579,7 +1579,7 @@ const Quotations = ({ autoOpen = false }) => {
     }
 
     if (actionKey === 'clone') {
-      navigate(location.pathname, { state: { quotationDraft: row.raw } })
+      navigate(location.pathname, { state: { quotationDraft: { ...row.raw, status: 'approved', rejectionReason: '' } } })
       return
     }
 

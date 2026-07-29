@@ -289,7 +289,7 @@ const AccountDetailsPage = () => {
                 onClick={() => setIsActionsOpen((current) => !current)}
               >
                 <span>Actions</span>
-                <span className="account-details-actions-caret">â–¼</span>
+                <span className="account-details-actions-caret">v</span>
               </button>
 
               {isActionsOpen ? (

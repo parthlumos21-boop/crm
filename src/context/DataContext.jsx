@@ -65,6 +65,28 @@ const filterDismissedNotifications = (notifications = []) => (
   notifications.filter((notification) => !notification?.isRead && !isNotificationDismissed(notification))
 )
 
+const getNotificationDedupeKey = (notification = {}) => {
+  const stableId = notification.id || notification._id
+  if (stableId) return `id:${stableId}`
+
+  return [
+    notification.receiverId || '',
+    notification.senderId || notification.actorUserId || '',
+    notification.title || '',
+    notification.message || '',
+    notification.type || 'info',
+  ].map((value) => String(value).trim().toLowerCase()).join('|')
+}
+
+const addUniqueNotification = (items = [], notification) => {
+  const nextKey = getNotificationDedupeKey(notification)
+  if (items.some((entry) => getNotificationDedupeKey(entry) === nextKey)) {
+    return items
+  }
+
+  return [notification, ...items].slice(0, 50)
+}
+
 const getAccountFrontendCacheKey = (user) => (
   user ? `${ACCOUNT_FRONTEND_CACHE_PREFIX}_${user.role || 'user'}_${user.id || 'anonymous'}` : ''
 )
@@ -137,7 +159,7 @@ export const DataProvider = ({ children }) => {
       timestamp: new Date().toISOString(),
     }
 
-    setNotifications((prev) => [notification, ...prev].slice(0, 50))
+    setNotifications((prev) => addUniqueNotification(prev, notification))
   }, [])
 
   const clearNotification = useCallback((id) => {
@@ -546,7 +568,7 @@ export const DataProvider = ({ children }) => {
       return
     }
 
-    setNotifications((prev) => [normalizedNotification, ...prev].slice(0, 50))
+    setNotifications((prev) => addUniqueNotification(prev, normalizedNotification))
   }, [user?.id])
 
   const handleActivity = useCallback((activity) => {

@@ -223,20 +223,23 @@
   background: var(--surface-card);
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .admin-accounts-stage-arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
+  width: 2.2rem;
+  min-height: 2.6rem;
   flex-shrink: 0;
-  border: none;
-  border-right: 1px solid var(--border-subtle);
-  background: var(--surface-app);
-  color: var(--color-primary);
+  border: 1px solid var(--border-subtle);
+  border-top: none;
+  border-bottom: none;
+  background: #f8fafc;
+  color: #111827;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   transition: background 0.15s ease;
 }
 
@@ -252,8 +255,9 @@
 .admin-accounts-stage-tabs {
   display: flex;
   gap: 0;
-  overflow-x: hidden;
-  flex: 1;
+  overflow-x: auto;
+  flex: 0 1 auto;
+  max-width: calc(100% - 4.4rem);
   scrollbar-width: none;
 }
 
@@ -265,12 +269,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 130px;
+  min-width: 162px;
+  min-height: 2.6rem;
   padding: 0.6rem 0.75rem;
-  border: none;
+  border: 1px solid var(--border-subtle);
+  border-top: none;
+  border-bottom: none;
   border-right: 1px solid var(--border-subtle);
   border-radius: 0;
-  background: var(--surface-app);
+  background: #f8fafc;
   color: var(--text-primary);
   cursor: pointer;
   white-space: nowrap;
@@ -279,13 +286,13 @@
 }
 
 .admin-accounts-stage-tab:hover {
-  background: var(--surface-muted);
+  background: #eef2f7;
 }
 
 .admin-accounts-stage-tab-active {
-  background: var(--surface-card);
+  background: #ffffff;
   color: var(--text-primary);
-  border-bottom: 2px solid var(--color-primary);
+  border-bottom: 2px solid #111827;
 }
 
 .admin-accounts-stage-tab-label {
@@ -347,6 +354,36 @@
 
 .admin-accounts-board-card--with-tabs {
   margin-top: 0.35rem;
+}
+
+.admin-accounts-page--accountSourceView .admin-accounts-board-card--with-tabs {
+  margin-top: 0;
+}
+
+.admin-accounts-page--accountSourceView .admin-accounts-stage-arrow {
+  display: none;
+}
+
+.admin-accounts-page--accountSourceView .admin-accounts-stage-tabs {
+  flex: 1 1 auto;
+  max-width: 100%;
+  width: 100%;
+}
+
+.admin-accounts-page--accountSourceView .admin-accounts-stage-tab {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.admin-accounts-page--accountSourceView .admin-accounts-board-table {
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.admin-accounts-page--accountSourceView .admin-accounts-board-table th,
+.admin-accounts-page--accountSourceView .admin-accounts-board-table td {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .admin-accounts-board-card--compact {

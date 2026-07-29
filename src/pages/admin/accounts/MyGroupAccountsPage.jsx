@@ -589,6 +589,17 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
     const selectedIds = new Set(selectedAccountIds.map((id) => String(id)))
     return filteredAllStageRows.filter((row) => selectedIds.has(String(row.id)))
   }, [filteredAllStageRows, selectedAccountIds])
+  const isKevalVShah = useMemo(() => {
+    const identityValues = [user?.name, user?.username, user?.email]
+      .map((value) => String(value || '').trim().toLowerCase())
+
+    return identityValues.some((value) => (
+      value === 'keval v shah'
+      || value === 'keval v. shah'
+      || value.startsWith('keval.v.shah@')
+      || value.startsWith('kevalvshah@')
+    ))
+  }, [user?.email, user?.name, user?.username])
   const selectedAccount = useMemo(
     () => getAccountById(boardData.records, selectedAccountId),
     [boardData.records, selectedAccountId]
@@ -948,12 +959,22 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
     await refreshData()
   }
 
+  useEffect(() => {
+    if (variantKey === 'weeklyReportsAll' && isKevalVShah) {
+      navigate('/admin/accounts/my-group-accounts', { replace: true })
+    }
+  }, [isKevalVShah, navigate, variantKey])
+
   const pageTitle = showRecordCountInHeroTitle
     ? `${view.heroTitle} - ${boardData.totalRecords} records`
     : view.heroTitle
 
+  if (variantKey === 'weeklyReportsAll' && isKevalVShah) {
+    return null
+  }
+
   return (
-    <div className="admin-accounts-page">
+    <div className={`admin-accounts-page admin-accounts-page--${variantKey}`}>
 
       {/* â”€â”€ Page title bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="mga-titlebar">
@@ -1036,7 +1057,7 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
                 : view.summaryMode === 'weekly'
                 ? `Showing ${filteredRows.length} records from the last 7 days.`
                 : showStageTabs
-                ? `Stage: ${visibleStages.find((s) => s.key === activeStage)?.label || activeStage} â€” ${filteredRows.length} records`
+                ? `Stage: ${visibleStages.find((s) => s.key === activeStage)?.label || activeStage} - ${filteredRows.length} records`
                 : `${filteredRows.length} records`}
             </p>
           </div>
@@ -1272,7 +1293,7 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
                         onClick={() => removeConvertedFilterRule(rule.id)}
                         aria-label="Remove filter row"
                       >
-                        âˆ’
+                        -
                       </button>
                   ) : null}
                 </div>

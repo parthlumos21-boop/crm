@@ -335,8 +335,8 @@
 }
 
 .hdr-icon-btn--green {
-  background: linear-gradient(180deg, #ecfaf7 0%, #d8f6ee 100%);
-  color: var(--text-primary);
+  background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
+  color: #1d4ed8;
 }
 
 .hdr-icon-btn--admin-alert,
@@ -427,9 +427,9 @@
 
 .hdr-icon-btn--green-solid,
 .hdr-back-btn {
-  background: var(--surface-app);
-  color: #ffffff;
-  border-color: transparent;
+  background: #f8fafc;
+  color: #111827;
+  border-color: var(--border-subtle);
 }
 
 .hdr-icon-btn--ghost {
@@ -478,7 +478,7 @@
   z-index: 450;
   transform-origin: top right;
   will-change: transform, opacity;
-  animation: popoverDrop 220ms var(--ease-out);
+  animation: none;
 }
 
 .hdr-popover-panel {

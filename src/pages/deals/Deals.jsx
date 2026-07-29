@@ -984,8 +984,8 @@ const buildDealViewConfig = (variantKey, customViewDefinition) => {
     },
     ownerWise: {
       ...baseConfig,
-      title: 'Owner Wise Deal',
-      subtitle: 'Review deals grouped and sorted by assigned owner.',
+      title: 'View Deal',
+      subtitle: 'Review all admin deals in one consolidated listing.',
       sortFn: (left, right) =>
         (left.dealOwner || '').localeCompare(right.dealOwner || '') || (left.name || '').localeCompare(right.name || ''),
     },
@@ -3975,60 +3975,6 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
           <section className="deals-tool-config-section">
             <div className="deals-tool-config-heading">
-              <span>Owner Wise Deal</span>
-              <span className="deals-tool-config-pill">YES</span>
-            </div>
-
-            <section className="deals-tool-popup-section">
-              <div className="deals-tool-popup-header">
-                <span>Owner Wise Deal</span>
-                <button
-                  type="button"
-                  className="deals-tool-popup-close"
-                  onClick={handleCloseFilterDialog}
-                  aria-label="Close owner wise filter"
-                >
-                  <FaTimes />
-                </button>
-              </div>
-
-              <div className="deals-tool-popup-body">
-                <div className="deals-tool-classification-box">
-                  <div className="deals-tool-classification-box-label">Deal Owner</div>
-
-                  <label className="deals-board-action-field deals-tool-filter-field-compact deals-tool-ownerwise-select">
-                    <span className="sr-only">Select Owner</span>
-                    <select
-                      value={pendingOwnerWiseOwnerId}
-                      onChange={(event) => setPendingOwnerWiseOwnerId(event.target.value)}
-                      aria-label="Select owner wise deal owner"
-                    >
-                      {ownerWiseDialogOptions.map((option) => (
-                        <option key={option.value || 'select-owner'} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <div className="deals-tool-field-actions deals-tool-ownerwise-actions">
-                    <Button type="button" size="small" onClick={() => applyOwnerWiseDealFilter()}>
-                      Apply
-                    </Button>
-                    <Button type="button" variant="success" size="small" onClick={() => applyOwnerWiseDealFilter({ persistPreferences: true })}>
-                      Save & Apply
-                    </Button>
-                    <Button type="button" variant="danger" size="small" onClick={handleCloseFilterDialog}>
-                      Close
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </section>
-
-          <section className="deals-tool-config-section">
-            <div className="deals-tool-config-heading">
               <span>Owner Classification</span>
               <span className="deals-tool-config-pill">YES</span>
             </div>
@@ -4766,7 +4712,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                             <span className="deals-board-card-summary-primary">{compactPrimary}</span>
                             <span className="deals-board-card-summary-meta">
                               <span title={deal.dealOwner || 'Unassigned'}>{deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner) || deal.dealOwner || 'Unassigned'}</span>
-                              <span aria-hidden="true">Ã‚Â·</span>
+                              <span aria-hidden="true">|</span>
                               <span title={compactDate}>{compactDate}</span>
                             </span>
                           </div>

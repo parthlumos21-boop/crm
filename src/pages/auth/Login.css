@@ -261,6 +261,7 @@
 }
 
 .login-brand-mark {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -274,6 +275,34 @@
   box-shadow: none;
   outline: none;
   overflow: visible;
+}
+
+.login-brand-hint {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 8px);
+  z-index: 3;
+  width: max-content;
+  max-width: min(220px, calc(100vw - 48px));
+  padding: 7px 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.login-brand-mark--button:hover .login-brand-hint,
+.login-brand-mark--button:focus-visible .login-brand-hint {
+  opacity: 1;
 }
 
 .login-brand-mark--left {

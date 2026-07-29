@@ -1,4 +1,4 @@
-import { ACCOUNT_ACTION_MAP, ACCOUNT_ACTIONS } from './accountActions'
+import { ACCOUNT_ACTION_MAP } from './accountActions'
 
 export const ADMIN_ACCOUNTS_BOARD_VIEWS = {
   viewAll: {
@@ -98,33 +98,6 @@ export const ADMIN_ACCOUNTS_BOARD_VIEWS = {
       showFilterIcon: true,
     },
   },
-  accountSourceView: {
-    key: 'accountSourceView',
-    queryValue: 'source-view',
-    route: '/admin/accounts/source-view',
-    heroEyebrow: 'Admin Source Workspace',
-    heroTitle: 'Account Source View',
-    heroCopy: 'Track live account records by source bucket with compact search columns and direct view-account access.',
-    boardTitle: 'Account Source View',
-    exportFilePrefix: 'account-source-view',
-    exportKind: 'csv',
-    exportButtonLabel: 'Export CSV',
-    defaultStage: 'call',
-    showStageTabs: true,
-    selectedTabField: 'sourceBucketKey',
-    summaryMode: 'source',
-    showRefreshButton: false,
-    showExportButton: false,
-    rowActionMenuEnabled: true,
-    rowActions: [ACCOUNT_ACTION_MAP['view-account']],
-    mainButtonBehavior: 'toggleMenu',
-    titlebarActions: {
-      showExportIcon: true,
-      showColumnsIcon: true,
-      showRefreshIcon: true,
-      showLoadMenu: true,
-    },
-  },
   weeklyReportsAll: {
     key: 'weeklyReportsAll',
     queryValue: 'weekly-reports-all',
@@ -196,9 +169,9 @@ export const ADMIN_ACCOUNTS_BOARD_VIEWS = {
     summaryMode: 'owner',
     showRefreshButton: false,
     showExportButton: false,
-    rowActionMenuEnabled: true,
-    rowActions: ACCOUNT_ACTIONS,
-    mainButtonBehavior: 'toggleMenu',
+    rowActionMenuEnabled: false,
+    rowActions: [ACCOUNT_ACTION_MAP['view-account']],
+    mainButtonBehavior: 'open',
   },
   dailyFreshLeads: {
     key: 'dailyFreshLeads',

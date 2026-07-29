@@ -1435,6 +1435,7 @@ html.is-user[data-theme="dark"] *::after {
   --crm-shell-bg:
     linear-gradient(135deg, rgba(14, 165, 233, 0.08), transparent 28%),
     linear-gradient(225deg, rgba(16, 185, 129, 0.07), transparent 30%),
+    linear-gradient(315deg, rgba(249, 115, 22, 0.06), transparent 34%),
     var(--surface-app);
   --crm-shell-border: color-mix(in srgb, var(--border-subtle) 86%, transparent);
   --crm-shell-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
@@ -1452,6 +1453,7 @@ html.is-user[data-theme="dark"] *::after {
   --crm-shell-bg:
     radial-gradient(circle at 12% 8%, rgba(34, 211, 238, 0.12), transparent 28%),
     radial-gradient(circle at 88% 12%, rgba(99, 102, 241, 0.12), transparent 30%),
+    radial-gradient(circle at 48% 100%, rgba(251, 146, 60, 0.1), transparent 32%),
     linear-gradient(160deg, #07111b 0%, #0d1722 42%, #08111a 100%);
   --crm-shell-border: rgba(148, 163, 184, 0.16);
   --crm-shell-shadow: 0 20px 42px rgba(0, 0, 0, 0.38);
@@ -1609,22 +1611,138 @@ html.is-user[data-theme="dark"] *::after {
 }
 
 .layout :where(.btn-primary, button.btn-primary, [class$="-primary-btn"], [class*="-primary-btn "]) {
-  background: linear-gradient(180deg, var(--crm-accent) 0%, color-mix(in srgb, var(--crm-accent) 72%, #0f172a) 100%) !important;
-  border-color: color-mix(in srgb, var(--crm-accent) 72%, #0f172a) !important;
+  background: linear-gradient(135deg, #2563eb 0%, #14b8a6 54%, #f97316 100%) !important;
+  border-color: color-mix(in srgb, #14b8a6 70%, #2563eb) !important;
   color: #ffffff !important;
-  box-shadow: 0 10px 20px color-mix(in srgb, var(--crm-accent) 24%, transparent) !important;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.16) !important;
+}
+
+.layout :where(
+  button[class*="-primary"],
+  button[class*="-save"],
+  button[class*="-submit"],
+  button[class*="-add"],
+  button[class*="primary-btn"],
+  button[class*="save-btn"],
+  button[class*="submit-btn"],
+  button[class*="add-btn"],
+  a[class*="-primary"],
+  a[class*="-save"],
+  a[class*="-add"]
+):not(
+  .btn-secondary,
+  .btn-outline,
+  .btn-ghost,
+  .btn-danger,
+  [class*="secondary"],
+  [class*="danger"],
+  [class*="cancel"],
+  [class*="close"],
+  [class*="clear"],
+  [class*="delete"],
+  [class*="remove"],
+  [class*="icon"],
+  [class*="menu"],
+  [class*="dropdown"],
+  [class*="option"],
+  [class*="tab"]
+) {
+  border: 1px solid color-mix(in srgb, #14b8a6 70%, #2563eb) !important;
+  background: linear-gradient(135deg, #2563eb 0%, #14b8a6 54%, #f97316 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.16) !important;
+}
+
+.layout :where(
+  button[class*="-primary"]:hover,
+  button[class*="-save"]:hover,
+  button[class*="-submit"]:hover,
+  button[class*="-add"]:hover,
+  button[class*="primary-btn"]:hover,
+  button[class*="save-btn"]:hover,
+  button[class*="submit-btn"]:hover,
+  button[class*="add-btn"]:hover,
+  a[class*="-primary"]:hover,
+  a[class*="-save"]:hover,
+  a[class*="-add"]:hover
+):not(
+  :disabled,
+  .btn-secondary,
+  .btn-outline,
+  .btn-ghost,
+  .btn-danger,
+  [class*="secondary"],
+  [class*="danger"],
+  [class*="cancel"],
+  [class*="close"],
+  [class*="clear"],
+  [class*="delete"],
+  [class*="remove"],
+  [class*="icon"],
+  [class*="menu"],
+  [class*="dropdown"],
+  [class*="option"],
+  [class*="tab"]
+) {
+  border-color: color-mix(in srgb, #0f766e 72%, #1d4ed8) !important;
+  background: linear-gradient(135deg, #1d4ed8 0%, #0f766e 54%, #ea580c 100%) !important;
+  color: #ffffff !important;
 }
 
 .layout :where(.btn-secondary, .btn-outline, .btn-ghost) {
   border-color: var(--border-default) !important;
-  background: var(--crm-control-bg) !important;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(20, 184, 166, 0.12), rgba(249, 115, 22, 0.12)),
+    var(--crm-control-bg) !important;
   color: var(--text-primary) !important;
 }
 
 .layout :where(.btn-secondary, .btn-outline, .btn-ghost):hover:not(:disabled) {
   border-color: var(--crm-accent-border) !important;
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(20, 184, 166, 0.18), rgba(249, 115, 22, 0.18)),
+    var(--crm-accent-soft) !important;
+  color: var(--text-primary) !important;
+}
+
+.layout :where(
+  [class*="dropdown"],
+  [class*="drop"],
+  [class*="menu"],
+  [class*="popover"]
+) {
+  border-color: var(--crm-shell-border);
+}
+
+.layout :where(
+  [class*="dropdown"] button,
+  [class*="drop"] button,
+  [class*="menu"] button,
+  [class*="popover"] button
+):not(.btn):not([class*="primary"]):not([class*="save"]):not([class*="submit"]) {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+}
+
+.layout :where(
+  [class*="dropdown"] button:hover,
+  [class*="drop"] button:hover,
+  [class*="menu"] button:hover,
+  [class*="popover"] button:hover
+):not(.btn):not([class*="primary"]):not([class*="save"]):not([class*="submit"]) {
   background: var(--crm-accent-soft) !important;
   color: var(--text-primary) !important;
+}
+
+.layout select option {
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .layout select option {
+  background: #111f2b;
+  color: #f4f8fb;
 }
 
 .layout :where(table, .table) {

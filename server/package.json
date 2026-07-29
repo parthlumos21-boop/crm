@@ -5,9 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "start:prod": "pm2 start server.js --name crm-server",
-    "stop:prod": "pm2 stop crm-server",
-    "restart:prod": "pm2 restart crm-server",
+    "start:prod": "pm2 start server.js --name crm-backend",
+    "stop:prod": "pm2 stop crm-backend",
+    "restart:prod": "pm2 restart crm-backend",
     "dev": "nodemon server.js",
     "test": "jest --runInBand",
     "doctor": "node scripts/doctor.js",

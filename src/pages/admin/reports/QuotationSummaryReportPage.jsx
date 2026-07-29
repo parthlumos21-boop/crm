@@ -791,7 +791,7 @@ const ResultsTable = ({
                     }
 
                     const cellClassName = col.key === 'company' ? 'qsr-td qsr-td--link' : 'qsr-td'
-                    return <td key={col.key} className={cellClassName}>{row[col.key] ?? 'â€”'}</td>
+                    return <td key={col.key} className={cellClassName}>{row[col.key] ?? '-'}</td>
                   })}
                 </tr>
               ))
@@ -812,7 +812,7 @@ const ResultsTable = ({
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={safePage === 1}
           >
-            â† Previous
+            Previous
           </button>
           {visiblePages().map((p) => (
             <button
@@ -830,7 +830,7 @@ const ResultsTable = ({
             onClick={() => setPage((p) => Math.min(pages, p + 1))}
             disabled={safePage === pages}
           >
-            Next â†’
+            Next
           </button>
         </div>
       </div>
@@ -1714,7 +1714,7 @@ const QuotationSummaryReportPage = ({ basePath }) => {
                     value={dateFrom}
                     onChange={(e) => setDateFrom(e.target.value)}
                   />
-                  <span className="qsr-date-sep">â€”</span>
+                  <span className="qsr-date-sep">-</span>
                   <input
                     type="date"
                     className="qsr-native-input"
@@ -1787,7 +1787,7 @@ const QuotationSummaryReportPage = ({ basePath }) => {
                 <tr><td>Owner:</td><td><strong>{modalQuotation.owner}</strong></td></tr>
                 <tr><td>Date:</td><td><strong>{modalQuotation.date}</strong></td></tr>
                 <tr><td>Amount:</td><td><strong>{fmtAmt(modalQuotation.amount)}</strong></td></tr>
-                <tr><td>Project:</td><td><strong>{modalQuotation.project || 'â€”'}</strong></td></tr>
+                <tr><td>Project:</td><td><strong>{modalQuotation.project || '-'}</strong></td></tr>
               </tbody>
             </table>
             <div className="qsr-modal-footer">

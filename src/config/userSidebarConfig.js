@@ -51,7 +51,6 @@ export const USER_ACCOUNT_MENU_ITEMS = [
   { label: 'My Group Accounts', to: '/accounts/my-group-accounts' },
   { label: 'Search Account', to: '/accounts/search' },
   { label: 'My Accounts', to: '/accounts/my-accounts' },
-  { label: 'Account Source View', to: '/accounts/source-view' },
   { label: 'Daily Fresh Leads', to: '/accounts/daily-fresh-leads' },
   { label: 'No Follow Leads', to: '/accounts/no-follow-leads' },
 ]
@@ -84,7 +83,6 @@ export const USER_SIDEBAR_GROUPS = [
       { label: 'Add Deal', to: '/deals/add' },
       { label: 'View Deal', to: '/deals/view' },
       { label: 'Search Deal', to: '/deals/search' },
-      { label: 'Owner Wise Deal', to: '/deals/owner-wise' },
       { label: 'Project Details', to: '/deals/project-details' },
       { label: 'Ahmedabad Deal', to: '/deals/ahmadabad' },
       { label: 'Vadodara Deal', to: '/deals/vadodara' },

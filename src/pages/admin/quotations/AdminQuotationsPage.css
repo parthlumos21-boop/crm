@@ -3255,6 +3255,61 @@
   color: #ffffff;
 }
 
+.aqp-doc,
+[data-theme="dark"] .aqp-doc {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+.aqp-doc__frame,
+.aqp-doc__party-card,
+.aqp-doc__meta,
+.aqp-doc__meta-cell,
+.aqp-doc__summary-card,
+.aqp-doc__totals,
+.aqp-doc__terms-card,
+.aqp-doc__amount-words,
+[data-theme="dark"] .aqp-doc__frame,
+[data-theme="dark"] .aqp-doc__party-card,
+[data-theme="dark"] .aqp-doc__meta,
+[data-theme="dark"] .aqp-doc__meta-cell,
+[data-theme="dark"] .aqp-doc__summary-card,
+[data-theme="dark"] .aqp-doc__totals,
+[data-theme="dark"] .aqp-doc__terms-card,
+[data-theme="dark"] .aqp-doc__amount-words {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+.aqp-doc :where(h2, h3, h4, p, strong, span, td, th, div),
+[data-theme="dark"] .aqp-doc :where(h2, h3, h4, p, strong, span, td, th, div) {
+  color: #111827 !important;
+}
+
+.aqp-doc__table th,
+[data-theme="dark"] .aqp-doc__table th {
+  background: #1f6ea4 !important;
+  border-color: #d1d5db !important;
+  color: #ffffff !important;
+}
+
+.aqp-doc__table td,
+[data-theme="dark"] .aqp-doc__table td,
+.aqp-doc__footer,
+[data-theme="dark"] .aqp-doc__footer,
+.aqp-doc__brand-head,
+[data-theme="dark"] .aqp-doc__brand-head {
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+.aqp-doc__grand-total,
+[data-theme="dark"] .aqp-doc__grand-total {
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
 [data-theme="dark"] .aqp-search-input::placeholder,
 [data-theme="dark"] .aqp-support-search-input::placeholder,
 [data-theme="dark"] .aqp-sort-icon,

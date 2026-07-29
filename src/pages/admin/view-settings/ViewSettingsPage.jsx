@@ -1,7 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  FaEye, FaGlobe, FaSearch, FaThumbsUp, FaUserFriends, FaUsers,
+  FaEye, FaSearch, FaThumbsUp, FaUserFriends, FaUsers,
 } from 'react-icons/fa'
 import './ViewSettingsPage.css'
 
@@ -11,12 +11,6 @@ const CARDS = [
     title: 'My Accounts View',
     icon: FaUserFriends,
     iconColor: '#27ae60',
-  },
-  {
-    id: 'account-source',
-    title: 'Account Source View',
-    icon: FaGlobe,
-    iconColor: '#2980b9',
   },
   {
     id: 'my-customers',

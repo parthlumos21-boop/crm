@@ -192,7 +192,7 @@ const BulkUploadAccountsPage = () => {
           className="bua-btn bua-btn--cancel"
           onClick={() => navigate(-1)}
         >
-          âœ• Cancel
+          Cancel
         </button>
         <button
           type="button"
@@ -200,7 +200,7 @@ const BulkUploadAccountsPage = () => {
           onClick={handleNextStep}
           disabled={step === 1 && !file}
         >
-          {step === 3 ? 'Upload' : 'Next â†’'}
+          {step === 3 ? 'Upload' : 'Next >'}
         </button>
       </div>
     </div>

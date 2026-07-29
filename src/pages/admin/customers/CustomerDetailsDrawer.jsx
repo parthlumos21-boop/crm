@@ -744,7 +744,7 @@ const CustomerDetailsDrawer = ({
                   onClick={handleSaveEdit}
                   disabled={isSavingEdit}
                 >
-                  {isSavingEdit ? 'Savingâ€¦' : 'Save'}
+                  {isSavingEdit ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   type="button"

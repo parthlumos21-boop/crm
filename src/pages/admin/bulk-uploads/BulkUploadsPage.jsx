@@ -5,7 +5,6 @@ import {
   FaTh,
   FaUserTie,
   FaThumbsUp,
-  FaBox,
   FaHistory,
   FaChevronLeft,
   FaTimes,
@@ -23,7 +22,6 @@ const BULK_CARDS = [
   { key: 'customer-tables', label: ['Bulk Upload', 'Customer Tables'], icon: FaTh,       color: '#83b63d' },
   { key: 'deals',           label: ['Bulk Upload', 'Deals'],           icon: FaThumbsUp, color: '#e07b39' },
   { key: 'deal-tables',     label: ['Bulk Upload', 'Deal Tables'],     icon: FaTh,       color: '#5d7488' },
-  { key: 'products',        label: ['Bulk Upload', 'Products'],        icon: FaBox,      color: '#5d7488' },
   { key: 'history',         label: ['Bulk Upload History'],            icon: FaHistory,  color: '#e8a23d' },
 ]
 

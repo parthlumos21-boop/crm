@@ -3,7 +3,6 @@ import { NavLink, useLocation } from 'react-router-dom'
 import swatiLogo from '../../assets/swati-logo.png'
 import {
   FaBell,
-  FaCalendarAlt,
   FaChartPie,
   FaClipboardList,
   FaCloud,
@@ -16,7 +15,6 @@ import {
   FaUserCircle,
   FaUsers,
   FaUserTie,
-  FaBox,
 } from 'react-icons/fa'
 import { FiChevronDown, FiChevronRight, FiChevronUp } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
@@ -124,7 +122,6 @@ const Sidebar = ({ isAdmin = false }) => {
   const isRemindersRoute = isAdmin && location.pathname.startsWith('/admin/reminders')
   const isReportsRoute = isAdmin && location.pathname.startsWith('/admin/reports')
   const isTeamViewRoute = isAdmin && location.pathname.startsWith('/admin/team-view')
-  const isCalendarRoute = isAdmin && location.pathname.startsWith('/admin/calendar')
   const isQuotationRoute = isAdmin && (
     location.pathname.startsWith('/admin/quotation-manager')
     || location.pathname === '/admin/reports/quotation-summary'
@@ -157,7 +154,6 @@ const Sidebar = ({ isAdmin = false }) => {
   const [userRemindersOpen, setUserRemindersOpen] = useState(isUserRemindersRoute)
   const [userReportsOpen, setUserReportsOpen] = useState(isUserReportsRoute)
   const [userQuotationManagerOpen, setUserQuotationManagerOpen] = useState(isUserQuotationRoute)
-  const [productCatalogueOpen, setProductCatalogueOpen] = useState(location.pathname.startsWith('/admin/products'))
 
   const todayKey = todayDateKey()
   const todayAccounts = useMemo(() => (
@@ -191,7 +187,6 @@ const Sidebar = ({ isAdmin = false }) => {
   useEffect(() => { if (isUserRemindersRoute) setUserRemindersOpen(true) }, [isUserRemindersRoute])
   useEffect(() => { if (isUserReportsRoute) setUserReportsOpen(true) }, [isUserReportsRoute])
   useEffect(() => { if (isUserQuotationRoute) setUserQuotationManagerOpen(true) }, [isUserQuotationRoute])
-  useEffect(() => { if (location.pathname.startsWith('/admin/products')) setProductCatalogueOpen(true) }, [location.pathname])
   useEffect(() => subscribeAdminCustomViews(setCustomViews), [])
   useEffect(() => subscribeAdminDealCustomViews(setDealCustomViews), [])
   useEffect(() => {
@@ -201,25 +196,35 @@ const Sidebar = ({ isAdmin = false }) => {
     )
   }, [isAdmin, isSidebarCollapsed])
 
+  const normalizedIdentity = [
+    user?.name,
+    user?.username,
+    user?.email,
+  ].map((value) => String(value || '').trim().toLowerCase())
+  const isKevalVShah = normalizedIdentity.some((value) => (
+    value === 'keval v shah'
+    || value === 'keval v. shah'
+    || value.startsWith('keval.v.shah@')
+    || value.startsWith('kevalvshah@')
+  ))
+
   const accountMenuItems = useMemo(() => ([
     { label: 'Add Account', to: '/admin/accounts/new' },
     { label: 'My Group Accounts', to: '/admin/accounts/my-group-accounts' },
     { label: 'Search Account', to: '/admin/accounts/search' },
     { label: 'My Accounts', to: '/admin/accounts/my-accounts' },
-    { label: 'Account Source View', to: '/admin/accounts/source-view' },
-    { label: 'Weekly reports-ALL', to: '/admin/accounts/weekly-reports-all' },
+    ...(!isKevalVShah ? [{ label: 'Weekly reports-ALL', to: '/admin/accounts/weekly-reports-all' }] : []),
     { label: 'SW-Baroda / Mum', to: '/admin/accounts/sw-baroda-mum' },
     { label: 'User Wise Leads', to: '/admin/accounts/user-wise-leads' },
     { label: '+ Custom View', to: '/admin/accounts/custom-views/new', accent: true },
     ...customViews.map((entry) => ({ label: entry.name, to: buildAdminCustomViewUrl(entry.id) })),
-  ]), [customViews])
+  ]), [customViews, isKevalVShah])
 
   const dealMenuItems = useMemo(() => {
     return [
       { label: 'Add Deal', to: '/admin/deals/add' },
       { label: 'View Deal', to: '/admin/deals/view' },
       { label: 'Search Deal', to: '/admin/deals/search' },
-      { label: 'Owner Wise Deal', to: '/admin/deals/owner-wise' },
       { label: 'Project Details', to: '/admin/deals/project-details' },
       { label: 'Ahmedabad Deal', to: '/admin/deals/ahmadabad' },
       { label: 'Vadodara Deal', to: '/admin/deals/vadodara' },
@@ -241,7 +246,6 @@ const Sidebar = ({ isAdmin = false }) => {
     { label: 'My Reminders', to: '/admin/reminders/my' },
     { label: 'Active Reminders', to: '/admin/reminders/active' },
     { label: 'Closed Reminders', to: '/admin/reminders/closed' },
-    { label: 'Calendar View', to: '/admin/calendar' },
   ]
 
   const reportsMenuItems = [
@@ -475,14 +479,6 @@ const Sidebar = ({ isAdmin = false }) => {
           >
             <FaList />
           </button>
-          <NavLink
-            to="/admin/calendar"
-            className={`sb-view-toolbar-button sb-view-toolbar-button--active ${isCalendarRoute ? 'sb-view-toolbar-button--route-active' : ''}`}
-            title="Calendar view"
-            aria-label="Calendar view"
-          >
-            <FaCalendarAlt />
-          </NavLink>
         </div>
 
         <div className="sb-nav-section">
@@ -635,18 +631,6 @@ const Sidebar = ({ isAdmin = false }) => {
           >
             <SubLink to="/admin/quotation-manager/view" label="View Quotations" />
             <SubLink to="/admin/reports/quotation-summary" label="Summary Report" />
-          </SidebarGroup>
-
-          <SidebarGroup
-            icon={<FaBox />}
-            label="Product Catalogue"
-            isActive={location.pathname.startsWith('/admin/products')}
-            isOpen={productCatalogueOpen}
-            isCollapsed={isSidebarCollapsed}
-            onToggle={() => setProductCatalogueOpen((previous) => !previous)}
-          >
-            <SubLink to="/admin/products" label="View Catalogue" />
-            <SubLink to="/admin/products/add" label="Add Product" />
           </SidebarGroup>
 
           <NavLink

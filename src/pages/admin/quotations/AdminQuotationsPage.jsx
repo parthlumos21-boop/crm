@@ -440,8 +440,8 @@ const buildLineItems = (quotation = {}) => {
   const mappedItems = items
     .filter((item) => String(item?.description || '').trim())
     .map((item, index) => {
-      const quantity = toNumber(item.quantity || 0)
-      const rate = toNumber(item.rate || 0)
+      const quantity = toNumber(item.quantity || item.qty || 0)
+      const rate = toNumber(item.rate || item.price || item.unitPrice || 0)
       const amount = Number.isFinite(Number(item.amount))
         ? Number(item.amount)
         : quantity * rate
@@ -2253,7 +2253,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
     }
 
     if (actionKey === 'clone') {
-      navigate(generatorPath, { state: { quotationDraft: row.raw } })
+      navigate(generatorPath, { state: { quotationDraft: { ...row.raw, status: 'approved', rejectionReason: '' } } })
       return
     }
 

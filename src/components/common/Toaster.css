@@ -21,7 +21,7 @@
   background: var(--surface-card);
   border: 1px solid var(--glass-border);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.06);
-  animation: toaster-slide-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: none;
 }
 
 .toaster-item--success { border-left: 4px solid var(--border-subtle); }
@@ -92,15 +92,4 @@
 
 .toaster-close:hover {
   color: var(--text-secondary);
-}
-
-@keyframes toaster-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }

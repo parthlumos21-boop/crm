@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { FaCheckCircle, FaEnvelope, FaExternalLinkAlt, FaPlug, FaQrcode } from 'react-icons/fa'
+import { FaCheckCircle, FaEnvelope, FaExternalLinkAlt, FaMicrosoft, FaPlug, FaQrcode } from 'react-icons/fa'
 import Button from '../../components/common/Button'
 import integrationApi from '../../services/integrationApi'
 import '../auth/Login.css'
@@ -164,54 +164,49 @@ const IntegrationQrPage = () => {
         })}
 
         {isOutlook && (
-          <div className="integration-section" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}>
-            <div className="integration-section-header" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-              <FaEnvelope className="integration-icon outlook-icon" style={{ fontSize: '24px', color: '#0078D4' }} />
-              <h3 style={{ margin: 0, fontSize: '20px' }}>Microsoft 365 Connection</h3>
+          <div className="integration-section integration-section--outlook">
+            <div className="integration-section-header integration-section-header--outlook">
+              <div className="outlook-brand-lockup">
+                <span className="outlook-logo-mark">
+                  <FaMicrosoft />
+                </span>
+                <div>
+                  <h3>Microsoft 365 Connection</h3>
+                  <span className="outlook-brand-subtitle">Outlook mail access</span>
+                </div>
+              </div>
+              <div className={`outlook-active-state${outlookConnected ? ' outlook-active-state--connected' : ''}`}>
+                {outlookConnected ? <FaCheckCircle /> : <FaPlug />}
+                <span>{isLoadingStatus ? 'Checking...' : outlookConnected ? 'Active' : 'Not Connected'}</span>
+              </div>
             </div>
-            
-            <div className="outlook-settings-layout" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <style>
-                {`
-                  @media (min-width: 992px) {
-                    .outlook-settings-layout {
-                      flex-direction: row !important;
-                    }
-                    .outlook-qr-container {
-                      flex: 1;
-                    }
-                    .outlook-settings-panel {
-                      width: 350px;
-                      flex-shrink: 0;
-                    }
-                  }
-                `}
-              </style>
-              <div className="outlook-settings-panel" style={{ padding: '24px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#f8fafc', height: 'fit-content' }}>
-                <h4 style={{ marginTop: 0, marginBottom: '16px', fontSize: '18px', color: '#1e293b' }}>Connection Status</h4>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: outlookConnected ? '#047857' : '#b45309', fontWeight: 700 }}>
+
+            <div className="outlook-settings-layout">
+              <div className="outlook-settings-panel">
+                <h4>Connection Status</h4>
+                <div className="outlook-status-row">
                   {outlookConnected ? <FaCheckCircle /> : <FaPlug />}
                   <span>{isLoadingStatus ? 'Checking...' : outlookConnected ? 'Connected' : 'Not Connected'}</span>
                 </div>
-                <div style={{ display: 'grid', gap: '10px', marginBottom: '18px', color: '#475569', fontSize: '14px' }}>
+                <div className="outlook-detail-grid">
                   <div>
-                    <strong style={{ display: 'block', color: '#0f172a' }}>Connected Outlook Email</strong>
+                    <strong>Connected Outlook Email</strong>
                     <span>{outlookConnected ? outlookStatus.email || 'Connected' : '-'}</span>
                   </div>
                   <div>
-                    <strong style={{ display: 'block', color: '#0f172a' }}>Microsoft Display Name</strong>
+                    <strong>Microsoft Display Name</strong>
                     <span>{outlookConnected ? outlookStatus.displayName || '-' : '-'}</span>
                   </div>
                   <div>
-                    <strong style={{ display: 'block', color: '#0f172a' }}>Last Connected Time</strong>
+                    <strong>Last Connected Time</strong>
                     <span>{formatOutlookDateTime(outlookStatus.connectedAt || outlookStatus.updatedAt)}</span>
                   </div>
                   <div>
-                    <strong style={{ display: 'block', color: '#0f172a' }}>Graph Setup</strong>
+                    <strong>Graph Setup</strong>
                     <span>{outlookConfigured ? 'Configured' : 'Missing environment variables'}</span>
                   </div>
                 </div>
-                <p style={{ marginBottom: '16px', color: '#475569', fontSize: '14px' }}>
+                <p className="outlook-panel-note">
                   Admin Outlook connections are shared so users can send CRM email with the connected mailbox.
                 </p>
                 <Button 
@@ -223,32 +218,32 @@ const IntegrationQrPage = () => {
                   {outlookGenerating ? 'Generating...' : outlookConnected ? 'Reconnect Outlook' : 'Connect Outlook'}
                 </Button>
                 {outlookError && (
-                  <div className="integration-message error" style={{ marginTop: '16px', padding: '8px', borderRadius: '4px', fontSize: '14px', backgroundColor: '#fee2e2', color: '#991b1b' }}>
+                  <div className="integration-message error">
                     {outlookError}
                   </div>
                 )}
               </div>
               
-              <div className="outlook-qr-container" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '32px', backgroundColor: '#fff', minHeight: '350px' }}>
+              <div className="outlook-qr-container">
                 {outlookAuthUrl ? (
                   <>
-                    <h4 style={{ marginTop: 0, marginBottom: '24px', fontSize: '18px', color: '#1e293b' }}>Scan or Click to Connect</h4>
+                    <h4>Scan or Click to Connect</h4>
                     <img 
                       src={buildQrUrl(outlookAuthUrl)} 
                       alt="Microsoft 365 QR Code" 
-                      style={{ width: '220px', height: '220px', marginBottom: '24px', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px' }} 
+                      className="outlook-qr-image"
                     />
                     <a 
                       href={outlookAuthUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 24px', backgroundColor: '#0078D4', color: '#fff', textDecoration: 'none', borderRadius: '6px', fontWeight: 500 }}
+                      className="outlook-open-link"
                     >
-                      Open Link <FaExternalLinkAlt style={{ fontSize: '14px' }} />
+                      Open Link <FaExternalLinkAlt />
                     </a>
                   </>
                 ) : (
-                  <p style={{ margin: 0, color: '#94a3b8', fontSize: '16px' }}>
+                  <p className="outlook-empty-note">
                     {outlookConnected ? 'Outlook is connected. Use Reconnect Outlook only when you need to refresh the mailbox login.' : 'Click Connect Outlook to open the Microsoft login URL.'}
                   </p>
                 )}

@@ -61,7 +61,6 @@ import ChartsPage from './pages/admin/charts/ChartsPage'
 import ChartsListPage from './pages/admin/charts/ChartsListPage'
 import ViewSettingsPage from './pages/admin/view-settings/ViewSettingsPage'
 import MyAccountsViewPage from './pages/admin/view-settings/MyAccountsViewPage'
-import AccountSourceViewPage from './pages/admin/view-settings/AccountSourceViewPage'
 import MyCustomersViewPage from './pages/admin/view-settings/MyCustomersViewPage'
 import ViewDealsViewPage from './pages/admin/view-settings/ViewDealsViewPage'
 import SearchViewSettingsPage from './pages/admin/view-settings/SearchViewSettingsPage'
@@ -126,6 +125,7 @@ function App() {
                 )}
               />
               <Route path="/logout" element={<Logout />} />
+              <Route path="/unauthorized" element={<Navigate to="/login" replace />} />
               <Route
                 path="/admin/launchpad"
                 element={(
@@ -151,7 +151,7 @@ function App() {
                 <Route path="accounts/search" element={<MyGroupAccountsPage variantKey="searchAccount" />} />
                 <Route path="accounts/my-group-accounts" element={<MyGroupAccountsPage variantKey="myGroup" />} />
                 <Route path="accounts/my-accounts" element={<MyGroupAccountsPage variantKey="myAccounts" />} />
-                <Route path="accounts/source-view" element={<MyGroupAccountsPage variantKey="accountSourceView" />} />
+                <Route path="accounts/source-view" element={<Navigate to="/accounts/my-group-accounts" replace />} />
                 <Route path="accounts/daily-fresh-leads" element={<MyGroupAccountsPage variantKey="dailyFreshLeads" />} />
                 <Route path="accounts/no-follow-leads" element={<MyGroupAccountsPage variantKey="noFollowLeads" />} />
                 <Route path="accounts/actions/:actionKey" element={<AccountActionPlaceholderPage />} />
@@ -165,7 +165,7 @@ function App() {
                 <Route path="deals/add" element={<AdminAddDealPage basePath="/deals" customerBasePath="/customers" />} />
                 <Route path="deals/search" element={<Deals variantKey="search" />} />
                 <Route path="deals/view" element={<Deals variantKey="view" />} />
-                <Route path="deals/owner-wise" element={<Deals variantKey="ownerWise" />} />
+                <Route path="deals/owner-wise" element={<Navigate to="/deals/view" replace />} />
                 <Route path="deals/project-details" element={<Deals variantKey="projectDetails" />} />
                 <Route path="deals/ahmadabad" element={<Deals variantKey="ahmadabad" />} />
                 <Route path="deals/vadodara" element={<Deals variantKey="vadodara" />} />
@@ -214,7 +214,7 @@ function App() {
                 <Route path="charts/new" element={<ChartsPage basePath="/charts" />} />
                 <Route path="view-settings" element={<ViewSettingsPage basePath="/view-settings" />} />
                 <Route path="view-settings/my-accounts" element={<MyAccountsViewPage basePath="/view-settings" />} />
-                <Route path="view-settings/account-source" element={<AccountSourceViewPage basePath="/view-settings" />} />
+                <Route path="view-settings/account-source" element={<Navigate to="/view-settings" replace />} />
                 <Route path="view-settings/my-customers" element={<MyCustomersViewPage basePath="/view-settings" />} />
                 <Route path="view-settings/view-deals" element={<ViewDealsViewPage basePath="/view-settings" />} />
                 <Route path="view-settings/search-view" element={<SearchViewSettingsPage basePath="/view-settings" />} />
@@ -252,7 +252,7 @@ function App() {
                 <Route path="accounts/my-group-accounts" element={<MyGroupAccountsPage variantKey="myGroup" />} />
                 <Route path="accounts/my-accounts" element={<MyGroupAccountsPage variantKey="myAccounts" />} />
                 <Route path="accounts/search" element={<MyGroupAccountsPage variantKey="searchAccount" />} />
-                <Route path="accounts/source-view" element={<MyGroupAccountsPage variantKey="accountSourceView" />} />
+                <Route path="accounts/source-view" element={<Navigate to="/admin/accounts/my-group-accounts" replace />} />
                 <Route path="accounts/weekly-reports-all" element={<MyGroupAccountsPage variantKey="weeklyReportsAll" />} />
                 <Route path="accounts/sw-baroda-mum" element={<MyGroupAccountsPage variantKey="swBarodaMum" />} />
                 <Route path="accounts/user-wise-leads" element={<MyGroupAccountsPage variantKey="userWiseLeads" />} />
@@ -273,7 +273,7 @@ function App() {
                 <Route path="deals/search" element={<Deals isAdmin variantKey="search" />} />
                 <Route path="deals/view" element={<Deals isAdmin variantKey="view" />} />
                 <Route path="deals/converted" element={<ConvertedDeals isAdmin />} />
-                <Route path="deals/owner-wise" element={<Deals isAdmin variantKey="ownerWise" />} />
+                <Route path="deals/owner-wise" element={<Navigate to="/admin/deals/view" replace />} />
                 <Route path="deals/project-details" element={<Deals isAdmin variantKey="projectDetails" />} />
                 <Route path="deals/ahmadabad" element={<Deals isAdmin variantKey="ahmadabad" />} />
                 <Route path="deals/vadodara" element={<Deals isAdmin variantKey="vadodara" />} />
@@ -326,7 +326,7 @@ function App() {
                 <Route path="charts/new" element={<ChartsPage />} />
                 <Route path="view-settings" element={<ViewSettingsPage />} />
                 <Route path="view-settings/my-accounts" element={<MyAccountsViewPage />} />
-                <Route path="view-settings/account-source" element={<AccountSourceViewPage />} />
+                <Route path="view-settings/account-source" element={<Navigate to="/admin/view-settings" replace />} />
                 <Route path="view-settings/my-customers" element={<MyCustomersViewPage />} />
                 <Route path="view-settings/view-deals" element={<ViewDealsViewPage />} />
                 <Route path="view-settings/search-view" element={<SearchViewSettingsPage />} />

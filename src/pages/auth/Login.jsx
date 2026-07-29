@@ -15,13 +15,14 @@ const panelMotion = {
   ease: [0.22, 1, 0.36, 1],
 }
 
-const LoginBrandHeader = ({ title = '', showLogoImage, setShowLogoImage, hideLogo = false, onLogoClick, glowColor }) => {
+const LoginBrandHeader = ({ title = '', showLogoImage, setShowLogoImage, hideLogo = false, onLogoClick, logoHint = '', glowColor }) => {
   const LogoWrapper = onLogoClick ? 'button' : 'div'
   const wrapperProps = onLogoClick ? {
     type: 'button',
     className: 'login-brand-mark login-brand-mark--center login-brand-mark--button',
     onClick: onLogoClick,
-    'aria-label': 'Go back to options'
+    'aria-label': logoHint || 'Go back to options',
+    title: logoHint || undefined
   } : {
     className: 'login-brand-mark login-brand-mark--center'
   }
@@ -40,6 +41,7 @@ const LoginBrandHeader = ({ title = '', showLogoImage, setShowLogoImage, hideLog
           ) : (
             <div className="login-brand-fallback">SWATI</div>
           )}
+          {logoHint ? <span className="login-brand-hint">{logoHint}</span> : null}
         </LogoWrapper>
       )}
       <div className="login-brand-crm" style={glowColor ? { '--crm-glow-color': glowColor } : undefined}>CRM</div>
@@ -219,6 +221,7 @@ const Login = () => {
               showLogoImage={showLogoImage}
               setShowLogoImage={setShowLogoImage}
               onLogoClick={() => navigate('/admin/login')}
+              logoHint="Click for admin login"
               glowColor={setupStatus?.loginBrandGlowColor}
             />
             <h2>User Login</h2>
