@@ -11,6 +11,7 @@ import {
   ACCOUNT_SOURCE_OPTIONS,
   CUSTOMER_TYPE_OPTIONS,
   INDUSTRY_TYPE_OPTIONS,
+  STATE_OPTIONS,
 } from '../../features/accounts/config/accountDropdownOptions'
 import { getAccountCategoryLogo } from '../../features/accounts/config/accountCategoryLogo'
 import './AddAccountWizard.css'
@@ -31,16 +32,11 @@ const accountCategories = [
 
 const accountSources = ACCOUNT_SOURCE_OPTIONS
 
-const accountStates = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-  { value: 'hold', label: 'Hold' },
-  { value: 'pending', label: 'Pending' },
-]
-
 const customerTypes = CUSTOMER_TYPE_OPTIONS
 
 const industryTypes = INDUSTRY_TYPE_OPTIONS
+
+const states = STATE_OPTIONS
 
 const reminderTypes = [
   { value: 'call', label: 'Call' },
@@ -97,21 +93,20 @@ const fieldGroups = {
   basicLeft: [
     { name: 'accountName', label: 'Account Name', required: true },
     { name: 'accountOwner', label: 'Account Owner', type: 'select', options: owners, required: true },
-    { name: 'state', label: 'State', required: true },
+    { name: 'state', label: 'State', type: 'select', options: states, required: true },
     { name: 'description', label: 'Remark', type: 'textarea', textareaRows: 3, fieldClassName: 'min-h-[88px]' },
     { name: 'address', label: 'Address', type: 'textarea', textareaRows: 3, fieldClassName: 'min-h-[88px]' },
     { name: 'customerName', label: 'Customer Name' },
-    { name: 'consultantName', label: 'Consultant Name' },
+    { name: 'consultantName', label: 'Consultant Name/AR' },
   ],
   basicRight: [
     { name: 'accountDate', label: 'Account Date', type: 'date', required: true },
     { name: 'accountCategory', label: 'Vertical Name', type: 'select', options: accountCategories, required: true },
     { name: 'accountSource', label: 'Account Source', type: 'select', options: accountSources, required: true },
-    { name: 'accountState', label: 'Inquiry Status', type: 'select', options: accountStates },
     { name: 'customerType', label: 'Customer Type', type: 'select', options: customerTypes },
-    { name: 'industryType', label: 'Industry Type', type: 'select', options: industryTypes, required: true },
     { name: 'customerRefNo', label: 'Inquiry Ref No.' },
     { name: 'customerRefDate', label: 'Inquiry Ref Date', type: 'date' },
+    { name: 'industryType', label: 'Industry Type', type: 'select', options: industryTypes, required: true },
   ],
   projectDetails: [
     { name: 'projectName', label: 'Project Name' },

@@ -1,4 +1,4 @@
-const { mongoose } = require('../config/db')
+const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 const ProductSchema = new Schema({
@@ -22,7 +22,7 @@ const ProductSchema = new Schema({
   updatedBy: { type: String }
 }, { timestamps: true })
 
-ProductSchema.index({ productId: 1 })
+
 ProductSchema.index({ productName: 1 })
 ProductSchema.index({ productGroup: 1 })
 

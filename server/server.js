@@ -44,6 +44,7 @@ const { notFoundHandler, errorHandler } = require('./middleware/errorHandler')
 const { requireAuth } = require('./middleware/authMiddleware')
 const { requireAdmin } = require('./middleware/roleMiddleware')
 const ovrcRoutes = require('./routes/ovrcRoutes')
+const databaseRoutes = require('./routes/databaseRoutes')
 
 
 const tryRequire = (moduleName) => {
@@ -248,6 +249,7 @@ app.use('/api/user-types', requireBackendReady, userTypeRoutes)
 app.use('/api/job-plannings', requireBackendReady, jobPlanningRoutes)
 app.use('/api/products', requireBackendReady, productRoutes)
 app.use('/api/ovrc', requireBackendReady, requireAuth, ovrcRoutes)
+app.use('/api/database', requireBackendReady, databaseRoutes)
 app.use('/api', requireBackendReady, remarkRoutes)
 
 app.use(express.static(clientDistPath))

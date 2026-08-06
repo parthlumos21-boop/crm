@@ -70,6 +70,7 @@ import AdminAdvancedSearchPage from './pages/admin/search/AdminAdvancedSearchPag
 import ProjectDetailsPage from './pages/admin/projects/ProjectDetailsPage'
 import AdminLaunchpad from './pages/admin/launchpad/AdminLaunchpad'
 import DataManagerPage from './pages/admin/data-manager/DataManagerPage'
+import DatabaseManagerPage from './pages/admin/database/DatabaseManagerPage'
 import DocumentBasePage from './pages/admin/data-manager/DocumentBasePage'
 import ImageGalleryPage from './pages/admin/data-manager/ImageGalleryPage'
 import KnowledgeBasePage from './pages/admin/data-manager/KnowledgeBasePage'
@@ -344,6 +345,7 @@ function App() {
                 <Route path="outlook" element={<OutlookMailPage />} />
                 <Route path="settings" element={<AdminSettingsPage />} />
                 <Route path="data-manager" element={<DataManagerPage />} />
+                <Route path="database-manager" element={<DatabaseManagerPage />} />
                 <Route path="data-manager/image-gallery" element={<ImageGalleryPage />} />
                 <Route path="data-manager/document-base" element={<DocumentBasePage />} />
                 <Route path="data-manager/knowledge-base" element={<KnowledgeBasePage />} />

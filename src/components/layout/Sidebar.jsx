@@ -642,6 +642,15 @@ const Sidebar = ({ isAdmin = false }) => {
             <span>Data Manager</span>
           </NavLink>
 
+          <NavLink
+            to="/admin/database-manager"
+            className={({ isActive }) => `sb-plain-link ${isActive ? 'sb-plain-link--active' : ''}`}
+            title="Database Manager"
+          >
+            <FaCloud className="sb-plain-icon" />
+            <span>Database Manager</span>
+          </NavLink>
+
         </div>
 
         {!isSidebarCollapsed && (

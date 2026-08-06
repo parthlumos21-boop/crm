@@ -49,11 +49,34 @@ export const createSocketConnection = (
     socket.on(SOCKET_EVENTS.CONNECT_ERROR, onConnectError)
   }
 
+  const handlePageHide = () => {
+    if (socket.connected) {
+      socket.disconnect()
+    }
+  }
+
+  const handlePageShow = (e) => {
+    if (e.persisted && socket.disconnected) {
+      socket.connect()
+    }
+  }
+
+  window.addEventListener('pagehide', handlePageHide)
+  window.addEventListener('pageshow', handlePageShow)
+
+  socket._cleanupBfcacheListeners = () => {
+    window.removeEventListener('pagehide', handlePageHide)
+    window.removeEventListener('pageshow', handlePageShow)
+  }
+
   return socket
 }
 
 export const closeSocketConnection = (socket) => {
   if (!socket) return
+  if (typeof socket._cleanupBfcacheListeners === 'function') {
+    socket._cleanupBfcacheListeners()
+  }
   socket.removeAllListeners()
   socket.close()
 }

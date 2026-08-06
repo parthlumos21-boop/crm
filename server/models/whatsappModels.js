@@ -1,8 +1,8 @@
-const { mongoose } = require('../config/db')
+const mongoose = require('mongoose')
 const { Schema } = mongoose
 
 const WhatsAppSettingSchema = new Schema({
-  userId: { type: String, required: true, index: true },
+  userId: { type: String, required: true },
   companyId: { type: String },
   businessName: { type: String },
   phoneNumber: { type: String },
@@ -16,7 +16,7 @@ const WhatsAppSettingSchema = new Schema({
 WhatsAppSettingSchema.index({ userId: 1 }, { unique: true })
 
 const WhatsAppChatSchema = new Schema({
-  userId: { type: String, required: true, index: true },
+  userId: { type: String, required: true },
   chatId: { type: String, required: true }, // Usually the customer's phone number
   name: { type: String },
   unreadCount: { type: Number, default: 0 },
@@ -27,7 +27,7 @@ const WhatsAppChatSchema = new Schema({
 WhatsAppChatSchema.index({ userId: 1, chatId: 1 }, { unique: true })
 
 const WhatsAppContactSchema = new Schema({
-  userId: { type: String, required: true, index: true },
+  userId: { type: String, required: true },
   contactId: { type: String, required: true }, // Phone number
   name: { type: String },
   pushname: { type: String },
@@ -37,7 +37,7 @@ const WhatsAppContactSchema = new Schema({
 WhatsAppContactSchema.index({ userId: 1, contactId: 1 }, { unique: true })
 
 const WhatsAppMessageSchema = new Schema({
-  userId: { type: String, required: true, index: true },
+  userId: { type: String, required: true },
   chatId: { type: String, required: true, index: true },
   customerId: { type: String },
   messageId: { type: String, required: true },

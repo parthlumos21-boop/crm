@@ -73,6 +73,47 @@ export const INDUSTRY_TYPE_LABELS = [
 
 export const INDUSTRY_TYPE_OPTIONS = INDUSTRY_TYPE_LABELS.map(toOption)
 
+export const STATE_LABELS = [
+  'Andaman and Nicobar Islands',
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chandigarh',
+  'Chhattisgarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jammu and Kashmir',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Ladakh',
+  'Lakshadweep',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Puducherry',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+]
+
+export const STATE_OPTIONS = STATE_LABELS.map(toOption)
+
 export const SW_BARODA_MUM_OWNER_LABELS = [
   'Jagurti Parmar',
   'Monali Pataliya',

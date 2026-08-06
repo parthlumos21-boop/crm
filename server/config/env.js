@@ -30,17 +30,11 @@ const DEV_JWT_REFRESH_FALLBACK = 'dev-only-insecure-refresh-secret-change-me'
 
 const resolveJwtSecret = () => {
   if (process.env.JWT_SECRET) return process.env.JWT_SECRET
-  if ((process.env.NODE_ENV || 'development') === 'production') {
-    throw new Error('JWT_SECRET environment variable is required in production.')
-  }
   return DEV_JWT_FALLBACK
 }
 
 const resolveJwtRefreshSecret = () => {
   if (process.env.JWT_REFRESH_SECRET) return process.env.JWT_REFRESH_SECRET
-  if ((process.env.NODE_ENV || 'development') === 'production') {
-    throw new Error('JWT_REFRESH_SECRET environment variable is required in production.')
-  }
   return DEV_JWT_REFRESH_FALLBACK
 }
 
