@@ -38,46 +38,13 @@ const requestPasswordReset = async ({ login, newPassword, confirmPassword }, req
 
   const pendingRequest = await passwordResetRepository.findPendingRequestByUserId(user.id)
   if (pendingRequest) {
-    const requestCount = await passwordResetRepository.countRequestsByUserId(user.id)
-    if (requestCount <= DIRECT_RESET_ATTEMPTS) {
-      const updatedUser = await userRepository.updateUserPasswordHash(
-        user.id,
-        pendingRequest.newPasswordHash,
-        pendingRequest.assignedPassword ?? pendingRequest.assigned_password ?? null
-      )
-      if (!updatedUser) {
-        throw new AppError('Unable to update user password.', 404)
-      }
-
-      const sanitizedRequest = await passwordResetRepository.updateRequestStatus(
-        pendingRequest.legacyId ?? pendingRequest.id,
-        {
-          status: 'completed',
-          adminActionAt: new Date(),
-          adminComment: 'Auto-completed first reset attempt.',
-        }
-      )
-      await passwordResetRepository.createAuditLog({
-        requestId: sanitizedRequest.id,
-        userId: user.id,
-        email: user.email,
-        action: 'completed',
-        comment: 'Auto-completed first reset attempt.',
-      })
-
-      return {
-        request: sanitizedRequest,
-        message: 'Password reset successful. You can now sign in with your new password.',
-      }
-    }
-
     throw new AppError('A password reset request is already pending for administrator approval.', 409)
   }
 
   const requestCount = await passwordResetRepository.countRequestsByUserId(user.id)
   const attemptCount = requestCount + 1
   const newPasswordHash = await hashPassword(newPassword)
-  const shouldApplyImmediately = attemptCount <= DIRECT_RESET_ATTEMPTS
+  const shouldApplyImmediately = attemptCount === 1
   const updatedUser = shouldApplyImmediately
     ? await userRepository.updateUserPasswordHash(user.id, newPasswordHash, newPassword)
     : null
