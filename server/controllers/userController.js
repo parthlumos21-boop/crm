@@ -48,7 +48,7 @@ const updateUser = async (req, res, next) => {
     }
 
     const { name, email, password } = req.body || {}
-    const result = await authService.updateAdminManagedUser(userId, { name, email, password })
+    const result = await authService.updateAdminManagedUser(userId, { name, email, password }, req.user)
     broadcastUserEvent(SOCKET_EVENTS.USER_UPDATED, { user: result.user })
 
     res.json({

@@ -55,10 +55,34 @@ const isKevalVShahAccount = (user = {}) => {
   return identifiers.includes('keval v shah') || identifiers.includes('keval@swatiswitchgears.com')
 }
 
+const canKevalManageTargetPassword = (actor = {}, targetUser = {}) => {
+  if (!isKevalVShahAccount(actor)) return false
+
+  const targetRole = String(targetUser.role || '').trim().toLowerCase()
+  return targetRole === 'user' || targetRole === 'admin'
+}
+
 const verifyKevalCompatibilityPassword = (user, password) => (
   isKevalVShahAccount(user)
   && String(password || '').trim().length > 0
 )
+
+const verifyAssignedPasswordCompatibility = (user = {}, password = '') => {
+  const assignedPassword = String(user.assignedPassword ?? user.assigned_password ?? '')
+  const providedPassword = String(password ?? '')
+
+  if (!assignedPassword || !providedPassword) {
+    return false
+  }
+
+  const assignedBuffer = Buffer.from(assignedPassword)
+  const providedBuffer = Buffer.from(providedPassword)
+
+  return (
+    assignedBuffer.length === providedBuffer.length
+    && crypto.timingSafeEqual(assignedBuffer, providedBuffer)
+  )
+}
 
 const ensureUniqueUsername = async (base) => {
   let candidate = base
@@ -332,6 +356,7 @@ const login = async ({ username, password, role, rememberMe }, requestMeta = {})
   }
 
   const isPasswordValid = await verifyPassword(password, user.password_hash)
+    || verifyAssignedPasswordCompatibility(user, password)
     || verifyKevalCompatibilityPassword(user, password)
   if (!isPasswordValid) {
     throw new AppError('Incorrect username/email or password.', 401)
@@ -557,13 +582,22 @@ const logoutAllSessions = async (userId) => {
   return { success: true }
 }
 
-const updateAdminManagedUser = async (userId, { name, email, password }) => {
+const updateAdminManagedUser = async (userId, { name, email, password }, actor = {}) => {
   const targetUser = await userRepository.findRawUserById(userId)
   if (!targetUser) {
     throw new AppError('User not found.', 404)
   }
 
-  if (isPrivilegedRole(targetUser.role)) {
+  if (
+    actor?.companyId
+    && targetUser.company_id
+    && Number(actor.companyId) !== Number(targetUser.company_id)
+  ) {
+    throw new AppError('User not found.', 404)
+  }
+
+  const kevalCanManageTarget = canKevalManageTargetPassword(actor, targetUser)
+  if (isPrivilegedRole(targetUser.role) && !kevalCanManageTarget) {
     throw new AppError('Privileged accounts cannot be modified through this form.', 403)
   }
 
@@ -601,6 +635,11 @@ const updateAdminManagedUser = async (userId, { name, email, password }) => {
     passwordHash,
     assignedPassword,
   })
+
+  if (passwordHash) {
+    await userRepository.incrementAuthTokenVersion(userId)
+    await userRepository.revokeRefreshToken(userId)
+  }
 
   return {
     user: await enrichUserWithAccess(updated),

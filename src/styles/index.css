@@ -2281,3 +2281,1833 @@ html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.
   -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
   box-shadow: none !important;
 }
+
+/* User CRM red skin. Scoped away from /admin/* by Layout's html.is-user and .layout--user hooks. */
+html.is-user:not([data-theme="dark"]) body {
+  --user-crm-red: #E51F25;
+  --user-crm-red-dark: #C9151B;
+  --user-crm-red-soft: #FDEBEC;
+  --user-crm-bg: #F4F8FA;
+  --user-crm-border: #DCE3E8;
+  --user-crm-text: #111827;
+  --user-crm-muted: #667085;
+  --color-primary: #E51F25;
+  --color-primary-hover: #C9151B;
+  --color-primary-soft: #FDEBEC;
+  --color-primary-border: rgba(229, 31, 37, 0.32);
+  --color-primary-strong: #C9151B;
+  --color-accent-user: #E51F25;
+  --color-accent-user-soft: #FDEBEC;
+  --surface-app: #F4F8FA;
+  --body-bg: #F4F8FA;
+  --surface-card: #FFFFFF;
+  --surface-raised: #FFFFFF;
+  --surface-muted: #F4F8FA;
+  --surface-sunken: #F8FBFC;
+  --glass-surface: #FFFFFF;
+  --glass-surface-strong: #FFFFFF;
+  --glass-border: #DCE3E8;
+  --border-subtle: #DCE3E8;
+  --border-default: #CBD5DD;
+  --text-primary: #111827;
+  --text-secondary: #667085;
+  --text-muted: #98A2B3;
+  --crm-accent: #E51F25;
+  --crm-accent-soft: #FDEBEC;
+  --crm-accent-border: rgba(229, 31, 37, 0.34);
+  --crm-panel-bg: #FFFFFF;
+  --crm-panel-bg-strong: #FFFFFF;
+  --crm-control-bg: #FFFFFF;
+  --crm-shell-border: #DCE3E8;
+  --crm-shell-shadow: 0 10px 28px rgba(17, 24, 39, 0.07);
+  background: #F4F8FA;
+  color: #111827;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user {
+  background: #F4F8FA;
+  color: #111827;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .layout-main,
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar,
+html.is-user:not([data-theme="dark"]) .layout--user :where(
+  .ud-card,
+  .ud-stat-card,
+  .dashboard-card,
+  .card,
+  .panel,
+  [class*="card"],
+  [class*="panel"]
+) {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #111827 !important;
+  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.07) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .layout-content-frame,
+html.is-user:not([data-theme="dark"]) .layout--user .ud-page {
+  background: transparent !important;
+}
+
+html.is-user:not([data-theme="dark"]) .header.header--user {
+  border-bottom-color: #DCE3E8 !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  background-image: none !important;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.06) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .header.header--user .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn,
+html.is-user:not([data-theme="dark"]) .header.header--user .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn:hover,
+html.is-user:not([data-theme="dark"]) .header.header--user .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn:focus-visible,
+html.is-user:not([data-theme="dark"]) .header.header--user .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn:active {
+  border: 1px solid #E51F25 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .header.header--user .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn svg,
+html.is-user:not([data-theme="dark"]) .header.header--user .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn svg * {
+  color: #E51F25 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #E51F25 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-theme-toggle {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-theme-toggle svg,
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-theme-toggle span {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-user-btn,
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-user-btn:hover,
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-user-btn:focus-visible {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-user-btn .hdr-avatar-icon {
+  color: #E51F25 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-user-btn .hdr-username,
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-user-btn .hdr-caret,
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-user-btn .hdr-caret svg {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+html.is-user:not([data-theme="dark"]) .header.header--user .hdr-badge,
+html.is-user:not([data-theme="dark"]) .layout--user :where(.badge, [class*="badge"], [class*="status"]):not(.sb-section-label) {
+  border-color: #FFFFFF !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.07) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user .sb-top-card,
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user .sb-view-toolbar,
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user .sb-today-section {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user .sb-section-label,
+html.is-user:not([data-theme="dark"]) .layout--user :where(.text-muted, .muted, small, .ud-stat-subtext, .ud-item-date, .ud-todo-meta, .ud-todo-message) {
+  color: #667085 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user :where(.sb-link, .sb-link--team, .sb-plain-link, .sb-group-trigger, .sb-sub-link) {
+  color: #667085 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user :where(.sb-link-icon, .sb-plain-icon, .sb-group-icon, .sb-group-chevron, .sb-sub-arrow) {
+  color: #98A2B3 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user :where(.sb-link:hover, .sb-link--team:hover, .sb-plain-link:hover, .sb-group-trigger:hover, .sb-sub-link:hover, .sb-group-trigger--open) {
+  border-color: rgba(229, 31, 37, 0.28) !important;
+  background: #FDEBEC !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user :where(
+  .sb-view-toolbar-button--route-active,
+  .sb-view-toolbar-button:active,
+  .sb-link--active,
+  .sb-link--team.sb-link--active,
+  .sb-plain-link--active,
+  .sb-group-trigger--route-active,
+  .sb-sub-link--active
+) {
+  border-color: #E51F25 !important;
+  background: #FDEBEC !important;
+  background-color: #FDEBEC !important;
+  background-image: none !important;
+  color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user :where(
+  .sb-view-toolbar-button--route-active,
+  .sb-view-toolbar-button:active,
+  .sb-link--active,
+  .sb-link--team.sb-link--active,
+  .sb-plain-link--active,
+  .sb-group-trigger--route-active,
+  .sb-sub-link--active
+) :where(svg, .sb-link-icon, .sb-plain-icon, .sb-group-icon, .sb-group-chevron, .sb-sub-arrow) {
+  color: #E51F25 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sidebar--user :where(.sb-link--active, .sb-link--team.sb-link--active, .sb-plain-link--active, .sb-group-trigger--route-active)::after {
+  background: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sb-lumos-mark span {
+  background: #E51F25 !important;
+  box-shadow: 0 0 0 1px rgba(229, 31, 37, 0.18) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sb-lumos-mark span:nth-child(3n + 2),
+html.is-user:not([data-theme="dark"]) .layout--user .sb-lumos-mark span:nth-child(3n + 3) {
+  background: #C9151B !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(h1, h2, h3, h4, h5, h6, strong, .ud-stat-value, .ud-item-title, .ud-item-value, .ud-todo-title) {
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(p, .ud-header p, .ud-stat-label, .ud-item-desc) {
+  color: #667085 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(
+  button[class*="primary"],
+  button[class*="submit"],
+  button[class*="save"],
+  button[class*="add"],
+  button[class*="next"],
+  .btn-primary,
+  .btn-red-theme,
+  a[class*="primary"],
+  a[class*="add"]
+):not(.hdr-icon-btn):not(.hdr-user-btn):not(.hdr-theme-toggle):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(
+  input,
+  select,
+  textarea,
+  .dropdown,
+  [class*="select"],
+  [class*="dropdown"]
+) {
+  border-color: #DCE3E8;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(
+  input:focus,
+  select:focus,
+  textarea:focus,
+  button:focus-visible,
+  a:focus-visible
+) {
+  outline-color: rgba(229, 31, 37, 0.35);
+  box-shadow: 0 0 0 3px rgba(229, 31, 37, 0.12) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(
+  .ud-view-all-btn,
+  .ud-todo-mini-btn,
+  .tab-active,
+  [class*="tab--active"],
+  [class*="active-tab"],
+  [aria-selected="true"]
+) {
+  border-color: #E51F25 !important;
+  background: #FDEBEC !important;
+  background-color: #FDEBEC !important;
+  background-image: none !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .ud-todo-mini-btn {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(table, th, td, .table, [class*="table"]) {
+  border-color: #DCE3E8 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(th, [class*="table-header"], [class*="-header-cell"]) {
+  background: #F4F8FA !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(a, .link, [class*="link"]) {
+  color: #E51F25;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :where(svg) {
+  color: currentColor;
+}
+
+/* Keval/admin visual parity for user-mounted account and customer screens only. */
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-page,
+  .admin-customers-page,
+  .admin-customers-search-page,
+  .admin-customers-view-page
+) {
+  background: transparent !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .mga-titlebar,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-board-card,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-card,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-wizard-card,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-search-card,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-view-card {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #111827 !important;
+  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.07) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page--dailyFreshLeads .admin-accounts-board-card {
+  border-color: transparent !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page--dailyFreshLeads .admin-accounts-board-toolbar {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.06) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(.mga-titlebar-heading, .admin-customers-header-row h1, .admin-customers-card h1) {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-stage-dropdown-wrapper,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-board-toolbar,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-banner-strip,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-stepper,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-form-actions-top {
+  border-color: #DCE3E8 !important;
+  background: #F4F8FA !important;
+  background-color: #F4F8FA !important;
+  background-image: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-stage-dropdown-label,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-board-subtitle,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-form-label,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-step-label {
+  color: #667085 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-form-label span {
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-step,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-stage-tab,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-pag-btn,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-page-button {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #667085 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-step-active,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-stage-tab-active,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-pag-btn--active,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-page-button-active {
+  border-color: #E51F25 !important;
+  background: #FDEBEC !important;
+  background-color: #FDEBEC !important;
+  background-image: none !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-step-active .admin-customers-step-label,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-stage-tab-active .admin-accounts-stage-tab-label {
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-step-count {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  color: #667085 !important;
+  -webkit-text-fill-color: #667085 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-step-active .admin-customers-step-count {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-step-arrow,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-page :where(svg, .admin-customers-toolbar-icon svg, .admin-customers-select-arrow),
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page :where(svg, .account-board-header-icon-btn svg) {
+  color: #E51F25 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-board-toolbar-actions > button,
+  .admin-accounts-board-toolbar-actions > .btn,
+  .admin-accounts-board-toolbar-actions > * > button,
+  .admin-accounts-board-toolbar-actions > * > .btn,
+  .account-board-header-icon-btn,
+  .admin-customers-nav-button,
+  .admin-customers-toolbar-button,
+  .admin-customers-toolbar-icon,
+  .admin-customers-save-button,
+  .admin-customers-grid-action-button
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-board-toolbar-actions > button,
+  .admin-accounts-board-toolbar-actions > .btn,
+  .admin-accounts-board-toolbar-actions > * > button,
+  .admin-accounts-board-toolbar-actions > * > .btn,
+  .account-board-header-icon-btn,
+  .admin-customers-nav-button,
+  .admin-customers-toolbar-button,
+  .admin-customers-toolbar-icon,
+  .admin-customers-save-button,
+  .admin-customers-grid-action-button
+):not(:disabled) :where(svg, span) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-nav-button-secondary {
+  border-color: #E51F25 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-nav-button-secondary :where(svg, span) {
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-stage-dropdown-select,
+  .admin-customers-input,
+  .admin-customers-custom-select-button,
+  .admin-customers-custom-select-dropdown,
+  .admin-customers-custom-select-option
+) {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-stage-dropdown-select:focus,
+  .admin-customers-input:focus,
+  .admin-customers-custom-select-button:focus-visible,
+  .admin-customers-custom-select-open
+) {
+  border-color: #E51F25 !important;
+  box-shadow: 0 0 0 3px rgba(229, 31, 37, 0.12) !important;
+  outline: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-custom-select-option:hover,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-custom-select-option-selected {
+  border-color: rgba(229, 31, 37, 0.24) !important;
+  background: #FDEBEC !important;
+  color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-board-table,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-table {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-board-table thead th,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-table thead th {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-board-table tbody td,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-table tbody td {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-board-table tbody tr:hover td,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-table tbody tr:hover td {
+  background: #FDEBEC !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-cell-link,
+  .admin-accounts-cell-link:hover,
+  .admin-accounts-cell-link:focus-visible,
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button:hover,
+  .admin-customers-grid-number-button:focus-visible
+) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-cell-link,
+  .admin-customers-grid-number-button
+) :where(span, svg) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-cell-menu-trigger,
+  .admin-accounts-cell-menu-trigger:hover,
+  .admin-accounts-cell-menu-trigger:focus-visible
+) {
+  border-color: #E51F25 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-cell-menu-trigger svg {
+  color: #E51F25 !important;
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* User support/reminder screens: Keval red accents with plain bordered tables. */
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-page,
+  .support-request-view-page,
+  .admin-my-reminders-page,
+  .active-reminders-page,
+  .support-request-legacy-page,
+  .support-ticket-shell
+) {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-card,
+  .sr-new-card--wizard,
+  .sr-status-board-shell,
+  .active-reminders-users-panel,
+  .active-reminders-select-card,
+  .active-reminders-detail-panel,
+  .active-reminders-filter-panel,
+  .admin-my-reminders-shell,
+  .admin-my-reminders-panel
+) {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #111827 !important;
+  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.07) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-header,
+  .sr-new-steps,
+  .sr-new-panel,
+  .sr-status-board-toolbar,
+  .active-reminders-header,
+  .active-reminders-users-panel-header,
+  .active-reminders-detail-header,
+  .active-reminders-filter-header,
+  .admin-my-reminders-header
+) {
+  border-color: #DCE3E8 !important;
+  background: #F4F8FA !important;
+  background-color: #F4F8FA !important;
+  background-image: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-header h1,
+  .support-request-legacy-header h1,
+  .sr-status-board-toolbar h1,
+  .active-reminders-header h1,
+  .admin-my-reminders-header h1,
+  .active-reminders-detail-title,
+  .active-reminders-filter-title
+) {
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-header p,
+  .sr-status-board-toolbar p,
+  .active-reminders-user-name,
+  .active-reminders-detail-item-main p,
+  .admin-my-reminders-item-main p
+) {
+  color: #667085 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-step,
+  .active-reminders-detail-tab,
+  .active-reminders-user-row,
+  .active-reminders-detail-item,
+  .admin-my-reminders-item
+) {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-step.is-active,
+  .sr-new-step.is-complete,
+  .active-reminders-detail-tab-active,
+  .active-reminders-user-row-selected
+) {
+  border-color: #E51F25 !important;
+  background: #FDEBEC !important;
+  background-color: #FDEBEC !important;
+  background-image: none !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(.sr-new-step-index) {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  color: #667085 !important;
+  -webkit-text-fill-color: #667085 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(.sr-new-step.is-active, .sr-new-step.is-complete) .sr-new-step-index {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(.sr-new-step.is-active, .sr-new-step.is-complete) .sr-new-step-copy {
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-field span,
+  .active-reminders-filter-control label,
+  .active-reminders-filter-toggle-row span,
+  .support-request-view-column-title
+) {
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-field input,
+  .sr-new-field select,
+  .sr-new-field textarea,
+  .sr-new-searchable-select input,
+  .active-reminders-filter-control select,
+  .active-reminders-filter-date-select,
+  .support-request-view-searchbar input
+) {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-field input:focus,
+  .sr-new-field select:focus,
+  .sr-new-field textarea:focus,
+  .sr-new-searchable-select input:focus,
+  .active-reminders-filter-control select:focus,
+  .active-reminders-filter-date-select:focus,
+  .support-request-view-searchbar input:focus
+) {
+  border-color: #E51F25 !important;
+  box-shadow: 0 0 0 3px rgba(229, 31, 37, 0.12) !important;
+  outline: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-btn,
+  .sr-new-customer-search-btn,
+  .sr-new-searchable-toggle,
+  .sr-status-filter-trigger,
+  .sr-status-filter-load,
+  .sr-status-board-card .btn-red-theme,
+  .support-request-legacy-table .btn-red-theme,
+  .active-reminders-filter-action-icon,
+  .active-reminders-filter-apply,
+  .admin-reminders-action-button,
+  .admin-my-reminders-item-action
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-btn,
+  .sr-new-customer-search-btn,
+  .sr-new-searchable-toggle,
+  .sr-status-filter-trigger,
+  .sr-status-filter-load,
+  .sr-status-board-card .btn-red-theme,
+  .support-request-legacy-table .btn-red-theme,
+  .active-reminders-filter-action-icon,
+  .active-reminders-filter-apply,
+  .admin-reminders-action-button,
+  .admin-my-reminders-item-action
+):not(:disabled) :where(svg, span) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-btn--cancel,
+  .active-reminders-filter-reset,
+  .support-request-view-edge,
+  .sr-status-board-edge
+):not(:disabled) {
+  border-color: #E51F25 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-btn--cancel,
+  .active-reminders-filter-reset,
+  .support-request-view-edge,
+  .sr-status-board-edge
+):not(:disabled) :where(svg, span) {
+  color: #E51F25 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-new-page svg,
+  .support-request-view-page svg,
+  .admin-my-reminders-page svg,
+  .active-reminders-page svg
+) {
+  color: #E51F25;
+  opacity: 1;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-status-board-column {
+  border-color: #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-status-board-column-header {
+  border-color: #E51F25 !important;
+  background: #FDEBEC !important;
+  background-color: #FDEBEC !important;
+  background-image: none !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(.sr-status-board-card, .sr-status-board-card:hover) {
+  border-color: #DCE3E8 !important;
+  border-left-color: #E51F25 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .sr-status-board-card-title,
+  .sr-status-board-card-line,
+  .sr-status-board-card-line svg,
+  .sr-status-board-card-muted
+) {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .support-request-legacy-table-shell,
+  .sr-customer-table-shell
+) {
+  border: 1px solid #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .support-request-legacy-table,
+  .sr-customer-table
+) {
+  border-collapse: collapse !important;
+  border-color: #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .support-request-legacy-table th,
+  .support-request-legacy-table td,
+  .sr-customer-table th,
+  .sr-customer-table td
+) {
+  border-color: #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page .support-request-legacy-table th,
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page .support-request-legacy-table th span {
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-legacy-table tbody tr:hover td,
+html.is-user:not([data-theme="dark"]) .layout--user .sr-customer-table tbody tr:hover td {
+  background: #FDEBEC !important;
+  background-color: #FDEBEC !important;
+}
+
+/* User-side CRM polish corrections. Keep these scoped away from /admin routes. */
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-page,
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-page :is(.sr-new-card, .sr-new-form, .sr-new-form-grid, .sr-new-field),
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-select {
+  overflow: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-select {
+  position: relative;
+  z-index: 40;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-menu {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: min(520px, calc(100vw - 2rem)) !important;
+  z-index: 9999 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  background: #FFFFFF !important;
+  border-color: #DCE3E8 !important;
+  box-shadow: 0 16px 32px rgba(17, 24, 39, 0.14) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-option {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-custom-select-wrapper-category .admin-customers-custom-select-button,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-custom-select-button-category,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-custom-select-button-category:hover,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-custom-select-button-category:focus,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-custom-select-button-category:active,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-custom-select-button-category.admin-customers-custom-select-open {
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  border-color: #C9151B !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-custom-select-wrapper-category :is(
+  .admin-customers-select-label,
+  .admin-customers-select-label-text,
+  .admin-customers-select-arrow,
+  .admin-customers-select-arrow-category,
+  svg,
+  span
+) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-table-wrap,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-shell {
+  border-color: #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-table,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-table :is(thead, tbody, tr, th, td),
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-filter-row :is(th, td) {
+  border-color: #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-table :is(
+  .admin-customers-grid-checkbox-head,
+  .admin-customers-grid-checkbox-cell,
+  .admin-customers-grid-filter-spacer
+) {
+  display: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-grid-table .admin-customers-grid-checkbox {
+  display: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page,
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :is(
+  .support-request-view-shell,
+  .support-request-view-panel,
+  .support-request-view-detail,
+  .support-request-view-other,
+  .support-request-view-toolbar,
+  .support-request-view-titlebar,
+  .sr-status-board-column,
+  .sr-status-board-column-header,
+  .sr-status-board-card
+) {
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-titlebar h1,
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-column-title,
+html.is-user:not([data-theme="dark"]) .layout--user .sr-status-board-column-header :is(strong, span) {
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :is(
+  p,
+  span,
+  strong,
+  dt,
+  dd,
+  label,
+  .sr-status-board-card-title,
+  .sr-status-board-card-line,
+  .sr-status-board-card-muted
+):not(.support-request-view-column-title) {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page :is(
+  .active-reminders-header-download,
+  .active-reminders-detail-btn.excel-export-button,
+  .excel-export-button
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page :is(
+  .active-reminders-header-download,
+  .active-reminders-detail-btn.excel-export-button,
+  .excel-export-button
+) :is(svg, span, .excel-export-button__icon, .excel-export-button__label, .excel-export-button__chevron) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .aqp-page :is(
+  .aqp-table-wrap,
+  .aqp-table,
+  .aqp-thead-row,
+  .aqp-search-row,
+  .aqp-row,
+  .aqp-th,
+  .aqp-search-th,
+  .aqp-td
+) {
+  border-color: #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .aqp-page .aqp-row:hover .aqp-td {
+  background: #F4F8FA !important;
+  background-color: #F4F8FA !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .qsr-page {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .qsr-page :is(
+  .qsr-titlebar,
+  .qsr-search-in-card,
+  .qsr-filter-card,
+  .qsr-results-phase,
+  .qsr-table-controls,
+  .qsr-table-footer,
+  .qsr-summary-bar,
+  .qsr-summary-amount,
+  .qsr-summary-filter-box,
+  .qsr-table-scroll
+) {
+  border-color: #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .qsr-page :is(.qsr-table, .qsr-th, .qsr-td, .qsr-row) {
+  border-color: #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .vc-page :is(
+  .vc-toggle,
+  .vc-toggle--green,
+  .vc-toggle--warm,
+  .vc-toggle--orange,
+  .vc-toggle--on,
+  .vc-mini-toggle,
+  .vc-mini-toggle--on,
+  .vc-chip,
+  .vc-chip--on
+) {
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  border: 1px solid #DCE3E8 !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .vc-page :is(.vc-toggle-knob, .vc-chip-state) {
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  border-color: #C9151B !important;
+}
+
+/* User account list tables: red borders only, no red table fill. */
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page :is(
+  .admin-accounts-board-table-wrap,
+  .admin-accounts-board-table-scroll,
+  .admin-accounts-board-table-shell
+) {
+  border-color: #E51F25 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table {
+  border: 1px solid #E51F25 !important;
+  border-collapse: collapse !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table :is(
+  thead,
+  tbody,
+  tr,
+  th,
+  td,
+  .admin-accounts-filter-row,
+  .admin-accounts-filter-cell
+) {
+  border-color: #E51F25 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table thead th,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table thead th :is(span, svg),
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table .admin-accounts-filter-placeholder {
+  color: #E51F25 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table tbody td,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table tbody td :is(span, strong, small) {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table .admin-accounts-filter-input {
+  border-color: #E51F25 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table tbody tr:hover td {
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+}
+
+/* User support request Request Type searchable select: border-only trigger, aligned menu. */
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-field:has(.sr-new-searchable-select) {
+  align-items: stretch !important;
+  gap: 0.38rem !important;
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 80 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-field:has(.sr-new-searchable-select) > span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.18rem !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  line-height: 1.2 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-field:has(.sr-new-searchable-select) > span .sr-required {
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-select {
+  width: 100% !important;
+  overflow: visible !important;
+  z-index: 90 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-select input {
+  min-height: 2.85rem !important;
+  padding-right: 2.8rem !important;
+  border: 1px solid #E51F25 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-select input:focus {
+  border-color: #C9151B !important;
+  box-shadow: 0 0 0 3px rgba(229, 31, 37, 0.12) !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-toggle,
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-toggle:hover,
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-toggle:focus-visible,
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-toggle:active {
+  top: 0 !important;
+  right: 0 !important;
+  width: 2.8rem !important;
+  height: 2.85rem !important;
+  border: 0 !important;
+  border-left: 1px solid #E51F25 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-toggle :is(svg, span) {
+  color: #E51F25 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-menu {
+  top: calc(100% + 0.2rem) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  border: 1px solid #E51F25 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  padding: 0.25rem !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-option,
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-empty {
+  min-height: 2.35rem !important;
+  display: flex !important;
+  align-items: center !important;
+  border: 0 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  text-align: left !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-option:hover,
+html.is-user:not([data-theme="dark"]) .layout--user .sr-new-searchable-option--active {
+  background: #FDEBEC !important;
+  background-color: #FDEBEC !important;
+  color: #E51F25 !important;
+  -webkit-text-fill-color: #E51F25 !important;
+}
+
+/* Latest user-only table/action corrections. */
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-page :is(
+  .admin-customers-grid-table-wrap,
+  .admin-customers-grid-shell,
+  .admin-customers-grid-table,
+  .admin-customers-grid-table thead,
+  .admin-customers-grid-table tbody,
+  .admin-customers-grid-table tr,
+  .admin-customers-grid-table th,
+  .admin-customers-grid-table td,
+  .admin-customers-grid-filter-row,
+  .admin-customers-grid-filter-row th,
+  .admin-customers-grid-filter-row td
+) {
+  border-color: #DCE3E8 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-page .admin-customers-grid-table thead th,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-page .admin-customers-grid-table thead th :is(span, svg),
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-page .admin-customers-grid-table tbody td,
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-page .admin-customers-grid-table tbody td :is(span, strong, small) {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-customers-page .admin-customers-grid-table tbody tr:hover td {
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page,
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :is(
+  .support-request-view-shell,
+  .support-request-view-titlebar,
+  .support-request-view-toolbar,
+  .support-request-view-panel,
+  .support-request-view-detail,
+  .support-request-view-other,
+  .support-request-view-titlebar h1,
+  .support-request-view-column-title,
+  .sr-status-board-toolbar,
+  .sr-status-board-toolbar h1,
+  .sr-status-board-column-header,
+  .sr-status-board-column-header *,
+  .sr-status-board-card,
+  .sr-status-board-card *
+) {
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+  border-color: #DCE3E8 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page :is(
+  .active-reminders-detail-btn,
+  .active-reminders-filter-action-icon,
+  .active-reminders-filter-action-btn,
+  .active-reminders-item-action,
+  .active-reminders-filter-apply,
+  .active-reminders-detail-tab-active,
+  .active-reminders-user-row-selected
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page :is(
+  .active-reminders-detail-btn,
+  .active-reminders-filter-action-icon,
+  .active-reminders-filter-action-btn,
+  .active-reminders-item-action,
+  .active-reminders-filter-apply,
+  .active-reminders-detail-tab-active,
+  .active-reminders-user-row-selected
+):not(:disabled) :is(svg, span, strong) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) :is(
+  .quotations-page .quotation-account-picker-button,
+  .quotations-page .quotation-builder-close-icon,
+  .quotations-page .quotation-account-list-page-button,
+  .quotations-page .quotation-item-modal-btn--close,
+  .quotations-page .quotation-item-modal-btn--save,
+  .quotations-page .quotation-builder-panel-close,
+  .quotations-page .line-item-page-btn,
+  .line-item-page-btn,
+  .line-item-alert-close
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) :is(
+  .quotations-page .quotation-account-picker-button,
+  .quotations-page .quotation-builder-close-icon,
+  .quotations-page .quotation-account-list-page-button,
+  .quotations-page .quotation-item-modal-btn--close,
+  .quotations-page .quotation-item-modal-btn--save,
+  .quotations-page .quotation-builder-panel-close,
+  .quotations-page .line-item-page-btn,
+  .line-item-page-btn,
+  .line-item-alert-close
+):not(:disabled) :is(svg, span) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* User-wide pagination and quotation/account final alignment. */
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page :is(
+  .admin-accounts-board-card,
+  .admin-accounts-board-table-wrap,
+  .admin-accounts-board-table-scroll,
+  .admin-accounts-board-table-shell,
+  .admin-accounts-board-table,
+  .admin-accounts-board-table thead,
+  .admin-accounts-board-table tbody,
+  .admin-accounts-board-table tr,
+  .admin-accounts-board-table th,
+  .admin-accounts-board-table td,
+  .admin-accounts-filter-row,
+  .admin-accounts-filter-cell
+) {
+  border-color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .admin-accounts-page .admin-accounts-board-table :is(th, td) {
+  border-width: 1px !important;
+  border-style: solid !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-pag-btn,
+  .admin-customers-grid-pagination-button,
+  .admin-customers-grid-page-number,
+  .support-request-legacy-footer-pagination button,
+  .support-request-legacy-footer-pagination span,
+  .support-request-list-page-btn,
+  .sr-list-pagination-button,
+  .sr-customer-modal-pagination button,
+  .active-reminders-page .excel-export-button,
+  .aqp-page-btn,
+  .aqp-account-list-page-button,
+  .quotation-account-list-page-button,
+  .qsr-page-btn,
+  .excel-export-button
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-pag-btn,
+  .admin-customers-grid-pagination-button,
+  .admin-customers-grid-page-number,
+  .support-request-legacy-footer-pagination button,
+  .support-request-legacy-footer-pagination span,
+  .support-request-list-page-btn,
+  .sr-list-pagination-button,
+  .sr-customer-modal-pagination button,
+  .active-reminders-page .excel-export-button,
+  .aqp-page-btn,
+  .aqp-account-list-page-button,
+  .quotation-account-list-page-button,
+  .qsr-page-btn,
+  .excel-export-button
+):not(:disabled) :is(svg, span, strong, .excel-export-button__icon, .excel-export-button__label, .excel-export-button__chevron) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .admin-accounts-pag-btn:disabled,
+  .admin-customers-grid-pagination-button:disabled,
+  .support-request-legacy-footer-pagination button:disabled,
+  .sr-list-pagination-button:disabled,
+  .sr-customer-modal-pagination button:disabled,
+  .aqp-page-btn:disabled,
+  .aqp-account-list-page-button:disabled,
+  .quotation-account-list-page-button:disabled
+) {
+  border-color: #DCE3E8 !important;
+  background: #F4F8FA !important;
+  background-color: #F4F8FA !important;
+  color: #98A2B3 !important;
+  -webkit-text-fill-color: #98A2B3 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .quotation-report-export .excel-export-button,
+  .quotation-report-icon-btn,
+  .quotation-report-icon-btn--export,
+  .aqp-report-export .excel-export-button,
+  .aqp-report-icon-btn,
+  .aqp-report-icon-btn--export,
+  .aqp-upload-account-button,
+  .quotation-account-picker-button
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user :is(
+  .quotation-report-export .excel-export-button,
+  .quotation-report-icon-btn,
+  .quotation-report-icon-btn--export,
+  .aqp-report-export .excel-export-button,
+  .aqp-report-icon-btn,
+  .aqp-report-icon-btn--export,
+  .aqp-upload-account-button,
+  .quotation-account-picker-button
+):not(:disabled) :is(svg, span, .excel-export-button__icon, .excel-export-button__label, .excel-export-button__chevron) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Final user-only corrections for quotation popup, reminders users, and SR view buttons. */
+html.is-user:not([data-theme="dark"]) .layout--user .quotations-page .quotation-builder-page-actions :is(
+  .btn,
+  button,
+  .quotation-builder-close-icon
+):not(:disabled),
+html.is-user:not([data-theme="dark"]) .layout--user .quotations-page :is(
+  .quotation-account-picker-button,
+  .aqp-upload-account-button
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .quotations-page .quotation-builder-page-actions :is(
+  .btn,
+  button,
+  .quotation-builder-close-icon
+):not(:disabled) :is(svg, span),
+html.is-user:not([data-theme="dark"]) .layout--user .quotations-page :is(
+  .quotation-account-picker-button,
+  .aqp-upload-account-button
+):not(:disabled) :is(svg, span) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page :is(
+  .active-reminders-user-row,
+  .active-reminders-user-row:hover,
+  .active-reminders-user-row-selected,
+  .active-reminders-user-row-selected:hover
+) {
+  border: 1px solid #E51F25 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page :is(
+  .active-reminders-user-row,
+  .active-reminders-user-row-selected
+) :is(svg, span, strong, .active-reminders-user-name, .active-reminders-user-badge) {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page :is(
+  .active-reminders-header-download,
+  .active-reminders-header-download.excel-export-button,
+  .active-reminders-header .excel-export-button
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .active-reminders-page :is(
+  .active-reminders-header-download,
+  .active-reminders-header-download.excel-export-button,
+  .active-reminders-header .excel-export-button
+):not(:disabled) :is(svg, span, .excel-export-button__icon, .excel-export-button__label) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :is(
+  button,
+  .btn,
+  .btn-red-theme,
+  .support-request-view-action-trigger,
+  .support-request-view-action-caret,
+  .support-request-view-edge,
+  .sr-status-filter-trigger,
+  .sr-status-filter-load,
+  .sr-status-board-edge
+):not(:disabled) {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :is(
+  button,
+  .btn,
+  .btn-red-theme,
+  .support-request-view-action-trigger,
+  .support-request-view-action-caret,
+  .support-request-view-edge,
+  .sr-status-filter-trigger,
+  .sr-status-filter-load,
+  .sr-status-board-edge
+):not(:disabled) :is(svg, span, strong) {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+/* User-only final fixes: deals table headers, deals toolbar actions, and neutral SR view. */
+html.is-user:not([data-theme="dark"]) .layout--user .deals-page .table-container:not(.deals-search-table) .table-header-cell {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .deals-page :is(
+  .deals-crm-toolbar-icon-orange,
+  .deals-ownerwise-toolbar-icon-orange
+):not(:disabled) {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  background-image: none !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .deals-page :is(
+  .deals-crm-toolbar-icon-orange,
+  .deals-ownerwise-toolbar-icon-orange
+):not(:disabled) :is(svg, span) {
+  color: #FFFFFF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page,
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :is(
+  .support-request-view-shell,
+  .support-request-view-titlebar,
+  .support-request-view-header,
+  .support-request-view-toolbar,
+  .support-request-view-toolbar-button,
+  .support-request-view-toolbar-button:hover,
+  .support-request-view-toolbar-button-active,
+  .support-request-view-toolbar-button-red,
+  .support-request-view-panel,
+  .support-request-view-detail,
+  .support-request-view-other,
+  .support-request-view-column,
+  .support-request-view-column-header,
+  .support-request-view-card,
+  .support-request-view-chip,
+  .support-request-view-edge,
+  .sr-status-board-shell,
+  .sr-status-board-toolbar,
+  .sr-status-board-column,
+  .sr-status-board-column-header,
+  .sr-status-board-card,
+  .sr-status-filter-trigger,
+  .sr-status-filter-load,
+  .sr-status-board-edge
+) {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :is(
+  h1,
+  h2,
+  h3,
+  strong,
+  span,
+  p,
+  dt,
+  dd,
+  em,
+  button,
+  .btn,
+  .btn-red-theme,
+  .support-request-view-column-title,
+  .support-request-view-card-customer,
+  .support-request-view-card-contact-title,
+  .support-request-view-chip,
+  .support-request-view-icons svg,
+  .sr-status-board-column-header *,
+  .sr-status-board-card-title,
+  .sr-status-board-card-line,
+  .sr-status-board-card-muted
+) {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :is(
+  .support-request-view-toolbar-button,
+  .support-request-view-action-trigger,
+  .support-request-view-action-caret,
+  .support-request-view-edge,
+  .sr-status-filter-trigger,
+  .sr-status-filter-load,
+  .sr-status-board-edge,
+  .sr-status-board-card .btn-red-theme
+):not(:disabled) {
+  border-color: #DCE3E8 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :is(
+  .support-request-view-toolbar-button,
+  .support-request-view-action-trigger,
+  .support-request-view-action-caret,
+  .support-request-view-edge,
+  .sr-status-filter-trigger,
+  .sr-status-filter-load,
+  .sr-status-board-edge,
+  .sr-status-board-card .btn-red-theme
+):not(:disabled) :is(svg, span, strong) {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+}

@@ -14,6 +14,7 @@ const sanitizeRequest = (record) => {
     status: record.status,
     attemptCount: record.attemptCount ?? 1,
     maxAttempts: record.maxAttempts ?? 1,
+    assignedPassword: record.assignedPassword ?? record.assigned_password ?? '',
     adminId: record.adminId ?? null,
     adminName: record.adminName || '',
     adminActionAt: record.adminActionAt || null,
@@ -51,6 +52,7 @@ const updateRequestStatus = async (requestId, updates = {}) => {
 const createRequest = async ({
   user,
   newPasswordHash,
+  assignedPassword = '',
   status = 'pending',
   attemptCount = 1,
   maxAttempts = 1,
@@ -67,6 +69,7 @@ const createRequest = async ({
     email: user.email,
     userName: user.name || user.username || user.email,
     newPasswordHash,
+    assignedPassword,
     status,
     attemptCount,
     maxAttempts,

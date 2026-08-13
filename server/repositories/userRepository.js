@@ -425,10 +425,45 @@ const updateUserDetails = async (userId, { name, email, passwordHash = null, ass
   const updates = { name, email }
   if (passwordHash) {
     updates.passwordHash = passwordHash
+    updates.password_hash = passwordHash
     updates.assignedPassword = assignedPassword || ''
+    updates.assigned_password = assignedPassword || ''
   }
 
   const record = await User.findOneAndUpdate(byLegacyId(userId), { $set: updates }, { new: true }).lean()
+  return sanitizeUserRow(record)
+}
+
+const updateUserPasswordHash = async (userId, passwordHash, assignedPassword = null) => {
+  if (!passwordHash) return null
+
+  const updates = {
+    passwordHash,
+    password_hash: passwordHash,
+  }
+
+  if (assignedPassword !== null && assignedPassword !== undefined) {
+    updates.assignedPassword = String(assignedPassword || '')
+    updates.assigned_password = String(assignedPassword || '')
+  }
+
+  const record = await User.findOneAndUpdate(
+    byLegacyId(userId),
+    {
+      $set: updates,
+      $inc: { authTokenVersion: 1 },
+      $unset: {
+        refreshTokenHash: '',
+        refreshTokenExpiresAt: '',
+      },
+    },
+    { new: true }
+  ).lean()
+
+  if (record) {
+    await User.updateOne(byLegacyId(userId), { $set: { refreshSessions: [] } })
+  }
+
   return sanitizeUserRow(record)
 }
 
@@ -497,6 +532,7 @@ module.exports = {
   createUser,
   upsertMicrosoftUser,
   updateUserDetails,
+  updateUserPasswordHash,
   deleteUser,
   findUsersByIds,
   findUsersByOwnerCodes,

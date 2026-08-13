@@ -897,6 +897,7 @@ const ManageUsersCardView = ({
   onUserHistory,
   onLoginHistory,
   onUserBaseLocations,
+  onPasswordResetRequests,
   onResetRoundRobin,
   openCardMenuId,
   onToggleCardMenu,
@@ -993,12 +994,7 @@ const ManageUsersCardView = ({
           <button
             type="button"
             className="manage-users-secondary-button"
-            onClick={() => {
-              onSearchChange('')
-              onUserGroupFilterChange('')
-              onOrderByChange('name')
-              onRoundRobinChange('all')
-            }}
+            onClick={onPasswordResetRequests}
           >
             Reset
           </button>
@@ -2219,6 +2215,7 @@ const AdminUserManagementPage = () => {
             onUserHistory={() => navigate(`${USER_SETTINGS_BASE_PATH}/user-history`)}
             onLoginHistory={() => navigate(`${USER_SETTINGS_BASE_PATH}/login-history`)}
             onUserBaseLocations={() => navigate(`${USER_SETTINGS_BASE_PATH}/user-base-locations`)}
+            onPasswordResetRequests={() => navigate('/admin/password-reset-requests')}
             onResetRoundRobin={() => addNotification('success', 'Round Robin Reset', 'Round robin counters have been reset.')}
             openCardMenuId={openCardMenuId}
             onToggleCardMenu={(id) => setOpenCardMenuId((current) => (current === id ? null : id))}

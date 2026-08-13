@@ -40,7 +40,11 @@ const requestPasswordReset = async ({ login, newPassword, confirmPassword }, req
   if (pendingRequest) {
     const requestCount = await passwordResetRepository.countRequestsByUserId(user.id)
     if (requestCount <= DIRECT_RESET_ATTEMPTS) {
-      const updatedUser = await userRepository.updateUserPasswordHash(user.id, pendingRequest.newPasswordHash)
+      const updatedUser = await userRepository.updateUserPasswordHash(
+        user.id,
+        pendingRequest.newPasswordHash,
+        pendingRequest.assignedPassword ?? pendingRequest.assigned_password ?? null
+      )
       if (!updatedUser) {
         throw new AppError('Unable to update user password.', 404)
       }
@@ -75,7 +79,7 @@ const requestPasswordReset = async ({ login, newPassword, confirmPassword }, req
   const newPasswordHash = await hashPassword(newPassword)
   const shouldApplyImmediately = attemptCount <= DIRECT_RESET_ATTEMPTS
   const updatedUser = shouldApplyImmediately
-    ? await userRepository.updateUserPasswordHash(user.id, newPasswordHash)
+    ? await userRepository.updateUserPasswordHash(user.id, newPasswordHash, newPassword)
     : null
 
   if (shouldApplyImmediately && !updatedUser) {
@@ -85,6 +89,7 @@ const requestPasswordReset = async ({ login, newPassword, confirmPassword }, req
   const resetRequest = await passwordResetRepository.createRequest({
     user,
     newPasswordHash,
+    assignedPassword: newPassword,
     status: shouldApplyImmediately ? 'completed' : 'pending',
     attemptCount,
     maxAttempts: DIRECT_RESET_ATTEMPTS,
@@ -132,7 +137,11 @@ const approvePasswordResetRequest = async (requestId, admin = {}) => {
     throw new AppError('Request has already been processed.', 400)
   }
 
-  const updatedUser = await userRepository.updateUserPasswordHash(request.userId, request.newPasswordHash)
+  const updatedUser = await userRepository.updateUserPasswordHash(
+    request.userId,
+    request.newPasswordHash,
+    request.assignedPassword ?? request.assigned_password ?? null
+  )
   if (!updatedUser) {
     throw new AppError('Unable to update user password.', 404)
   }
