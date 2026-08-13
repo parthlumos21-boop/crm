@@ -1426,3 +1426,59 @@ html.is-user[data-theme="dark"] *::after {
   animation: none !important;
   transition: none !important;
 }
+
+/* Keep SR No. and Customer No. pills visible in admin light mode without row hover. */
+html:not([data-theme="dark"]) .layout--admin :where(
+  .support-request-row-menu-trigger,
+  .support-request-row-menu-trigger:hover,
+  .support-request-row-menu-trigger:focus-visible,
+  .support-request-row-menu-trigger:disabled,
+  .support-request-related-number-button,
+  .support-request-related-number-button:hover,
+  .support-request-related-number-button:focus-visible,
+  .support-request-related-number-button:disabled,
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button:hover,
+  .admin-customers-grid-number-button:focus-visible
+) {
+  display: inline-flex !important;
+  align-items: center !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
+  background-color: var(--admin-red, #dc2626) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin :where(
+  .support-request-row-menu-trigger span,
+  .support-request-row-menu-trigger svg,
+  .support-request-row-menu-caret,
+  .support-request-related-number-button span,
+  .support-request-related-number-button svg,
+  .admin-customers-grid-number-button span,
+  .admin-customers-grid-number-button svg
+) {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
+  fill: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin :where(
+  .support-request-row-menu,
+  .admin-customers-grid-number-menu
+) {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+}

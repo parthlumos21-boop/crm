@@ -14,7 +14,6 @@ const DEFAULT_FOLDER_OPTION = 'Document'
 const DOCUMENT_TYPE_OPTIONS = [
   'Select a document type',
   'General',
-  'GENERAL',
   'Invoice',
   'LR Details',
   'Project Document',

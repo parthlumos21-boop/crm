@@ -116,16 +116,18 @@ const AddTicketPage = ({ basePath = '/tickets' }) => {
             <div className="sr-new-header-actions">
               <button
                 type="button"
-                className="sr-new-btn sr-new-btn--cancel"
+                className="sr-new-btn sr-new-btn--cancel btn-red-theme"
                 onClick={() => navigate(basePath)}
+                style={{ backgroundColor: '#e11d48', color: '#fff', borderColor: '#e11d48' }}
               >
                 <FaTimes />
                 <span>Cancel</span>
               </button>
               <button
                 type="submit"
-                className="sr-new-btn sr-new-btn--send"
+                className="sr-new-btn sr-new-btn--send btn-red-theme"
                 disabled={saving}
+                style={{ backgroundColor: '#e11d48', color: '#fff', borderColor: '#e11d48' }}
               >
                 <FaCheckCircle />
                 <span>{saving ? 'Sending...' : 'Send'}</span>

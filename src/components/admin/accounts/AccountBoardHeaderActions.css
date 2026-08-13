@@ -92,7 +92,12 @@
 
 .account-board-header-icon-btn-filter {
   border-color: var(--text-primary);
-  background: linear-gradient(180deg, #66c45a 0%, #46a23d 100%);
+  background: var(--admin-red, #dc2626);
+  color: #ffffff;
+}
+
+.account-board-header-icon-btn-filter svg {
+  color: #ffffff !important;
 }
 
 .account-board-header-icon-btn-blue {

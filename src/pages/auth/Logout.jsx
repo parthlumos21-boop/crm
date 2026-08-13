@@ -31,7 +31,7 @@ const Logout = () => {
           <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
             Cancel
           </Button>
-          <Button type="button" variant="primary" onClick={handleLogout}>
+          <Button type="button" variant="primary" className="btn-red-theme" onClick={handleLogout}>
             Logout
           </Button>
         </div>

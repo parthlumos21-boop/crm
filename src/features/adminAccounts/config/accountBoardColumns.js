@@ -9,15 +9,18 @@ const formatProjectNameDisplay = (value, row = {}) => (
   || row.raw?.productCategory
   || emptyValue
 )
-const formatAccountOwnerDisplay = (value, row = {}) => (
-  row.accountOwnerDisplay
-  || row.accountOwnerName
-  || value
-  || row.raw?.accountOwner
-  || row.raw?.ownerName
-  || row.raw?.assignedToName
-  || emptyValue
-)
+const formatAccountOwnerDisplay = (value, row = {}) => {
+  const name = row.accountOwnerDisplay
+    || row.accountOwnerName
+    || value
+    || row.raw?.accountOwner
+    || row.raw?.ownerName
+    || row.raw?.assignedToName
+    || emptyValue
+
+  const code = row.accountOwnerCode || row.raw?.accountOwnerCode || ''
+  return code ? `${code} -- ${name}` : name
+}
 const formatAddedByDisplay = (value, row = {}) => row.addedBy || row.addedByDisplay || value || emptyValue
 
 const formatLegacyBoardDate = (value) => {
@@ -32,6 +35,7 @@ const formatLegacyBoardDate = (value) => {
 export const GROUP_ACCOUNTS_COLUMNS = [
   { key: 'accountNumber', label: 'Account No.', filterPlaceholder: 'Search Account No.', width: '150px', searchable: true, exportable: true, clickable: true },
   { key: 'name', label: 'Account Name', filterPlaceholder: 'Search Account Name', width: '220px', searchable: true, exportable: true },
+  { key: 'accountOwner', label: 'Account Owner', filterPlaceholder: 'Search Account Owner', width: '180px', searchable: true, exportable: true, cellFormatter: formatAccountOwnerDisplay, exportFormatter: formatAccountOwnerDisplay },
   { key: 'accountDate', label: 'Account Date', filterPlaceholder: 'Search Account Date', width: '150px', searchable: true, exportable: true, cellFormatter: (value) => formatLegacyBoardDate(value), exportFormatter: (value) => formatLegacyBoardDate(value) },
   { key: 'accountCategory', label: 'Account Category', filterPlaceholder: 'Search Account Category', width: '180px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
   { key: 'status', label: 'Account Status', filterPlaceholder: 'Search Account Status', width: '150px', searchable: true, exportable: true },
@@ -43,6 +47,8 @@ export const GROUP_ACCOUNTS_COLUMNS = [
   { key: 'poValue', label: 'PO Value', filterPlaceholder: 'Search PO Value', width: '155px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
   { key: 'jobNo', label: 'Job No', filterPlaceholder: 'Search Job No', width: '155px', searchable: true, exportable: true, cellFormatter: (value) => value || emptyValue },
 ]
+
+export const MY_GROUP_ACCOUNTS_COLUMNS = GROUP_ACCOUNTS_COLUMNS.filter((column) => column.key !== 'accountState')
 
 export const VIEW_ALL_COLUMNS = [
   { key: 'accountNumber', label: 'Account No.', filterPlaceholder: 'Search Account No.', width: '150px', searchable: true, exportable: true, clickable: true },
@@ -757,7 +763,7 @@ export const CONVERTED_ACCOUNTS_COLUMNS = [
 
 const BOARD_COLUMNS_BY_VARIANT = {
   viewAll: VIEW_ALL_COLUMNS,
-  myGroup: GROUP_ACCOUNTS_COLUMNS,
+  myGroup: MY_GROUP_ACCOUNTS_COLUMNS,
   myAccounts: GROUP_ACCOUNTS_COLUMNS,
   searchAccount: ACCOUNT_LIST_BOARD_COLUMNS,
   accountSourceView: ACCOUNT_SOURCE_VIEW_COLUMNS,

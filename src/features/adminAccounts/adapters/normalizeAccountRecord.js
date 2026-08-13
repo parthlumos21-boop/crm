@@ -84,7 +84,7 @@ const resolveStage = (account) => {
     return explicitStage
   }
 
-  const normalizedStatus = normalizeStageKey(account.status || account.accountState)
+  const normalizedStatus = normalizeStageKey(account.status || account.accountStatus || account.accountState)
   const statusToStage = {
     pending: 'new',
     active: 'contacted',
@@ -114,16 +114,25 @@ export const normalizeAccountRecord = (account = {}, index = 0, options = {}) =>
   const fallbackDate = account.createdAt || new Date().toISOString()
   const rawAccountOwner = account.accountOwner || account.ownerName || account.raw?.accountOwner || account.raw?.ownerName || ownerByUserId[account.userId] || 'Unassigned'
   const accountOwner = getCanonicalCrmUserName(rawAccountOwner) || titleize(rawAccountOwner)
-  const accountOwnerCode = getCrmOwnerCode(accountOwner)
+  const accountOwnerCode = String(
+    account.accountOwnerCode
+    || account.ownerCode
+    || account.raw?.accountOwnerCode
+    || account.raw?.ownerCode
+    || account.raw?.formData?.accountOwnerCode
+    || account.raw?.formData?.ownerCode
+    || getCrmOwnerCode(accountOwner)
+    || ''
+  ).trim()
   const accountNumber = account.accountNumber || account.accountNo || account.account_no || account.raw?.accountNumber || account.raw?.accountNo || account.raw?.account_no || accountOwnerCode || ''
   const accountOwnerDisplay = accountOwner
-  const status = titleize(account.status || account.accountState || stageMeta.label)
+  const status = titleize(account.status || account.accountStatus || account.accountState || stageMeta.label)
   const reasonForLost =
     account.reasonForLost ||
     ((stage === 'order_lost' || stage === 'rejected') ? account.remark || 'Not specified' : '')
   const primaryEmail = account.email || account.contactEmail || primaryContact.email || account.alternateEmail || ''
   const primaryPhone = account.phone || account.contactPhone || primaryContact.phone || account.contactMobile || primaryContact.mobile || account.alternatePhone || ''
-  const accountState = titleize(account.accountState || '')
+  const accountState = titleize(account.accountState || account.status || account.accountStatus || stageMeta.label)
   const accountSource = titleize(account.accountSource || account.source || '')
   const accountSubsource = titleize(account.accountSubsource || account.subsource || '')
   const addedByName = resolveAddedByName(account)
@@ -147,6 +156,7 @@ export const normalizeAccountRecord = (account = {}, index = 0, options = {}) =>
     stage,
     stageLabel: stageMeta.label,
     status,
+    accountStatus: status,
     email: primaryEmail,
     phone: primaryPhone,
     website: account.website || '',

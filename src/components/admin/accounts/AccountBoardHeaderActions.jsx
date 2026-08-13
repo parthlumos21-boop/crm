@@ -17,6 +17,8 @@ import { exportAccountsBoardWorkbook } from '../../../features/adminAccounts/uti
 import { ExcelExportMenuButton } from '../../common/ExcelExportButton'
 import './AccountBoardHeaderActions.css'
 
+const SHOW_BULK_ACTIONS = false
+
 const AccountBoardHeaderActions = ({
   view,
   currentStageRows,
@@ -139,7 +141,7 @@ const AccountBoardHeaderActions = ({
 
   return (
     <div className="account-board-header-actions" ref={activeMenuRef}>
-      {actions.showBulk ? (
+      {SHOW_BULK_ACTIONS && actions.showBulk ? (
         <div className="account-board-header-menu-wrap">
           <button
             ref={bulkTriggerRef}

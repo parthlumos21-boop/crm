@@ -29,16 +29,14 @@ const isKevalVShah = (user = {}) => {
 }
 
 const cardMotion = {
-  hidden: { opacity: 0, y: 52, scale: 0.94, filter: 'blur(10px)' },
+  hidden: { opacity: 0, y: 12 },
   visible: (index = 0) => ({
     opacity: 1,
     y: 0,
-    scale: 1,
-    filter: 'blur(0px)',
     transition: {
-      duration: 0.95,
-      delay: index * 0.16,
-      ease: [0.22, 1, 0.36, 1],
+      duration: 0.18,
+      delay: Math.min(index * 0.03, 0.12),
+      ease: 'easeOut',
     },
   }),
 }
@@ -67,8 +65,8 @@ const AdminLaunchpad = () => {
   useEffect(() => subscribeAdminDealCustomViews(setDealCustomViews), [])
 
   const handleDefaultSelection = (route) => {
-    setAdminDefaultModuleRoute(user, route)
     setDefaultRoute(route)
+    setAdminDefaultModuleRoute(user, route)
   }
 
   const defaultModuleLabel = useMemo(() => (
@@ -161,8 +159,7 @@ const AdminLaunchpad = () => {
                           custom={moduleIndex}
                           variants={cardMotion}
                           initial="hidden"
-                          whileInView="visible"
-                          viewport={{ once: true, amount: 0.3 }}
+                          animate="visible"
                           className={`lp-card lp-card--${module.accent}`}
                         >
                           <button

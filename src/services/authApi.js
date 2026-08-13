@@ -52,4 +52,12 @@ export const authApi = {
   async logoutAllSessions() {
     return apiClient.delete('/auth/logout-all')
   },
+
+  async submitPasswordResetRequest({ login, newPassword, confirmPassword }) {
+    return apiClient.post('/auth/password-reset-requests', {
+      login,
+      newPassword,
+      confirmPassword,
+    })
+  },
 }

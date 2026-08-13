@@ -58,7 +58,6 @@ const REQUIRED_FIELDS_BY_STEP = {
   ],
   3: [
     { key: 'contactPerson', label: 'Contact Name', message: 'Please provide Contact Name.' },
-    { key: 'contactPhone', label: 'Contact Phone', message: 'Please provide Contact Phone.' },
   ],
 }
 
@@ -1058,6 +1057,9 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
     setSaving(true)
 
     const result = await createSupportRequest({
+      customerId: formData.customerId,
+      customerNumber: formData.customerNumber.trim(),
+      customerNo: formData.customerNumber.trim(),
       requestType: formData.requestType,
       title: formData.title.trim() || `${formData.requestType || 'Service Request'} - ${formData.customerName.trim()}`,
       description: formData.description.trim(),
@@ -1131,7 +1133,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
               {currentStep < STEP_CONFIG.length - 1 ? (
                 <button
                   type="button"
-                  className="sr-new-btn sr-new-btn--primary"
+                  className="sr-new-btn sr-new-btn--primary btn-red-theme"
                   onClick={handleNext}
                 >
                   <span>Next</span>
@@ -1140,7 +1142,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
               ) : (
                 <button
                   type="submit"
-                  className="sr-new-btn sr-new-btn--primary"
+                  className="sr-new-btn sr-new-btn--primary btn-red-theme"
                   disabled={saving}
                 >
                   {saving ? 'Saving...' : 'Create SR'}
@@ -1149,7 +1151,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
 
               <button
                 type="button"
-                className="sr-new-btn sr-new-btn--cancel"
+                className="sr-new-btn sr-new-btn--cancel btn-red-theme"
                 onClick={handleCancel}
               >
                 Cancel
@@ -1194,7 +1196,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                       value={selectedCustomerSummary}
                       placeholder="Search in Customer list"
                     />
-                    <button type="button" className="sr-new-customer-search-btn" onClick={() => setIsCustomerModalOpen(true)}>
+                    <button type="button" className="sr-new-customer-search-btn btn-red-theme" onClick={() => setIsCustomerModalOpen(true)}>
                       <FiSearch />
                     </button>
                   </div>
@@ -1223,14 +1225,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                   {errors.customerEmail ? <small>{errors.customerEmail}</small> : null}
                 </label>
 
-                <label className="sr-new-field">
-                  <span>Phone</span>
-                  <input
-                    type="text"
-                    value={formData.customerPhone}
-                    onChange={(event) => handleChange('customerPhone', event.target.value)}
-                  />
-                </label>
+
 
                 <label className={`sr-new-field ${errors.customerMobile ? 'sr-new-field--error' : ''}`}>
                   <span>{requiredLabel('Mobile Number')}</span>
@@ -1242,7 +1237,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                   {errors.customerMobile ? <small>{errors.customerMobile}</small> : null}
                 </label>
 
-                <label className={`sr-new-field sr-new-field--full ${errors.customerCompany ? 'sr-new-field--error' : ''}`}>
+                <label className={`sr-new-field ${errors.customerCompany ? 'sr-new-field--error' : ''}`}>
                   <span>{requiredLabel('Company Name')}</span>
                   <input
                     type="text"
@@ -1407,7 +1402,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                         />
                         <button
                           type="button"
-                          className="sr-location-icon-btn"
+                          className="sr-location-icon-btn btn-red-theme"
                           onClick={handleLocationSearch}
                           disabled={locationBusy}
                           aria-label="Search location"
@@ -1630,15 +1625,7 @@ const AddSupportRequest = ({ panelMode = false, onClose, onSuccess }) => {
                   />
                 </label>
 
-                <label className={`sr-new-field ${errors.contactPhone ? 'sr-new-field--error' : ''}`}>
-                  <span>{requiredLabel('Contact Phone')}</span>
-                  <input
-                    type="text"
-                    value={formData.contactPhone}
-                    onChange={(event) => handleChange('contactPhone', event.target.value)}
-                  />
-                  {errors.contactPhone ? <small>{errors.contactPhone}</small> : null}
-                </label>
+
 
                 <label className="sr-new-field">
                   <span>Contact Mobile</span>

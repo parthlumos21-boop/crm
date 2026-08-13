@@ -100,8 +100,15 @@
 .admin-add-deal-step-active .admin-add-deal-step-count,
 .admin-add-deal-step-complete .admin-add-deal-step-count {
   border-color: var(--text-primary);
-  background: linear-gradient(180deg, #56bae7 0%, #2d7db0 100%);
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--text-primary);
+}
+
+.layout--admin .admin-add-deal-step-active .admin-add-deal-step-count,
+.layout--admin .admin-add-deal-step-complete .admin-add-deal-step-count {
+  border-color: var(--text-primary) !important;
+  background: #ffffff !important;
+  color: var(--text-primary) !important;
 }
 
 .admin-add-deal-step-arrow {
@@ -712,4 +719,44 @@
 [data-theme="dark"] .admin-add-deal-contact-flag {
   background: #14202a;
   color: #c7dae6;
+}
+
+.admin-add-deal-customer-results {
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
+}
+
+.admin-add-deal-customer-option,
+.admin-add-deal-customer-option:hover,
+.admin-add-deal-customer-option-active {
+  border-bottom-color: rgba(255, 255, 255, 0.3) !important;
+  background: var(--admin-red, #dc2626) !important;
+  color: #ffffff !important;
+}
+
+.admin-add-deal-customer-option:hover,
+.admin-add-deal-customer-option-active {
+  background: var(--admin-red-dark, #b91c1c) !important;
+}
+
+.admin-add-deal-customer-option-meta,
+.admin-add-deal-empty-results,
+.admin-add-deal-customer-option-name {
+  color: #ffffff !important;
+}
+
+.admin-add-deal-customer-option-source {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .admin-add-deal-step-count,
+[data-theme="dark"] .admin-add-deal-step-active .admin-add-deal-step-count,
+[data-theme="dark"] .admin-add-deal-step-complete .admin-add-deal-step-count,
+.layout--admin[data-theme="dark"] .admin-add-deal-step-active .admin-add-deal-step-count,
+.layout--admin[data-theme="dark"] .admin-add-deal-step-complete .admin-add-deal-step-count {
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  background: #ffffff !important;
+  color: #111827 !important;
 }

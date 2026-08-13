@@ -117,84 +117,31 @@ const parseAndDeduplicateMessages = (message, fallback = 'An error occurred') =>
   return uniqueMessages.join(' | ') || fallback
 }
 
-const DEAL_SEARCH_FIELD_CATALOG = [
+const DEAL_TABLE_COLUMNS = [
   { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search Deal No.', sourceField: 'deal_number' },
-  { key: 'quotationNumber', label: 'Quotation Number', placeholder: 'Search Quotation No.', sourceField: 'quotation_number' },
-  { key: 'dealDate', label: 'Quotation Date', placeholder: 'Search Quotation Date', sourceField: 'quotation_date' },
-  { key: 'dealOwner', label: 'Quotation Owner', placeholder: 'Search Quotation Owner', sourceField: 'owner' },
-  { key: 'companyCustomerName', label: 'Company / Customer Name', placeholder: 'Search Company / Customer', sourceField: 'company_customer_name' },
-  { key: 'companyName', label: 'Company Name', placeholder: 'Search Company Name', sourceField: 'company_name' },
-  { key: 'customerName', label: 'Customer Name', placeholder: 'Search Customer Name', sourceField: 'customer_name' },
+  { key: 'dealName', label: 'Deal Name', placeholder: 'Search Deal Name', sourceField: 'deal_name' },
+  { key: 'dealDate', label: 'Deal Date', placeholder: 'Search Deal Date', sourceField: 'deal_date' },
+  { key: 'dealOwner', label: 'Deal Owner', placeholder: 'Search Deal Owner', sourceField: 'owner' },
+  { key: 'dealType', label: 'Deal Type', placeholder: 'Search Deal Type', sourceField: 'deal_type' },
+  { key: 'dealStatus', label: 'Deal Status', placeholder: 'Search Deal Status', sourceField: 'status' },
   { key: 'projectName', label: 'Project Name', placeholder: 'Search Project Name', sourceField: 'project_name' },
-  { key: 'dealValue', label: 'Amount', placeholder: 'Search Amount', sourceField: 'deal_value' },
-  { key: 'dealStatus', label: 'Status', placeholder: 'Search Status', sourceField: 'status' },
-  { key: 'orderCustomerStatusOld', label: 'Old', groupLabel: 'Customer Order Status', placeholder: 'Search Old Status', sourceField: 'order_customer_status_old' },
-  { key: 'orderCustomerStatusNew', label: 'New', groupLabel: 'Customer Order Status', placeholder: 'Search New Status', sourceField: 'order_customer_status_new' },
-  { key: 'convertToPo', label: 'Convert to PO', placeholder: 'Search Convert to PO', sourceField: 'convert_to_po' },
+  { key: 'dealValue', label: 'Deal Value', placeholder: 'Search Deal Value', sourceField: 'deal_value' },
+  { key: 'convertToPo', label: 'Convert PO', placeholder: 'Search Convert PO', sourceField: 'convert_to_po' },
   { key: 'poValue', label: 'PO Value', placeholder: 'Search PO Value', sourceField: 'po_value' },
   { key: 'jobNo', label: 'Job No.', placeholder: 'Search Job No.', sourceField: 'job_no' },
   { key: 'reasonForLostOrder', label: 'Lost Order Reason', placeholder: 'Search Lost Order Reason', sourceField: 'reason_for_lost_order' },
-  { key: 'customerNumber', label: 'Customer No.', placeholder: 'Search Customer No.', sourceField: 'customer_number' },
-  { key: 'dealType', label: 'Deal Type', placeholder: 'Search Deal Type', sourceField: 'deal_type' },
-  { key: 'dealName', label: 'Deal Name', placeholder: 'Search Deal Name', sourceField: 'deal_name' },
-  { key: 'address', label: 'Address', placeholder: 'Search Address', sourceField: 'address' },
-  { key: 'dealCoOwners', label: 'Deal Co-Owners', placeholder: 'Search Deal Co-Owners', sourceField: 'deal_co_owners' },
-  { key: 'actualClosureDate', label: 'Actual Closure Date', placeholder: 'Search Actual Closure Date', sourceField: 'actual_closure_date' },
-  { key: 'expectedClosureDate', label: 'Expected Closure Date', placeholder: 'Search Expected Closure Date', sourceField: 'expected_closure_date' },
-  { key: 'probability', label: 'Probability', placeholder: 'Search Probability', sourceField: 'probability' },
-  { key: 'dealScore', label: 'Deal Score', placeholder: 'Search Deal Score', sourceField: 'deal_score' },
-  { key: 'description', label: 'Description', placeholder: 'Search Description', sourceField: 'description' },
-  { key: 'productCategory', label: 'Product Category', placeholder: 'Search Product Category', sourceField: 'product_category' },
-  { key: 'consultantName', label: 'Consultant Name', placeholder: 'Search Consultant Name', sourceField: 'consultant_name' },
-  { key: 'contactName', label: 'Contact Name', placeholder: 'Search Contact Name', sourceField: 'contact_name' },
-  { key: 'gstin', label: 'GSTIN', placeholder: 'Search GSTIN', sourceField: 'gstin' },
-  { key: 'phone', label: 'Phone', placeholder: 'Search Phone', sourceField: 'phone' },
-  { key: 'email', label: 'Email', placeholder: 'Search Email', sourceField: 'email' },
-  { key: 'quotationCustomerStatus', label: 'Status Of Customer as per Quotation Given', placeholder: 'Search Quotation Status', sourceField: 'quotation_customer_status' },
-  { key: 'orderCustomerStatus', label: 'Status Of Customer as per Order Received', placeholder: 'Search Order Status', sourceField: 'order_customer_status' },
-  { key: 'accountName', label: 'Linked Account Name', placeholder: 'Search Linked Account Name', sourceField: 'account_name' },
-  { key: 'accountNumber', label: 'Account No.', placeholder: 'Search Account No.', sourceField: 'account_number' },
-  { key: 'city', label: 'City', placeholder: 'Search City', sourceField: 'city' },
-  { key: 'companyProfile', label: 'Company Profile', placeholder: 'Search Company Profile', sourceField: 'company_profile' },
-  { key: 'latestRemark', label: 'Latest Remark', placeholder: 'Search Latest Remark', sourceField: 'latest_remark' },
-  { key: 'createdDate', label: 'Created Date', placeholder: 'Search Created Date', sourceField: 'created_at' },
-  { key: 'location', label: 'Location', placeholder: 'Search Location', sourceField: 'location' },
+]
+
+const DEAL_SEARCH_FIELD_CATALOG = [
+  ...DEAL_TABLE_COLUMNS,
 ]
 
 const DEAL_GRID_COLUMNS = [
-  { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search Deal No.' },
-  { key: 'quotationNumber', label: 'Quotation Number', placeholder: 'Search Quotation No.' },
-  { key: 'dealDate', label: 'Quotation Date', placeholder: 'Search Quotation Date' },
-  { key: 'dealOwner', label: 'Quotation Owner', placeholder: 'Search Quotation Owner' },
-  { key: 'companyCustomerName', label: 'Company / Customer Name', placeholder: 'Search Company / Customer' },
-  { key: 'projectName', label: 'Project Name', placeholder: 'Search Project Name' },
-  { key: 'dealValue', label: 'Amount', placeholder: 'Search Amount' },
-  { key: 'dealStatus', label: 'Status', placeholder: 'Search Status' },
-  { key: 'quotationCustomerStatus', label: 'Quotation Status', placeholder: 'Search Quotation Status' },
-  { key: 'orderCustomerStatusOld', label: 'Old', groupLabel: 'Customer Order Status', placeholder: 'Search Old Status' },
-  { key: 'orderCustomerStatusNew', label: 'New', groupLabel: 'Customer Order Status', placeholder: 'Search New Status' },
-  { key: 'convertToPo', label: 'Convert to PO', placeholder: 'Search Convert to PO' },
-  { key: 'poValue', label: 'PO Value', placeholder: 'Search PO Value' },
-  { key: 'jobNo', label: 'Job No.', placeholder: 'Search Job No' },
-  { key: 'reasonForLostOrder', label: 'Lost Order Reason', placeholder: 'Search Reason' },
+  ...DEAL_TABLE_COLUMNS,
 ]
 
 const VIEW_DEAL_GRID_COLUMNS = [
-  { key: 'dealNumber', label: 'Deal No.', placeholder: 'Search Deal No.' },
-  { key: 'quotationNumber', label: 'Quotation Number', placeholder: 'Search Quotation No.' },
-  { key: 'dealDate', label: 'Quotation Date', placeholder: 'Search Quotation Date' },
-  { key: 'dealOwner', label: 'Quotation Owner', placeholder: 'Search Quotation Owner' },
-  { key: 'companyCustomerName', label: 'Company / Customer Name', placeholder: 'Search Company / Customer' },
-  { key: 'projectName', label: 'Project Name', placeholder: 'Search Project Name' },
-  { key: 'dealValue', label: 'Amount', placeholder: 'Search Amount' },
-  { key: 'dealStatus', label: 'Status', placeholder: 'Search Status' },
-  { key: 'quotationCustomerStatus', label: 'Quotation Status', placeholder: 'Search Quotation Status' },
-  { key: 'orderCustomerStatusOld', label: 'Old', groupLabel: 'Customer Order Status', placeholder: 'Search Old Status' },
-  { key: 'orderCustomerStatusNew', label: 'New', groupLabel: 'Customer Order Status', placeholder: 'Search New Status' },
-  { key: 'convertToPo', label: 'Convert to PO (Yes / No)', placeholder: 'Search Convert to PO' },
-  { key: 'poValue', label: 'PO Value', placeholder: 'Search PO Value' },
-  { key: 'jobNo', label: 'Job No.', placeholder: 'Search Job No' },
-  { key: 'reasonForLostOrder', label: 'Lost Order Reason', placeholder: 'Search Reason' },
+  ...DEAL_TABLE_COLUMNS,
 ]
 
 const CUSTOM_LOCATION_SELECT_OPTIONS = [
@@ -205,16 +152,13 @@ const CUSTOM_LOCATION_SELECT_OPTIONS = [
 
 const SEARCH_DEAL_REQUIRED_GRID_KEYS = [
   'dealNumber',
-  'quotationNumber',
+  'dealName',
   'dealDate',
   'dealOwner',
-  'companyCustomerName',
+  'dealType',
+  'dealStatus',
   'projectName',
   'dealValue',
-  'dealStatus',
-  'quotationCustomerStatus',
-  'orderCustomerStatusOld',
-  'orderCustomerStatusNew',
   'convertToPo',
   'poValue',
   'jobNo',
@@ -694,7 +638,6 @@ const CLASSIFICATION_FILTER_OWNER_NAMES = [
   'Nita Bhavsar',
   'Rajeshree Parmar',
   'Samir Sheth',
-  'Tajamul Rafique Solkar',
 ]
 
 const loadDealSearchPreferences = () => {
@@ -899,12 +842,49 @@ const getDealCompanyCustomerName = (deal = {}, linkedCustomer = null) => (
   ].filter(Boolean))].join(' / ')
 )
 
+const mergeDealSources = (deals = [], convertedDeals = []) => {
+  const normalDealSourceIds = new Set(
+    deals
+      .map((deal) => String(deal?.sourceDealId || deal?.dealId || deal?.id || '').trim())
+      .filter(Boolean)
+  )
+
+  const mergedDeals = [...deals]
+  convertedDeals.forEach((deal) => {
+    const sourceDealId = String(deal?.sourceDealId || deal?.dealId || '').trim()
+    const fallbackKey = String(deal?.id || '').trim()
+
+    if (sourceDealId && normalDealSourceIds.has(sourceDealId)) {
+      return
+    }
+
+    if (!sourceDealId && fallbackKey && normalDealSourceIds.has(fallbackKey)) {
+      return
+    }
+
+    mergedDeals.push(deal)
+  })
+
+  return mergedDeals
+}
+
+const normalizeDealCityForFilter = (value) => {
+  const normalizedValue = String(value || '').trim().toLowerCase()
+  if (normalizedValue === 'ahmedabad' || normalizedValue === 'ahmadabad') return 'ahmadabad'
+  if (normalizedValue === 'baroda' || normalizedValue === 'vadodara') return 'vadodara'
+  return String(value || '').trim()
+}
+
 const getDealBranchLocation = (deal = {}, linkedCustomer = null) => normalizeDealCity(
   deal.city
   || deal.location
   || deal.branch
   || deal.branchLocation
   || deal.projectLocation
+  || deal.data?.city
+  || deal.data?.location
+  || deal.data?.branchLocation
+  || deal.data?.projectLocation
   || linkedCustomer?.city
   || linkedCustomer?.location
   || ''
@@ -1065,7 +1045,7 @@ const isConvertedDealRecord = (deal = {}) => Boolean(
 const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition = null }) => {
   const location = useLocation()
   const navigate = useNavigate()
-  const { accounts, deals, quotations, createDeal, updateDeal, deleteDeal, createConvertedDeal, addNotification, refreshData } = useData()
+  const { accounts, deals, convertedDeals, quotations, createDeal, updateDeal, deleteDeal, createConvertedDeal, addNotification, refreshData } = useData()
   const { user } = useAuth()
   const { isOpen, data, open, close } = useModal()
   const [hasAutoOpened, setHasAutoOpened] = useState(false)
@@ -1321,12 +1301,26 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     }, {}),
     [availableUsers]
   )
+  const shouldReadDealsDirectlyForTable = (
+    !customViewDefinition
+    && (
+      effectiveVariantKey === 'view'
+      || effectiveVariantKey === 'search'
+      || effectiveVariantKey === 'projectDetails'
+      || effectiveVariantKey === 'ahmadabad'
+      || effectiveVariantKey === 'vadodara'
+    )
+  )
 
   const scopedDeals = useMemo(() => {
-    const sourceDeals = deals || []
+    let sourceDeals = deals || []
+    if (isAdmin || variantKey === 'search' || variantKey === 'view') {
+      sourceDeals = mergeDealSources(deals || [], convertedDeals || [])
+    }
 
     const normalizedDeals = sourceDeals
-      .map((deal) => {
+      .filter((deal) => deal?.id)
+      .map((deal, index) => {
         const linkedAccount = accountDirectory[String(deal.accountId || '')]
           || accountNameDirectory[normalizeSearchValue(deal.accountName || deal.customerName || '')]
           || null
@@ -1348,16 +1342,16 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
         return {
           ...deal,
-          projectName: deal.projectName || linkedAccount?.projectName || '',
+          projectName: deal.projectName || linkedAccount?.projectName || deal.name || deal.title || '',
           accountOwner: deal.accountOwnerDisplay || deal.accountOwner || linkedAccount?.accountOwnerDisplay || linkedAccount?.accountOwnerName || linkedAccount?.accountOwner || deal.customerOwnerDisplay || deal.customerOwner || '',
-          city: normalizeDealCity(deal.city || deal.location || deal.branch || deal.branchLocation || deal.projectLocation || linkedAccount?.raw?.city || linkedAccount?.location || linkedCustomer?.city || linkedCustomer?.location || ''),
+          city: normalizeDealCityForFilter(deal.city || deal.location || deal.branch || deal.branchLocation || deal.projectLocation || linkedAccount?.raw?.city || linkedAccount?.location || linkedCustomer?.city || linkedCustomer?.location || ''),
           ownerUserId: resolvedOwnerUserId,
           ownerId: resolvedOwnerUserId,
           assignedTo: String(deal.assignedTo || deal.assignedUserId || resolvedOwnerUserId || ''),
           assignedUserId: String(deal.assignedUserId || deal.assignedTo || resolvedOwnerUserId || ''),
           ownerName: deal.ownerName || resolvedOwnerName,
           dealOwner: resolvedOwnerName,
-          dealNumber: deal.dealNumber || '',
+          dealNumber: deal.dealNumber || `DL${String(index + 1).padStart(5, '0')}`,
           dealDate: deal.dealDate || deal.createdAt || '',
           dealType: deal.dealType || deal.customerCategory || linkedAccount?.accountCategory || deal.stage || '',
           quotationCustomerStatus: deal.quotationCustomerStatus || '',
@@ -1384,13 +1378,15 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         }
       })
 
-    const variantDeals = normalizedDeals.filter(viewConfig.filterFn)
+    const variantDeals = shouldReadDealsDirectlyForTable
+      ? normalizedDeals
+      : normalizedDeals.filter(viewConfig.filterFn)
     const customViewDeals = customViewDefinition
       ? getCustomViewDeals(variantDeals, customViewDefinition)
       : variantDeals
 
     return customViewDeals.sort(viewConfig.sortFn)
-  }, [accountDirectory, accountNameDirectory, customViewDefinition, customerDirectory, deals, userDirectory, viewConfig.filterFn, viewConfig.sortFn])
+  }, [accountDirectory, accountNameDirectory, customViewDefinition, customerDirectory, deals, convertedDeals, isAdmin, shouldReadDealsDirectlyForTable, variantKey, userDirectory, viewConfig.filterFn, viewConfig.sortFn])
   const roleSelectionOptions = useMemo(() => {
     const availableUserByOwnerName = availableUsers.reduce((lookup, entry) => {
       const normalizedName = normalizeOwnerValue(entry.ownerDisplayName || entry.name)
@@ -1535,21 +1531,22 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       return ownerIdSet.has(ownerId) || appliedClassificationOwnerNameSet.has(ownerLabel)
     })
   }, [appliedClassificationOwnerIds, appliedClassificationOwnerNameSet, appliedClassificationOwners.length, filteredItems, userDirectory])
+  const tableSourceDeals = shouldReadDealsDirectlyForTable ? drilldownScopedDeals : classificationFilteredDeals
 
   const displayedDeals = useMemo(
-    () => [...classificationFilteredDeals].sort(viewConfig.sortFn),
-    [classificationFilteredDeals, viewConfig.sortFn]
+    () => [...tableSourceDeals].sort(viewConfig.sortFn),
+    [tableSourceDeals, viewConfig.sortFn]
   )
 
   const adminGridRows = useMemo(() => (
-    displayedDeals.map((deal) => {
+    displayedDeals.map((deal, index) => {
       const linkedCustomer = customerDirectory[deal.customerId] || null
 
       return {
         id: deal.id,
         rawDeal: deal,
         dealId: deal.id || '',
-        dealNumber: deal.dealNumber || '',
+        dealNumber: deal.dealNumber || `DL${String(index + 1).padStart(5, '0')}`,
         quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
         location: deal.city || deal.location || linkedCustomer?.city || linkedCustomer?.location || '',
         customerNumber: deal.customerNumber || linkedCustomer?.customerNumber || '',
@@ -1679,8 +1676,8 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     })
   ), [adminGridRows, appliedOwnerWiseOwnerId, dealStatusTableFilter, gridFilterRules, gridFilters, ownerNameById])
   const displayGridRows = useMemo(
-    () => filteredGridRows.filter((row) => hasDealTableData(row, activeGridColumns)),
-    [activeGridColumns, filteredGridRows]
+    () => filteredGridRows,
+    [filteredGridRows]
   )
 
   const getGridSortValue = (row, columnKey) => {
@@ -1866,7 +1863,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   }, [appliedBoardStatuses, boardOwnership, displayedDeals, user?.id, user?.name])
 
   const ownerWiseAllRows = useMemo(() => (
-    displayedDeals.map((deal) => {
+    displayedDeals.map((deal, index) => {
       const linkedCustomer = customerDirectory[deal.customerId] || null
 
       return {
@@ -1874,7 +1871,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         rawDeal: deal,
         ownerKey: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
         dealId: deal.id || '',
-        dealNumber: deal.dealNumber || '',
+        dealNumber: deal.dealNumber || `DL${String(index + 1).padStart(5, '0')}`,
         quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
         location: getDealBranchLocation(deal, linkedCustomer),
         customerName: getDealCustomerName(deal, linkedCustomer),
@@ -1910,8 +1907,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
   const projectDetailsAllRows = useMemo(() => (
     displayedDeals
-      .filter((deal) => String(deal.projectName || '').trim() !== '')
-      .map((deal) => {
+      .map((deal, index) => {
         const linkedCustomer = customerDirectory[deal.customerId] || null
 
         return {
@@ -1919,9 +1915,9 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
           rawDeal: deal,
           ownerKey: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
           dealId: deal.id || '',
-          dealNumber: deal.dealNumber || '',
+          dealNumber: deal.dealNumber || `DL${String(index + 1).padStart(5, '0')}`,
           quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
-          location: deal.city || deal.location || linkedCustomer?.city || linkedCustomer?.location || '',
+          location: getDealBranchLocation(deal, linkedCustomer),
           customerName: getDealCustomerName(deal, linkedCustomer),
           customerNumber: deal.customerNumber || linkedCustomer?.customerNumber || '',
           companyName: getDealCompanyName(deal, linkedCustomer),
@@ -1952,7 +1948,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   ), [customerDirectory, displayedDeals, quotationNumberByDealId, quotationNumberByDealNumber])
 
   const ahmadabadAllRows = useMemo(() => (
-    displayedDeals.map((deal) => {
+    displayedDeals.map((deal, index) => {
       const linkedCustomer = customerDirectory[deal.customerId] || null
 
       return {
@@ -1960,7 +1956,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         rawDeal: deal,
         ownerKey: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
         dealId: deal.id || '',
-        dealNumber: deal.dealNumber || '',
+        dealNumber: deal.dealNumber || `DL${String(index + 1).padStart(5, '0')}`,
         quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
         location: getDealBranchLocation(deal, linkedCustomer),
         customerName: getDealCustomerName(deal, linkedCustomer),
@@ -1994,7 +1990,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   ), [customerDirectory, displayedDeals, quotationNumberByDealId, quotationNumberByDealNumber])
 
   const vadodaraAllRows = useMemo(() => (
-    displayedDeals.map((deal) => {
+    displayedDeals.map((deal, index) => {
       const linkedCustomer = customerDirectory[deal.customerId] || null
 
       return {
@@ -2002,7 +1998,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         rawDeal: deal,
         ownerKey: deal.dealOwnerDisplay || getCrmOwnerDisplay(deal.dealOwner || deal.ownerName || '') || deal.dealOwner || deal.ownerName || '',
         dealId: deal.id || '',
-        dealNumber: deal.dealNumber || '',
+        dealNumber: deal.dealNumber || `DL${String(index + 1).padStart(5, '0')}`,
         quotationNumber: getDealQuotationNumber(deal, quotationNumberByDealId, quotationNumberByDealNumber),
         location: getDealBranchLocation(deal, linkedCustomer),
         customerName: getDealCustomerName(deal, linkedCustomer),
@@ -2114,8 +2110,8 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     })
   ), [activeOwnerScopedColumns, adminGridRowById, appliedOwnerWiseOwnerId, gridFilterRules, gridFilters, ownerNameById, ownerScopedFilters, ownerScopedRows])
   const displayOwnerScopedRows = useMemo(
-    () => filteredOwnerScopedRows.filter((row) => hasDealTableData(row, activeOwnerScopedColumns)),
-    [activeOwnerScopedColumns, filteredOwnerScopedRows]
+    () => filteredOwnerScopedRows,
+    [filteredOwnerScopedRows]
   )
 
   const sortedOwnerScopedRows = useMemo(() => {
@@ -2740,7 +2736,9 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       return
     }
 
-    navigate(buildAdminManageDealUrl(activeDeal.id), {
+    navigate(isAdmin
+      ? buildAdminManageDealUrl(activeDeal.id)
+      : `/deals/manage/${encodeURIComponent(activeDeal.id)}`, {
       state: {
         fromPath: `${location.pathname}${location.search || ''}`,
         dealSnapshot: activeDeal,
@@ -3558,11 +3556,13 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
         <div className="deals-crm-number-menu" data-deal-card-menu>
           <button
             type="button"
-            className="deals-crm-number-button deals-crm-number-button-label"
-            onClick={() => handleViewDeal(row)}
+            className="deals-crm-number-button deals-crm-number-button-label deals-deal-number-link admin-accounts-cell-link"
+            onClick={(event) => handleToggleDealMenu(event, row?.rawDeal?.id || row?.id)}
+            onDoubleClick={() => handleManageDeal(row)}
           >
             <span className="deals-crm-number-button-content">
               <span>{row.dealNumber || ''}</span>
+              <FaEllipsisV className="deals-crm-number-button-dots" aria-hidden="true" />
             </span>
           </button>
           {renderInlineDealActionMenu(row)}
@@ -3616,15 +3616,6 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
     return (
       <>
-        <button
-          type="button"
-          className="deals-crm-number-button deals-crm-number-button-arrow"
-          aria-label={`Deal ${activeDeal?.dealNumber || ''}`}
-          onClick={(event) => handleToggleDealMenu(event, activeDeal?.id)}
-        >
-          <FaEllipsisV />
-        </button>
-
         {isMenuOpen && dealTableMenuPosition ? createPortal(
           (
             <div
@@ -3691,15 +3682,17 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
   const renderOwnerScopedCell = (row, columnKey) => {
     if (columnKey === 'dealNumber') {
       return (
-        <td className="deals-crm-number-cell">
+        <td className="deals-crm-number-cell" onDoubleClick={() => handleManageDeal(row)}>
           <div className="deals-crm-number-menu" data-deal-card-menu>
             <button
               type="button"
-              className="deals-crm-number-button deals-crm-number-button-label"
-              onClick={() => handleViewDeal(row)}
+              className="deals-crm-number-button deals-crm-number-button-label deals-deal-number-link admin-accounts-cell-link"
+              onClick={(event) => handleToggleDealMenu(event, row?.rawDeal?.id || row?.id)}
+              onDoubleClick={() => handleManageDeal(row)}
             >
               <span className="deals-crm-number-button-content">
                 <span>{row.dealNumber}</span>
+                <FaEllipsisV className="deals-crm-number-button-dots" aria-hidden="true" />
               </span>
             </button>
             {renderInlineDealActionMenu(row)}
@@ -3708,7 +3701,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
       )
     }
 
-    return <td>{renderDealGridCellContent(row, columnKey)}</td>
+    return <td onDoubleClick={() => handleManageDeal(row)}>{renderDealGridCellContent(row, columnKey)}</td>
   }
 
   const hasActiveAdvancedFilters = (
@@ -3719,7 +3712,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
     || Boolean(appliedOwnerWiseOwnerId && appliedOwnerWiseOwnerId !== 'all')
     || appliedClassificationOwners.length > 0
   )
-  const showInlineGridFilters = showGridFilters
+  const showInlineGridFilters = showGridFilters || shouldReadDealsDirectlyForTable
 
   const renderDealToolModals = () => (
     <>
@@ -5262,15 +5255,17 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                         {activeGridColumns.map((column) => {
                           if (column.key === 'dealNumber') {
                             return (
-                              <td key={`${row.id}-${column.key}`} className="deals-crm-number-cell">
+                              <td key={`${row.id}-${column.key}`} className="deals-crm-number-cell" onDoubleClick={() => handleManageDeal(row)}>
                                 <div className="deals-crm-number-menu" data-deal-card-menu>
                                   <button
                                     type="button"
-                                    className="deals-crm-number-button deals-crm-number-button-label"
-                                    onClick={() => handleViewDeal(row)}
+                                    className="deals-crm-number-button deals-crm-number-button-label deals-deal-number-link admin-accounts-cell-link"
+                                    onClick={(event) => handleToggleDealMenu(event, row?.rawDeal?.id || row?.id)}
+                                    onDoubleClick={() => handleManageDeal(row)}
                                   >
                                     <span className="deals-crm-number-button-content">
                                       <span>{row[column.key] || ''}</span>
+                                      <FaEllipsisV className="deals-crm-number-button-dots" aria-hidden="true" />
                                     </span>
                                   </button>
                                   {renderInlineDealActionMenu(row)}
@@ -5278,7 +5273,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                               </td>
                             )
                           }
-                          return <td key={`${row.id}-${column.key}`}>{renderDealGridCellContent(row, column.key)}</td>
+                          return <td key={`${row.id}-${column.key}`} onDoubleClick={() => handleManageDeal(row)}>{renderDealGridCellContent(row, column.key)}</td>
                         })}
                       </tr>
                     ))}

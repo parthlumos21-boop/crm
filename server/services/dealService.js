@@ -12,15 +12,6 @@ const pickFirstDefined = (...values) => values.find((value) => value !== undefin
 const buildDealData = (body = {}, existing = null) => {
   const data = { ...(existing?.data || {}), ...body }
 
-  if (data.conversionSource === 'search-account' || data.convertedFromAccount === true || data.convertedFromAccount === 'true') {
-    delete data.accountName
-    delete data.accountNumber
-    delete data.linkedAccountName
-    delete data.linkedAccountNumber
-    delete data.companyName
-    delete data.companyProfile
-  }
-
   return data
 }
 
@@ -63,7 +54,15 @@ const buildPayload = (body = {}, actor, existing) => {
     title,
     ...(dealNumber ? { dealNumber } : {}),
     customerName: asTrimmedStringOrNull(pickFirstDefined(body.customerName, existing?.customerName)),
+    customerNumber: asTrimmedStringOrNull(pickFirstDefined(body.customerNumber, existing?.customerNumber, existing?.data?.customerNumber)),
     accountId: asOptionalInteger(pickFirstDefined(body.accountId, body.account_id, existing?.accountId)),
+    accountName: asTrimmedStringOrNull(pickFirstDefined(body.accountName, existing?.accountName, existing?.data?.accountName)),
+    accountNumber: asTrimmedStringOrNull(pickFirstDefined(body.accountNumber, existing?.accountNumber, existing?.data?.accountNumber)),
+    linkedAccountName: asTrimmedStringOrNull(pickFirstDefined(body.linkedAccountName, body.accountName, existing?.linkedAccountName, existing?.accountName, existing?.data?.linkedAccountName, existing?.data?.accountName)),
+    linkedAccountNumber: asTrimmedStringOrNull(pickFirstDefined(body.linkedAccountNumber, body.accountNumber, existing?.linkedAccountNumber, existing?.accountNumber, existing?.data?.linkedAccountNumber, existing?.data?.accountNumber)),
+    companyName: asTrimmedStringOrNull(pickFirstDefined(body.companyName, existing?.companyName, existing?.data?.companyName)),
+    companyProfile: asTrimmedStringOrNull(pickFirstDefined(body.companyProfile, existing?.companyProfile, existing?.data?.companyProfile)),
+    companyLogo: asTrimmedStringOrNull(pickFirstDefined(body.companyLogo, existing?.companyLogo, existing?.data?.companyLogo)),
     amount,
     value: amount,
     dealValue: amount,
@@ -89,6 +88,8 @@ const buildPayload = (body = {}, actor, existing) => {
     projectStatus: asTrimmedStringOrNull(pickFirstDefined(body.projectStatus, existing?.projectStatus)),
     poValue: asOptionalNumber(pickFirstDefined(body.poValue, existing?.poValue)),
     jobNo: asTrimmedStringOrNull(pickFirstDefined(body.jobNo, existing?.jobNo)),
+    city: asTrimmedStringOrNull(pickFirstDefined(body.city, body.location, existing?.city, existing?.location, existing?.data?.city, existing?.data?.location)),
+    location: asTrimmedStringOrNull(pickFirstDefined(body.location, body.city, existing?.location, existing?.city, existing?.data?.location, existing?.data?.city)),
     contactPerson: asTrimmedStringOrNull(pickFirstDefined(body.contactPerson, body.contactName, existing?.contactPerson, existing?.contactName)),
     contactName: asTrimmedStringOrNull(pickFirstDefined(body.contactName, body.contactPerson, existing?.contactName, existing?.contactPerson)),
     contactMobile: asTrimmedStringOrNull(pickFirstDefined(body.contactMobile, body.phone, existing?.contactMobile, existing?.phone)),
@@ -209,7 +210,6 @@ module.exports = {
       }
     }
 
-    await ensureUniqueDeal(actor, payload)
     const createdDeal = await baseService.create(actor, enhancedBody)
 
     if (isConvertedAccountPayload(createdDeal)) {

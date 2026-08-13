@@ -1,14 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import swatiLogo from '../../assets/swati-logo.png'
+import lumosLogo from '../../assets/lumos-logo.svg'
 import {
   FaBell,
+  FaCalendarAlt,
   FaChartPie,
   FaClipboardList,
   FaCloud,
   FaDesktop,
   FaHandshake,
   FaHeadset,
+  FaKey,
   FaList,
   FaListAlt,
   FaTh,
@@ -20,9 +23,7 @@ import { FiChevronDown, FiChevronRight, FiChevronUp } from 'react-icons/fi'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
 import { customerService } from '../../services/customerService'
-import { buildAdminCustomViewUrl, getAdminCustomViews, subscribeAdminCustomViews } from '../../features/adminAccounts/customViews/customViewStorage'
-import { ADMIN_DEAL_CUSTOM_VIEW_NEW_ROUTE, buildAdminDealCustomViewUrl } from '../../features/adminDeals/config/adminDealViews'
-import { getAdminDealCustomViews, subscribeAdminDealCustomViews } from '../../features/adminDeals/customViews/dealCustomViewStorage'
+
 import {
   USER_ACCOUNT_MENU_ITEMS,
   USER_SIDEBAR_GROUPS,
@@ -69,20 +70,38 @@ const LumosRailMark = () => (
   </span>
 )
 
-const SidebarTopCard = ({ isAdmin, isCollapsed, displayName }) => {
+const SidebarTopCard = ({ isAdmin, isCollapsed, displayName, user }) => {
+  const normalizedUser = String(user?.email || user?.username || user?.name || '').trim().toLowerCase()
+  const isKeval = normalizedUser === 'keval@swatiswitchgears.com' || normalizedUser === 'keval v shah'
+  const company = String(user?.company || '').trim().toLowerCase()
+  const isLumos = company.includes('lumos')
+
   return (
     <div className="sb-top-card" style={{ padding: '20px 16px', background: 'transparent', borderBottom: 'none' }}>
-      <img 
-        src={swatiLogo} 
-        alt="Swati Switchgears Logo" 
-        style={{ 
-          width: '100%', 
-          maxHeight: '60px', 
-          objectFit: 'contain',
-          opacity: isCollapsed ? 0.5 : 1,
-          transition: 'opacity 0.2s ease'
-        }} 
-      />
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', width: '100%', opacity: isCollapsed ? 0.5 : 1, transition: 'opacity 0.2s ease' }}>
+        {(isKeval || !isLumos) && (
+          <img 
+            src={swatiLogo} 
+            alt="Swati Switchgears Logo" 
+            style={{ 
+              width: isKeval ? '48%' : '100%', 
+              maxHeight: '60px', 
+              objectFit: 'contain',
+            }} 
+          />
+        )}
+        {(isKeval || isLumos) && (
+          <img 
+            src={lumosLogo} 
+            alt="Lumos Logo" 
+            style={{ 
+              width: isKeval ? '48%' : '100%', 
+              maxHeight: '60px', 
+              objectFit: 'contain',
+            }} 
+          />
+        )}
+      </div>
     </div>
   )
 }
@@ -121,6 +140,7 @@ const Sidebar = ({ isAdmin = false }) => {
   const isSupportRequestsRoute = isAdmin && location.pathname.startsWith('/admin/support-requests')
   const isRemindersRoute = isAdmin && location.pathname.startsWith('/admin/reminders')
   const isReportsRoute = isAdmin && location.pathname.startsWith('/admin/reports')
+  const isPasswordResetRoute = isAdmin && location.pathname.startsWith('/admin/password-reset-requests')
   const isTeamViewRoute = isAdmin && location.pathname.startsWith('/admin/team-view')
   const isQuotationRoute = isAdmin && (
     location.pathname.startsWith('/admin/quotation-manager')
@@ -170,8 +190,6 @@ const Sidebar = ({ isAdmin = false }) => {
     }).length
   ), [todayKey])
 
-  const [customViews, setCustomViews] = useState(() => getAdminCustomViews())
-  const [dealCustomViews, setDealCustomViews] = useState(() => getAdminDealCustomViews())
 
   useEffect(() => { if (isAccountsRoute) setAccountsOpen(true) }, [isAccountsRoute])
   useEffect(() => { if (isCustomersRoute) setCustomersOpen(true) }, [isCustomersRoute])
@@ -187,8 +205,7 @@ const Sidebar = ({ isAdmin = false }) => {
   useEffect(() => { if (isUserRemindersRoute) setUserRemindersOpen(true) }, [isUserRemindersRoute])
   useEffect(() => { if (isUserReportsRoute) setUserReportsOpen(true) }, [isUserReportsRoute])
   useEffect(() => { if (isUserQuotationRoute) setUserQuotationManagerOpen(true) }, [isUserQuotationRoute])
-  useEffect(() => subscribeAdminCustomViews(setCustomViews), [])
-  useEffect(() => subscribeAdminDealCustomViews(setDealCustomViews), [])
+
   useEffect(() => {
     localStorage.setItem(
       isAdmin ? ADMIN_SIDEBAR_COLLAPSE_STORAGE_KEY : USER_SIDEBAR_COLLAPSE_STORAGE_KEY,
@@ -214,11 +231,7 @@ const Sidebar = ({ isAdmin = false }) => {
     { label: 'Search Account', to: '/admin/accounts/search' },
     { label: 'My Accounts', to: '/admin/accounts/my-accounts' },
     ...(!isKevalVShah ? [{ label: 'Weekly reports-ALL', to: '/admin/accounts/weekly-reports-all' }] : []),
-    { label: 'SW-Baroda / Mum', to: '/admin/accounts/sw-baroda-mum' },
-    { label: 'User Wise Leads', to: '/admin/accounts/user-wise-leads' },
-    { label: '+ Custom View', to: '/admin/accounts/custom-views/new', accent: true },
-    ...customViews.map((entry) => ({ label: entry.name, to: buildAdminCustomViewUrl(entry.id) })),
-  ]), [customViews, isKevalVShah])
+  ]), [isKevalVShah])
 
   const dealMenuItems = useMemo(() => {
     return [
@@ -226,12 +239,8 @@ const Sidebar = ({ isAdmin = false }) => {
       { label: 'View Deal', to: '/admin/deals/view' },
       { label: 'Search Deal', to: '/admin/deals/search' },
       { label: 'Project Details', to: '/admin/deals/project-details' },
-      { label: 'Ahmedabad Deal', to: '/admin/deals/ahmadabad' },
-      { label: 'Vadodara Deal', to: '/admin/deals/vadodara' },
-      { label: '+ Custom View', to: ADMIN_DEAL_CUSTOM_VIEW_NEW_ROUTE, accent: true },
-      ...dealCustomViews.map((entry) => ({ label: entry.name, to: buildAdminDealCustomViewUrl(entry.id) })),
     ]
-  }, [dealCustomViews])
+  }, [])
 
   const supportRequestsMenuItems = [
     { label: 'Add SR', to: '/admin/support-requests/add' },
@@ -239,7 +248,7 @@ const Sidebar = ({ isAdmin = false }) => {
     { label: 'SR View', to: '/admin/support-requests/view' },
     { label: 'Search SR', to: '/admin/support-requests/search' },
     { label: 'Closed SR', to: '/admin/support-requests/closed' },
-    { label: '+ Custom View', to: '/admin/support-requests/custom-views/new', accent: true },
+
   ]
 
   const remindersMenuItems = [
@@ -251,7 +260,7 @@ const Sidebar = ({ isAdmin = false }) => {
   const reportsMenuItems = [
     { label: 'Custom Reports', to: '/admin/reports/custom' },
     { label: 'Summary Reports', to: '/admin/reports/summary' },
-    { label: 'Analytics', to: '/admin/reports/analytics' },
+
     { label: 'Customer Map View', to: '/admin/reports/customer-map' },
   ]
 
@@ -296,7 +305,7 @@ const Sidebar = ({ isAdmin = false }) => {
     return (
       <aside className={`sidebar sidebar--user ${isSidebarCollapsed ? 'sidebar--collapsed' : ''}`}>
         <nav className="sb-nav">
-          <SidebarTopCard isAdmin={false} isCollapsed={isSidebarCollapsed} displayName={displayName} />
+          <SidebarTopCard isAdmin={false} isCollapsed={isSidebarCollapsed} displayName={displayName} user={user} />
 
           <div className="sb-view-toolbar" aria-label="Sidebar view options">
             {USER_SIDEBAR_TOOLBAR.slice(0, 2).map((item) => {
@@ -353,7 +362,7 @@ const Sidebar = ({ isAdmin = false }) => {
                   title={link.label}
                 >
                   <Icon className="sb-link-icon" />
-                  <span>{link.label}</span>
+                  {link.key === 'calendar' ? null : <span>{link.label}</span>}
                 </NavLink>
               )
             })}
@@ -451,7 +460,7 @@ const Sidebar = ({ isAdmin = false }) => {
   return (
     <aside className={`sidebar sidebar--admin ${isSidebarCollapsed ? 'sidebar--collapsed' : ''}`}>
       <nav className="sb-nav">
-        <SidebarTopCard isAdmin isCollapsed={isSidebarCollapsed} displayName={displayName} />
+        <SidebarTopCard isAdmin isCollapsed={isSidebarCollapsed} displayName={displayName} user={user} />
 
         <div className="sb-view-toolbar" aria-label="Sidebar view options">
           <NavLink
@@ -461,6 +470,14 @@ const Sidebar = ({ isAdmin = false }) => {
             aria-label="Data Manager"
           >
             <FaCloud />
+          </NavLink>
+          <NavLink
+            to="/admin/calendar"
+            className={({ isActive }) => `sb-view-toolbar-button sb-view-toolbar-button--active ${isActive ? 'sb-view-toolbar-button--route-active' : ''}`}
+            title="Calendar"
+            aria-label="Calendar"
+          >
+            <FaCalendarAlt />
           </NavLink>
           <NavLink
             to="/admin/monitoring"
@@ -605,19 +622,19 @@ const Sidebar = ({ isAdmin = false }) => {
           <SectionLabel isCollapsed={isSidebarCollapsed}>Workspace tools</SectionLabel>
           <NavLink
             to="/admin/charts"
-            className={({ isActive }) => `sb-plain-link ${isActive ? 'sb-plain-link--active' : ''}`}
+            className={({ isActive }) => `sb-link sb-workspace-tool-link ${isActive ? 'sb-link--active' : ''}`}
             title="Charts"
           >
-            <FaChartPie className="sb-plain-icon" />
+            <FaChartPie className="sb-link-icon" />
             <span>Charts</span>
           </NavLink>
 
           <NavLink
             to="/admin/view-settings"
-            className={({ isActive }) => `sb-plain-link ${isActive ? 'sb-plain-link--active' : ''}`}
+            className={({ isActive }) => `sb-link sb-workspace-tool-link ${isActive ? 'sb-link--active' : ''}`}
             title="View Settings"
           >
-            <FaTh className="sb-plain-icon" />
+            <FaTh className="sb-link-icon" />
             <span>View Settings</span>
           </NavLink>
 
@@ -635,21 +652,25 @@ const Sidebar = ({ isAdmin = false }) => {
 
           <NavLink
             to="/admin/data-manager"
-            className={({ isActive }) => `sb-plain-link ${isActive ? 'sb-plain-link--active' : ''}`}
+            className={({ isActive }) => `sb-link sb-workspace-tool-link ${isActive ? 'sb-link--active' : ''}`}
             title="Data Manager"
           >
-            <FaCloud className="sb-plain-icon" />
+            <FaCloud className="sb-link-icon" />
             <span>Data Manager</span>
           </NavLink>
 
-          <NavLink
-            to="/admin/database-manager"
-            className={({ isActive }) => `sb-plain-link ${isActive ? 'sb-plain-link--active' : ''}`}
-            title="Database Manager"
-          >
-            <FaCloud className="sb-plain-icon" />
-            <span>Database Manager</span>
-          </NavLink>
+          {(user?.role === 'super_admin' || user?.actualRole === 'super_admin') ? (
+            <NavLink
+              to="/admin/password-reset-requests"
+              className={({ isActive }) => `sb-plain-link ${isActive || isPasswordResetRoute ? 'sb-plain-link--active' : ''}`}
+              title="Password Reset Requests"
+            >
+              <FaKey className="sb-plain-icon" />
+              <span>Password Reset Requests</span>
+            </NavLink>
+          ) : null}
+
+
 
         </div>
 

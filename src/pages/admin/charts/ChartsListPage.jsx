@@ -218,14 +218,21 @@ const ChartsListPage = ({ basePath = '/admin/charts' }) => {
       <div className="cl-body">
         <aside className="cl-filter-panel">
           {ADMIN_CHART_CATEGORIES.map((filterLabel) => (
+            (() => {
+              const isActive = activeFilter === filterLabel
+              return (
             <button
               key={filterLabel}
               type="button"
-              className={`cl-filter-item${activeFilter === filterLabel ? ' cl-filter-item--active' : ''}`}
+              className={`cl-category-item ${isActive ? 'cl-category-item--active' : 'cl-category-item--inactive'}`}
+              data-chart-filter="true"
+              data-active={isActive ? 'true' : 'false'}
               onClick={() => setActiveFilter(filterLabel)}
             >
               {filterLabel}
             </button>
+              )
+            })()
           ))}
         </aside>
 

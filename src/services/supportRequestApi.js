@@ -9,6 +9,8 @@ const buildAutoSupportRequestNumber = (value) => {
 const normalizeSupportRequestRecord = (sr = {}) => {
   const data = sr.data && typeof sr.data === 'object' ? sr.data : {}
   const srNumber = sr.srNumber || data.srNumber || buildAutoSupportRequestNumber(sr.id || sr.legacyId || data.id)
+  const customerNumber = sr.customerNumber || data.customerNumber || sr.customerNo || data.customerNo || ''
+  const customerNo = sr.customerNo || data.customerNo || sr.customerNumber || data.customerNumber || ''
 
   return {
     ...data,
@@ -21,6 +23,8 @@ const normalizeSupportRequestRecord = (sr = {}) => {
     priority: sr.priority || data.priority || 'normal',
     status: sr.status || data.status || 'open',
     category: sr.category || data.category || '',
+    customerNumber,
+    customerNo,
     customerName: sr.customerName || data.customerName || '',
     customerEmail: sr.customerEmail || data.customerEmail || '',
     ownerId: String(sr.assignedTo || data.ownerId || ''),
@@ -63,4 +67,14 @@ export const supportRequestApi = {
     const response = await apiClient.delete(`/support-requests/${encodeURIComponent(id)}`)
     return response.data
   },
+
+  async addReply(id, message) {
+    const response = await apiClient.post(`/support-requests/${encodeURIComponent(id)}/reply`, { message })
+    return normalizeSupportRequestRecord(response.data)
+  },
+
+  async closeTicket(id) {
+    const response = await apiClient.post(`/support-requests/${encodeURIComponent(id)}/close`)
+    return normalizeSupportRequestRecord(response.data)
+  }
 }

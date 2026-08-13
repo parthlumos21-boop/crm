@@ -1,44 +1,3 @@
-const GROUP_DEFINITIONS = [
-  {
-    id: 'ahmedabad',
-    label: 'Ahmedabad',
-    userIds: ['user-006', 'user-007', 'user-014'],
-  },
-  {
-    id: 'swati-sales-1',
-    label: 'Swati Sales-1',
-    userIds: ['user-001', 'user-002', 'user-004'],
-  },
-  {
-    id: 'swati-sales-2',
-    label: 'Swati Sales-2',
-    userIds: ['user-005', 'user-009', 'user-010'],
-  },
-]
-
-const TYPE_DEFINITIONS = [
-  {
-    id: 'admin',
-    label: 'ADMIN',
-    userIds: ['user-006', 'user-007', 'user-014'],
-  },
-  {
-    id: 'customer-support-field-staff',
-    label: 'Customer Support Field Staff',
-    userIds: ['user-016', 'user-017'],
-  },
-  {
-    id: 'manager',
-    label: 'Manager',
-    userIds: ['user-012', 'user-015'],
-  },
-  {
-    id: 'sales-team',
-    label: 'Sales Team',
-    userIds: ['user-001', 'user-002', 'user-003', 'user-004', 'user-005', 'user-008', 'user-009', 'user-010', 'user-011', 'user-013'],
-  },
-]
-
 const USER_ATTENDANCE = {
   'user-001': { status: 'Present', punchIn: '09:12 AM', punchOut: '06:18 PM' },
   'user-002': { status: 'Present', punchIn: '09:03 AM', punchOut: '06:01 PM' },
@@ -59,50 +18,54 @@ const USER_ATTENDANCE = {
   'user-017': { status: 'Present', punchIn: '09:19 AM', punchOut: '06:15 PM' },
 }
 
-const buildUsersById = (users) => (
-  users.reduce((lookup, user) => ({
-    ...lookup,
-    [user.id]: user,
-  }), {})
-)
+export const getTeamViewGroups = (users, dbGroups = []) => {
+  return dbGroups.map((group) => {
+    const groupName = String(group.groupName || group.name || group.title || '').trim()
+    const apiUsers = Array.isArray(group.users) ? group.users : []
+    const apiGroupUsers = apiUsers.map((member, index) => ({
+      id: String(member.userId || member.id || member.email || `${groupName}-${index}`),
+      userId: member.userId || member.id || '',
+      name: member.name || member.member?.name || '-',
+      email: member.email || member.member?.email || '',
+      userGroup: groupName,
+      userType: member.role || member.userType || member.designation || '-',
+      role: member.role || '',
+      designation: member.designation || '',
+      attendanceStatus: member.attendanceStatus || '-',
+      punchIn: member.punchIn || '-',
+      punchOut: member.punchOut || '-',
+      status: member.status || 'active',
+    }))
 
-const mapUsersForNode = (userIds, usersById) => (
-  userIds
-    .map((userId) => usersById[userId])
-    .filter(Boolean)
-)
-
-export const getTeamViewGroups = (users) => {
-  const usersById = buildUsersById(users)
-
-  return GROUP_DEFINITIONS.map((entry) => ({
-    ...entry,
-    users: mapUsersForNode(entry.userIds, usersById),
-  }))
+    return {
+      id: String(group.mongoId || group._id || group.id || groupName),
+      label: groupName,
+      users: apiGroupUsers.length > 0
+        ? apiGroupUsers
+        : users.filter((user) => String(user.userGroup || user.user_group || '').trim() === groupName),
+    }
+  }).filter((group) => group.label)
 }
 
-export const getTeamViewTypes = (users) => {
-  const usersById = buildUsersById(users)
-
-  return TYPE_DEFINITIONS.map((entry) => ({
-    ...entry,
-    users: mapUsersForNode(entry.userIds, usersById),
-  }))
+export const getTeamViewTypes = (users, dbTypes = []) => {
+  return dbTypes.map((type) => {
+    const typeName = String(type)
+    return {
+      id: typeName.toLowerCase().replace(/\s+/g, '-'),
+      label: typeName,
+      users: users.filter(u => String(u.designation || '').trim() === typeName),
+    }
+  })
 }
 
 export const enrichUsersForTeamView = (users) => {
-  const groups = getTeamViewGroups(users)
-  const types = getTeamViewTypes(users)
-
   return users.map((user) => {
-    const group = groups.find((entry) => entry.userIds.includes(user.id))
-    const type = types.find((entry) => entry.userIds.includes(user.id))
     const attendance = USER_ATTENDANCE[user.id] || { status: 'Unknown', punchIn: '-', punchOut: '-' }
 
     return {
       ...user,
-      userGroup: group?.label || '-',
-      userType: type?.label || '-',
+      userGroup: user.userGroup || user.user_group || '-',
+      userType: user.designation || '-',
       attendanceStatus: attendance.status,
       punchIn: attendance.punchIn,
       punchOut: attendance.punchOut,

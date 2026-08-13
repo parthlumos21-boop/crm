@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { FaCheck, FaChevronDown, FaFilter, FaHandPointRight, FaPlus, FaRedo, FaTimes, FaUser } from 'react-icons/fa'
 import { ExcelExportActionButton } from '../../../components/common/ExcelExportButton'
 import { useAuth } from '../../../context/AuthContext'
@@ -601,6 +602,7 @@ const normalizeActiveReminderExportRows = (rows = []) => rows.map((row) => ({
 }))
 
 const AdminRemindersPage = ({ variantKey = 'active' }) => {
+  const location = useLocation()
   const {
     accounts,
     deals,
@@ -629,6 +631,12 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
   const [remarkReminders, setRemarkReminders] = useState([])
 
   useEffect(() => subscribeAdminReminderStates(setReminderStatesById), [])
+  useEffect(() => {
+    const requestedTab = location.state?.activeMyReminderTab
+    if (variantKey === 'my' && MY_REMINDER_TABS.some((tab) => tab.key === requestedTab)) {
+      setActiveMyReminderTab(requestedTab)
+    }
+  }, [location.state, variantKey])
 
   useEffect(() => {
     let isMounted = true

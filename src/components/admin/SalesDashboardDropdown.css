@@ -127,6 +127,12 @@
   word-break: break-word;
 }
 
+[data-theme="dark"] .sales-dashboard-btn:not(:hover) .sales-dashboard-chevron,
+[data-theme="dark"] .sales-dashboard-btn:not(:hover) .sales-dashboard-icon {
+  color: #f0fffd;
+  opacity: 1;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sales-dashboard-btn {

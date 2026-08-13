@@ -494,6 +494,27 @@
   border: 1px solid transparent;
 }
 
+.qsr-refine-btn,
+.qsr-icon-tool-btn,
+.qsr-view-btn,
+.qsr-panel-btn--apply,
+.qsr-panel-btn--save,
+.qsr-modal-btn-primary,
+.qsr-page-btn--active,
+.qsr-row-badge,
+.qsr-select-option--active {
+  background: var(--admin-red, #dc2626) !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  color: #ffffff !important;
+}
+
+.qsr-refine-btn svg,
+.qsr-icon-tool-btn svg,
+.qsr-view-btn svg,
+.qsr-row-badge svg {
+  color: #ffffff !important;
+}
+
 .qsr-export-wrap {
   position: relative;
   z-index: 30;

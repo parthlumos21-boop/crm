@@ -109,6 +109,18 @@ const COLLECTION_INDEXES = {
     { fields: { userId: 1, lastActivity: -1 } },
     { fields: { expiresAt: 1 } },
   ],
+  password_reset_requests: [
+    { fields: { legacyId: 1 }, options: { unique: true, sparse: true } },
+    { fields: { userId: 1, status: 1 } },
+    { fields: { email: 1, status: 1 } },
+    { fields: { createdAt: -1 } },
+  ],
+  password_reset_audit_logs: [
+    { fields: { legacyId: 1 }, options: { unique: true, sparse: true } },
+    { fields: { requestId: 1, createdAt: -1 } },
+    { fields: { userId: 1, createdAt: -1 } },
+    { fields: { action: 1, createdAt: -1 } },
+  ],
   email_logs: [
     { fields: { userId: 1, sentDate: -1 } },
     { fields: { messageId: 1 }, options: { sparse: true } },
@@ -207,6 +219,13 @@ const COLLECTION_INDEXES = {
     { fields: { supportRequestId: 1 }, options: { sparse: true } },
     { fields: { createdAt: -1 } },
   ],
+  support_replies: [
+    { fields: { support_request_id: 1, created_at: 1 } },
+    { fields: { sender_id: 1, created_at: -1 } },
+    { fields: { recipient_id: 1, created_at: -1 } },
+    { fields: { sender_email: 1 } },
+    { fields: { recipient_email: 1 } },
+  ],
   supportTickets: [
     { fields: { legacyId: 1 }, options: { unique: true, sparse: true } },
     { fields: { ticketNo: 1 }, options: { unique: true, sparse: true } },
@@ -258,7 +277,19 @@ const COLLECTION_INDEXES = {
     { fields: { companyId: 1 } },
     { fields: { departmentId: 1 } },
   ],
+  user_groups: [
+    { fields: { legacyId: 1 }, options: { unique: true, sparse: true } },
+    { fields: { companyId: 1 } },
+    { fields: { status: 1 } },
+  ],
+  user_group_members: [
+    { fields: { legacyId: 1 }, options: { unique: true, sparse: true } },
+    { fields: { groupId: 1 } },
+    { fields: { userId: 1 } },
+    { fields: { status: 1 } },
+  ],
 }
+
 
 const modelNameForCollection = (collectionName) => (
   collectionName

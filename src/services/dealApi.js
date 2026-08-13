@@ -9,30 +9,48 @@ const firstPresent = (...values) => {
   return undefined
 }
 
+const normalizeDealCityForFilter = (value) => {
+  const normalizedValue = String(value || '').trim().toLowerCase()
+  if (normalizedValue === 'ahmedabad' || normalizedValue === 'ahmadabad') return 'ahmadabad'
+  if (normalizedValue === 'baroda' || normalizedValue === 'vadodara') return 'vadodara'
+  return String(value || '').trim()
+}
+
 export const normalizeDealRecord = (deal = {}) => {
   const data = deal.data && typeof deal.data === 'object' ? deal.data : {}
   const dealOwner = getCanonicalCrmUserName(data.dealOwner || data.ownerName || deal.dealOwner || deal.ownerName) || String(data.dealOwner || data.ownerName || deal.dealOwner || deal.ownerName || '').trim()
   const customerOwner = getCanonicalCrmUserName(data.customerOwner || deal.customerOwner) || String(data.customerOwner || deal.customerOwner || '').trim()
-  const resolvedAmount = firstPresent(data.amount, data.value, data.dealValue, deal.amount, deal.value, deal.dealValue)
+  const resolvedAmount = firstPresent(data.amount, data.value, data.dealValue, data.deal_value, deal.amount, deal.value, deal.dealValue, deal.deal_value)
+  const resolvedAccountName = deal.linkedAccountName || deal.accountName || deal.account_name || data.linkedAccountName || data.accountName || data.account_name || ''
+  const resolvedAccountNumber = deal.linkedAccountNumber || deal.accountNumber || deal.account_number || data.linkedAccountNumber || data.accountNumber || data.account_number || data.accountNo || data.account_no || ''
+  const resolvedCustomerName = deal.customerName || deal.customer_name || data.customerName || data.customer_name || resolvedAccountName || ''
+  const resolvedCompanyName = deal.companyName || deal.company_name || data.companyName || data.company_name || data.company || resolvedAccountName || resolvedCustomerName || ''
+  const resolvedTitle = data.name || data.dealName || data.deal_name || deal.name || deal.dealName || deal.deal_name || deal.title || ''
+  const resolvedCity = data.city || data.location || data.branchLocation || data.projectLocation || deal.city || deal.location || deal.branchLocation || deal.projectLocation || ''
+  const resolvedProjectName = data.projectName || data.project_name || deal.projectName || deal.project_name || resolvedTitle
 
   return {
     ...data,
     ...deal,
     id: deal.id,
-    dealNumber: deal.dealNumber || data.dealNumber || '',
-    name: data.name || data.dealName || deal.name || deal.title || '',
-    title: data.name || data.dealName || deal.name || deal.title || '',
+    dealNumber: deal.dealNumber || deal.deal_number || data.dealNumber || data.deal_number || '',
+    name: resolvedTitle,
+    title: resolvedTitle,
     value: resolvedAmount ?? null,
     amount: resolvedAmount ?? null,
     dealValue: resolvedAmount ?? null,
     stage: deal.stage || data.stage || 'new',
     status: deal.status || data.status || deal.stage || data.stage || 'new',
     accountId: deal.accountId ?? data.accountId ?? '',
-    linkedAccountName: deal.linkedAccountName || data.linkedAccountName || '',
-    linkedAccountNumber: deal.linkedAccountNumber || data.linkedAccountNumber || '',
-    accountName: deal.linkedAccountName || deal.accountName || data.accountName || '',
-    accountNumber: deal.linkedAccountNumber || deal.accountNumber || data.accountNumber || '',
-    customerName: deal.customerName || data.customerName || '',
+    linkedAccountName: resolvedAccountName,
+    linkedAccountNumber: resolvedAccountNumber,
+    accountName: resolvedAccountName,
+    accountNumber: resolvedAccountNumber,
+    customerName: resolvedCustomerName,
+    customerNumber: deal.customerNumber || deal.customer_number || data.customerNumber || data.customer_number || data.customerNo || data.customer_no || resolvedAccountNumber || '',
+    companyName: resolvedCompanyName,
+    companyProfile: deal.companyProfile || deal.company_profile || data.companyProfile || data.company_profile || data.company || resolvedCompanyName || '',
+    companyLogo: deal.companyLogo || deal.company_logo || data.companyLogo || data.company_logo || '',
     ownerUserId: String(deal.ownerUserId || deal.assignedTo || data.ownerUserId || ''),
     ownerId: String(deal.ownerUserId || deal.assignedTo || data.ownerId || ''),
     assignedTo: String(deal.assignedTo || deal.ownerUserId || ''),
@@ -51,14 +69,16 @@ export const normalizeDealRecord = (deal = {}) => {
     probability: data.probability ?? deal.probability ?? null,
     expectedClosureDate: data.expectedClosureDate || data.expectedCloseDate || data.closeDate || deal.expectedCloseDate || deal.expectedClosureDate || deal.closeDate || '',
     closeDate: data.closeDate || data.expectedCloseDate || deal.closeDate || deal.expectedCloseDate || '',
-    actualClosureDate: data.actualClosureDate || deal.actualClosureDate || '',
-    dealDate: data.dealDate || deal.dealDate || '',
-    dealType: data.dealType || deal.dealType || data.customerCategory || deal.customerCategory || '',
-    dealSource: data.dealSource || data.source || deal.dealSource || deal.source || '',
+    actualClosureDate: data.actualClosureDate || data.actual_closure_date || deal.actualClosureDate || deal.actual_closure_date || '',
+    dealDate: data.dealDate || data.deal_date || deal.dealDate || deal.deal_date || '',
+    dealType: data.dealType || data.deal_type || deal.dealType || deal.deal_type || data.customerCategory || data.customer_category || deal.customerCategory || deal.customer_category || '',
+    dealSource: data.dealSource || data.deal_source || data.source || deal.dealSource || deal.deal_source || deal.source || '',
     source: data.source || data.dealSource || deal.source || deal.dealSource || '',
     dealSubsource: data.dealSubsource || data.subsource || deal.dealSubsource || deal.subsource || '',
     subsource: data.subsource || data.dealSubsource || deal.subsource || deal.dealSubsource || '',
-    projectName: data.projectName || deal.projectName || '',
+    city: normalizeDealCityForFilter(resolvedCity),
+    location: resolvedCity,
+    projectName: resolvedProjectName,
     projectStatus: data.projectStatus || deal.projectStatus || '',
     poValue: firstPresent(data.poValue, deal.poValue, ''),
     poValueJobNo: data.poValueJobNo || deal.poValueJobNo || '',
@@ -108,7 +128,7 @@ const normalizeDealPayload = (deal = {}) => ({
 
 export const dealApi = {
   async getDeals(params = {}) {
-    const response = await apiClient.get('/deals', { params })
+    const response = await apiClient.get('/deals', { params: { limit: 'all', ...params } })
     return (response.data || []).map(normalizeDealRecord)
   },
 

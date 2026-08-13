@@ -21,21 +21,18 @@ import { ExcelExportActionButton } from '../../../components/common/ExcelExportB
 import { authService } from '../../../services/authService'
 import { enrichUsersForTeamView, getAttendanceRows, getTeamViewGroups, getTeamViewTypes } from '../../../features/adminTeamView/teamViewData'
 import { exportExcelWorkbook } from '../../../utils/excelExport'
+import { userGroupApi } from '../../../services/userGroupApi'
 import './TeamViewPage.css'
 
 const TOP_TABS = [
   { key: 'team-view', label: 'Team View' },
   { key: 'user-group', label: 'User Group' },
-  { key: 'user-type', label: 'User Type' },
-  { key: 'users', label: 'Users' },
-  { key: 'attendance', label: 'Attendance' },
 ]
 
-const USER_TOP_TABS = TOP_TABS.filter((tab) => ['team-view', 'users'].includes(tab.key))
+const USER_TOP_TABS = TOP_TABS.filter((tab) => ['team-view', 'user-group'].includes(tab.key))
 
 const INNER_TREE_TABS = [
   { key: 'group', label: 'User Group-wise' },
-  { key: 'type', label: 'User Type-wise' },
 ]
 
 const VIEW_MODES = ['Users', 'User Groups']
@@ -61,9 +58,40 @@ const TeamViewPage = ({ isAdminView = true }) => {
   const [selectedGroup, setSelectedGroup] = useState('')
   const [selectedType, setSelectedType] = useState('')
   const [selectedUser, setSelectedUser] = useState('')
+  const [selectedUserAction, setSelectedUserAction] = useState('')
+  
+  const [apiUserGroups, setApiUserGroups] = useState([])
+  const [apiUserTypes, setApiUserTypes] = useState([])
+  const [userGroupLoadError, setUserGroupLoadError] = useState('')
+  const [selectedGroupMembers, setSelectedGroupMembers] = useState([])
+  const [selectedGroupMembersLoading, setSelectedGroupMembersLoading] = useState(false)
+  const [selectedGroupMembersError, setSelectedGroupMembersError] = useState('')
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const response = await userGroupApi.listGroups()
+        const groups = Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response)
+            ? response
+            : []
+        setApiUserGroups(groups)
+        setUserGroupLoadError('')
+        
+        const typesResponse = await authService.getDesignations()
+        setApiUserTypes(typesResponse || [])
+      } catch (err) {
+        console.error('Failed to fetch user groups or types', err)
+        setApiUserGroups([])
+        setUserGroupLoadError(err?.response?.data?.message || err?.message || 'Unable to load user groups.')
+      }
+    }
+    fetchGroups()
+  }, [])
 
   // User Group Dashboard State
-  const [ugActiveView, setUgActiveView] = useState('summary')
+  const [ugActiveView, setUgActiveView] = useState('login-history')
   const [ugLoginPeriod, setUgLoginPeriod] = useState('this-month')
   const [ugLoginDropOpen, setUgLoginDropOpen] = useState(false)
   const [ugIdleTab, setUgIdleTab] = useState('10min')
@@ -94,12 +122,12 @@ const TeamViewPage = ({ isAdminView = true }) => {
 
   const teamUsers = useMemo(() => enrichUsersForTeamView(availableUsers), [availableUsers])
   const teamGroups = useMemo(
-    () => getTeamViewGroups(availableUsers).filter((group) => isAdminView || group.users.length > 0),
-    [availableUsers, isAdminView]
+    () => getTeamViewGroups(teamUsers, apiUserGroups),
+    [apiUserGroups, teamUsers]
   )
   const teamTypes = useMemo(
-    () => getTeamViewTypes(availableUsers).filter((type) => isAdminView || (type.id !== 'admin' && type.users.length > 0)),
-    [availableUsers, isAdminView]
+    () => getTeamViewTypes(availableUsers, apiUserTypes).filter((type) => isAdminView || (type.id !== 'admin' && type.users.length > 0)),
+    [availableUsers, isAdminView, apiUserTypes]
   )
   const attendanceRows = useMemo(
     () => (activeTopTab === 'attendance' ? getAttendanceRows(availableUsers, selectedReportMode, selectedYear, selectedMonth) : []),
@@ -123,10 +151,89 @@ const TeamViewPage = ({ isAdminView = true }) => {
     }
   }, [activeTreeTab, innerTreeTabs])
 
+  const selectedGroupRecord = useMemo(
+    () => teamGroups.find((group) => group.id === selectedGroup) || null,
+    [selectedGroup, teamGroups]
+  )
+
+  const selectedGroupLabel = selectedGroupRecord?.label || ''
+
   const groupUsers = useMemo(() => {
     if (!selectedGroup) return []
-    return teamUsers.filter((user) => user.userGroup === selectedGroup)
-  }, [selectedGroup, teamUsers])
+    if (selectedGroupMembers.length > 0) {
+      return selectedGroupMembers.map((member) => {
+        const matchedUser = teamUsers.find((user) => String(user.id) === String(member.userId)) || {}
+        return {
+          ...matchedUser,
+          id: member.userId || member.id,
+          name: member.name || matchedUser.name || '-',
+          email: member.email || matchedUser.email || '',
+          userGroup: selectedGroupLabel || matchedUser.userGroup || '-',
+          userType: member.role || member.userType || matchedUser.userType || matchedUser.role || '-',
+          designation: member.designation || matchedUser.designation || '',
+          attendanceStatus: matchedUser.attendanceStatus || '-',
+          punchIn: matchedUser.punchIn || '-',
+          punchOut: matchedUser.punchOut || '-',
+          status: member.status || matchedUser.status || '',
+        }
+      })
+    }
+    return selectedGroupRecord?.users || []
+  }, [selectedGroup, selectedGroupLabel, selectedGroupMembers, selectedGroupRecord, teamUsers])
+
+  useEffect(() => {
+    if (!selectedGroup) {
+      setSelectedGroupMembers([])
+      setSelectedGroupMembersError('')
+      setSelectedGroupMembersLoading(false)
+      return undefined
+    }
+
+    const existingMembers = selectedGroupRecord?.users || []
+    if (existingMembers.length > 0) {
+      setSelectedGroupMembers(existingMembers)
+      setSelectedGroupMembersError('')
+      setSelectedGroupMembersLoading(false)
+      return undefined
+    }
+
+    const canFetchMembersByMongoId = /^[a-f\d]{24}$/i.test(String(selectedGroup))
+    if (!canFetchMembersByMongoId) {
+      setSelectedGroupMembers([])
+      setSelectedGroupMembersError('')
+      setSelectedGroupMembersLoading(false)
+      return undefined
+    }
+
+    let isMounted = true
+    setSelectedGroupMembersLoading(true)
+    setSelectedGroupMembersError('')
+
+    userGroupApi.listGroupMembers(selectedGroup)
+      .then((response) => {
+        if (!isMounted) return
+        const members = Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response)
+            ? response
+            : []
+        setSelectedGroupMembers(members)
+      })
+      .catch((error) => {
+        if (!isMounted) return
+        setSelectedGroupMembers([])
+        setSelectedGroupMembersError(error?.response?.data?.message || error?.message || 'Unable to load group members.')
+      })
+      .finally(() => {
+        if (isMounted) {
+          setSelectedGroupMembersLoading(false)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [selectedGroup, selectedGroupRecord])
 
   const loggedInTodayUsers = useMemo(() => (
     groupUsers.filter((u) => u.attendanceStatus === 'Present')
@@ -325,6 +432,9 @@ const TeamViewPage = ({ isAdminView = true }) => {
 
               <div className="team-view-tree-shell">
                 <div className="team-view-company-pill">Swati Switchgears India Pvt Ltd</div>
+                {activeTreeTab === 'group' && userGroupLoadError ? (
+                  <div className="ug-panel ug-panel--empty">{userGroupLoadError}</div>
+                ) : null}
 
                 {(activeTreeTab === 'group' ? teamGroups : teamTypes).map((entry) => {
                   const isExpanded = activeTreeTab === 'group'
@@ -352,8 +462,8 @@ const TeamViewPage = ({ isAdminView = true }) => {
 
                       {isExpanded ? (
                         <div className="team-view-tree-children">
-                          {entry.users.map((user) => (
-                            <div key={user.id} className="team-view-tree-user">
+                          {entry.users.map((user, idx) => (
+                            <div key={user.id || idx} className="team-view-tree-user">
                               {user.name}
                             </div>
                           ))}
@@ -377,19 +487,58 @@ const TeamViewPage = ({ isAdminView = true }) => {
                 >
                   <option value="">Select</option>
                   {teamGroups.map((group) => (
-                    <option key={group.id} value={group.label}>
+                    <option key={group.id} value={group.id}>
                       {group.label}
                     </option>
                   ))}
                 </select>
               </div>
+              {userGroupLoadError ? (
+                <div className="ug-panel ug-panel--empty">{userGroupLoadError}</div>
+              ) : null}
 
               {/* ── UG action buttons ── */}
+              {selectedGroup ? (
+                <div className="ug-panel">
+                  <div className="ug-panel-titlebar">
+                    <h3 className="ug-panel-title">Users in {selectedGroupLabel || 'Selected Group'}</h3>
+                    {selectedGroupMembersLoading ? <span className="ug-info">Loading members...</span> : null}
+                  </div>
+                  {selectedGroupMembersError ? (
+                    <div className="ug-panel ug-panel--empty">{selectedGroupMembersError}</div>
+                  ) : (
+                    <table className="ug-table">
+                      <thead>
+                        <tr>
+                          <th>User Name</th>
+                          <th>Email</th>
+                          <th>Role</th>
+                          <th>Designation</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {groupUsers.length === 0 && !selectedGroupMembersLoading ? (
+                          <tr><td colSpan={5} className="ug-table-empty">No users are members of this group.</td></tr>
+                        ) : (
+                          groupUsers.map((member) => (
+                            <tr key={`${member.id}-${member.email || member.name}`}>
+                              <td>{member.name || '-'}</td>
+                              <td>{member.email || '-'}</td>
+                              <td>{member.userType || member.role || '-'}</td>
+                              <td>{member.designation || '-'}</td>
+                              <td>{member.status || '-'}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              ) : null}
+
               <div className="ug-action-bar">
                 <div className="ug-action-row ug-action-row--top">
-                  <button type="button" className={`ug-btn${ugActiveView === 'summary' ? ' ug-btn--active' : ''}`} onClick={() => setUgActiveView('summary')}>
-                    <FaListAlt /> Summary
-                  </button>
                   <button type="button" className={`ug-btn${ugActiveView === 'login-history' ? ' ug-btn--active' : ''}`} onClick={() => setUgActiveView('login-history')}>
                     <FaHistory /> Login History
                   </button>
@@ -408,44 +557,6 @@ const TeamViewPage = ({ isAdminView = true }) => {
               </div>
 
               {/* ── UG sub-panels ── */}
-              {ugActiveView === 'summary' && groupSummary ? (
-                <div className="ug-panel">
-                  <h3 className="ug-panel-title">Summary</h3>
-                  {[
-                    { label: 'Total Accounts', total: groupSummary.accounts.total, items: groupSummary.accounts.byStatus },
-                    { label: 'Total Customers', total: groupSummary.customers.total, items: groupSummary.customers.byStatus },
-                    { label: 'Total Support Requests', total: groupSummary.support.total, items: groupSummary.support.byStatus },
-                    { label: 'Total Deals', total: groupSummary.deals.total, items: groupSummary.deals.byStatus },
-                  ].map((section) => (
-                    <div key={section.label} className="ug-summary-section">
-                      <div className="ug-summary-section-head">
-                        <strong>{section.label}: {section.total}</strong>
-                        <div className="ug-summary-section-actions">
-                          <button type="button" onClick={() => toggleWidget(section.label)} title={collapsedWidgets.has(section.label) ? 'Expand' : 'Collapse'}>
-                            {collapsedWidgets.has(section.label) ? <FaExpandAlt /> : <FaCompressAlt />}
-                          </button>
-                          <button type="button" onClick={() => refreshWidget(section.label)} title="Refresh"><FaSyncAlt /></button>
-                        </div>
-                      </div>
-                      {!collapsedWidgets.has(section.label) && (
-                        <div className="ug-summary-items">
-                          {section.items.map(([name, count]) => (
-                            <div key={name} className="ug-summary-item">
-                              <span className="ug-summary-item-label">{name}</span>
-                              <span className={`ug-summary-item-count${name === 'Closed' || name === 'Rejected' || name === 'Order Lost' ? ' ug-summary-item-count--red' : ''}`}>:{count}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-
-              {ugActiveView === 'summary' && !groupSummary ? (
-                <div className="ug-panel ug-panel--empty">Select a user group to view summary.</div>
-              ) : null}
-
               {ugActiveView === 'login-history' ? (
                 <div className="ug-panel">
                   <div className="ug-login-history-header">

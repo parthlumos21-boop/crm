@@ -1728,3 +1728,38 @@
 [data-theme="dark"] .support-request-legacy-footer-pagination button:disabled {
   opacity: 0.5;
 }
+
+html:not([data-theme="dark"]) .layout--admin .support-request-related-number-button,
+html:not([data-theme="dark"]) .layout--admin .support-request-related-number-button:hover,
+html:not([data-theme="dark"]) .layout--admin .support-request-related-number-button:focus-visible,
+html:not([data-theme="dark"]) .layout--admin .support-request-row-menu-trigger,
+html:not([data-theme="dark"]) .layout--admin .support-request-row-menu-trigger:hover,
+html:not([data-theme="dark"]) .layout--admin .support-request-row-menu-trigger:focus-visible,
+html:not([data-theme="dark"]) .layout--admin .support-request-search-results .support-request-related-number-button,
+html:not([data-theme="dark"]) .layout--admin .support-request-search-results .support-request-row-menu-trigger {
+  visibility: visible !important;
+  opacity: 1 !important;
+  border-color: transparent !important;
+  background: var(--admin-red, #dc2626) !important;
+  background-color: var(--admin-red, #dc2626) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin .support-request-related-number-button span,
+html:not([data-theme="dark"]) .layout--admin .support-request-related-number-button:hover span,
+html:not([data-theme="dark"]) .layout--admin .support-request-related-number-button:focus-visible span,
+html:not([data-theme="dark"]) .layout--admin .support-request-row-menu-trigger span,
+html:not([data-theme="dark"]) .layout--admin .support-request-row-menu-trigger:hover span,
+html:not([data-theme="dark"]) .layout--admin .support-request-row-menu-trigger:focus-visible span,
+html:not([data-theme="dark"]) .layout--admin .support-request-row-menu-trigger svg,
+html:not([data-theme="dark"]) .layout--admin .support-request-row-menu-trigger:hover svg,
+html:not([data-theme="dark"]) .layout--admin .support-request-row-menu-trigger:focus-visible svg {
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
+  fill: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+}

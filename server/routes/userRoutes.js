@@ -8,6 +8,8 @@ const { idParam } = require('../validation/schemas')
 const router = express.Router()
 
 router.use(requireAuth)
+
+router.get('/designations', userController.getDistinctDesignations)
 router.get('/directory', userController.listUserDirectory)
 router.post('/', requireAdmin, userController.createUser)
 router.get('/', requireAdmin, userController.listUsers)

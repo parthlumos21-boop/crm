@@ -47,12 +47,19 @@
   min-height: 2.35rem;
   border: 1px solid var(--border-subtle);
   border-radius: 0.15rem;
-  background: linear-gradient(180deg, #4f97d1 0%, #2f75b3 100%);
+  background: #dc2626;
   color: #ffffff;
   padding: 0 1rem;
   font-size: 0.82rem;
   font-weight: 800;
   cursor: pointer;
+}
+
+.ticket-help-btn:hover,
+.ticket-empty-btn:hover {
+  border-color: #b91c1c;
+  background: #dc2626;
+  color: #ffffff;
 }
 
 .ticket-tabs {
@@ -75,19 +82,43 @@
 }
 
 .ticket-tab--open {
-  background: linear-gradient(180deg, #4f97d1 0%, #2f75b3 100%);
-  border-color: var(--text-primary);
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #ffffff;
 }
 
 .ticket-tab--closed {
-  background: linear-gradient(180deg, #61c04f 0%, #3fa33a 100%);
-  border-color: var(--text-primary);
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+
+.ticket-tab--replied {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #ffffff;
 }
 
 .ticket-tab--active {
   opacity: 1;
   position: relative;
   z-index: 2;
+}
+
+.ticket-tab--open.ticket-tab--active {
+  color: #000000;
+}
+
+.ticket-tab--closed.ticket-tab--active {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .ticket-tab--closed:not(.ticket-tab--active) {
+  background: #2f3542;
+  border-color: #4b5563;
+  color: #d1d5db;
 }
 
 .ticket-content {
@@ -109,6 +140,7 @@
 }
 
 .ticket-record-card {
+  cursor: pointer;
   padding: 1rem 1.1rem;
   border: 1px solid var(--border-subtle);
   border-radius: 1rem;
@@ -130,6 +162,140 @@
   margin: 0;
   color: var(--text-primary);
   font-size: 0.84rem;
+}
+
+.ticket-description-box {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: var(--surface-muted);
+  border-radius: 4px;
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.ticket-reply-actions {
+  margin-top: 15px;
+}
+
+.ticket-reply-textarea {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  resize: vertical;
+}
+
+.ticket-reply-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.ticket-reply-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.ticket-add-reply-btn,
+.ticket-close-btn {
+  min-height: 2.25rem;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ticket-add-reply-btn {
+  border: none;
+}
+
+.ticket-close-btn {
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+.ticket-add-reply-btn:disabled,
+.ticket-close-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.ticket-closed-meta {
+  margin-top: 15px;
+  color: var(--text-muted);
+}
+
+.ticket-replies {
+  margin-top: 15px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 15px;
+}
+
+.ticket-chatbox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ticket-chatbox > strong {
+  color: var(--text-primary);
+}
+
+.ticket-replies-status {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.ticket-replies-status--error {
+  color: #b91c1c;
+}
+
+.ticket-chat-message {
+  max-width: min(80%, 42rem);
+  padding: 10px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-primary);
+}
+
+.ticket-chat-message--support {
+  align-self: flex-end;
+  border-color: #91d5ff;
+  background: #e6f7ff;
+}
+
+.ticket-chat-message--customer {
+  align-self: flex-start;
+  background: var(--surface-muted);
+}
+
+.ticket-chat-message-meta {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+}
+
+.ticket-chat-message p {
+  display: block;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .ticket-chat-message--support {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.22);
+}
+
+[data-theme="dark"] .ticket-chat-message--customer {
+  background: var(--surface-raised);
+}
+
+[data-theme="dark"] .ticket-replies-status--error {
+  color: #fca5a5;
 }
 
 .ticket-empty-state {

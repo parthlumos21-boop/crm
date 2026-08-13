@@ -118,6 +118,20 @@ const AccountActionModal = ({ account, actionKey, onClose, onSaved }) => {
     }
   }
 
+  const handleSaveRemarkAccountField = async (fieldKey, value) => {
+    const accountId = account.raw?.id || account.id
+    const result = await updateAccount(accountId, { [fieldKey]: value })
+
+    if (!result.success) {
+      addNotification('error', 'Account update failed', result.message || 'Unable to update account field.')
+      throw new Error(result.message || 'Unable to update account field.')
+    }
+
+    addNotification('success', 'Account updated', 'Account information saved successfully.')
+    onSaved?.()
+    return result
+  }
+
   if (actionKey === 'add-note-remarks') {
     return (
       <AddRemarksModal
@@ -125,6 +139,7 @@ const AccountActionModal = ({ account, actionKey, onClose, onSaved }) => {
         onClose={onClose}
         accountData={account}
         onSave={handleSaveRemark}
+        onSaveAccountField={handleSaveRemarkAccountField}
         isLoading={isSaving}
       />
     )
@@ -162,10 +177,11 @@ const AccountActionModal = ({ account, actionKey, onClose, onSaved }) => {
       }
 
       const selectedStatus = getAccountChangeStatusOption(stage)
+      const selectedStatusLabel = selectedStatus?.label || stage
       updates = {
         stage: selectedStatus?.stageKey || stage,
-        status: selectedStatus?.label || stage,
-        accountState: accountState || account.accountState || '',
+        status: selectedStatusLabel,
+        accountState: accountState || selectedStatusLabel,
         latestRemark: statusNote.trim() || account.latestRemark,
       }
 
@@ -469,8 +485,8 @@ const AccountActionModal = ({ account, actionKey, onClose, onSaved }) => {
           {renderFields()}
           {formError ? <div className="admin-accounts-action-error">{formError}</div> : null}
           <div className="admin-accounts-placeholder-actions">
-            <Button type="button" variant="outline" onClick={onClose}>Close</Button>
-            <Button type="submit" disabled={isSaving}>{actionKey === 'send-mail' ? 'Open Mail' : 'Save'}</Button>
+            <Button type="button" variant="outline" className="btn-red-theme" onClick={onClose}>Close</Button>
+            <Button type="submit" className="btn-red-theme" disabled={isSaving}>{actionKey === 'send-mail' ? 'Open Mail' : 'Save'}</Button>
           </div>
         </form>
       </section>

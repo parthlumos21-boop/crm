@@ -8,6 +8,7 @@ import {
   FaFileAlt,
   FaFileUpload,
   FaMapMarkerAlt,
+  FaPencilAlt,
   FaPhone,
   FaTimes,
   FaTrash,
@@ -204,7 +205,7 @@ const AdminDealDetailPage = () => {
     setProbabilityDraft(clampProbability(deal?.probability || 0))
   }, [deal?.id, deal?.probability])
 
-  const fromPath = location.state?.fromPath || '/admin/deals/view'
+  const fromPath = location.state?.fromPath || (user?.role === 'admin' ? '/admin/deals/view' : '/deals/view')
 
   const handleClose = () => {
     navigate(fromPath)
@@ -508,6 +509,15 @@ const AdminDealDetailPage = () => {
                       <span className={`admin-deal-detail-info-row-value ${hasDisplayValue(item.value) ? '' : 'admin-deal-detail-item-value-empty'}`}>
                         {renderDisplayValue(item.value)}
                       </span>
+                      <button
+                        type="button"
+                        className="admin-deal-detail-inline-edit"
+                        onClick={handleManageDeal}
+                        aria-label={`Edit ${item.label}`}
+                        title={`Edit ${item.label}`}
+                      >
+                        <FaPencilAlt />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -521,6 +531,15 @@ const AdminDealDetailPage = () => {
               <div className="admin-deal-detail-info-card-body">
                 <div className={`admin-deal-detail-description ${hasDisplayValue(deal.description) ? '' : 'admin-deal-detail-item-value-empty'}`}>
                   {renderDisplayValue(deal.description)}
+                  <button
+                    type="button"
+                    className="admin-deal-detail-inline-edit admin-deal-detail-description-edit"
+                    onClick={handleManageDeal}
+                    aria-label="Edit Description"
+                    title="Edit Description"
+                  >
+                    <FaPencilAlt />
+                  </button>
                 </div>
               </div>
             </section>

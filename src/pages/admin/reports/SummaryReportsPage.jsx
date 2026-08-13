@@ -30,7 +30,7 @@ import {
 } from '../../../features/adminReports/reportTemplateStorage'
 import { authService } from '../../../services/authService'
 import { customerService } from '../../../services/customerService'
-import { buildCsvWorkbookText, exportCsvWorkbook, exportExcelWorkbook, exportSummaryReportHtml } from '../../../utils/excelExport'
+import { exportExcelWorkbook } from '../../../utils/excelExport'
 import { ExcelExportMenuButton } from '../../../components/common/ExcelExportButton'
 import { getCrmOwnerDisplay, isSameCrmOwner } from '../../../features/users/crmUserDirectory'
 import './SummaryReportsPage.css'
@@ -177,18 +177,6 @@ const resolveMonthlyStatusLabel = (record) => {
   ))
 
   return matchingEntry?.label || ''
-}
-
-const downloadBlobFile = (content, filename, type) => {
-  const blob = new Blob([content], { type })
-  const objectUrl = window.URL.createObjectURL(blob)
-  const anchor = document.createElement('a')
-  anchor.href = objectUrl
-  anchor.download = filename
-  document.body.appendChild(anchor)
-  anchor.click()
-  document.body.removeChild(anchor)
-  setTimeout(() => window.URL.revokeObjectURL(objectUrl), 0)
 }
 
 const buildMonthlyStatusOwnerOptions = (normalizedRecords = [], availableUsers = []) => dedupeByNormalizedValue([
@@ -407,19 +395,9 @@ const SummaryReportCard = ({
             items={[
               {
                 key: `${report.id}-excel`,
-                label: 'Export to Excel',
+                label: 'Export to Excel .xlsx',
                 badge: 'XLSX',
                 onClick: () => onExportAction('excel', report),
-              },
-              {
-                key: `${report.id}-web`,
-                label: 'View as Web',
-                onClick: () => onExportAction('web', report),
-              },
-              {
-                key: `${report.id}-analytics`,
-                label: 'ANALYTICS',
-                onClick: () => onExportAction('analytics', report),
               },
             ]}
           />
@@ -987,16 +965,6 @@ const SummaryReportsPage = () => {
   ), [])
 
   const handleSummaryExportAction = useCallback((actionKey, report) => {
-    if (actionKey === 'web') {
-      handleViewSummary(report)
-      return
-    }
-
-    if (actionKey === 'analytics') {
-      navigate(`${reportBasePath}/analytics`)
-      return
-    }
-
     if (report.id === MONTHLY_STATUS_REPORT_ID) {
       const monthlyStatusMetadata = [
         { label: 'Generated On', value: monthlyStatusExportData.generatedOn },
@@ -1006,34 +974,15 @@ const SummaryReportsPage = () => {
         { label: 'Total Records', value: String(monthlyStatusExportData.totalRecords) },
       ]
 
-      if (actionKey === 'csv') {
-        const csvContent = buildCsvWorkbookText({
+      if (actionKey === 'excel') {
+        exportExcelWorkbook({
           title: monthlyStatusExportData.title,
           subtitle: '',
           metadata: monthlyStatusMetadata,
           columns: monthlyStatusExportData.columns,
           rows: monthlyStatusExportData.tableRows,
           sheetName: monthlyStatusExportData.reportName,
-          compact: false,
-        })
-
-        downloadBlobFile(
-          csvContent,
-          buildReportFilename(report, 'csv'),
-          'text/csv;charset=utf-8;',
-        )
-        addNotification('success', 'CSV exported', `${report.title} was exported to CSV.`)
-        showToast('success', `${report.title} exported to CSV.`)
-        return
-      }
-
-      if (actionKey === 'excel') {
-        exportSummaryReportHtml({
-          filename: buildReportFilename(report, 'xls'),
-          title: monthlyStatusExportData.title,
-          metadata: monthlyStatusMetadata,
-          owners: monthlyStatusExportData.owners,
-          rows: monthlyStatusExportData.rows,
+          filename: buildReportFilename(report, 'xlsx'),
         })
         addNotification('success', 'Excel exported', `${report.title} was exported to Excel.`)
         showToast('success', `${report.title} exported to Excel.`)
@@ -1068,16 +1017,6 @@ const SummaryReportsPage = () => {
       rows: rows.map(([field, value]) => ({ field, value })),
     }
 
-    if (actionKey === 'csv') {
-      exportCsvWorkbook({
-        ...summaryExportOptions,
-        filename: buildReportFilename(report, 'csv'),
-      })
-      addNotification('success', 'CSV exported', `${report.title} was exported to CSV.`)
-      showToast('success', `${report.title} exported to CSV.`)
-      return
-    }
-
     if (actionKey === 'excel') {
       exportExcelWorkbook({
         ...summaryExportOptions,
@@ -1086,7 +1025,7 @@ const SummaryReportsPage = () => {
       addNotification('success', 'Excel exported', `${report.title} was exported to Excel.`)
       showToast('success', `${report.title} exported to Excel.`)
     }
-  }, [addNotification, buildReportFilename, handleViewSummary, monthlyStatusExportData, navigate, showToast])
+  }, [addNotification, buildReportFilename, monthlyStatusExportData, showToast])
 
   const handleToggleSummaryCollapse = (reportId) => {
     setCollapsedReportIds((currentValue) => (
@@ -1219,7 +1158,7 @@ const SummaryReportsPage = () => {
         <h1>Summary</h1>
         <div className="summary-reports-topbar-actions">
           <div className="summary-reports-split-btn" ref={splitBtnRef}>
-            <button type="button" className="summary-reports-primary-btn">New Report</button>
+            <button type="button" className="summary-reports-primary-btn btn-red-theme">New Report</button>
             <button
               type="button"
               className="summary-reports-primary-btn summary-reports-caret-btn"

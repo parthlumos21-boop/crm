@@ -11,6 +11,13 @@ const baseRepository = createCrudRepository({
 const Deal = getMongoModel('deals')
 const Lead = getMongoModel('leads')
 
+const normalizeDealCityForFilter = (value) => {
+  const normalizedValue = String(value || '').trim().toLowerCase()
+  if (normalizedValue === 'ahmedabad' || normalizedValue === 'ahmadabad') return 'ahmadabad'
+  if (normalizedValue === 'baroda' || normalizedValue === 'vadodara') return 'vadodara'
+  return String(value || '').trim()
+}
+
 const normalizeMappedDeal = async (record) => {
   const mapped = baseRepository.map(record)
   if (!mapped) return null
@@ -18,9 +25,12 @@ const normalizeMappedDeal = async (record) => {
   const data = mapped.data && typeof mapped.data === 'object' ? mapped.data : {}
   const latest = (...values) => values.find((value) => value !== undefined && value !== null)
   const latestText = (...values) => String(latest(...values, '') || '').trim()
-  const resolvedAmount = latest(data.amount, data.value, data.dealValue, mapped.amount, mapped.value, mapped.dealValue)
-  let linkedAccountName = mapped.linkedAccountName || mapped.accountName || data.accountName || ''
-  let linkedAccountNumber = mapped.linkedAccountNumber || mapped.accountNumber || data.accountNumber || data.accountNo || ''
+  const resolvedAmount = latest(data.amount, data.value, data.dealValue, data.deal_value, mapped.amount, mapped.value, mapped.dealValue, mapped.deal_value)
+  const resolvedTitle = latestText(data.name, data.dealName, data.deal_name, mapped.name, mapped.dealName, mapped.deal_name, mapped.title)
+  const resolvedProjectName = latestText(data.projectName, data.project_name, mapped.projectName, mapped.project_name, resolvedTitle)
+  const resolvedCity = latestText(data.city, data.location, data.branchLocation, data.projectLocation, mapped.city, mapped.location, mapped.branchLocation, mapped.projectLocation)
+  let linkedAccountName = mapped.linkedAccountName || mapped.accountName || mapped.account_name || data.linkedAccountName || data.accountName || data.account_name || ''
+  let linkedAccountNumber = mapped.linkedAccountNumber || mapped.accountNumber || mapped.account_number || data.linkedAccountNumber || data.accountNumber || data.account_number || data.accountNo || data.account_no || ''
 
   const accountId = toNumberOrNull(mapped.accountId)
   if (accountId !== null && (!linkedAccountName || !linkedAccountNumber)) {
@@ -32,24 +42,35 @@ const normalizeMappedDeal = async (record) => {
 
   return {
     ...mapped,
-    dealNumber: mapped.dealNumber || data.dealNumber || data.deal_number || '',
+    dealNumber: mapped.dealNumber || mapped.deal_number || data.dealNumber || data.deal_number || '',
+    name: resolvedTitle,
+    title: resolvedTitle || mapped.title || 'Untitled Deal',
     amount: resolvedAmount ?? null,
     value: resolvedAmount ?? null,
     dealValue: resolvedAmount ?? null,
+    customerName: latestText(mapped.customerName, mapped.customer_name, data.customerName, data.customer_name, linkedAccountName),
+    customerNumber: latestText(mapped.customerNumber, mapped.customer_number, data.customerNumber, data.customer_number, data.customerNo, data.customer_no),
+    accountName: linkedAccountName,
+    accountNumber: linkedAccountNumber,
     status: latestText(data.status, mapped.status, data.stage, mapped.stage),
     stage: latestText(data.stage, mapped.stage, data.status, mapped.status) || 'new',
     probability: latest(data.probability, mapped.probability, null),
     expectedCloseDate: latestText(data.expectedCloseDate, data.expectedClosureDate, data.closeDate, mapped.expectedCloseDate, mapped.expectedClosureDate, mapped.closeDate),
     expectedClosureDate: latestText(data.expectedClosureDate, data.expectedCloseDate, data.closeDate, mapped.expectedClosureDate, mapped.expectedCloseDate, mapped.closeDate),
     closeDate: latestText(data.closeDate, data.expectedCloseDate, mapped.closeDate, mapped.expectedCloseDate),
-    actualClosureDate: latestText(data.actualClosureDate, mapped.actualClosureDate),
-    dealDate: latestText(data.dealDate, mapped.dealDate),
-    dealType: latestText(data.dealType, mapped.dealType, data.customerCategory, mapped.customerCategory),
-    dealSource: latestText(data.dealSource, data.source, mapped.dealSource, mapped.source),
+    actualClosureDate: latestText(data.actualClosureDate, data.actual_closure_date, mapped.actualClosureDate, mapped.actual_closure_date),
+    dealDate: latestText(data.dealDate, data.deal_date, mapped.dealDate, mapped.deal_date),
+    dealType: latestText(data.dealType, data.deal_type, mapped.dealType, mapped.deal_type, data.customerCategory, data.customer_category, mapped.customerCategory, mapped.customer_category),
+    dealSource: latestText(data.dealSource, data.deal_source, data.source, mapped.dealSource, mapped.deal_source, mapped.source),
     source: latestText(data.source, data.dealSource, mapped.source, mapped.dealSource),
     dealSubsource: latestText(data.dealSubsource, data.subsource, mapped.dealSubsource, mapped.subsource),
     subsource: latestText(data.subsource, data.dealSubsource, mapped.subsource, mapped.dealSubsource),
-    projectName: latestText(data.projectName, mapped.projectName),
+    city: normalizeDealCityForFilter(resolvedCity),
+    location: resolvedCity,
+    companyName: latestText(data.companyName, data.company_name, mapped.companyName, mapped.company_name, data.accountName, data.account_name, linkedAccountName),
+    companyProfile: latestText(data.companyProfile, data.company_profile, mapped.companyProfile, mapped.company_profile, data.company, mapped.company),
+    companyLogo: latestText(data.companyLogo, mapped.companyLogo),
+    projectName: resolvedProjectName,
     projectStatus: latestText(data.projectStatus, mapped.projectStatus),
     poValue: latest(data.poValue, mapped.poValue, ''),
     jobNo: latestText(data.jobNo, mapped.jobNo),
@@ -123,8 +144,12 @@ const listWithFilters = async (actor, filters = {}, { companyWide = false, scope
   const coOwnerId = toNumberOrNull(filters.coOwnerId ?? filters.co_owner_id ?? filters.coOwnerUserId)
   const ownerName = String(filters.ownerName ?? filters.owner_name ?? '').trim()
   const stage = String(filters.stage || '').trim()
+  const rawLimit = String(filters.limit ?? '').trim().toLowerCase()
+  const shouldReturnAll = !rawLimit || ['all', '0', '-1'].includes(rawLimit)
   const page = Math.max(1, Number.parseInt(String(filters.page || '1'), 10) || 1)
-  const limit = Math.min(250, Math.max(1, Number.parseInt(String(filters.limit || '100'), 10) || 100))
+  const limit = shouldReturnAll
+    ? 0
+    : Math.min(5000, Math.max(1, Number.parseInt(rawLimit, 10) || 5000))
 
   const filter = mergeFilters(
     buildScopedMongoFilter({
@@ -147,12 +172,15 @@ const listWithFilters = async (actor, filters = {}, { companyWide = false, scope
     }
   )
 
-  const records = await Deal
+  let query = Deal
     .find(filter)
     .sort(sortFromFilters(filters))
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .lean()
+
+  if (limit > 0) {
+    query = query.skip((page - 1) * limit).limit(limit)
+  }
+
+  const records = await query.lean()
 
   return mapDeals(records)
 }

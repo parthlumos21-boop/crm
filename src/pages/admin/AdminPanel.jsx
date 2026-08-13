@@ -18,6 +18,7 @@ import Modal from '../../components/common/Modal'
 import { useClickOutside } from '../../hooks'
 import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
+import apiClient from '../../services/apiClient'
 import { customerService } from '../../services/customerService'
 import { APP_NAME } from '../../utils/constants'
 import { getAdminBookmarks, subscribeAdminBookmarks, toggleAdminBookmark } from '../../features/adminBookmarks/adminBookmarkStorage'
@@ -33,6 +34,8 @@ import {
 } from '../../features/adminDashboardTabs/dashboardTabStorage'
 import { getWeeklyReportsAllBoardData } from '../../features/adminAccounts/selectors/getWeeklyReportsAllBoardData'
 import { getSwBarodaMumBoardData } from '../../features/adminAccounts/selectors/getSwBarodaMumBoardData'
+import { getAdminReminders } from '../../features/adminReminders/getAdminReminders'
+import { closeAdminReminder, getAdminReminderStates, subscribeAdminReminderStates } from '../../features/adminReminders/reminderStorage'
 import { buildMonthlyWonLostData, buildPerformanceSummary } from '../../features/adminDashboardTabs/dashboardInsights'
 import './AdminPanel.css'
 
@@ -81,6 +84,17 @@ const formatStatusLabel = (value, fallback = 'Pending') => {
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/\b\w/g, (character) => character.toUpperCase())
+}
+
+const formatTodoDateTime = (value) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 const buildStatusSummary = (records, getValue, fallbackLabels = [], maxItems = 6) => {
@@ -200,9 +214,25 @@ const AdminPanel = () => {
   const [bookmarks, setBookmarks] = useState(() => getAdminBookmarks(user))
   const [selectedPerformanceMetric, setSelectedPerformanceMetric] = useState('won')
   const [collapsedMyCrmCards, setCollapsedMyCrmCards] = useState([])
+  const [todoReplies, setTodoReplies] = useState([])
+  const [reminderStatesById, setReminderStatesById] = useState(() => getAdminReminderStates())
   const menuRef = useClickOutside(() => setOpenMenuState(null))
   const customers = useMemo(() => customerService.getCustomers(), [])
   const isAdmin = user?.role === 'admin'
+
+  const fetchTodoReplies = useCallback(async () => {
+    try {
+      const res = await apiClient.get('/support-requests/todo/replies')
+      setTodoReplies(Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []))
+    } catch (error) {
+      console.error('Failed to fetch todo replies:', error)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchTodoReplies()
+  }, [fetchTodoReplies])
+  useEffect(() => subscribeAdminReminderStates(setReminderStatesById), [])
 
   const weeklyData = useMemo(() => getWeeklyReportsAllBoardData(accounts), [accounts])
   const swBarodaData = useMemo(() => getSwBarodaMumBoardData(accounts), [accounts])
@@ -436,48 +466,93 @@ const AdminPanel = () => {
     })
   }
 
-  const myCrmCards = useMemo(() => ([
-    {
-      id: 'accounts',
-      title: 'Accounts With No Follow-Ups',
-      total: accounts.length,
-      items: buildStatusSummary(
-        accounts,
-        (account) => account.stage || account.status || account.accountStatus,
-        ['New', 'Follow Up', 'Quotation Sent', 'Order Received', 'Converted', 'Rejected']
-      ),
-    },
-    {
-      id: 'customers',
-      title: 'Customers With No Follow-Ups',
-      total: customers.length,
-      items: buildStatusSummary(
-        customers,
-        (customer) => customer.customerStatus || customer.status,
-        ['New', 'Active', 'Future Prospect', 'Converted', 'Rejected', 'Old']
-      ),
-    },
-    {
-      id: 'supportRequests',
-      title: 'Support Requests With No Follow-Ups',
-      total: supportRequests.length,
-      items: buildStatusSummary(
-        supportRequests,
-        (supportRequest) => supportRequest.status,
-        ['Active', 'In Progress', 'On Site', 'Attending', 'On Hold', 'Postponed']
-      ),
-    },
-    {
-      id: 'deals',
-      title: 'Deals With No Follow-Ups',
-      total: deals.length,
-      items: buildStatusSummary(
-        deals,
-        (deal) => deal.status,
-        ['New', 'Quotation Sent', 'Quotation Revision', 'Order Received', 'Convert To PO', 'Order Lost']
-      ),
-    },
-  ]), [accounts, customers, deals, supportRequests])
+  const myCrmCards = useMemo(() => ([]), [])
+
+  const handleTodoReminderActive = useCallback((reminder, event) => {
+    event?.stopPropagation()
+    navigate('/admin/reminders/active', {
+      state: {
+        reminderId: reminder.id,
+        selectedOwner: reminder.ownerName,
+      },
+    })
+  }, [navigate])
+
+  const handleTodoReminderClose = useCallback((reminder, event) => {
+    event?.stopPropagation()
+    const closedState = closeAdminReminder({
+      sourceType: reminder.sourceType,
+      sourceId: reminder.sourceId,
+      userName: user?.name || user?.username || '',
+    })
+    setReminderStatesById((currentStates) => ({
+      ...currentStates,
+      [closedState.id]: closedState,
+    }))
+    navigate('/admin/reminders/closed', {
+      replace: false,
+      state: {
+        reminderId: reminder.id,
+        selectedOwner: reminder.ownerName,
+      },
+    })
+  }, [navigate, user?.name, user?.username])
+
+  const todoItems = useMemo(() => {
+    const reminderItems = getAdminReminders({
+      accounts,
+      deals,
+      supportRequests,
+      user,
+      variantKey: 'my',
+      reminderStatesById,
+      isAdmin,
+    })
+      .filter((reminder) => reminder.status === 'active')
+      .slice(0, 8)
+      .map((reminder) => ({
+        id: `reminder-${reminder.id}`,
+        type: 'Reminder',
+        title: reminder.name || 'Reminder',
+        meta: `${reminder.sourceLabel || 'Reminder'} | ${reminder.reminderDateDisplay || ''}`,
+        message: reminder.note || reminder.reminderMode || '-',
+        date: reminder.reminderDate,
+        reminder,
+        onClick: () => navigate('/admin/reminders/my', {
+          state: {
+            activeMyReminderTab: 'today',
+            reminderId: reminder.id,
+          },
+        }),
+      }))
+
+    const replyItems = todoReplies.slice(0, 8).map((reply, index) => {
+      const requestId = reply.support_request_id || reply.supportRequestId || reply.relatedEntityId || ''
+      const matchedRequest = supportRequests.find((request) => (
+        [request.id, request.mongoId, request._id, request.legacyId].some((value) => String(value || '') === String(requestId || ''))
+      ))
+      const targetRequestId = matchedRequest?.id || requestId
+      return {
+        id: `reply-${reply._id || reply.id || index}`,
+        type: 'Reply',
+        title: reply.sender_email || reply.senderEmail || 'Support Reply',
+        meta: formatTodoDateTime(reply.created_at || reply.createdAt),
+        message: reply.message || '-',
+        date: reply.created_at || reply.createdAt,
+        onClick: () => navigate('/admin/tickets', {
+          state: {
+            activeTab: 'replied',
+            expandedTicketId: targetRequestId,
+            supportRequestId: targetRequestId,
+          },
+        }),
+      }
+    })
+
+    return [...replyItems, ...reminderItems]
+      .sort((left, right) => new Date(right.date || 0).getTime() - new Date(left.date || 0).getTime())
+      .slice(0, 12)
+  }, [accounts, deals, isAdmin, navigate, reminderStatesById, supportRequests, todoReplies, user])
 
   const handleMyCrmViewList = (card) => {
     addNotification('info', 'View list', `Opening ${card.title}.`)
@@ -508,51 +583,61 @@ const AdminPanel = () => {
       <div className="ap-left-col">
         <div className="ap-welcome-block">
           <h2 className="ap-welcome-heading">Welcome, {user?.name || 'Demo User'}!</h2>
-          <p className="ap-welcome-sub">How do you want to start with {APP_NAME} today..</p>
-
-          <ul className="ap-quick-nav">
-            {QUICK_NAV.map((item) => (
-              <li
-                key={item.id}
-                className="ap-quick-item"
-                onClick={() => navigate(item.route)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(event) => event.key === 'Enter' && navigate(item.route)}
-              >
-                <span className="ap-quick-dot" style={{ borderColor: item.dotColor }} />
-                <span className="ap-quick-label">{item.label}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="ap-stat-cards">
-          <div
-            className="ap-stat-card"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/admin/accounts/weekly-reports-all')}
-            onKeyDown={(event) => event.key === 'Enter' && navigate('/admin/accounts/weekly-reports-all')}
-          >
-            <div className="ap-stat-count">{weeklyData.totalRecords}</div>
-            <div className="ap-stat-label">
-              <FaUsers className="ap-stat-icon" />
-              <span>Weekly reports-ALL</span>
+          <div className="ap-stat-cards" style={{ marginTop: '20px' }}>
+            <div
+              className="ap-stat-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate('/admin/accounts/my-accounts?stage=new&page=1')}
+              onKeyDown={(event) => event.key === 'Enter' && navigate('/admin/accounts/my-accounts?stage=new&page=1')}
+            >
+              <div className="ap-stat-count">{accounts?.length || 0}</div>
+              <div className="ap-stat-label">
+                <FaUsers className="ap-stat-icon" />
+                <span>Accounts</span>
+              </div>
             </div>
-          </div>
 
-          <div
-            className="ap-stat-card"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate('/admin/accounts/sw-baroda-mum')}
-            onKeyDown={(event) => event.key === 'Enter' && navigate('/admin/accounts/sw-baroda-mum')}
-          >
-            <div className="ap-stat-count">{swBarodaData.totalRecords}</div>
-            <div className="ap-stat-label">
-              <FaUsers className="ap-stat-icon" />
-              <span>SW-Baroda / Mum</span>
+            <div
+              className="ap-stat-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate('/admin/customers/my-customers')}
+              onKeyDown={(event) => event.key === 'Enter' && navigate('/admin/customers/my-customers')}
+            >
+              <div className="ap-stat-count">{customers?.length || 0}</div>
+              <div className="ap-stat-label">
+                <FaUsers className="ap-stat-icon" />
+                <span>Customer</span>
+              </div>
+            </div>
+
+            <div
+              className="ap-stat-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate('/admin/deals/view')}
+              onKeyDown={(event) => event.key === 'Enter' && navigate('/admin/deals/view')}
+            >
+              <div className="ap-stat-count">{deals?.length || 0}</div>
+              <div className="ap-stat-label">
+                <FaUsers className="ap-stat-icon" />
+                <span>Deal</span>
+              </div>
+            </div>
+
+            <div
+              className="ap-stat-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate('/admin/quotation-manager/view')}
+              onKeyDown={(event) => event.key === 'Enter' && navigate('/admin/quotation-manager/view')}
+            >
+              <div className="ap-stat-count">-</div>
+              <div className="ap-stat-label">
+                <FaUsers className="ap-stat-icon" />
+                <span>Quotation Manager</span>
+              </div>
             </div>
           </div>
         </div>
@@ -562,11 +647,46 @@ const AdminPanel = () => {
         <div className="ap-todo-header">
           <span className="ap-todo-title">&#9776; To Do List</span>
           <div className="ap-todo-actions">
-            <button className="ap-todo-btn" title="Refresh"><FaSyncAlt /></button>
+            <button className="ap-todo-btn" title="Refresh" onClick={fetchTodoReplies}><FaSyncAlt /></button>
             <button className="ap-todo-btn ap-todo-btn--green" title="Filter"><FaFilter /></button>
           </div>
         </div>
-        <div className="ap-todo-empty">No reminders available</div>
+        {todoItems.length > 0 ? (
+          <div className="ap-todo-list">
+            {todoItems.map((item) => (
+              <div
+                key={item.id}
+                role="button"
+                tabIndex={0}
+                className="ap-todo-item"
+                onClick={item.onClick}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    item.onClick()
+                  }
+                }}
+              >
+                <span className="ap-todo-item-kicker">{item.type}</span>
+                <span className="ap-todo-item-title">{item.title}</span>
+                <span className="ap-todo-item-meta">{item.meta}</span>
+                <span className="ap-todo-item-message">{item.message}</span>
+                {item.reminder ? (
+                  <span className="ap-todo-item-actions">
+                    <button type="button" className="ap-todo-mini-btn" onClick={(event) => handleTodoReminderActive(item.reminder, event)}>
+                      Active
+                    </button>
+                    <button type="button" className="ap-todo-mini-btn ap-todo-mini-btn--close" onClick={(event) => handleTodoReminderClose(item.reminder, event)}>
+                      Close
+                    </button>
+                  </span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="ap-todo-empty">No reminders available</div>
+        )}
       </div>
     </div>
   )
@@ -917,7 +1037,7 @@ const AdminPanel = () => {
             <span className="ap-dashboard-card-title">My Profile</span>
           </div>
 
-          <div className="ap-mycrm-profile-body">
+          <div className="ap-mycrm-profile-content">
             <div className="ap-mycrm-profile-avatar">
               {(user?.name || 'U').charAt(0).toUpperCase()}
             </div>
@@ -931,66 +1051,26 @@ const AdminPanel = () => {
                 <div><strong>Added</strong><span>{new Date().toLocaleString('en-IN')}</span></div>
               </div>
             </div>
+
+            <div className="ap-mycrm-action-grid">
+              <button type="button" className="ap-mycrm-action-btn" onClick={() => navigate('/admin/user-management')}>
+                <FaAddressCard />
+                <span>My Profile</span>
+              </button>
+              <button type="button" className="ap-mycrm-action-btn" onClick={() => navigate('/admin/accounts/my-accounts')}>
+                <FaBriefcase />
+                <span>My Accounts</span>
+              </button>
+              <button type="button" className="ap-mycrm-action-btn" onClick={() => navigate('/admin/customers/my-customers')}>
+                <FaUsers />
+                <span>My Customers</span>
+              </button>
+              <button type="button" className="ap-mycrm-action-btn" onClick={() => navigate('/admin/reminders/my')}>
+                <FaBell />
+                <span>My Reminders</span>
+              </button>
+            </div>
           </div>
-
-          <div className="ap-mycrm-action-grid">
-            <button type="button" className="ap-mycrm-action-btn" onClick={() => navigate('/admin/user-management')}>
-              <FaAddressCard />
-              <span>My Profile</span>
-            </button>
-            <button type="button" className="ap-mycrm-action-btn" onClick={() => navigate('/admin/accounts/my-accounts')}>
-              <FaBriefcase />
-              <span>My Accounts</span>
-            </button>
-            <button type="button" className="ap-mycrm-action-btn" onClick={() => navigate('/admin/customers/my-customers')}>
-              <FaUsers />
-              <span>My Customers</span>
-            </button>
-            <button type="button" className="ap-mycrm-action-btn" onClick={() => navigate('/admin/reminders/my')}>
-              <FaBell />
-              <span>My Reminders</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="ap-mycrm-summary-panel">
-          {myCrmCards.map((card) => {
-            const isCollapsed = collapsedMyCrmCards.includes(card.id)
-
-            return (
-              <section key={card.id} className="ap-mycrm-summary-card">
-                <div className="ap-mycrm-summary-header">
-                  <div>
-                    <span className="ap-mycrm-summary-title">{card.title}: {card.total}</span>
-                  </div>
-                  <div className="ap-mycrm-summary-actions">
-                    <button type="button" className="ap-mycrm-summary-btn ap-mycrm-summary-btn-green" title="View list" onClick={() => handleMyCrmViewList(card)}>
-                      <FaTable />
-                    </button>
-                    <button type="button" className="ap-mycrm-summary-btn ap-mycrm-summary-btn-orange" title="Refresh" onClick={() => handleMyCrmRefresh(card)}>
-                      <FaSyncAlt />
-                    </button>
-                    <button type="button" className="ap-mycrm-summary-btn ap-mycrm-summary-btn-dark" title="Expand or collapse" onClick={() => handleToggleMyCrmCard(card)}>
-                      <FiChevronDown className={isCollapsed ? '' : 'ap-mycrm-summary-chevron-open'} />
-                    </button>
-                  </div>
-                </div>
-
-                {!isCollapsed ? (
-                  <div className="ap-mycrm-summary-body">
-                    <div className="ap-mycrm-summary-stats">
-                      {card.items.map((item) => (
-                        <div key={`${card.id}-${item.label}`} className="ap-mycrm-summary-stat">
-                          <span>{item.label}</span>
-                          <strong>{item.value}</strong>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </section>
-            )
-          })}
         </div>
       </div>
     </div>

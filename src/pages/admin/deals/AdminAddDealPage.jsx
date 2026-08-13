@@ -63,7 +63,6 @@ const buildInitialFormData = () => {
     dealType: '',
     dealOwner: '',
     dealSource: '',
-    dealSubsource: '',
     address: '',
     expectedClosureDate: todayDate,
     probability: '1',
@@ -249,8 +248,6 @@ const buildDealPayload = ({ convertedAccount, resolvedCustomer, formData, user, 
     gstin: formData.gstin.trim(),
     dealSource: formData.dealSource.trim(),
     source: formData.dealSource.trim(),
-    dealSubsource: formData.dealSubsource.trim(),
-    subsource: formData.dealSubsource.trim(),
     accountId: resolvedAccountId,
     convertedFromAccount: Boolean(convertedAccount),
     conversionSource: convertedAccount ? 'search-account' : '',
@@ -430,6 +427,7 @@ const AdminAddDealPage = ({
 
     setSelectedCustomerId(nextCustomer.id)
     setCustomerSearch(nextCustomer.customerName)
+    setDealContacts(buildDealContactsForCustomer(nextCustomer))
     const primaryContact = getPrimaryContact(nextCustomer)
     setFormData((currentValue) => ({
       ...currentValue,
@@ -454,8 +452,10 @@ const AdminAddDealPage = ({
     if (matchedCustomer) {
       setSelectedCustomerId(matchedCustomer.id)
       setCustomerSearch(matchedCustomer.customerName)
+      setDealContacts(buildDealContactsForCustomer(matchedCustomer))
     } else if (!selectedCustomerId) {
       setCustomerSearch(convertedAccount.customerName || convertedAccount.name || '')
+      setDealContacts(buildDealContactsForCustomer(buildConvertedCustomerFallback(convertedAccount)))
     }
 
     const primaryContact = matchedCustomer ? getPrimaryContact(matchedCustomer) : {}
@@ -482,6 +482,7 @@ const AdminAddDealPage = ({
 
     setSelectedCustomerId(customer.id)
     setCustomerSearch(customer.customerName)
+    setDealContacts(buildDealContactsForCustomer(customer))
     setErrors((currentValue) => {
       const nextErrors = { ...currentValue }
       delete nextErrors.customer
@@ -707,7 +708,7 @@ const AdminAddDealPage = ({
         <h2>Select the Customer to add the new Deal:</h2>
         <button
           type="button"
-          className="admin-add-deal-customer-button"
+          className="admin-add-deal-customer-button btn-red-theme"
           onClick={() => navigate(`${normalizedCustomerBasePath}/add?returnTo=${encodeURIComponent(`${normalizedBasePath}/add`)}`)}
         >
           <FaUserPlus />
@@ -915,7 +916,6 @@ const AdminAddDealPage = ({
             {renderSelectField('deal-type', 'Deal Type', 'dealType', DEAL_TYPE_OPTIONS, { required: true })}
             {renderSelectField('deal-source', 'Deal Source', 'dealSource', DEAL_SOURCE_OPTIONS, { required: true })}
             {renderSelectField('deal-owner', 'Deal Owner', 'dealOwner', ACCOUNT_OWNER_OPTIONS, { required: true })}
-            {renderTextField('deal-subsource', 'Deal Subsource', 'dealSubsource', { placeholder: 'Enter Deal Subsource' })}
             {renderTextareaField('deal-address', 'Address', 'address', { rows: 2 })}
             {renderSelectField('deal-city', 'City', 'city', DEAL_CITY_OPTIONS)}
             {renderTextField('deal-expected-closure-date', 'Expected Closure Date', 'expectedClosureDate', { type: 'date', required: true })}
@@ -1052,13 +1052,13 @@ const AdminAddDealPage = ({
 
   const renderNavigationButtons = () => (
     <div className="admin-add-deal-nav-row">
-      <button type="button" className="admin-add-deal-nav-button admin-add-deal-nav-button-secondary" onClick={handleBack}>
+      <button type="button" className="admin-add-deal-nav-button admin-add-deal-nav-button-secondary btn-red-theme" onClick={handleBack}>
         <FaArrowLeft />
         <span>Back</span>
       </button>
 
       {currentStep < steps.length - 1 ? (
-        <button type="button" className="admin-add-deal-nav-button" onClick={handleNext}>
+        <button type="button" className="admin-add-deal-nav-button btn-red-theme" onClick={handleNext}>
           <span>Next</span>
           <FaArrowRight />
         </button>

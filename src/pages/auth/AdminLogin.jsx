@@ -8,6 +8,8 @@ import Input from '../../components/common/Input'
 import { setupApi } from '../../services/setupApi'
 import { APP_VERSION, getDashboardRoute } from '../../utils/constants'
 import swatiLogo from '../../assets/swati-logo.png'
+import lumosLogo from '../../assets/lumos-logo.svg'
+import ResetPasswordModal from './ResetPasswordModal'
 import './Login.css'
 
 const panelMotion = {
@@ -15,16 +17,31 @@ const panelMotion = {
   ease: [0.22, 1, 0.36, 1],
 }
 
-const LoginBrandHeader = ({ title = '', showLogoImage, setShowLogoImage, hideLogo = false, onLogoClick, logoHint = '', glowColor }) => {
+const isLumosLoginValue = (value = '') => String(value).trim().toLowerCase().includes('@lumossolution.com')
+
+const LoginBrandHeader = ({
+  title = '',
+  showLogoImage,
+  setShowLogoImage,
+  hideLogo = false,
+  onLogoClick,
+  logoHint = '',
+  glowColor,
+  logoSrc = swatiLogo,
+  logoAlt = 'Swati Switchgears logo',
+  fallbackText = 'SWATI',
+  logoClassName = '',
+  markClassName = '',
+}) => {
   const LogoWrapper = onLogoClick ? 'button' : 'div'
   const wrapperProps = onLogoClick ? {
     type: 'button',
-    className: 'login-brand-mark login-brand-mark--center login-brand-mark--button',
+    className: `login-brand-mark login-brand-mark--center login-brand-mark--button ${markClassName}`.trim(),
     onClick: onLogoClick,
     'aria-label': logoHint || 'Go back to options',
     title: logoHint || undefined
   } : {
-    className: 'login-brand-mark login-brand-mark--center'
+    className: `login-brand-mark login-brand-mark--center ${markClassName}`.trim()
   }
 
   return (
@@ -33,13 +50,13 @@ const LoginBrandHeader = ({ title = '', showLogoImage, setShowLogoImage, hideLog
         <LogoWrapper {...wrapperProps}>
           {showLogoImage ? (
             <img
-              src={swatiLogo}
-              alt="Swati Switchgears logo"
-              className="login-brand-image"
+              src={logoSrc}
+              alt={logoAlt}
+              className={`login-brand-image ${logoClassName}`.trim()}
               onError={() => setShowLogoImage(false)}
             />
           ) : (
-            <div className="login-brand-fallback">SWATI</div>
+            <div className="login-brand-fallback">{fallbackText}</div>
           )}
           {logoHint ? <span className="login-brand-hint">{logoHint}</span> : null}
         </LogoWrapper>
@@ -68,8 +85,17 @@ const AdminLogin = () => {
   const [showLogoImage, setShowLogoImage] = useState(true)
   const [setupStatus, setSetupStatus] = useState(null)
   const [setupNotice, setSetupNotice] = useState('')
+  const [resetPasswordOpen, setResetPasswordOpen] = useState(false)
 
   const { login, user } = useAuth()
+  const isLumosLogo = isLumosLoginValue(username)
+  const loginLogoSrc = isLumosLogo ? lumosLogo : swatiLogo
+  const loginLogoAlt = isLumosLogo ? 'Lumos Solution logo' : 'Swati Switchgears logo'
+  const loginLogoFallback = isLumosLogo ? 'LUMOS' : 'SWATI'
+
+  useEffect(() => {
+    setShowLogoImage(true)
+  }, [loginLogoSrc])
 
   React.useEffect(() => {
     let isMounted = true
@@ -119,8 +145,13 @@ const AdminLogin = () => {
 
     if (!loginValue) {
       nextErrors.username = 'Email or username is required.'
-    } else if (loginValue.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginValue)) {
-      nextErrors.username = 'Enter a valid email address.'
+    } else if (loginValue.includes('@')) {
+      const emailDomain = loginValue.toLowerCase()
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginValue)) {
+        nextErrors.username = 'Enter a valid email address.'
+      } else if (!emailDomain.endsWith('@swatiswitchgears.com') && !emailDomain.endsWith('@lumossolution.com') && !emailDomain.endsWith('@support.com')) {
+        nextErrors.username = 'Email must belong to @swatiswitchgears.com, @lumossolution.com, or @support.com domains.'
+      }
     }
 
     if (!passwordValue) {
@@ -218,6 +249,11 @@ const AdminLogin = () => {
             <LoginBrandHeader
               showLogoImage={showLogoImage}
               setShowLogoImage={setShowLogoImage}
+              logoSrc={loginLogoSrc}
+              logoAlt={loginLogoAlt}
+              fallbackText={loginLogoFallback}
+              logoClassName={isLumosLogo ? 'login-brand-image--lumos' : ''}
+              markClassName={isLumosLogo ? 'login-brand-mark--lumos' : ''}
               onLogoClick={() => navigate('/login')}
               logoHint="Click for user login"
               glowColor={setupStatus?.loginBrandGlowColor}
@@ -268,11 +304,19 @@ const AdminLogin = () => {
               type="submit"
               variant="primary"
               size="large"
+              className="btn-red-theme"
               fullWidth
               loading={loading}
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
+            <button
+              type="button"
+              className="login-reset-link"
+              onClick={() => setResetPasswordOpen(true)}
+            >
+              Reset Password
+            </button>
           </form>
 
           <div className="login-footer">
@@ -282,6 +326,11 @@ const AdminLogin = () => {
           </div>
         </motion.section>
       </div>
+      <ResetPasswordModal
+        open={resetPasswordOpen}
+        loginValue={username}
+        onClose={() => setResetPasswordOpen(false)}
+      />
     </div>
   )
 }

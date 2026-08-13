@@ -66,6 +66,8 @@ const mapLeadRow = (record) => {
     ...mergedFormData,
     createdByUserId: row.createdByUserId || mergedFormData.createdByUserId || row.createdBy || null,
     createdByUserName: row.createdByUserName || mergedFormData.createdByUserName || '',
+    createdUserBy: row.createdUserBy || mergedFormData.createdUserBy || '',
+    ownerCode: row.ownerCode || mergedFormData.ownerCode || null,
     employeeId: row.employeeId || mergedFormData.employeeId || '',
     department: row.department || mergedFormData.department || '',
     userEmail: row.userEmail || mergedFormData.userEmail || '',

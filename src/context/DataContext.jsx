@@ -1127,6 +1127,17 @@ export const DataProvider = ({ children }) => {
     return loadAllData()
   }, [loadAllData, refreshAccountStorageStatus])
 
+  const refreshSupportRequests = useCallback(async () => {
+    try {
+      const records = await supportRequestApi.getSupportRequests()
+      setSupportRequests(records)
+      return records
+    } catch (error) {
+      console.error('Failed to refresh support requests', error)
+      return []
+    }
+  }, [])
+
   const value = {
     accounts,
     deals,
@@ -1161,6 +1172,7 @@ export const DataProvider = ({ children }) => {
     createSupportRequest,
     updateSupportRequest,
     deleteSupportRequest,
+    refreshSupportRequests,
     createTask,
     updateTask,
     deleteTask,

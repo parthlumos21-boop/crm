@@ -42,7 +42,6 @@ const SEARCH_RESULT_COLUMNS = [
   { key: 'customerNumber', label: 'Customer Number' },
   { key: 'description', label: 'Description' },
   { key: 'requestDate', label: 'Request Date', type: 'date' },
-  { key: 'endDate', label: 'End Date', type: 'date' },
   { key: 'ownerName', label: 'Owner' },
   { key: 'requestType', label: 'Request Type' },
   { key: 'status', label: 'Status' },
@@ -102,6 +101,7 @@ const SupportRequestSearch = () => {
   const location = useLocation()
   const { supportRequests } = useData()
   const basePath = getSupportRequestBasePath(location.pathname)
+  const isAdminSearchRoute = location.pathname.startsWith('/admin/support-requests/search')
   const [conditions, setConditions] = useState([buildConditionRow()])
 
   const activeConditions = useMemo(
@@ -114,6 +114,9 @@ const SupportRequestSearch = () => {
     if (activeConditions.length === 0) return []
 
     return supportRequests.filter((supportRequest) => {
+      const customerNumber = getSupportRequestValue(supportRequest, 'customerNumber')
+      if (!customerNumber || customerNumber === '-') return false
+
       return activeConditions.every((condition) => {
         const fieldConfig = SEARCH_FIELDS.find((field) => field.value === condition.fieldKey)
         if (!fieldConfig) return true
@@ -215,7 +218,7 @@ const SupportRequestSearch = () => {
           {conditions.map((condition, index) => {
             const selectedField = SEARCH_FIELDS.find((field) => field.value === condition.fieldKey)
             const operatorOptions = selectedField?.type === 'date' ? DATE_OPERATORS : TEXT_OPERATORS
-            const shouldHideValue = condition.operator === 'isEmpty'
+            const shouldHideValue = condition.operator === 'isEmpty' || (isAdminSearchRoute && selectedField?.type === 'text')
 
             return (
               <div key={condition.id} className="support-request-search-row">
@@ -298,7 +301,7 @@ const SupportRequestSearch = () => {
 
                 <button
                   type="button"
-                  className="support-request-search-add"
+                  className="support-request-search-add btn-red-theme"
                   onClick={handleAddCondition}
                   aria-label="Add search condition"
                 >

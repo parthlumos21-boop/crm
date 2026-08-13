@@ -29,7 +29,6 @@ const CRM_DIRECTORY_USERS = [
   { ownerCode: '1010', name: 'Rajeshree Parmar', role: 'user', userGroup: 'Back Office', userType: 'Sales Executive', aliases: [] },
   { ownerCode: '1011', name: 'Samir Jha', role: 'user', userGroup: 'Back Office', userType: 'Sales Executive', aliases: [] },
   { ownerCode: '1012', name: 'Support Swati', role: 'user', userGroup: 'Field Staff', userType: 'Support Executive', aliases: [] },
-  { ownerCode: '1013', name: 'Tajammul Solkar', role: 'user', userGroup: 'Back Office', userType: 'Sales Executive', aliases: ['Tajamul Rafique Solkar', 'Tajamul Solkar'] },
   { ownerCode: '1014', name: 'Vaibhavi Patel', role: 'user', userGroup: 'Back Office', userType: 'Sales Executive', aliases: [] },
   { ownerCode: '1018', name: 'Bhavesh Prajapati', role: 'user', userGroup: 'Back Office', userType: 'Sales Executive', aliases: [] },
   { ownerCode: '1019', name: 'Samir Seth', role: 'user', userGroup: 'Back Office', userType: 'Sales Executive', aliases: [] },

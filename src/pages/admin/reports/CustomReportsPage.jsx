@@ -365,10 +365,10 @@ const WebReportModal = ({ report, onClose }) => {
 
 const SplitDropdown = ({ label, options, isOpen, buttonRef, onToggle, onSelect }) => (
   <div className="cr-list-split" ref={buttonRef}>
-    <button type="button" className="cr-list-primary-btn" onClick={() => onSelect(options[0].key)}>
+    <button type="button" className="cr-list-primary-btn btn-red-theme" onClick={() => onSelect(options[0].key)}>
       {label}
     </button>
-    <button type="button" className="cr-list-caret-btn" onClick={onToggle} aria-label={`Open ${label} menu`}>
+    <button type="button" className="cr-list-caret-btn btn-red-theme" onClick={onToggle} aria-label={`Open ${label} menu`}>
       <span />
     </button>
     {isOpen && (
@@ -545,8 +545,7 @@ const CustomReportsPage = ({ basePath = '/admin/reports' }) => {
       </header>
 
       <div className="cr-list-tabs">
-        <button type="button" className={activeManagementTab === 'my' ? 'active' : ''} onClick={() => setActiveManagementTab('my')}>My Reports</button>
-        <button type="button" className={activeManagementTab === 'shared' ? 'active' : ''} onClick={() => setActiveManagementTab('shared')}>Shared Reports</button>
+
         {isAdmin && <button type="button" className={activeManagementTab === 'all' ? 'active' : ''} onClick={() => setActiveManagementTab('all')}>All Reports</button>}
       </div>
 

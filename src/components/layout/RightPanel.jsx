@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  FaCheckCircle,
   FaEnvelope,
-  FaExclamationCircle,
   FaExternalLinkAlt,
   FaPlug,
   FaRegFileAlt,
@@ -182,12 +180,8 @@ const RightPanel = () => {
                 <span className="rp-action-card__icon">
                   <ActionIcon />
                 </span>
-                <span className="rp-action-card__label">{action.label}</span>
-                <span className="rp-action-card__meta">
-                  <span className={`rp-integration-status ${action.statusClass}`}>
-                    {action.statusClass.includes('active') ? <FaCheckCircle /> : <FaExclamationCircle />}
-                    {isBusy ? 'Opening' : action.status}
-                  </span>
+                <span className="rp-action-card__body">
+                  <span className="rp-action-card__label">{action.label}</span>
                   <span className="rp-action-card__cta">
                     {action.cta}
                     {action.key === 'outlook' && integrationStatus?.outlook?.connected ? <FaExternalLinkAlt /> : <FaPlug />}

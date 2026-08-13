@@ -281,7 +281,7 @@ const buildVisiblePages = (currentPage, totalPages) => {
   return [currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2]
 }
 
-const getPrimaryContact = (customer) => customer.contacts?.[0] || {}
+const getPrimaryContact = (customer) => customer?.contacts?.[0] || {}
 
 const formatCustomerDate = (value) => {
   if (!value) return '-'
@@ -541,12 +541,26 @@ const createCustomerRouteHelpers = (basePath = '/admin/customers') => {
   }
 }
 
+const getCustomerNumberDisplay = (customer = {}) => (
+  customer.customerNumber
+  || customer.customerNo
+  || customer.customer_number
+  || customer.customer_no
+  || customer.raw?.customerNumber
+  || customer.raw?.customerNo
+  || customer.raw?.customer_number
+  || customer.raw?.customer_no
+  || customer.customerRefNo
+  || customer.number
+  || (customer.id ? `SSC${String(customer.id).padStart(5, '0')}` : '')
+)
+
 const toSearchRow = (customer) => {
   const primaryContact = getPrimaryContact(customer)
 
   return {
     id: customer.id,
-    customerNumber: customer.customerNumber || '',
+    customerNumber: getCustomerNumberDisplay(customer),
     customerName: getCustomerSearchName(customer),
     contactPerson: primaryContact.name || customer.contactPerson || '',
     email: primaryContact.email || '',
@@ -702,7 +716,7 @@ const CustomerField = ({
 )
 
 const AdminCustomersPage = ({
-  variantKey = 'add',
+  variantKey: propVariantKey = 'add',
   basePath = '/admin/customers',
   restrictToOwner = false,
   showActionMenu = true,
@@ -711,6 +725,13 @@ const AdminCustomersPage = ({
   const navigate = useNavigate()
   const location = useLocation()
   const { customerId: routeCustomerId = '' } = useParams()
+  
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const urlCustomerId = searchParams.get('customerId') || ''
+  
+  const variantKey = propVariantKey
+    
+  const customerId = variantKey === 'view' && urlCustomerId ? urlCustomerId : routeCustomerId
   const { user } = useAuth()
   const highlightedRowRef = useRef(null)
   const actionMenuTriggerRef = useRef(null)
@@ -719,6 +740,7 @@ const AdminCustomersPage = ({
     fallbackGridPath,
     quotationsPath,
     buildReturnUrl,
+    buildViewUrl,
     buildActionUrl,
     buildManageUrl,
   } = useMemo(() => createCustomerRouteHelpers(basePath), [basePath])
@@ -784,10 +806,15 @@ const AdminCustomersPage = ({
   const [manageRemarkTab, setManageRemarkTab] = useState('feedback')
   const [showManageSystemUpdates, setShowManageSystemUpdates] = useState(false)
 
-  const customerGridActions = useMemo(
-    () => CUSTOMER_GRID_ACTION_KEYS.map((actionKey) => CUSTOMER_ACTION_MAP[actionKey]).filter(Boolean),
-    []
-  )
+  const customerGridActions = useMemo(() => {
+    return CUSTOMER_GRID_ACTION_KEYS
+      .filter((actionKey) => {
+        if (variantKey === 'manage' && actionKey === 'manage-customer') return false;
+        return true;
+      })
+      .map((actionKey) => CUSTOMER_ACTION_MAP[actionKey])
+      .filter(Boolean)
+  }, [variantKey])
 
   useEffect(() => {
     const unsubscribe = customerService.subscribe((nextCustomers) => {
@@ -1022,7 +1049,7 @@ const AdminCustomersPage = ({
 
   const handleBack = () => {
     if (variantKey === 'manage' || variantKey === 'view') {
-      navigate(returnUrl, { state: { highlightCustomerId: routeCustomerId || currentCustomer?.id || '' } })
+      navigate(returnUrl)
       return
     }
 
@@ -1248,15 +1275,15 @@ const AdminCustomersPage = ({
     })
   }, [currentPageSafe, highlightedCustomerId, paginatedRows, variantKey])
 
-  const handleOpenCustomerView = (customerId) => {
-    if (variantKey === 'search' || variantKey === 'myCustomers') {
-      navigate(buildViewUrl(customerId, currentGridUrl), {
-        state: { returnTo: currentGridUrl, highlightCustomerId: customerId },
+  const handleOpenCustomerView = (id) => {
+    if (propVariantKey === 'search' || propVariantKey === 'myCustomers') {
+      navigate(buildViewUrl(id, currentGridUrl), {
+        state: { returnTo: currentGridUrl, highlightCustomerId: id },
       })
       return
     }
 
-    setDrawerCustomerId(customerId)
+    setDrawerCustomerId(id)
     setDrawerInitialActionKey('')
   }
 
@@ -1350,7 +1377,7 @@ const AdminCustomersPage = ({
       ...customer,
       ...updates,
       id: customer.id,
-      customerNumber: customer.customerNumber,
+      customerNumber: getCustomerNumberDisplay(customer),
     })
     setSaveMessage('Customer updated successfully.')
   }
@@ -1423,10 +1450,33 @@ const AdminCustomersPage = ({
         stateCode: getManageEditValue(nextProfileData.stateCode),
         contacts: nextContacts,
       })
-      setProfileSaveMessage('Profile detail updated successfully.')
+      setProfileSaveMessage('')
       setEditingProfileField('')
     } catch (error) {
       setProfileSaveMessage(error?.response?.data?.message || error?.message || 'Unable to update profile details.')
+    } finally {
+      setIsSavingCustomer(false)
+    }
+  }
+
+  const handleSaveManageRemark = async (fieldKey, value) => {
+    if (!currentCustomer || isSavingCustomer) return
+
+    const nextValue = String(value || '').trim()
+    const currentValue = String(currentCustomer[fieldKey] || '').trim()
+    if (nextValue === currentValue) return
+
+    setIsSavingCustomer(true)
+    setProfileSaveMessage('')
+
+    try {
+      await customerService.saveCustomer({
+        ...currentCustomer,
+        [fieldKey]: nextValue,
+      })
+      setProfileSaveMessage('')
+    } catch (error) {
+      setProfileSaveMessage(error?.response?.data?.message || error?.message || 'Unable to save remark.')
     } finally {
       setIsSavingCustomer(false)
     }
@@ -1449,6 +1499,19 @@ const AdminCustomersPage = ({
     handleSaveProfileField(fieldKey)
   }
 
+  const handleProfileEditBlur = (event, fieldKey) => {
+    if (isSavingCustomer || editingProfileField !== fieldKey) return
+
+    const nextValue = event.currentTarget.value
+    const currentValue = buildManageProfileData(currentCustomer || {})[fieldKey]
+    if (String(nextValue ?? '').trim() === String(currentValue ?? '').trim()) {
+      setEditingProfileField('')
+      return
+    }
+
+    handleSaveProfileField(fieldKey)
+  }
+
   const handleOpenBulkActionDialog = (actionKey) => {
     setIsBulkMenuOpen(false)
     setBulkDialogActionKey(actionKey)
@@ -1460,7 +1523,7 @@ const AdminCustomersPage = ({
         ...customer,
         ...payload,
         id: customer.id,
-        customerNumber: customer.customerNumber,
+        customerNumber: getCustomerNumberDisplay(customer),
       })
     )))
 
@@ -1546,11 +1609,11 @@ const AdminCustomersPage = ({
             <h1>{title}</h1>
 
             <div className="admin-customers-toolbar-actions" data-customer-bulk-menu>
-              {showActionMenu ? (
+              {false && showActionMenu ? (
                 <div className="admin-customers-toolbar-bulk-wrap">
                   <button
                     type="button"
-                    className="admin-customers-toolbar-button admin-customers-toolbar-button-primary admin-customers-toolbar-button-bulk"
+                    className="admin-customers-toolbar-button admin-customers-toolbar-button-primary admin-customers-toolbar-button-bulk btn-red-theme"
                     onClick={() => setIsBulkMenuOpen((currentValue) => !currentValue)}
                     aria-expanded={isBulkMenuOpen}
                   >
@@ -1835,14 +1898,14 @@ const AdminCustomersPage = ({
                                     className="admin-customers-grid-number-button admin-customers-grid-number-button-label"
                                     onClick={() => handleOpenCustomerView(row.id)}
                                   >
-                                    <span>{row.customerNumber || '-'}</span>
+                                    <span>{row.customerNumber || row.customerNo || row.customer_number || row.customer_no || '-'}</span>
                                   </button>
                                   {showActionMenu ? (
                                     <button
                                       type="button"
                                       className="admin-customers-grid-number-button admin-customers-grid-number-button-arrow"
                                       onClick={(event) => handleToggleCustomerActionMenu(row.id, event.currentTarget)}
-                                      aria-label={`Open actions for ${row.customerNumber}`}
+                                      aria-label={`Open actions for ${row.customerNumber || row.customerNo || row.customer_number || row.customer_no || 'customer'}`}
                                       aria-expanded={openActionMenuCustomerId === row.id}
                                       aria-haspopup="menu"
                                     >
@@ -2085,6 +2148,7 @@ const AdminCustomersPage = ({
       value: getManageDisplayValue(row.rawValue),
       missing: getManageDisplayValue(row.rawValue) === 'Not Available',
     }))
+    const profileGridRows = [...profileMainRows, ...profileDetailRows]
     const editableFactRows = [
       { key: 'gstin', label: 'GSTIN:', icon: <FaIdBadge />, value: currentCustomer.gstin || currentCustomer.gstIn || 'Not Available', missing: !(currentCustomer.gstin || currentCustomer.gstIn) },
       { key: 'stateCode', label: 'State Code:', icon: <FaInfoCircle />, value: currentCustomer.stateCode || 'Not Available', missing: !currentCustomer.stateCode },
@@ -2135,6 +2199,7 @@ const AdminCustomersPage = ({
                   type="text"
                   value={profileEditData.customerName}
                   onChange={(event) => handleProfileEditChange('customerName', event.target.value)}
+                  onBlur={(event) => handleProfileEditBlur(event, 'customerName')}
                   placeholder="Fill Customer Name"
                   autoFocus
                 />
@@ -2154,6 +2219,9 @@ const AdminCustomersPage = ({
               </>
             )}
             <strong className="admin-customers-manage-number">{currentCustomer.customerNumber || '-'}</strong>
+            <button type="button" className="admin-customers-manage-mail admin-customers-manage-mail-header" onClick={() => handleOpenCustomerAction(CUSTOMER_ACTION_MAP['send-mail'], currentCustomer.id)}>
+              <FaEnvelope />
+            </button>
             {showActionMenu ? (
               <div className="admin-customers-manage-actions" data-customer-action-menu>
                 <button
@@ -2195,6 +2263,7 @@ const AdminCustomersPage = ({
                         value={profileEditData[row.key]}
                         onChange={(event) => handleProfileEditChange(row.key, event.target.value)}
                         onKeyDown={(event) => handleProfileEditKeyDown(event, row.key)}
+                        onBlur={(event) => handleProfileEditBlur(event, row.key)}
                         placeholder={`Fill ${row.label}`}
                         autoFocus
                       />
@@ -2225,9 +2294,6 @@ const AdminCustomersPage = ({
                   )}
                 </div>
               ))}
-              <button type="button" className="admin-customers-manage-mail" onClick={() => handleOpenCustomerAction(CUSTOMER_ACTION_MAP['send-mail'], currentCustomer.id)}>
-                <FaEnvelope />
-              </button>
             </div>
 
             <div className="admin-customers-manage-facts">
@@ -2252,6 +2318,7 @@ const AdminCustomersPage = ({
                         value={profileEditData[row.key]}
                         onChange={(event) => handleProfileEditChange(row.key, event.target.value)}
                         onKeyDown={(event) => handleProfileEditKeyDown(event, row.key)}
+                        onBlur={(event) => handleProfileEditBlur(event, row.key)}
                         placeholder={`Fill ${row.label.replace(':', '')}`}
                         autoFocus
                       />
@@ -2296,6 +2363,104 @@ const AdminCustomersPage = ({
 
           <section className="admin-customers-manage-body">
             <div className="admin-customers-manage-left">
+              <div className="admin-customers-manage-profile-card">
+                <h2>
+                  <span>Profile details</span>
+                </h2>
+                <div className="admin-customers-manage-profile-inner admin-customers-manage-profile-grid admin-customers-manage-profile-grid--three">
+                  {profileGridRows.map((row) => {
+                    const isMissing = row.missing || row.value === 'Not Available'
+                    const inputType = row.type || (row.key === 'alternateEmail' || row.key === 'email' ? 'email' : 'text')
+
+                    return (
+                      <div
+                        key={row.key}
+                        className={[
+                          'admin-customers-manage-profile-grid-item',
+                          editingProfileField === row.key ? 'admin-customers-manage-profile-row-editing' : '',
+                          isMissing ? 'admin-customers-manage-fill-row' : '',
+                        ].filter(Boolean).join(' ')}
+                        onClick={editingProfileField ? undefined : () => handleStartProfileEdit(row.key)}
+                      >
+                        {editingProfileField === row.key ? (
+                          <>
+                            <label>
+                              <span>{row.label}</span>
+                              <input
+                                type={inputType}
+                                value={profileEditData[row.key]}
+                                onChange={(event) => handleProfileEditChange(row.key, event.target.value)}
+                                onKeyDown={(event) => handleProfileEditKeyDown(event, row.key)}
+                                onBlur={(event) => handleProfileEditBlur(event, row.key)}
+                                placeholder={`Fill ${row.label}`}
+                                autoFocus
+                              />
+                            </label>
+                            <div className="admin-customers-manage-profile-inline-actions admin-customers-manage-icon-actions">
+                              <button type="button" onClick={() => handleSaveProfileField(row.key)} disabled={isSavingCustomer} aria-label={`Save ${row.label}`}>
+                                <FaCheck />
+                              </button>
+                              <button type="button" onClick={handleCancelProfileEdit} aria-label={`Close ${row.label}`}>
+                                <FaTimes />
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <span className="admin-customers-manage-profile-row-label">{row.label}</span>
+                            <strong className={isMissing ? 'admin-customers-manage-profile-row-value admin-customers-manage-missing' : 'admin-customers-manage-profile-row-value'}>
+                              {row.value}
+                            </strong>
+                            <button
+                              type="button"
+                              className="admin-customers-manage-row-edit-button"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                handleStartProfileEdit(row.key)
+                              }}
+                              aria-label={`Edit ${row.label}`}
+                            >
+                              <FaEdit />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="admin-customers-manage-right admin-customers-manage-right--stacked">
+                <div className="admin-customers-manage-followup">
+                  <span><FaInfoCircle /> No planned Follow-ups</span>
+                  <button type="button" onClick={() => handleOpenCustomerAction(CUSTOMER_ACTION_MAP['add-reminder'], currentCustomer.id)}>Add Reminder</button>
+                </div>
+                <div className="admin-customers-manage-updates">
+                  <div>
+                    <span>Recent Updates</span>
+                    <button type="button" onClick={() => setShowManageSystemUpdates((currentValue) => !currentValue)}>
+                      {showManageSystemUpdates ? 'Hide System Updates' : 'Show System Updates'}
+                    </button>
+                  </div>
+                  {showManageSystemUpdates ? (
+                    <div className="admin-customers-manage-update-feed">
+                      {manageSystemUpdates.map((update) => (
+                        <article key={update.id} className="admin-customers-manage-update-item-grid-card">
+                          <div className="admin-customers-manage-update-item-date">{update.date}</div>
+                          {update.time ? <div className="admin-customers-manage-update-item-time">{update.time}</div> : null}
+                          <div className="admin-customers-manage-update-item-type">{update.type}</div>
+                          <div className="admin-customers-manage-update-item-by">By {update.by}</div>
+                          <p className="admin-customers-manage-update-item-body">{update.message}</p>
+                        </article>
+                      ))}
+                      <p className="admin-customers-manage-no-more-updates">No more updates</p>
+                    </div>
+                  ) : (
+                    <p>No updates available</p>
+                  )}
+                </div>
+              </div>
+
               <div className="admin-customers-manage-remark-box">
                 <div className="admin-customers-manage-tags">
                   <button
@@ -2314,157 +2479,21 @@ const AdminCustomersPage = ({
                   </button>
                 </div>
                 {manageRemarkTab === 'feedback' ? (
-                  <textarea placeholder="Add feedback here..." defaultValue={currentCustomer.remark || ''} />
+                  <textarea
+                    placeholder="Add feedback here..."
+                    defaultValue={currentCustomer.remark || ''}
+                    onBlur={(event) => handleSaveManageRemark('remark', event.target.value)}
+                  />
                 ) : (
-                  <textarea placeholder="Add general note here..." defaultValue={currentCustomer.description || ''} />
-                )}
-              </div>
-
-              <div className="admin-customers-manage-profile-card">
-                <h2>
-                  <span>Profile details</span>
-                </h2>
-                <div className="admin-customers-manage-profile-inner">
-                  {profileMainRows.map((row) => (
-                    <div
-                      key={row.key}
-                      className={`admin-customers-manage-profile-row ${row.isTitle ? 'admin-customers-manage-profile-row-title' : ''} ${editingProfileField === row.key ? 'admin-customers-manage-profile-row-editing' : ''}`}
-                      onClick={editingProfileField ? undefined : () => handleStartProfileEdit(row.key)}
-                    >
-                      {editingProfileField === row.key ? (
-                        <>
-                          <label>
-                            <span>{row.label}</span>
-                            <input
-                              type={row.type || 'text'}
-                              value={profileEditData[row.key]}
-                              onChange={(event) => handleProfileEditChange(row.key, event.target.value)}
-                              onKeyDown={(event) => handleProfileEditKeyDown(event, row.key)}
-                              placeholder={`Fill ${row.label}`}
-                              autoFocus
-                            />
-                          </label>
-                          <div className="admin-customers-manage-profile-inline-actions">
-                            <button type="button" onClick={handleCancelProfileEdit}>Close</button>
-                            <button type="button" onClick={() => handleSaveProfileField(row.key)} disabled={isSavingCustomer}>
-                              {isSavingCustomer ? 'Saving...' : 'Save'}
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {row.icon || null}
-                          {row.isTitle ? <h3>{row.value}</h3> : <span>{row.value}</span>}
-                          <button
-                            type="button"
-                            className="admin-customers-manage-row-edit-button"
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              handleStartProfileEdit(row.key)
-                            }}
-                            aria-label={`Edit ${row.label}`}
-                          >
-                            <FaEdit />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                  <hr />
-                  <h4>Other Details</h4>
-                  <dl>
-                    {profileDetailRows.map((row) => (
-                      <div
-                        key={row.key}
-                        className={[
-                          editingProfileField === row.key ? 'admin-customers-manage-profile-row-editing' : '',
-                          row.missing ? 'admin-customers-manage-fill-row' : '',
-                        ].filter(Boolean).join(' ')}
-                        onClick={editingProfileField ? undefined : () => handleStartProfileEdit(row.key)}
-                      >
-                        <dt>{row.label}</dt>
-                        <dd className={row.missing ? 'admin-customers-manage-missing' : ''}>
-                          {editingProfileField === row.key ? (
-                            <>
-                              <input
-                                type={row.key === 'alternateEmail' ? 'email' : 'text'}
-                                value={profileEditData[row.key]}
-                                onChange={(event) => handleProfileEditChange(row.key, event.target.value)}
-                                onKeyDown={(event) => handleProfileEditKeyDown(event, row.key)}
-                                placeholder={`Fill ${row.label}`}
-                                autoFocus
-                              />
-                              <span className="admin-customers-manage-profile-inline-actions">
-                                <button type="button" onClick={handleCancelProfileEdit}>Close</button>
-                                <button type="button" onClick={() => handleSaveProfileField(row.key)} disabled={isSavingCustomer}>
-                                  {isSavingCustomer ? 'Saving...' : 'Save'}
-                                </button>
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <span>{row.value}</span>
-                              <button
-                                type="button"
-                                className="admin-customers-manage-row-edit-button"
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  handleStartProfileEdit(row.key)
-                                }}
-                                aria-label={`Edit ${row.label}`}
-                              >
-                                <FaEdit />
-                              </button>
-                            </>
-                          )}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                  {profileSaveMessage ? <p className="admin-customers-manage-profile-message">{profileSaveMessage}</p> : null}
-                </div>
-              </div>
-            </div>
-
-            <div className="admin-customers-manage-right">
-              <div className="admin-customers-manage-followup">
-                <span><FaInfoCircle /> No planned Follow-ups</span>
-                <button type="button" onClick={() => handleOpenCustomerAction(CUSTOMER_ACTION_MAP['add-reminder'], currentCustomer.id)}>Add Reminder</button>
-              </div>
-              <div className="admin-customers-manage-updates">
-                <div>
-                  <span>Recent Updates</span>
-                  <button type="button" onClick={() => setShowManageSystemUpdates((currentValue) => !currentValue)}>
-                    {showManageSystemUpdates ? 'Hide System Updates' : 'Show System Updates'}
-                  </button>
-                </div>
-                {showManageSystemUpdates ? (
-                  <div className="admin-customers-manage-update-feed">
-                    {manageSystemUpdates.map((update) => (
-                      <article key={update.id} className="admin-customers-manage-update-item">
-                        <span className={`admin-customers-manage-update-icon admin-customers-manage-update-icon-${update.icon}`}>
-                          {update.icon === 'edit' ? <FaEdit /> : update.icon === 'deal' ? <FaThumbsUp /> : <FaDesktop />}
-                        </span>
-                        <time>
-                          <span>{update.date}</span>
-                          {update.time ? <strong>{update.time}</strong> : null}
-                        </time>
-                        <div>
-                          <header>
-                            <strong>{update.type}</strong>
-                            <span>By {update.by}</span>
-                          </header>
-                          <p>{update.message}</p>
-                        </div>
-                      </article>
-                    ))}
-                    <p className="admin-customers-manage-no-more-updates">No more updates</p>
-                  </div>
-                ) : (
-                  <p>No updates available</p>
+                  <textarea
+                    placeholder="Add general note here..."
+                    defaultValue={currentCustomer.description || ''}
+                    onBlur={(event) => handleSaveManageRemark('description', event.target.value)}
+                  />
                 )}
               </div>
             </div>
+
           </section>
         </section>
         {actionMenuPortal}
@@ -2490,12 +2519,12 @@ const AdminCustomersPage = ({
         </div>
 
         <div className="admin-customers-form-actions admin-customers-form-actions-top">
-          <button type="button" className="admin-customers-nav-button admin-customers-nav-button-secondary" onClick={handleBack}>
+          <button type="button" className="admin-customers-nav-button admin-customers-nav-button-secondary btn-red-theme" onClick={handleBack}>
             Back
           </button>
 
           {currentStep < steps.length - 1 ? (
-            <button type="button" className="admin-customers-nav-button" onClick={handleNext}>
+            <button type="button" className="admin-customers-nav-button btn-red-theme" onClick={handleNext}>
               Next
             </button>
           ) : (
@@ -2654,12 +2683,12 @@ const AdminCustomersPage = ({
         {customersError ? <div className="admin-customers-save-message">{customersError}</div> : null}
 
         <div className="admin-customers-form-actions">
-          <button type="button" className="admin-customers-nav-button admin-customers-nav-button-secondary" onClick={handleBack}>
+          <button type="button" className="admin-customers-nav-button admin-customers-nav-button-secondary btn-red-theme" onClick={handleBack}>
             Back
           </button>
 
           {currentStep < steps.length - 1 ? (
-            <button type="button" className="admin-customers-nav-button" onClick={handleNext}>
+            <button type="button" className="admin-customers-nav-button btn-red-theme" onClick={handleNext}>
               Next
             </button>
           ) : (

@@ -14,17 +14,42 @@ const Deal = getMongoModel('deals')
 const Lead = getMongoModel('leads')
 const User = getMongoModel('users')
 
+const normalizeDealCityForFilter = (value) => {
+  const normalizedValue = String(value || '').trim().toLowerCase()
+  if (normalizedValue === 'ahmedabad' || normalizedValue === 'ahmadabad') return 'ahmadabad'
+  if (normalizedValue === 'baroda' || normalizedValue === 'vadodara') return 'vadodara'
+  return String(value || '').trim()
+}
+
 const normalizeMappedConvertedDeal = (record) => {
   const mapped = baseRepository.map(record)
   if (!mapped) return null
+  const data = mapped.data && typeof mapped.data === 'object' ? mapped.data : {}
 
   return {
     ...mapped,
-    accountName: mapped.accountName || mapped.linkedAccountName || '',
-    linkedAccountName: mapped.linkedAccountName || mapped.accountName || '',
-    linkedAccountNumber: mapped.linkedAccountNumber || mapped.accountNumber || '',
-    sourceDealTitle: mapped.sourceDealTitle || mapped.title || '',
-    sourceDealNumber: mapped.sourceDealNumber || mapped.dealNumber || '',
+    accountName: mapped.accountName || mapped.linkedAccountName || data.accountName || data.linkedAccountName || '',
+    accountNumber: mapped.accountNumber || mapped.linkedAccountNumber || data.accountNumber || data.linkedAccountNumber || '',
+    linkedAccountName: mapped.linkedAccountName || mapped.accountName || data.linkedAccountName || data.accountName || '',
+    linkedAccountNumber: mapped.linkedAccountNumber || mapped.accountNumber || data.linkedAccountNumber || data.accountNumber || '',
+    customerName: mapped.customerName || data.customerName || '',
+    customerNumber: mapped.customerNumber || data.customerNumber || data.customer_number || '',
+    companyName: mapped.companyName || data.companyName || mapped.accountName || data.accountName || mapped.customerName || data.customerName || '',
+    companyProfile: mapped.companyProfile || data.companyProfile || data.company || '',
+    companyLogo: mapped.companyLogo || data.companyLogo || '',
+    projectName: mapped.projectName || data.projectName || data.project_name || mapped.title || data.title || data.name || '',
+    city: normalizeDealCityForFilter(mapped.city || mapped.location || data.city || data.location || data.branchLocation || data.projectLocation || ''),
+    location: mapped.location || mapped.city || data.location || data.city || data.branchLocation || data.projectLocation || '',
+    contactPerson: mapped.contactPerson || mapped.contactName || data.contactPerson || data.contactName || '',
+    contactName: mapped.contactName || mapped.contactPerson || data.contactName || data.contactPerson || '',
+    contactMobile: mapped.contactMobile || mapped.phone || data.contactMobile || data.phone || '',
+    contactPhone: mapped.contactPhone || mapped.phone || data.contactPhone || data.phone || '',
+    phone: mapped.phone || mapped.contactMobile || mapped.contactPhone || data.phone || data.contactMobile || data.contactPhone || '',
+    contactEmail: mapped.contactEmail || mapped.email || data.contactEmail || data.email || '',
+    email: mapped.email || mapped.contactEmail || data.email || data.contactEmail || '',
+    address: mapped.address || data.address || '',
+    sourceDealTitle: mapped.sourceDealTitle || mapped.title || data.title || data.name || '',
+    sourceDealNumber: mapped.sourceDealNumber || mapped.dealNumber || data.dealNumber || '',
     isConvertedDeal: true,
     recordType: 'convertedDeal',
     sourceType: 'convertedDeal',
@@ -74,8 +99,12 @@ const listWithFilters = async (actor, filters = {}, { companyWide = false, scope
   const owner = String(filters.owner || filters.ownerName || '').trim()
   const date = String(filters.date || '').trim()
   const convertedDate = String(filters.convertedDate || filters.converted_at || '').trim()
+  const rawLimit = String(filters.limit ?? '').trim().toLowerCase()
+  const shouldReturnAll = !rawLimit || ['all', '0', '-1'].includes(rawLimit)
   const page = Math.max(1, Number.parseInt(String(filters.page || '1'), 10) || 1)
-  const limit = Math.min(250, Math.max(1, Number.parseInt(String(filters.limit || '100'), 10) || 100))
+  const limit = shouldReturnAll
+    ? 0
+    : Math.min(5000, Math.max(1, Number.parseInt(rawLimit, 10) || 5000))
 
   const buildDayRangeFilter = (field, value) => {
     if (!value) return {}
@@ -100,12 +129,15 @@ const listWithFilters = async (actor, filters = {}, { companyWide = false, scope
     buildDayRangeFilter('convertedAt', convertedDate)
   )
 
-  const records = await ConvertedDeal
+  let query = ConvertedDeal
     .find(filter)
     .sort({ convertedAt: -1, legacyId: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .lean()
+
+  if (limit > 0) {
+    query = query.skip((page - 1) * limit).limit(limit)
+  }
+
+  const records = await query.lean()
 
   return records.map(normalizeMappedConvertedDeal)
 }
@@ -189,6 +221,9 @@ const buildConvertedDealPayload = async (deal) => {
   const customerName = mappedDeal.customerName || data.customerName || accountSnapshot?.customerName || accountName
   const dealNumber = mappedDeal.dealNumber || data.dealNumber || data.deal_number || ''
   const ownerName = accountSnapshot?.ownerName || resolvedDealOwnerName
+  const rawCity = mappedDeal.city || mappedDeal.location || data.city || data.location || data.branchLocation || data.projectLocation || ''
+  const city = normalizeDealCityForFilter(rawCity)
+  const projectName = mappedDeal.projectName || data.projectName || data.project_name || mappedDeal.title || mappedDeal.name || ''
 
   return {
     title: mappedDeal.title || mappedDeal.name || '',
@@ -201,11 +236,26 @@ const buildConvertedDealPayload = async (deal) => {
     linkedAccountName: accountName,
     linkedAccountNumber: accountSnapshot?.accountNumber || data.accountNumber || '',
     customerName,
+    customerNumber: mappedDeal.customerNumber || data.customerNumber || data.customer_number || '',
+    companyName: mappedDeal.companyName || data.companyName || accountName || customerName,
+    companyProfile: mappedDeal.companyProfile || data.companyProfile || data.company || '',
+    companyLogo: mappedDeal.companyLogo || data.companyLogo || '',
     amount: mappedDeal.amount ?? data.amount ?? data.value ?? null,
     currency: mappedDeal.currency || data.currency || 'INR',
     stage: mappedDeal.stage || data.stage || 'converted',
     status: mappedDeal.status || data.status || mappedDeal.stage || 'converted',
     ownerName,
+    projectName,
+    city,
+    location: mappedDeal.location || mappedDeal.city || data.location || data.city || rawCity || city,
+    contactPerson: mappedDeal.contactPerson || mappedDeal.contactName || data.contactPerson || data.contactName || '',
+    contactName: mappedDeal.contactName || mappedDeal.contactPerson || data.contactName || data.contactPerson || '',
+    contactMobile: mappedDeal.contactMobile || mappedDeal.phone || data.contactMobile || data.phone || '',
+    contactPhone: mappedDeal.contactPhone || mappedDeal.phone || data.contactPhone || data.phone || '',
+    phone: mappedDeal.phone || mappedDeal.contactMobile || mappedDeal.contactPhone || data.phone || data.contactMobile || data.contactPhone || '',
+    contactEmail: mappedDeal.contactEmail || mappedDeal.email || data.contactEmail || data.email || '',
+    email: mappedDeal.email || mappedDeal.contactEmail || data.email || data.contactEmail || '',
+    address: mappedDeal.address || data.address || '',
     convertedAt: mappedDeal.convertedAt || data.convertedAt || mappedDeal.createdAt || new Date(),
     assignedTo: toNumberOrNull(mappedDeal.assignedTo),
     createdBy: toNumberOrNull(mappedDeal.createdBy),
@@ -222,6 +272,13 @@ const buildConvertedDealPayload = async (deal) => {
       customerId: toNumberOrNull(mappedDeal.customerId || data.customerId || accountSnapshot?.customerId),
       accountName,
       customerName,
+      customerNumber: mappedDeal.customerNumber || data.customerNumber || data.customer_number || '',
+      companyName: mappedDeal.companyName || data.companyName || accountName || customerName,
+      companyProfile: mappedDeal.companyProfile || data.companyProfile || data.company || '',
+      companyLogo: mappedDeal.companyLogo || data.companyLogo || '',
+      projectName,
+      city,
+      location: mappedDeal.location || mappedDeal.city || data.location || data.city || rawCity || city,
       convertedFromAccount: true,
       conversionSource: 'search-account',
     },

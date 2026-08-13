@@ -21,6 +21,7 @@
     "@heyputer/puter.js": "^2.5.4",
     "@vitejs/plugin-react": "^4.7.0",
     "axios": "^1.13.2",
+    "country-state-city": "^3.2.1",
     "date-fns": "^3.6.0",
     "dotenv": "^17.4.2",
     "framer-motion": "^12.23.26",

@@ -662,7 +662,7 @@ const Quotations = ({ autoOpen = false }) => {
     const otherServiceTotal = toNumber(quotation.otherServiceTotal || 0)
     const serviceTotalBeforeDiscount = toNumber(quotation.serviceTotalBeforeDiscount || serviceTotal)
     const validUntilSort = quotation.validUntil || ''
-    const quotationScope = quotation.selectedAccountId || quotation.clientAccountNumber ? 'account' : 'deal'
+    const quotationScope = quotation.quotationContext || (quotation.selectedAccountId ? 'account' : 'deal')
 
     return {
       id: quotation.id || `quotation-${index}`,
@@ -1239,7 +1239,8 @@ const Quotations = ({ autoOpen = false }) => {
   const handleGenerateQuotation = async (event) => {
     event.preventDefault()
 
-    if (!quotationForm.profileKey || !quotationForm.selectedAccountId) {
+    const isDealQuotation = quotationForm.quotationContext === 'deal' || (!quotationForm.selectedAccountId && quotationForm.clientAccountNumber)
+    if (!quotationForm.profileKey || (!quotationForm.selectedAccountId && !isDealQuotation)) {
       setBuilderError('Profile and account selection are required to generate a quotation.')
       return
     }
@@ -1255,10 +1256,6 @@ const Quotations = ({ autoOpen = false }) => {
     }
 
     const persistedLineItems = sanitizeLineItems(quotationForm.lineItems)
-    if (persistedLineItems.length === 0) {
-      setBuilderError('Add at least one quote item before generating the quotation.')
-      return
-    }
 
     const payload = {
       quotationNumber: quotationForm.quotationNumber.trim() || nextQuotationNumber,
@@ -1289,6 +1286,7 @@ const Quotations = ({ autoOpen = false }) => {
       organizationTagline: quotationForm.organizationTagline,
       selectedAccountId: quotationForm.selectedAccountId,
       selectedAccountOwner: quotationForm.selectedAccountOwner,
+      quotationContext: quotationForm.quotationContext || (quotationForm.selectedAccountId ? 'account' : 'deal'),
       architectName: quotationForm.architectName,
       pmcName: quotationForm.pmcName,
       quotationSubject: quotationForm.quotationSubject,
@@ -1698,7 +1696,7 @@ const Quotations = ({ autoOpen = false }) => {
                     label="Export"
                     title="Export quotation report"
                     className="quotation-report-export"
-                    buttonClassName="quotation-report-icon-btn quotation-report-icon-btn--green quotation-report-icon-btn--export"
+                    buttonClassName="quotation-report-icon-btn quotation-report-icon-btn--red quotation-report-icon-btn--export"
                     menuClassName="quotation-report-export-menu"
                     items={[
                       {
@@ -2425,7 +2423,7 @@ const Quotations = ({ autoOpen = false }) => {
               >
                 <FaTimes />
               </button>
-              <Button type="submit" variant="primary" loading={savingQuotation}>
+              <Button type="submit" variant="danger" loading={savingQuotation}>
                 Generate
               </Button>
               <Button type="button" variant="outline" onClick={handleCloseQuotationBuilder}>

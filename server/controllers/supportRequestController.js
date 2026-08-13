@@ -17,4 +17,32 @@ const bulkDelete = async (req, res, next) => {
   } catch (error) { next(error) }
 }
 
-module.exports = { ...base, bulkUpdate, bulkDelete }
+const addReply = async (req, res, next) => {
+  try {
+    const data = await supportRequestService.addReply(req.user, req.params.id, req.body?.message)
+    res.json({ success: true, data })
+  } catch (error) { next(error) }
+}
+
+const getReplies = async (req, res, next) => {
+  try {
+    const data = await supportRequestService.getReplies(req.user, req.params.id)
+    res.json({ success: true, data })
+  } catch (error) { next(error) }
+}
+
+const getTodoReplies = async (req, res, next) => {
+  try {
+    const data = await supportRequestService.getTodoReplies(req.user)
+    res.json({ success: true, data })
+  } catch (error) { next(error) }
+}
+
+const closeTicket = async (req, res, next) => {
+  try {
+    const data = await supportRequestService.closeTicket(req.user, req.params.id)
+    res.json({ success: true, data })
+  } catch (error) { next(error) }
+}
+
+module.exports = { ...base, bulkUpdate, bulkDelete, addReply, getReplies, getTodoReplies, closeTicket }

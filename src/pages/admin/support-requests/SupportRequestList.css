@@ -94,6 +94,28 @@
   color: var(--color-primary-hover);
 }
 
+html:not([data-theme="dark"]) .sr-list-sr-number,
+html:not([data-theme="dark"]) .sr-list-sr-number:hover,
+html:not([data-theme="dark"]) .sr-list-sr-number:focus-visible {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  min-width: 122px;
+  padding: 0 0.8rem;
+  border: 1px solid #b91c1c;
+  background: #dc2626;
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  font-weight: 800;
+}
+
+html:not([data-theme="dark"]) .sr-list-sr-number * {
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  opacity: 1;
+}
+
 .sr-list-expand-icon {
   display: inline-flex;
   align-items: center;

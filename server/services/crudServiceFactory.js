@@ -109,27 +109,36 @@ const createCrudService = ({
   buildPayload,
   adminOnlyDelete = false,
   enforceScope = true,
+  bypassScopeForRoles = [],
 }) => {
+  const hasScopeBypass = (actor) => isPrivilegedRole(actor.role) || bypassScopeForRoles.includes((actor.role || '').toLowerCase().trim())
+
   const list = async (actor) => {
     if (!enforceScope || !repository.listForActor) {
-      if (!enforceScope || isPrivilegedRole(actor.role)) {
+      if (!enforceScope || hasScopeBypass(actor)) {
         return repository.listAll()
       }
       return repository.listForUser(actor.id)
     }
 
     const scope = await resolveCrmGroupScope(actor)
+    if (hasScopeBypass(actor)) {
+      scope.queryOptions.companyWide = true
+    }
     return repository.listForActor(scope.actor, scope.queryOptions)
   }
 
   const get = async (actor, id) => {
     const normalizedId = normalizeId(id, entityLabel)
     const scope = await resolveCrmGroupScope(actor)
+    if (hasScopeBypass(actor)) {
+      scope.queryOptions.companyWide = true
+    }
     const record = repository.findByIdForActor
       ? await repository.findByIdForActor(normalizedId, scope.actor, scope.queryOptions)
       : await repository.findById(normalizedId)
     if (!record) throw new AppError(`${entityLabel} not found.`, 404)
-    if (enforceScope) ensureAccess(scope.actor, record, entityLabel)
+    if (enforceScope && !hasScopeBypass(actor)) ensureAccess(scope.actor, record, entityLabel)
     return record
   }
 

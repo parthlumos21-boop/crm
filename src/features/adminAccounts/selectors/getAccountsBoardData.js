@@ -2,8 +2,8 @@ import { normalizeAccountRecord } from '../adapters/normalizeAccountRecord'
 import { getVisibleAccountStages } from '../config/accountStages'
 
 export const compareAccountsByNumberAsc = (left = {}, right = {}) => {
-  const leftNumber = Number(left.accountNumber || left.accountNo || left.account_no || 0)
-  const rightNumber = Number(right.accountNumber || right.accountNo || right.account_no || 0)
+  const leftNumber = Number(resolveAccountOwnerSeriesNumber(left) || 0)
+  const rightNumber = Number(resolveAccountOwnerSeriesNumber(right) || 0)
 
   if (leftNumber !== rightNumber) {
     return leftNumber - rightNumber
@@ -18,6 +18,34 @@ export const compareAccountsByNumberAsc = (left = {}, right = {}) => {
   return String(left.name || '').localeCompare(String(right.name || ''))
 }
 
+const resolveAccountOwnerSeriesNumber = (record = {}) => {
+  const ownerCode = record.accountOwnerCode
+    || record.ownerCode
+    || record.raw?.accountOwnerCode
+    || record.raw?.ownerCode
+    || record.raw?.formData?.accountOwnerCode
+    || record.raw?.formData?.ownerCode
+
+  return String(ownerCode || '').trim()
+}
+
+const resolveStoredAccountNumber = (record = {}, index = 0) => {
+  const ownerSeriesNumber = resolveAccountOwnerSeriesNumber(record)
+  if (ownerSeriesNumber) {
+    return ownerSeriesNumber
+  }
+
+  const storedValue = record.originalAccountNumber
+    || record.accountNumber
+    || record.accountNo
+    || record.account_no
+    || record.raw?.accountNumber
+    || record.raw?.accountNo
+    || record.raw?.account_no
+
+  return String(storedValue || 1001 + index)
+}
+
 export const getAccountsBoardData = (accounts = []) => {
   const records = accounts.map((account, index) =>
     normalizeAccountRecord(account, index, { recordSource: 'live' })
@@ -25,7 +53,7 @@ export const getAccountsBoardData = (accounts = []) => {
     .map((record, index) => ({
       ...record,
       originalAccountNumber: record.originalAccountNumber || record.accountNumber,
-      accountNumber: String(1001 + index),
+      accountNumber: resolveStoredAccountNumber(record, index),
     }))
 
   const stages = getVisibleAccountStages()

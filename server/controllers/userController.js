@@ -18,12 +18,15 @@ const broadcastUserEvent = (eventName, payload) => {
 
 const createUser = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body || {}
+    const { name, email, password, role, designation, state, city } = req.body || {}
     const result = await authService.createAdminManagedUser({
       name,
       email,
       password,
       role,
+      designation,
+      state,
+      city,
       companyId: req.user.companyId,
     })
     broadcastUserEvent(SOCKET_EVENTS.USER_CREATED, { user: result.user })
@@ -181,7 +184,18 @@ const changeUserStatus = (nextStatus) => async (req, res, next) => {
   }
 }
 
+
+const getDistinctDesignations = async (req, res, next) => {
+  try {
+    const designations = await userRepository.getDistinctDesignations(req.user?.companyId);
+    res.json({ success: true, data: designations });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
+  getDistinctDesignations,
   createUser,
   updateUser,
   deleteUser,

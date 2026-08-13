@@ -8,6 +8,7 @@ import {
   FaDownload,
   FaEye,
   FaEllipsisV,
+  FaEdit,
   FaFilePdf,
   FaPlus,
   FaPrint,
@@ -972,15 +973,35 @@ export const buildPrintableHtml = (doc) => {
           color: #102a43;
         }
         table { width: 100%; border-collapse: collapse; }
+        .items-table {
+          width: 100%;
+          max-width: 100%;
+          table-layout: fixed;
+        }
         thead { display: table-header-group; }
         tr { page-break-inside: avoid; }
         .items-table th,
         .items-table td {
+          box-sizing: border-box;
           border: 1px solid #c9d5df;
           padding: 9px 8px;
           font-size: 10px;
           vertical-align: top;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
+        .items-table th:nth-child(1),
+        .items-table td:nth-child(1) { width: 38px !important; }
+        .items-table th:nth-child(2),
+        .items-table td:nth-child(2) { width: auto !important; }
+        .items-table th:nth-child(3),
+        .items-table td:nth-child(3) { width: 52px !important; }
+        .items-table th:nth-child(4),
+        .items-table td:nth-child(4) { width: 58px !important; }
+        .items-table th:nth-child(5),
+        .items-table td:nth-child(5) { width: 84px !important; }
+        .items-table th:nth-child(6),
+        .items-table td:nth-child(6) { width: 96px !important; }
         .items-table th {
           background: #1f6ea4;
           color: #ffffff;
@@ -1329,12 +1350,103 @@ export function ModalShell({ title, onClose, size = '', children, footer }) {
   )
 }
 
-export function QuotationDocument({ documentData }) {
+const EditableQuotationValue = ({
+  value,
+  fieldKey,
+  editable = false,
+  multiline = false,
+  className = '',
+  onCommit,
+}) => {
+  const [isEditing, setIsEditing] = useState(false)
+  const [draftValue, setDraftValue] = useState(value || '')
+
+  useEffect(() => {
+    if (!isEditing) {
+      setDraftValue(value || '')
+    }
+  }, [isEditing, value])
+
+  const commitValue = () => {
+    const nextValue = String(draftValue || '').trim()
+    setIsEditing(false)
+    if (nextValue !== String(value || '').trim()) {
+      onCommit?.(fieldKey, nextValue)
+    }
+  }
+
+  if (!editable || !fieldKey) {
+    return <span className={className}>{value}</span>
+  }
+
+  if (isEditing) {
+    return multiline ? (
+      <textarea
+        className="aqp-doc-edit-input aqp-doc-edit-input--textarea"
+        value={draftValue}
+        onChange={(event) => setDraftValue(event.target.value)}
+        onBlur={commitValue}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') setIsEditing(false)
+          if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') commitValue()
+        }}
+        autoFocus
+      />
+    ) : (
+      <input
+        className="aqp-doc-edit-input"
+        value={draftValue}
+        onChange={(event) => setDraftValue(event.target.value)}
+        onBlur={commitValue}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') setIsEditing(false)
+          if (event.key === 'Enter') commitValue()
+        }}
+        autoFocus
+      />
+    )
+  }
+
+  return (
+    <span className={`aqp-doc-editable ${className}`.trim()}>
+      <span className="aqp-doc-editable-value">{value}</span>
+      <button
+        type="button"
+        className="aqp-doc-edit-btn"
+        onClick={() => {
+          setDraftValue(value || '')
+          setIsEditing(true)
+        }}
+        aria-label="Edit quotation field"
+      >
+        <FaEdit />
+      </button>
+    </span>
+  )
+}
+
+const renderEditableQuotationValue = (documentData, editable, onEditField) => (
+  fieldKey,
+  value,
+  options = {}
+) => (
+  <EditableQuotationValue
+    fieldKey={fieldKey}
+    value={value}
+    editable={editable}
+    multiline={options.multiline}
+    className={options.className}
+    onCommit={onEditField}
+  />
+)
+
+export function QuotationDocument({ documentData, editable = false, onEditField }) {
   const logoSource = documentData.logoSource || getBrandLogoSource(documentData.brandKey)
   const brandModifier = documentData.isLumosDocument ? 'lumos' : documentData.isSwatiDocument ? 'swati' : 'default'
   const productLabel = [documentData.product, documentData.otherProduct]
     .filter((value) => value && value !== '-')
     .join(' / ') || '-'
+  const editValue = renderEditableQuotationValue(documentData, editable, onEditField)
 
   return (
     <div className="aqp-doc aqp-print-scope">
@@ -1358,20 +1470,20 @@ export function QuotationDocument({ documentData }) {
         <div className="aqp-doc__party-grid">
           <section className="aqp-doc__party-card">
             <div className="aqp-doc__eyebrow">Customer Details</div>
-            <div className="aqp-doc__field-row"><strong>Customer Name</strong><span>{documentData.companyName}</span></div>
-            <div className="aqp-doc__field-row"><strong>Client Account No.</strong><span>{documentData.clientAccountNumber}</span></div>
-            <div className="aqp-doc__field-row"><strong>Contact Person</strong><span>{documentData.contactPerson}</span></div>
-            <div className="aqp-doc__field-row"><strong>Phone</strong><span>{documentData.telephone}</span></div>
-            <div className="aqp-doc__field-row"><strong>Email</strong><span>{documentData.email}</span></div>
-            <div className="aqp-doc__field-row"><strong>GSTIN</strong><span>{documentData.gstin}</span></div>
-            <div className="aqp-doc__field-row"><strong>Address</strong><span>{documentData.clientAddressDetails}</span></div>
+            <div className="aqp-doc__field-row"><strong>Customer Name</strong>{editValue('companyName', documentData.companyName)}</div>
+            <div className="aqp-doc__field-row"><strong>Client Account No.</strong>{editValue('clientAccountNumber', documentData.clientAccountNumber)}</div>
+            <div className="aqp-doc__field-row"><strong>Contact Person</strong>{editValue('contactPerson', documentData.contactPerson)}</div>
+            <div className="aqp-doc__field-row"><strong>Phone</strong>{editValue('telephone', documentData.telephone)}</div>
+            <div className="aqp-doc__field-row"><strong>Email</strong>{editValue('email', documentData.email)}</div>
+            <div className="aqp-doc__field-row"><strong>GSTIN</strong>{editValue('gstin', documentData.gstin)}</div>
+            <div className="aqp-doc__field-row"><strong>Address</strong>{editValue('clientAddressDetails', documentData.clientAddressDetails, { multiline: true })}</div>
           </section>
           <section className="aqp-doc__party-card">
             <div className="aqp-doc__eyebrow">Sales Details</div>
-            <div className="aqp-doc__field-row"><strong>Sales Executive</strong><span>{documentData.accountOwner}</span></div>
-            <div className="aqp-doc__field-row"><strong>Mobile Number</strong><span>{documentData.organizationPhone}</span></div>
-            <div className="aqp-doc__field-row"><strong>Email Address</strong><span>{documentData.organizationEmail}</span></div>
-            <div className="aqp-doc__field-row"><strong>Quotation Reference</strong><span>{documentData.quotationNumber}</span></div>
+            <div className="aqp-doc__field-row"><strong>Sales Executive</strong>{editValue('selectedAccountOwner', documentData.accountOwner)}</div>
+            <div className="aqp-doc__field-row"><strong>Mobile Number</strong>{editValue('organizationPhone', documentData.organizationPhone)}</div>
+            <div className="aqp-doc__field-row"><strong>Email Address</strong>{editValue('organizationEmail', documentData.organizationEmail)}</div>
+            <div className="aqp-doc__field-row"><strong>Quotation Reference</strong>{editValue('quotationNumber', documentData.quotationNumber)}</div>
           </section>
         </div>
 
@@ -1380,19 +1492,19 @@ export function QuotationDocument({ documentData }) {
         <div className="aqp-doc__meta">
           <div className="aqp-doc__meta-cell">
             <span className="aqp-doc__meta-label">Quotation No.</span>
-            <strong>{documentData.quotationNumber}</strong>
+            <strong>{editValue('quotationNumber', documentData.quotationNumber)}</strong>
           </div>
           <div className="aqp-doc__meta-cell">
             <span className="aqp-doc__meta-label">Quotation Date</span>
-            <strong>{documentData.quotationDate}</strong>
+            <strong>{editValue('quotationDate', documentData.quotationDate)}</strong>
           </div>
           <div className="aqp-doc__meta-cell">
             <span className="aqp-doc__meta-label">Valid Until</span>
-            <strong>{documentData.validUntil}</strong>
+            <strong>{editValue('validUntil', documentData.validUntil)}</strong>
           </div>
           <div className="aqp-doc__meta-cell">
             <span className="aqp-doc__meta-label">Currency</span>
-            <strong>{documentData.currency}</strong>
+            <strong>{editValue('currency', documentData.currency)}</strong>
           </div>
         </div>
 
@@ -1415,10 +1527,10 @@ export function QuotationDocument({ documentData }) {
             ) : documentData.lineItems.map((item) => (
               <tr key={item.id}>
                 <td className="aqp-doc__num">{item.srNo}</td>
-                <td className="aqp-doc__description">{item.description}</td>
-                <td className="aqp-doc__num">{item.quantity}</td>
-                <td className="aqp-doc__num">{item.unit}</td>
-                <td className="aqp-doc__amount">{formatCurrency(item.rate, documentData.currency)}</td>
+                <td className="aqp-doc__description">{editValue(`lineItems.${item.srNo - 1}.description`, item.description, { multiline: true })}</td>
+                <td className="aqp-doc__num">{editValue(`lineItems.${item.srNo - 1}.quantity`, item.quantity)}</td>
+                <td className="aqp-doc__num">{editValue(`lineItems.${item.srNo - 1}.unit`, item.unit)}</td>
+                <td className="aqp-doc__amount">{editValue(`lineItems.${item.srNo - 1}.rate`, formatCurrency(item.rate, documentData.currency))}</td>
                 <td className="aqp-doc__amount">{formatCurrency(item.amount, documentData.currency)}</td>
               </tr>
             ))}
@@ -1428,12 +1540,12 @@ export function QuotationDocument({ documentData }) {
         <div className="aqp-doc__summary">
           <div className="aqp-doc__summary-card">
             <div className="aqp-doc__eyebrow">Quotation Details</div>
-            <div className="aqp-doc__kv-row"><strong>Profile Name</strong><span>{documentData.profileName}</span></div>
-            <div className="aqp-doc__kv-row"><strong>Project</strong><span>{documentData.projectName}</span></div>
-            <div className="aqp-doc__kv-row"><strong>Account Owner</strong><span>{documentData.accountOwner}</span></div>
-            <div className="aqp-doc__kv-row"><strong>Subject</strong><span>{documentData.quotationSubject}</span></div>
-            <div className="aqp-doc__kv-row"><strong>Product</strong><span>{productLabel}</span></div>
-            <div className="aqp-doc__kv-row"><strong>Service</strong><span>{documentData.otherService}</span></div>
+            <div className="aqp-doc__kv-row"><strong>Profile Name</strong>{editValue('profileName', documentData.profileName)}</div>
+            <div className="aqp-doc__kv-row"><strong>Project</strong>{editValue('projectName', documentData.projectName)}</div>
+            <div className="aqp-doc__kv-row"><strong>Account Owner</strong>{editValue('selectedAccountOwner', documentData.accountOwner)}</div>
+            <div className="aqp-doc__kv-row"><strong>Subject</strong>{editValue('quotationSubject', documentData.quotationSubject)}</div>
+            <div className="aqp-doc__kv-row"><strong>Product</strong>{editValue('product', productLabel)}</div>
+            <div className="aqp-doc__kv-row"><strong>Service</strong>{editValue('otherService', documentData.otherService)}</div>
           </div>
           <div className="aqp-doc__totals">
             <div className="aqp-doc__eyebrow">Amount Summary</div>
@@ -1454,19 +1566,19 @@ export function QuotationDocument({ documentData }) {
         <div className="aqp-doc__terms">
           <section className="aqp-doc__terms-card">
             <h4>Inquiry Reference</h4>
-            <p><strong>Number:</strong> {documentData.customerReferenceNumber}</p>
-            <p><strong>Date:</strong> {documentData.customerReferenceDate}</p>
-            <p><strong>Subject:</strong> {documentData.customerReferenceSubject}</p>
+            <p><strong>Number:</strong> {editValue('customerReference.number', documentData.customerReferenceNumber)}</p>
+            <p><strong>Date:</strong> {editValue('customerReference.date', documentData.customerReferenceDate)}</p>
+            <p><strong>Subject:</strong> {editValue('customerReference.subject', documentData.customerReferenceSubject)}</p>
           </section>
           <section className="aqp-doc__terms-card">
             <h4>Terms &amp; Conditions</h4>
-            <p><strong>Delivery:</strong> {documentData.deliveryTerms}</p>
-            <p><strong>Payment:</strong> {documentData.paymentTerms}</p>
-            <p><strong>Warranty:</strong> {documentData.warrantyTerms}</p>
+            <p><strong>Delivery:</strong> {editValue('deliveryTerms', documentData.deliveryTerms)}</p>
+            <p><strong>Payment:</strong> {editValue('paymentTerms', documentData.paymentTerms)}</p>
+            <p><strong>Warranty:</strong> {editValue('warrantyTerms', documentData.warrantyTerms)}</p>
           </section>
           <section className="aqp-doc__terms-card">
             <h4>Quotation Notes</h4>
-            <p>{documentData.quotationNotes}</p>
+            <p>{editValue('quotationNotes', documentData.quotationNotes, { multiline: true })}</p>
           </section>
           <section className="aqp-doc__terms-card">
             <h4>Status</h4>
@@ -2224,6 +2336,83 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
     addNotification('success', 'Quotation rejected', 'The quotation has been rejected and the reason was saved.')
   }
 
+  const normalizeInlineCurrencyValue = (value) => {
+    const numericValue = Number.parseFloat(String(value || '').replace(/[^\d.-]/g, ''))
+    return Number.isFinite(numericValue) ? numericValue : 0
+  }
+
+  const buildInlineQuotationPatch = (rawQuotation = {}, fieldKey = '', value = '') => {
+    if (fieldKey.startsWith('customerReference.')) {
+      const [, nestedKey] = fieldKey.split('.')
+      return {
+        customerReference: {
+          ...(rawQuotation.customerReference || {}),
+          [nestedKey]: value,
+        },
+      }
+    }
+
+    if (fieldKey.startsWith('lineItems.')) {
+      const [, indexValue, lineItemKey] = fieldKey.split('.')
+      const itemIndex = Number.parseInt(indexValue, 10)
+      const sourceItems = Array.isArray(rawQuotation.lineItems) && rawQuotation.lineItems.length > 0
+        ? rawQuotation.lineItems
+        : buildLineItems(rawQuotation)
+      const nextLineItems = sourceItems.map((lineItem, index) => {
+        if (index !== itemIndex) return lineItem
+
+        const nextItem = { ...lineItem }
+        if (lineItemKey === 'quantity') {
+          nextItem.quantity = normalizeInlineCurrencyValue(value)
+        } else if (lineItemKey === 'rate') {
+          nextItem.rate = normalizeInlineCurrencyValue(value)
+        } else {
+          nextItem[lineItemKey] = value
+        }
+        nextItem.amount = toNumber(nextItem.quantity) * toNumber(nextItem.rate)
+        return nextItem
+      })
+
+      return {
+        lineItems: nextLineItems,
+        amount: nextLineItems.reduce((sum, lineItem) => sum + toNumber(lineItem.amount), 0),
+        totalAmount: nextLineItems.reduce((sum, lineItem) => sum + toNumber(lineItem.amount), 0),
+      }
+    }
+
+    return { [fieldKey]: value }
+  }
+
+  const handleInlineQuotationEdit = async (fieldKey, value) => {
+    if (!viewRow?.id || !fieldKey) return
+
+    const rawQuotation = viewRow.raw || {}
+    const patch = buildInlineQuotationPatch(rawQuotation, fieldKey, value)
+    const optimisticRaw = {
+      ...rawQuotation,
+      ...patch,
+    }
+
+    setViewRow((currentRow) => (
+      currentRow?.id === viewRow.id
+        ? { ...currentRow, raw: optimisticRaw }
+        : currentRow
+    ))
+
+    const result = await updateQuotation(viewRow.id, patch)
+    if (!result.success) {
+      addNotification('error', 'Quotation update failed', result.message || 'Unable to save quotation field.')
+      setViewRow((currentRow) => (
+        currentRow?.id === viewRow.id
+          ? { ...currentRow, raw: rawQuotation }
+          : currentRow
+      ))
+      return
+    }
+
+    addNotification('success', 'Quotation updated', 'Quotation field saved.')
+  }
+
   const handleAction = (actionKey, row) => {
     if (actionKey === 'pdf') {
       openPdfPage(row)
@@ -2346,7 +2535,7 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
             <FaUpload className="aqp-btn-icon" />
             Upload Quotation
           </button>
-          <button type="button" className="aqp-btn aqp-btn--blue" onClick={() => navigate(generatorPath, { state: { openGenerator: true } })}>
+          <button type="button" className="aqp-btn aqp-btn--red aqp-btn--generate" onClick={() => navigate(generatorPath, { state: { openGenerator: true } })}>
             <FaPlus className="aqp-btn-icon" />
             Generate Quotation
           </button>
@@ -2963,7 +3152,11 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
             </div>
           </div>
           <div className="aqp-view-quotation-document">
-            <QuotationDocument documentData={viewDocument} />
+            <QuotationDocument
+              documentData={viewDocument}
+              editable
+              onEditField={handleInlineQuotationEdit}
+            />
           </div>
         </ModalShell>
       ) : null}

@@ -147,6 +147,7 @@ const buildLeadPayload = async (payload = {}, actor, existingLead = null) => {
     || payload.accountNumber
     || payload.account_no
     || null
+  const hasReasonForLost = Object.prototype.hasOwnProperty.call(sanitizedPayload, 'reasonForLost')
   const normalizedPayload = applyOwnershipMetadata(actor, {
     customerName: sanitizedPayload.accountName || sanitizedPayload.customerName || existingLead?.customerName || '',
     mobile: sanitizedPayload.alternatePhone || sanitizedPayload.mobile || existingLead?.mobile || '',
@@ -154,6 +155,7 @@ const buildLeadPayload = async (payload = {}, actor, existingLead = null) => {
     company: sanitizedPayload.projectName || sanitizedPayload.company || existingLead?.company || '',
     projectName: sanitizedPayload.projectName || existingLead?.projectName || '',
     status: sanitizedPayload.accountState || sanitizedPayload.status || existingLead?.status || 'pending',
+    reasonForLost: hasReasonForLost ? sanitizedPayload.reasonForLost : (existingLead?.reasonForLost || existingLead?.formData?.reasonForLost || ''),
     assignedTo: assignedUser?.id || existingLead?.assignedTo || null,
     createdBy: existingLead?.createdBy || actor.id,
     ownerName,
@@ -162,6 +164,8 @@ const buildLeadPayload = async (payload = {}, actor, existingLead = null) => {
     accountNo,
     createdByUserId: existingLead?.createdByUserId || existingLead?.createdBy || actor.id,
     createdByUserName: existingLead?.createdByUserName || actor.name || actor.username || '',
+    createdUserBy: existingLead?.createdUserBy || actor.email || actor.username || '',
+    ownerCode: existingLead?.ownerCode || actor.ownerCode || null,
     employeeId: sanitizedPayload.employeeId || existingLead?.employeeId || actor.ownerCode || '',
     department: sanitizedPayload.department || existingLead?.department || '',
     userEmail: sanitizedPayload.userEmail || existingLead?.userEmail || actor.email || '',
@@ -178,6 +182,8 @@ const buildLeadPayload = async (payload = {}, actor, existingLead = null) => {
       userId: existingLead?.createdBy || actor.id,
       createdByUserId: existingLead?.createdByUserId || existingLead?.createdBy || actor.id,
       createdByUserName: existingLead?.createdByUserName || actor.name || actor.username || '',
+      createdUserBy: existingLead?.createdUserBy || actor.email || actor.username || '',
+      ownerCode: existingLead?.ownerCode || actor.ownerCode || null,
       employeeId: sanitizedPayload.employeeId || existingLead?.employeeId || actor.ownerCode || '',
       department: sanitizedPayload.department || existingLead?.department || '',
       userEmail: sanitizedPayload.userEmail || existingLead?.userEmail || actor.email || '',
@@ -280,23 +286,51 @@ const emitLeadRealtime = async ({ action, lead, actor, assignedUserId, previousL
   })
 }
 
-const listLeads = async (actor, query = {}) => {
-  if (!isPrivilegedRole(actor.role) && leadRepository.listCreatedLeadsForActor) {
-    return leadRepository.listCreatedLeadsForActor(actor, query)
-  }
+const augmentLeadsWithOwnerCode = async (leads) => {
+  if (!Array.isArray(leads)) return leads
 
-  const scope = await resolveAccountScope(actor)
-  if (leadRepository.listLeadsForActor) {
-    return leadRepository.listLeadsForActor(scope.actor, {
-      ...scope.queryOptions,
-      filters: query,
-    })
-  }
+  return leads.map((lead) => {
+    const ownerCode = lead.ownerCode || null
 
-  return isPrivilegedRole(actor.role)
-    ? leadRepository.listAllLeads()
-    : leadRepository.listAssignedLeads(actor.id)
+    if (ownerCode) {
+      return {
+        ...lead,
+        accountNumber: ownerCode,
+        accountNo: ownerCode,
+      }
+    }
+
+    return lead
+  })
 }
+
+const augmentLeadWithOwnerCode = async (lead) => {
+  if (!lead) return lead
+  const augmented = await augmentLeadsWithOwnerCode([lead])
+  return augmented[0]
+}
+
+const listLeads = async (actor, query = {}) => {
+  let leads = []
+  if (!isPrivilegedRole(actor.role) && leadRepository.listCreatedLeadsForActor) {
+    leads = await leadRepository.listCreatedLeadsForActor(actor, query)
+  } else {
+    const scope = await resolveAccountScope(actor)
+    if (leadRepository.listLeadsForActor) {
+      leads = await leadRepository.listLeadsForActor(scope.actor, {
+        ...scope.queryOptions,
+        filters: query,
+      })
+    } else {
+      leads = isPrivilegedRole(actor.role)
+        ? await leadRepository.listAllLeads()
+        : await leadRepository.listAssignedLeads(actor.id)
+    }
+  }
+
+  return augmentLeadsWithOwnerCode(leads)
+}
+
 
 const getLeadById = async (actor, leadId, { includeGroupScope = true } = {}) => {
   const normalizedLeadId = normalizeLeadId(leadId)
@@ -314,7 +348,7 @@ const getLeadById = async (actor, leadId, { includeGroupScope = true } = {}) => 
     throw new AppError('You do not have permission to access this lead.', 403)
   }
 
-  return lead
+  return augmentLeadWithOwnerCode(lead)
 }
 
 const createLead = async (actor, payload) => {
@@ -327,7 +361,7 @@ const createLead = async (actor, payload) => {
     assignedUserId: lead.assignedTo,
   })
 
-  return lead
+  return augmentLeadWithOwnerCode(lead)
 }
 
 const deleteLead = async (actor, leadId) => {
@@ -400,25 +434,29 @@ const updateLead = async (actor, leadId, payload) => {
     emitConvertedDealRealtime('updated', convertedDeal, actor)
   }
 
-  return updatedLead
+  return augmentLeadWithOwnerCode(updatedLead)
 }
 
 const buildDealPayloadFromAccount = (account = {}, actor = {}) => {
   const dealTitle = account.projectName || account.accountName || account.customerName || account.name || 'Converted Deal'
   const ownerUserId = account.ownerUserId || account.assignedTo || account.createdBy || actor.id
   const ownerName = account.accountOwner || account.ownerName || actor.name || ''
+  const accountName = account.accountName || account.name || account.customerName || ''
+  const accountNumber = account.accountNumber || account.accountNo || ''
+  const customerName = account.customerName || accountName
+  const city = account.city || account.location || account.branch || account.branchLocation || account.projectLocation || ''
 
   return {
     title: dealTitle,
     name: dealTitle,
-    customerName: account.customerName || account.accountName || account.name || '',
+    customerName,
     accountId: account.id,
-    accountName: account.accountName || account.name || account.customerName || '',
-    accountNumber: account.accountNumber || account.accountNo || '',
-    linkedAccountName: account.accountName || account.name || account.customerName || '',
-    linkedAccountNumber: account.accountNumber || account.accountNo || '',
+    accountName,
+    accountNumber,
+    linkedAccountName: accountName,
+    linkedAccountNumber: accountNumber,
     customerId: account.customerId || null,
-    customerNumber: account.customerNumber || account.accountNumber || account.accountNo || '',
+    customerNumber: account.customerNumber || accountNumber,
     amount: account.projectValue || account.value || account.amount || null,
     value: account.projectValue || account.value || account.amount || null,
     currency: account.currency || 'INR',
@@ -435,8 +473,27 @@ const buildDealPayloadFromAccount = (account = {}, actor = {}) => {
     convertedBy: actor.id,
     projectName: account.projectName || '',
     consultantName: account.consultantName || '',
+    jobNo: account.jobNo || '',
+    city,
+    location: city,
+    address: account.address || '',
+    contactPerson: account.contactPerson || account.contactName || '',
+    contactName: account.contactName || account.contactPerson || '',
+    contactMobile: account.contactMobile || account.mobile || account.phone || account.contactPhone || '',
+    contactPhone: account.contactPhone || account.phone || account.contactMobile || account.mobile || '',
+    phone: account.phone || account.contactMobile || account.contactPhone || account.mobile || '',
+    contactEmail: account.contactEmail || account.email || '',
+    email: account.email || account.contactEmail || '',
+    contactDesignation: account.contactDesignation || account.designation || '',
+    productCategory: account.productCategory || account.accountCategory || account.customerCategory || '',
+    customerCategory: account.customerCategory || account.accountCategory || '',
+    customerStatus: account.customerStatus || account.accountStatus || account.status || '',
+    companyName: account.company || account.companyName || accountName,
+    companyProfile: account.companyProfile || account.company || account.companyName || account.accountCategory || '',
+    companyLogo: account.companyLogo || '',
+    gstin: account.gstin || '',
     description: account.description || account.notes || '',
-    notes: `Converted from account ${account.accountNumber || account.accountNo || account.id || ''}`.trim(),
+    notes: `Converted from account ${accountNumber || account.id || ''}`.trim(),
     companyId: account.companyId || actor.companyId || 1,
     organizationId: account.organizationId || account.companyId || actor.companyId || 1,
   }

@@ -1793,3 +1793,491 @@ html.is-user[data-theme="dark"] *::after {
     border-radius: var(--radius-md);
   }
 }
+
+/* Red button style restricted to Light Mode, preserving original size/layout */
+html:not([data-theme="dark"]) .btn-red-theme,
+body:not([data-theme="dark"]) .btn-red-theme {
+  background-color: #c60016 !important;
+  background-image: none !important;
+  color: white !important;
+  border: none !important;
+  transition: background-color 0.3s ease;
+}
+
+html:not([data-theme="dark"]) .btn-red-theme:hover,
+body:not([data-theme="dark"]) .btn-red-theme:hover {
+  background-color: #9e0011 !important;
+}
+
+/* ============================================================
+   Admin red action theme
+   ============================================================ */
+:root {
+  --admin-red: #dc2626;
+  --admin-red-hover: #b91c1c;
+  --admin-red-soft: rgba(220, 38, 38, 0.1);
+  --admin-red-border: #b91c1c;
+}
+
+[data-theme="dark"] {
+  --admin-red: #740A03;
+  --admin-red-hover: #920d04;
+  --admin-red-soft: rgba(116, 10, 3, 0.18);
+  --admin-red-border: #920d04;
+}
+
+.layout--admin :where(
+  .btn-primary,
+  .btn-red-theme,
+  .excel-export-button,
+  button[class*="primary"],
+  button[class*="submit"],
+  button[class*="save"],
+  button[class*="add"],
+  button[class*="next"],
+  button[class*="refresh"],
+  button[class*="filter"],
+  button[class*="export"],
+  button[class*="bulk"],
+  button[class*="action"],
+  button[class*="icon-btn"],
+  button[class*="nav"],
+  button[class*="toolbar"],
+  button[class*="page"],
+  button[class*="pagination"],
+  a[class*="primary"],
+  a[class*="add"],
+  a[class*="export"],
+  a[class*="page"],
+  a[class*="pagination"]
+):not(.hdr-icon-btn):not(.rp-action-card--outlook):not(:disabled):not([class*="close"]):not([class*="delete"]):not([class*="remove"]):not([class*="cancel"]):not([class*="clear"]):not([class*="dropdown-item"]):not([class*="menu-item"]) {
+  border-color: var(--admin-red-border) !important;
+  background: var(--admin-red) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.layout--admin :where(
+  .btn-primary,
+  .btn-red-theme,
+  .excel-export-button,
+  button[class*="primary"],
+  button[class*="submit"],
+  button[class*="save"],
+  button[class*="add"],
+  button[class*="next"],
+  button[class*="refresh"],
+  button[class*="filter"],
+  button[class*="export"],
+  button[class*="bulk"],
+  button[class*="action"],
+  button[class*="icon-btn"],
+  button[class*="nav"],
+  button[class*="toolbar"],
+  button[class*="page"],
+  button[class*="pagination"],
+  a[class*="primary"],
+  a[class*="add"],
+  a[class*="export"],
+  a[class*="page"],
+  a[class*="pagination"]
+):not(.hdr-icon-btn):not(.rp-action-card--outlook):not(:disabled):not([class*="close"]):not([class*="delete"]):not([class*="remove"]):not([class*="cancel"]):not([class*="clear"]):not([class*="dropdown-item"]):not([class*="menu-item"]):hover {
+  border-color: var(--admin-red-border) !important;
+  background: var(--admin-red) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.layout--admin :where(
+  .pagination button,
+  [class*="pagination"] button,
+  [class*="page-btn"],
+  [class*="page-button"],
+  [class*="page-number"],
+  [class*="page-tab"]
+):not(:disabled) {
+  border-color: var(--admin-red-border) !important;
+  background: var(--admin-red) !important;
+  color: #ffffff !important;
+}
+
+.layout--admin :where(
+  .pagination button,
+  [class*="pagination"] button,
+  [class*="page-btn"],
+  [class*="page-button"],
+  [class*="page-number"],
+  [class*="page-tab"]
+):not(:disabled):hover {
+  border-color: var(--admin-red-border) !important;
+  background: var(--admin-red) !important;
+  color: #ffffff !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.layout--admin :where(
+  select,
+  [class*="select"],
+  [class*="dropdown-toggle"],
+  [class*="filter"] svg,
+  [class*="export"] svg,
+  [class*="bulk"] svg,
+  [class*="chevron"]
+) {
+  accent-color: var(--admin-red);
+}
+
+.layout--admin :where(
+  [class*="account-number"],
+  [class*="account-no"],
+  [class*="accountNumber"]
+) {
+  color: var(--admin-red) !important;
+}
+
+.layout--admin :where(
+  [class*="admin-customers"] button[class*="bulk"] svg,
+  [class*="admin-customers"] button[class*="filter"] svg,
+  [class*="admin-customers"] button[class*="export"] svg
+) {
+  color: #ffffff !important;
+}
+
+.layout--admin .excel-export-button__chevron,
+.layout--admin .excel-export-button__icon {
+  color: currentColor !important;
+}
+
+.layout--admin :where(
+  .admin-customers-step-active,
+  .admin-customers-step-active .admin-customers-step-count,
+  .admin-customers-step-active .admin-customers-step-label,
+  [class*="process-tab"][class*="active"],
+  [class*="step"][class*="active"],
+  [class*="tab"][class*="active"]:not(.ticket-tab--open)
+) {
+  border-color: var(--admin-red-border) !important;
+  background: var(--admin-red) !important;
+  color: #ffffff !important;
+}
+
+.layout--admin :where(select:focus, button[class*="dropdown"]:focus-visible, button[class*="caret"]:focus-visible) {
+  box-shadow: 0 0 0 3px var(--admin-red-soft) !important;
+}
+
+/* Keep SR No. and Customer No. pills visible in admin light mode without row hover. */
+html:not([data-theme="dark"]) .layout--admin :where(
+  .support-request-row-menu-trigger,
+  .support-request-row-menu-trigger:hover,
+  .support-request-row-menu-trigger:focus-visible,
+  .support-request-row-menu-trigger:disabled,
+  .support-request-related-number-button,
+  .support-request-related-number-button:hover,
+  .support-request-related-number-button:focus-visible,
+  .support-request-related-number-button:disabled,
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button:hover,
+  .admin-customers-grid-number-button:focus-visible
+) {
+  display: inline-flex !important;
+  align-items: center !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
+  background-color: var(--admin-red, #dc2626) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin :where(
+  .support-request-row-menu-trigger span,
+  .support-request-row-menu-trigger svg,
+  .support-request-row-menu-caret,
+  .support-request-related-number-button span,
+  .support-request-related-number-button svg,
+  .admin-customers-grid-number-button span,
+  .admin-customers-grid-number-button svg
+) {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: #ffffff !important;
+  fill: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin :where(
+  .support-request-row-menu,
+  .admin-customers-grid-number-menu
+) {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+}
+
+html:not([data-theme="dark"]) :where(
+  .support-request-row-menu-trigger,
+  .support-request-row-menu-trigger:hover,
+  .support-request-row-menu-trigger:focus-visible,
+  .support-request-related-number-button,
+  .support-request-related-number-button:hover,
+  .support-request-related-number-button:focus-visible,
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button:hover,
+  .admin-customers-grid-number-button:focus-visible
+) {
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
+  background-color: var(--admin-red, #dc2626) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) :where(
+  .support-request-row-menu-trigger span,
+  .support-request-row-menu-trigger svg,
+  .support-request-row-menu-caret,
+  .support-request-related-number-button span,
+  .support-request-related-number-button svg,
+  .admin-customers-grid-number-button span,
+  .admin-customers-grid-number-button svg
+) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) td.admin-customers-grid-number-cell,
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) td.admin-customers-grid-number-cell:hover {
+  background: var(--surface-card) !important;
+  overflow: visible !important;
+}
+
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) .admin-customers-grid-number-menu,
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) .admin-customers-grid-number-button,
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) .admin-customers-grid-number-button-label,
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) .admin-customers-grid-number-button-arrow,
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) .admin-customers-grid-number-button:hover,
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) .admin-customers-grid-number-button:focus-visible {
+  background: #dc2626 !important;
+  background-color: #dc2626 !important;
+  background-image: none !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) .admin-customers-grid-number-button-label span,
+html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search-page) .admin-customers-grid-number-button-arrow svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-crm-number-cell .deals-crm-number-button,
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-crm-number-cell .deals-crm-number-button:hover,
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-crm-number-cell .deals-crm-number-button:focus-visible,
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-deal-number-link,
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-deal-number-link:hover,
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-deal-number-link:focus-visible {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 78px !important;
+  min-height: 26px !important;
+  padding: 0.18rem 0.5rem !important;
+  border: 1px solid var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
+  background-color: var(--admin-red, #dc2626) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-crm-number-cell .deals-crm-number-button span,
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-crm-number-cell .deals-crm-number-button svg,
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-deal-number-link span,
+html:not([data-theme="dark"]) .layout--admin :is(.deals-crm-page, .deals-page) .deals-deal-number-link svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-row-menu-trigger,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-row-menu-trigger:hover,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-row-menu-trigger:focus-visible,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-row-menu-trigger:disabled,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-menu .support-request-sr-number-menu-trigger,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-menu .support-request-sr-number-menu-trigger:hover,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-menu .support-request-sr-number-menu-trigger:focus-visible,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-menu .support-request-sr-number-menu-trigger:disabled,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-chip,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-chip:hover,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-chip:focus-visible,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .sr-list-sr-number,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .sr-list-sr-number:hover,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .sr-list-sr-number:focus-visible {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 122px !important;
+  min-height: 32px !important;
+  padding: 0 0.8rem !important;
+  border: 1px solid #b91c1c !important;
+  background: #dc2626 !important;
+  background-color: #dc2626 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-row-menu-trigger span,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-row-menu-trigger svg,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-menu .support-request-sr-number-menu-trigger span,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-menu .support-request-sr-number-menu-trigger svg,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-chip span,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .support-request-sr-number-chip svg,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .sr-list-sr-number *,
+html:not([data-theme="dark"]) :is(.support-request-legacy-page, .support-ticket-shell, .support-ticket-content, .sr-list-page) .sr-list-sr-number svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin .cl-page .cl-filter-panel button.cl-category-item,
+html:not([data-theme="dark"]) .layout--admin .cl-page .cl-filter-panel button.cl-category-item:hover,
+html:not([data-theme="dark"]) .layout--admin .cl-page .cl-filter-panel button.cl-category-item:focus-visible {
+  border-color: var(--border-subtle) !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .layout--admin .cl-page .cl-filter-panel button.cl-category-item,
+[data-theme="dark"] .layout--admin .cl-page .cl-filter-panel button.cl-category-item:hover,
+[data-theme="dark"] .layout--admin .cl-page .cl-filter-panel button.cl-category-item:focus-visible {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: #111827 !important;
+  background-color: #111827 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Admin dashboard exceptions: keep header utility icons and Outlook card white in light mode. */
+html:not([data-theme="dark"]) .layout--admin .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn,
+html:not([data-theme="dark"]) .layout--admin .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn:hover,
+html:not([data-theme="dark"]) .layout--admin .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn:focus-visible,
+html:not([data-theme="dark"]) .layout--admin .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn:active {
+  border: 1px solid var(--admin-red-border, #b91c1c) !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: var(--admin-red, #dc2626) !important;
+  -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn svg,
+html:not([data-theme="dark"]) .layout--admin .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn svg :where(path, circle, rect, line, polyline, polygon) {
+  color: var(--admin-red, #dc2626) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn .hdr-badge {
+  border-color: #ffffff !important;
+  background: var(--admin-red, #dc2626) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook,
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook:hover,
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook:focus-visible,
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook:active {
+  border: 1px solid var(--admin-red-border, #b91c1c) !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook .rp-action-card__icon {
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
+  background-color: var(--admin-red, #dc2626) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook .rp-action-card__icon svg,
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook .rp-action-card__icon svg :where(path, circle, rect, line, polyline, polygon) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook .rp-action-card__label,
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook .rp-integration-status {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook .rp-action-card__cta,
+html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.rp-action-card--integration.rp-action-card--outlook .rp-action-card__cta svg {
+  border-color: transparent !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--admin-red, #dc2626) !important;
+  -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
+  box-shadow: none !important;
+}

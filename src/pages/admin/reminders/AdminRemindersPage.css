@@ -290,22 +290,26 @@
 }
 
 .active-reminders-users-list {
-  display: flex;
-  flex-direction: column;
-  padding: 0.25rem 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  padding: 0.65rem;
   max-height: 32rem;
   overflow-y: auto;
 }
 
 /* Each user row */
 .active-reminders-user-row {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 1rem;
-  border: none;
-  border-bottom: 1px solid var(--surface-app);
-  background: transparent;
+  gap: 0.5rem;
+  min-height: 4.2rem;
+  padding: 0.72rem 0.58rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--surface-card);
   text-align: left;
   cursor: pointer;
   width: 100%;
@@ -313,7 +317,7 @@
 }
 
 .active-reminders-user-row:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .active-reminders-user-row:hover {
@@ -327,37 +331,41 @@
 .active-reminders-user-icon {
   color: var(--text-primary);
   flex-shrink: 0;
-  font-size: 0.85rem;
+  font-size: 1rem;
+  align-self: center;
 }
 
 .active-reminders-user-name {
-  flex: 1;
+  min-width: 0;
   color: var(--text-primary);
-  font-size: 0.88rem;
-  font-weight: 400;
+  font-size: 0.76rem;
+  font-weight: 700;
   font-family: inherit;
   text-align: left;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Orange count badge */
 .active-reminders-user-badge {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.6rem;
-  height: 1.5rem;
-  padding: 0 0.35rem;
-  border: 1px solid var(--border-subtle);
-  border-radius: 3px;
-  background: #f8fafc;
-  color: var(--text-primary);
-  font-size: 0.74rem;
-  font-weight: 700;
+  min-width: 1.35rem;
+  height: 1.25rem;
+  padding: 0 0.28rem;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 0.68rem;
+  font-weight: 900;
   flex-shrink: 0;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: none;
 }
 
 /* ── Detail panel ────────────────────────────────────────── */
@@ -752,6 +760,16 @@
   .active-reminders-filter-checkbox-row {
     grid-template-columns: 1fr;
     justify-items: start;
+  }
+
+  .active-reminders-users-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .active-reminders-users-list {
+    grid-template-columns: 1fr;
   }
 }
 

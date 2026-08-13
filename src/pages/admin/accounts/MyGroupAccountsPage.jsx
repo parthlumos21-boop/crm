@@ -37,6 +37,7 @@ const DEFAULT_ROWS_PER_PAGE = 10
 const SIX_ROW_ACCOUNT_VARIANTS = new Set(['viewAll', 'myAccounts', 'searchAccount'])
 const REQUIRED_ACCOUNT_TABLE_COLUMN_KEYS = ['projectName', 'accountOwner']
 const EXACT_ACCOUNT_LIST_VARIANTS = new Set(['viewAll', 'myGroup', 'myAccounts', 'searchAccount'])
+const PLAIN_ACCOUNT_OWNER_VARIANTS = new Set(['myGroup', 'myAccounts', 'searchAccount'])
 const DEFAULT_CONVERTED_FILTER_RULE = () => ({
   id: `converted-filter-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   fieldKey: '',
@@ -96,15 +97,56 @@ const getAccountRowsWithRequiredFields = (rows = []) => rows.map((row = {}) => {
   const raw = row.raw || {}
   const projectName = row.projectName || raw.projectName || raw.formData?.projectName || row.productCategory || raw.productCategory || 'General Enquiry'
   const accountOwner = row.accountOwnerDisplay || row.accountOwnerName || row.accountOwner || raw.accountOwner || raw.ownerName || raw.assignedToName || 'Unassigned'
+  const cleanAccountOwner = String(accountOwner || '').trim().toLowerCase() === 'no' ? '-' : accountOwner
 
   return {
     ...row,
     projectName,
-    accountOwner,
-    accountOwnerName: row.accountOwnerName || accountOwner,
-    accountOwnerDisplay: row.accountOwnerDisplay || accountOwner,
+    accountOwner: cleanAccountOwner,
+    accountOwnerName: row.accountOwnerName || cleanAccountOwner,
+    accountOwnerDisplay: row.accountOwnerDisplay || cleanAccountOwner,
   }
 })
+
+const stripOwnerCodePrefix = (value = '') => String(value || '')
+  .trim()
+  .replace(/^\d{3,}\s*-+\s*/u, '')
+
+const getPlainAccountOwnerName = (_value, row = {}) => {
+  const rawOwner = row.accountOwnerDisplay
+    || row.accountOwnerName
+    || row.accountOwner
+    || row.raw?.accountOwner
+    || row.raw?.ownerName
+    || row.raw?.assignedToName
+    || ''
+
+  const ownerName = stripOwnerCodePrefix(rawOwner)
+  return ownerName && ownerName.toLowerCase() !== 'no' ? ownerName : '-'
+}
+
+const getCreatorOwnerCode = (row = {}) => (
+  row.accountOwnerCode
+  || row.raw?.accountOwnerCode
+  || row.raw?.formData?.accountOwnerCode
+  || row.ownerCode
+  || row.raw?.ownerCode
+  || row.raw?.formData?.ownerCode
+  || row.employeeId
+  || row.raw?.employeeId
+  || row.raw?.formData?.employeeId
+  || row.accountNumber
+  || ''
+)
+
+const getCurrentUserOwnerCode = (user = {}) => String(
+  user.ownerCode
+  || user.owner_code
+  || user.accountOwnerCode
+  || user.employeeId
+  || user.employee_id
+  || ''
+).trim()
 
 const getConvertedAccountsFieldText = (row = {}, fieldKey = '') => {
   switch (fieldKey) {
@@ -711,9 +753,45 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
     const sourceColumns = isConvertedAccountsView ? convertedColumnDefinitions : columns
     const nextVisibleColumnKeys = getAccountColumnKeysWithRequiredFields(visibleColumnKeys, sourceColumns)
     const sourceColumnMap = new Map(sourceColumns.map((column) => [column.key, column]))
-    const filteredColumns = nextVisibleColumnKeys.map((key) => sourceColumnMap.get(key)).filter(Boolean)
-    return filteredColumns.length > 0 ? filteredColumns : sourceColumns
-  }, [columns, convertedColumnDefinitions, isConvertedAccountsView, visibleColumnKeys])
+    let filteredColumns = nextVisibleColumnKeys.map((key) => sourceColumnMap.get(key)).filter(Boolean)
+    if (filteredColumns.length === 0) {
+      filteredColumns = sourceColumns
+    }
+
+    if (variantKey === 'myAccounts' || PLAIN_ACCOUNT_OWNER_VARIANTS.has(variantKey)) {
+      const currentUserOwnerCode = getCurrentUserOwnerCode(user)
+
+      return filteredColumns.map((col) => {
+        if (variantKey === 'myAccounts' && col.key === 'accountNumber') {
+          return {
+            ...col,
+            cellFormatter: (_value, row) => currentUserOwnerCode || getCreatorOwnerCode(row) || '-',
+            exportFormatter: (_value, row) => currentUserOwnerCode || getCreatorOwnerCode(row),
+          }
+        }
+
+        if (variantKey === 'searchAccount' && col.key === 'accountNumber') {
+          return {
+            ...col,
+            cellFormatter: (_value, row) => getCreatorOwnerCode(row) || '-',
+            exportFormatter: (_value, row) => getCreatorOwnerCode(row),
+          }
+        }
+
+        if (PLAIN_ACCOUNT_OWNER_VARIANTS.has(variantKey) && col.key === 'accountOwner') {
+          return {
+            ...col,
+            cellFormatter: getPlainAccountOwnerName,
+            exportFormatter: getPlainAccountOwnerName,
+          }
+        }
+
+        return col
+      })
+    }
+
+    return filteredColumns
+  }, [columns, convertedColumnDefinitions, isConvertedAccountsView, user, visibleColumnKeys, variantKey])
   const rowActionsEnabled = isAdminPortal ? view.rowActionMenuEnabled : true
   const rowActions = isAdminPortal ? view.rowActions : USER_ACCOUNT_ROW_ACTIONS
   const drawerActions = isAdminPortal ? undefined : USER_ACCOUNT_DRAWER_ACTIONS
@@ -735,6 +813,18 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
 
     addNotification('success', 'Account converted', 'Deal and Converted Deal were created successfully.')
     await refreshData()
+
+    const createdDeal = result.data?.deal || {}
+    const createdConvertedDeal = result.data?.convertedDeal || {}
+    navigate(isAdminPortal ? '/admin/deals/view' : '/deals/view', {
+      state: {
+        quotationDealLookup: {
+          dealNumber: createdDeal.dealNumber || createdConvertedDeal.dealNumber || '',
+          projectName: createdDeal.name || createdDeal.dealName || createdDeal.projectName || createdConvertedDeal.name || createdConvertedDeal.projectName || '',
+          companyName: createdDeal.companyName || createdDeal.customerName || createdDeal.accountName || createdConvertedDeal.accountName || row.name || '',
+        },
+      },
+    })
   }
 
   const handleViewLinkedDeal = (row) => {
@@ -1100,7 +1190,13 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
               </Button>
             ) : null}
             {showRefreshButton ? (
-              <Button variant="outline" size="small" onClick={refreshData} loading={loading}>
+              <Button
+                variant="outline"
+                size="small"
+                className={variantKey === 'myGroup' ? 'admin-accounts-toolbar-refresh-btn' : ''}
+                onClick={refreshData}
+                loading={loading}
+              >
                 Refresh
               </Button>
             ) : null}
@@ -1167,6 +1263,7 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
         onRefresh={refreshData}
         canEdit={user?.role === 'admin' || selectedAccount?.recordSource === 'live'}
         actionItems={drawerActions}
+        hiddenFieldKeys={variantKey === 'myGroup' ? ['accountState'] : []}
       />
 
       <Modal

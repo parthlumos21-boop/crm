@@ -1,7 +1,9 @@
 const supportRequestRepository = require('../repositories/supportRequestRepository')
+const supportReplyRepository = require('../repositories/supportReplyRepository')
 const { createCrudService, emitEntity } = require('./crudServiceFactory')
 const { AppError } = require('../utils/appError')
 const { supportRequest } = require('../validation/schemas')
+const { Types } = require('mongoose')
 
 const DEFAULT_SR_NUMBER_START = 1
 
@@ -13,6 +15,40 @@ const parseSupportRequestNumber = (srNumber = '') => {
 }
 
 const getRecordSrNumber = (record = {}) => record.srNumber || record.data?.srNumber || ''
+
+const getSupportRequestReplyIds = (record = {}) => {
+  const values = [
+    record._id,
+    record.mongoId,
+    record.id,
+    record.legacyId,
+    record.data?.id,
+    record.data?.legacyId,
+  ].filter((value) => value !== undefined && value !== null && value !== '')
+
+  const variants = []
+  values.forEach((value) => {
+    variants.push(value)
+    variants.push(String(value))
+
+    if (Types.ObjectId.isValid(String(value))) {
+      variants.push(new Types.ObjectId(String(value)))
+    }
+
+    const numericValue = Number.parseInt(String(value), 10)
+    if (Number.isFinite(numericValue) && String(numericValue) === String(value)) {
+      variants.push(numericValue)
+    }
+  })
+
+  const seen = new Set()
+  return variants.filter((value) => {
+    const key = `${typeof value}:${String(value)}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
 
 const getNextSupportRequestNumber = async (actor = {}) => {
   const records = await supportRequestRepository.listAll()
@@ -44,10 +80,15 @@ const buildPayload = async (body, actor, existing) => {
     status: body.status ?? existing?.status ?? 'open',
     category: body.category ?? existing?.category ?? null,
     customerId: body.customerId ?? existing?.customerId ?? null,
+    customerNumber: body.customerNumber ?? body.customerNo ?? existing?.customerNumber ?? existing?.data?.customerNumber ?? null,
+    customerNo: body.customerNo ?? body.customerNumber ?? existing?.customerNo ?? existing?.data?.customerNo ?? null,
     customerName: body.customerName ?? existing?.customerName ?? null,
     customerEmail: body.customerEmail ?? existing?.customerEmail ?? null,
     assignedTo: body.assignedTo ?? existing?.assignedTo ?? null,
+    requestType: body.requestType ?? body.request_type ?? existing?.requestType ?? null,
+    userEmail: actor.email || actor.username || existing?.userEmail || null,
     createdBy: existing?.createdBy ?? actor.id,
+    updatedBy: actor.id,
     resolvedAt: body.status === 'resolved' && existing?.status !== 'resolved' ? new Date() : existing?.resolvedAt ?? null,
     data: { ...(existing?.data || {}), ...body, srNumber },
   }
@@ -58,6 +99,7 @@ const base = createCrudService({
   entityLabel: 'Support request',
   entityType: 'support-request',
   buildPayload,
+  bypassScopeForRoles: ['support'],
 })
 
 const { sendEmail } = require('./emailService')
@@ -114,16 +156,136 @@ const list = async (actor) => {
   const twoDaysAgo = new Date()
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
 
-  return records.filter((record) => {
+  const filteredRecords = records.filter((record) => {
     if ((record.status || '').toLowerCase() === 'closed') {
       const recordDate = new Date(record.updatedAt || record.createdAt || 0)
       if (recordDate < twoDaysAgo) return false
     }
     return true
   })
+
+  const replyIdGroups = filteredRecords.map((record) => ({
+    recordId: (record._id || record.id).toString(),
+    replyIds: getSupportRequestReplyIds(record),
+  }))
+  const recordIds = replyIdGroups.flatMap((group) => group.replyIds)
+  
+  let replyCounts = []
+  if (recordIds.length > 0) {
+    replyCounts = await supportReplyRepository.model.aggregate([
+      { $match: { support_request_id: { $in: recordIds } } },
+      { $group: { _id: "$support_request_id", count: { $sum: 1 } } }
+    ])
+  }
+
+  const countMap = {}
+  replyCounts.forEach(rc => {
+    const matchedGroup = replyIdGroups.find((group) => (
+      group.replyIds.some((replyId) => String(replyId) === String(rc._id))
+    ))
+    if (matchedGroup) countMap[matchedGroup.recordId] = (countMap[matchedGroup.recordId] || 0) + rc.count
+  })
+
+  return filteredRecords.map(record => {
+    const isMongoose = typeof record.toObject === 'function'
+    const doc = isMongoose ? record.toObject() : record
+    return {
+      ...doc,
+      replyCount: countMap[(doc._id || doc.id).toString()] || 0
+    }
+  })
 }
 
-module.exports = { ...base, create, list, bulkUpdate, bulkDelete }
+const addReply = async (actor, id, message) => {
+  const existing = await base.get(actor, id)
+  if (!existing) throw new AppError('Support request not found.', 404)
+
+  const isSupportAgent = String(actor.email || '') === 'parth@support.com' || String(actor.email || '') === 'rushabh@support.com'
+  const senderType = isSupportAgent ? 'support_agent' : 'user'
+  
+  let recipientId = null
+  let recipientType = null
+  let recipientEmail = null
+  
+  if (isSupportAgent) {
+    recipientType = 'user'
+    recipientEmail = existing.userEmail || existing.customerEmail || existing.contactEmail || null
+    // Assuming customer is tied to `customerId` or `accountId`, we just use what's available
+    recipientId = existing.customerId || existing.accountId || null
+  } else {
+    recipientType = 'support_agent'
+    recipientEmail = 'parth@support.com, rushabh@support.com'
+    recipientId = existing.assignedTo || existing.ownerUserId || null
+  }
+
+  const newReply = {
+    support_request_id: existing.id,
+    sender_id: actor.id || actor._id,
+    sender_type: senderType,
+    sender_email: actor.email,
+    recipient_id: recipientId,
+    recipient_type: recipientType,
+    recipient_email: recipientEmail,
+    message,
+    attachments: [],
+    is_internal: false,
+    created_at: new Date(),
+    updated_at: new Date()
+  }
+
+  await supportReplyRepository.model.create(newReply)
+
+  emitEntity('support-request', 'updated', existing, actor)
+  return existing
+}
+
+const getReplies = async (actor, id) => {
+  const existing = await base.get(actor, id)
+  if (!existing) throw new AppError('Support request not found.', 404)
+
+  const replies = await supportReplyRepository.model.find({
+    support_request_id: { $in: getSupportRequestReplyIds(existing) }
+  }).sort({ created_at: 1 }).lean()
+
+  return replies
+}
+
+const getTodoReplies = async (actor) => {
+  const escapedEmail = String(actor.email || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const replies = await supportReplyRepository.model.find({
+    recipient_email: { $regex: escapedEmail, $options: 'i' }
+  })
+    .sort({ created_at: -1 })
+    .limit(50)
+    .lean()
+
+  return replies
+}
+
+const closeTicket = async (actor, id) => {
+  const allowedEmails = ['parth@support.com', 'rushabh@support.com']
+  if (!allowedEmails.includes(actor.email)) {
+    throw new AppError('Forbidden. Only authorized support agents can close tickets.', 403)
+  }
+
+  const existing = await base.get(actor, id)
+  if (!existing) throw new AppError('Support request not found.', 404)
+
+  const updatedData = {
+    ...(existing.data || {}),
+    closedBy: actor.email,
+    closedAt: new Date().toISOString()
+  }
+
+  const updated = await base.update(actor, id, {
+    status: 'closed',
+    data: updatedData
+  })
+  emitEntity('support-request', 'updated', updated, actor)
+  return updated
+}
+
+module.exports = { ...base, create, list, bulkUpdate, bulkDelete, addReply, getReplies, getTodoReplies, closeTicket }
 module.exports.validation = {
   create: supportRequest,
   update: supportRequest,

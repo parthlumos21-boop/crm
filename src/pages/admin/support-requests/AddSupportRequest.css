@@ -1,6 +1,6 @@
 .sr-new-page {
   min-height: 100%;
-  padding: 0.75rem;
+  padding: 1.15rem;
   background: var(--surface-card);
 }
 
@@ -12,8 +12,8 @@
 
 .sr-new-card {
   display: grid;
-  gap: 0.85rem;
-  padding: 0.9rem 1rem;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
   border: 1px solid var(--border-subtle);
   background: var(--surface-app);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
@@ -95,7 +95,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
-  padding: 0.15rem 0 0.75rem;
+  padding: 0.15rem 0 0.9rem;
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -103,7 +103,11 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  color: #c0c8d1;
+  min-width: 0;
+  padding: 0.62rem 0.75rem;
+  border: 1px solid var(--admin-red-border, #b91c1c);
+  background: var(--surface-card);
+  color: var(--text-primary);
 }
 
 .sr-new-step-index {
@@ -112,10 +116,10 @@
   justify-content: center;
   width: 2.15rem;
   height: 2.15rem;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--admin-red-border, #b91c1c);
   border-radius: 999px;
-  background: var(--surface-app);
-  color: var(--text-primary);
+  background: var(--admin-red, #dc2626);
+  color: #ffffff;
   font-size: 1rem;
   font-weight: 700;
 }
@@ -123,30 +127,62 @@
 .sr-new-step-copy {
   font-size: 0.95rem;
   font-weight: 700;
+  color: var(--text-primary) !important;
+  line-height: 1.25;
+  min-width: 0;
 }
 
-.sr-new-step.is-active,
 .sr-new-step.is-complete {
-  color: var(--text-primary);
+  border-color: var(--admin-red-border, #b91c1c);
+  background: var(--admin-red, #dc2626);
+  color: #ffffff;
 }
 
-.sr-new-step.is-active .sr-new-step-index,
+.sr-new-step.is-active {
+  border-color: var(--admin-red-border, #b91c1c);
+}
+
+.sr-new-step.is-complete .sr-new-step-copy {
+  color: #ffffff !important;
+}
+
 .sr-new-step.is-complete .sr-new-step-index {
-  border-color: var(--text-primary);
-  background: linear-gradient(180deg, #49bae3 0%, #218fc5 100%);
-  color: #ffffff;
+  border-color: #ffffff;
+  background: #ffffff;
+  color: var(--admin-red, #dc2626);
+}
+
+.layout--admin .sr-new-step.is-complete .sr-new-step-index {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: var(--admin-red, #dc2626) !important;
+}
+
+[data-theme="dark"] .sr-new-step-index,
+[data-theme="dark"] .sr-new-step.is-complete .sr-new-step-index,
+.layout--admin[data-theme="dark"] .sr-new-step.is-complete .sr-new-step-index {
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .sr-new-step.is-complete .sr-new-step-index,
+.layout--admin[data-theme="dark"] .sr-new-step.is-complete .sr-new-step-index {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: var(--admin-red, #dc2626) !important;
 }
 
 .sr-new-panel {
   flex: 1;
   min-height: 0;
-  padding: 0.8rem 0 0;
+  padding: 1rem 0 0;
 }
 
 .sr-new-form-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
-  gap: 0.75rem 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 0.95rem 1rem;
   align-items: start;
 }
 
@@ -175,6 +211,8 @@
 .sr-new-field select,
 .sr-new-field textarea {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box !important;
   border: 1px solid var(--border-subtle);
   background: var(--surface-card);
   color: var(--text-primary);
@@ -335,8 +373,8 @@
 .sr-new-upload-btn {
   min-width: 110px;
   min-height: 2.85rem;
-  border: 1px solid var(--border-subtle);
-  background: linear-gradient(180deg, #55c66f 0%, #2f9b49 100%);
+  border: 1px solid var(--admin-red-border, #b91c1c);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
   font: inherit;
   font-weight: 700;
@@ -459,7 +497,7 @@
 }
 
 .ticket-new-form-grid {
-  grid-template-columns: minmax(220px, 0.7fr) minmax(320px, 1.3fr) minmax(260px, 0.9fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   align-items: end;
   gap: 1.15rem 1.25rem;
   overflow: hidden;

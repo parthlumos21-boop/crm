@@ -14,18 +14,17 @@ import {
   FiEdit2,
 } from 'react-icons/fi'
 import { HiOutlineStatusOnline } from 'react-icons/hi'
-import Badge from '../../../components/common/Badge'
 import Button from '../../../components/common/Button'
 import ContactIntegrationActions from '../../../components/integrations/ContactIntegrationActions'
 import { useData } from '../../../context/DataContext'
 import { buildAdminDealDetailUrl } from '../../../features/adminDeals/config/adminDealViews'
 import { useClickOutside } from '../../../hooks'
 import { ACCOUNT_ACTION_DROPDOWN_LABEL, ACCOUNT_DRAWER_ACTIONS } from '../../../features/adminAccounts/config/accountActions'
-import { ACCOUNT_CATEGORY_OPTIONS, ACCOUNT_SOURCE_OPTIONS, CUSTOMER_TYPE_OPTIONS, INDUSTRY_TYPE_OPTIONS } from '../../../features/accounts/config/accountDropdownOptions'
-import { ACCOUNT_STATE_OPTIONS, ACCOUNT_CHANGE_STATUS_OPTIONS } from '../../../features/adminAccounts/config/accountStages'
+import { ACCOUNT_CATEGORY_OPTIONS, ACCOUNT_SOURCE_OPTIONS, CUSTOMER_TYPE_OPTIONS, INDUSTRY_TYPE_OPTIONS, STATE_OPTIONS } from '../../../features/accounts/config/accountDropdownOptions'
+import { ACCOUNT_CHANGE_STATUS_OPTIONS, ACCOUNT_ORDER_STATUS_OPTIONS, ACCOUNT_QUOTATION_STATUS_OPTIONS, ACCOUNT_STATE_OPTIONS } from '../../../features/adminAccounts/config/accountStages'
 import { buildAdminAccountActionUrl } from '../../../features/adminAccounts/utils/accountNavigation'
 import { getAccountOwnerOptionLabel, getCachedAccountOwnerOptions, loadAccountOwnerOptions } from '../../../features/adminAccounts/utils/accountOwnerOptions'
-import { formatCurrency, formatDate, getStatusColor } from '../../../utils/helpers'
+import { formatCurrency, formatDate } from '../../../utils/helpers'
 import AccountActionModal from './AccountActionModal'
 import './MyGroupAccounts.css'
 
@@ -36,6 +35,24 @@ const ACCOUNT_INFORMATION_STAGE_OPTIONS = ACCOUNT_CHANGE_STATUS_OPTIONS
     value: option.stageKey,
     label: option.value === 'convert_to_po' ? 'PO Converted' : option.label,
   }))
+const REASON_FOR_LOST_OPTIONS = [
+  'Intense Competition',
+  'On Hold',
+  'Payment Terms not matching',
+  'Delivery not matching',
+  'Budgetory Offer',
+].map((value) => ({ value, label: value }))
+const toSelectOptions = (entries = []) => entries.map((entry) => (
+  typeof entry === 'string' ? { value: entry, label: entry } : entry
+))
+const ACCOUNT_STATUS_OPTIONS = ACCOUNT_STATE_OPTIONS.map((value) => ({
+  value: value.toLowerCase(),
+  label: value,
+}))
+const getAccountStatusLabel = (value) => {
+  const normalizedValue = String(value || '').trim().toLowerCase()
+  return ACCOUNT_STATUS_OPTIONS.find((option) => option.value === normalizedValue || option.label.toLowerCase() === normalizedValue)?.label || value
+}
 const getAllowedAccountInformationStage = (value) => (
   ACCOUNT_INFORMATION_STAGE_OPTIONS.some((option) => option.value === value) ? value : ''
 )
@@ -63,12 +80,10 @@ const sectionConfig = [
       { key: 'addedBy', label: 'Added By' },
       { key: 'lastUpdated', label: 'Last Updated', readOnly: true },
       { key: 'accountCategory', label: 'Account Category', options: ACCOUNT_CATEGORY_OPTIONS },
-      { key: 'status', label: 'Account Status', options: ACCOUNT_STATE_OPTIONS.map((value) => ({ value, label: value })) },
       { key: 'accountOwner', label: 'Account Owner' },
+      { key: 'status', label: 'Account Status', options: ACCOUNT_STATUS_OPTIONS },
       { key: 'accountState', label: 'Account State' },
       { key: 'accountSource', label: 'Account Source', options: ACCOUNT_SOURCE_OPTIONS },
-      { key: 'changeStatus', label: 'Change Status', options: ACCOUNT_CHANGE_STATUS_OPTIONS },
-      { key: 'accountSubsource', label: 'Account Subsource' },
       { key: 'gstin', label: 'GSTIN' },
       { key: 'stateCode', label: 'State Code' },
     ],
@@ -90,16 +105,16 @@ const sectionConfig = [
       { key: 'customerType', label: 'Customer Type', options: CUSTOMER_TYPE_OPTIONS },
       { key: 'projectName', label: 'Project Name' },
       { key: 'projectType', label: 'Product Category' },
-      { key: 'state', label: 'State' },
+      { key: 'state', label: 'State', options: STATE_OPTIONS },
       { key: 'industry', label: 'Industry type', options: INDUSTRY_TYPE_OPTIONS },
       { key: 'customerRefNo', label: 'Customer Ref. No.' },
       { key: 'customerRefDate', label: 'Customer Ref. Date', type: 'date' },
       { key: 'consultantName', label: 'Consultant Name' },
       { key: 'poValue', label: 'PO Value' },
-      { key: 'statusAsPerOrderReceived', label: 'Status of Customer as per Order Received' },
-      { key: 'statusAsPerQuotationGiven', label: 'Status Of Customer as per quotation Given' },
+      { key: 'statusAsPerOrderReceived', label: 'Status of Customer as per Order Received', options: toSelectOptions(ACCOUNT_ORDER_STATUS_OPTIONS) },
+      { key: 'statusAsPerQuotationGiven', label: 'Status Of Customer as per quotation Given', options: toSelectOptions(ACCOUNT_QUOTATION_STATUS_OPTIONS) },
       { key: 'jobNo', label: 'Job No' },
-      { key: 'reasonForLost', label: 'Reason For Lost' },
+      { key: 'reasonForLost', label: 'Reason For Lost', options: REASON_FOR_LOST_OPTIONS },
       { key: 'customerName', label: 'Customer Name' },
     ],
   },
@@ -144,6 +159,11 @@ const getDisplayFieldValue = (field, value) => {
   if (!value) return ''
   if (field.key === 'lastUpdated') return formatDetailDate(value, 'dd-MM-yyyy hh:mm a')
   if (field.type === 'date') return formatDetailDate(value)
+  if (field.key === 'status') return getAccountStatusLabel(value)
+  if (field.options) {
+    const option = field.options.find((entry) => entry.value === value || entry.label === value)
+    if (option) return option.label
+  }
   return value
 }
 
@@ -166,8 +186,8 @@ const buildInitialForm = (account) => ({
   industry: account.industryType || account.raw?.industry || '',
   accountCategory: account.accountCategory || account.customerType || '',
   accountSource: account.accountSource || account.source || '',
-  accountSubsource: account.accountSubsource || account.raw?.accountSubsource || account.raw?.subsource || '',
-  status: account.status || '',
+  status: String(account.raw?.status || account.status || '').trim().toLowerCase(),
+  accountState: account.accountState || account.raw?.accountState || getAccountStatusLabel(account.raw?.status || account.status || ''),
   stage: getAllowedAccountInformationStage(account.stage || ''),
   accountDate: normalizeDateInput(account.accountDate || account.createdAt) || '',
   accountOwner: account.accountOwnerName || account.accountOwner || '',
@@ -217,10 +237,10 @@ const buildUpdatePayload = (form) => ({
   industryType: form.industry,
   accountCategory: form.accountCategory,
   accountSource: form.accountSource,
-  accountSubsource: form.accountSubsource,
-  subsource: form.accountSubsource,
   source: form.accountSource,
-  status: form.status,
+  status: String(form.status || '').trim().toLowerCase(),
+  accountStatus: getAccountStatusLabel(form.status),
+  accountState: form.accountState,
   stage: form.stage,
   accountDate: form.accountDate,
   accountOwner: form.accountOwner,
@@ -279,6 +299,7 @@ const AccountDetailsDrawer = ({
   onRefresh,
   canEdit = false,
   actionItems = ACCOUNT_DRAWER_ACTIONS,
+  hiddenFieldKeys = [],
   inline = false,
 }) => {
   const location = useLocation()
@@ -294,6 +315,11 @@ const AccountDetailsDrawer = ({
   const [ownerOptions, setOwnerOptions] = useState(getCachedAccountOwnerOptions)
   const closeActions = useCallback(() => setIsActionsOpen(false), [])
   const actionsRef = useClickOutside(closeActions)
+  const hiddenFieldKeySet = useMemo(() => new Set(hiddenFieldKeys), [hiddenFieldKeys])
+  const visibleAccountFields = useMemo(
+    () => flattenedAccountFields.filter((field) => !hiddenFieldKeySet.has(field.key)),
+    [hiddenFieldKeySet]
+  )
 
   useEffect(() => {
     if (account) {
@@ -322,8 +348,6 @@ const AccountDetailsDrawer = ({
   }, [])
 
   const headerFacts = useMemo(() => ([
-    { label: 'Stage', value: account?.stageLabel || account?.stage || '-' },
-    { label: 'Status', value: account?.status || '-' },
     { label: 'Owner', value: account?.accountOwnerDisplay || account?.accountOwner || '-' },
     { label: 'Last Updated', value: formatHeaderDate(account?.updatedAt) },
   ]), [account])
@@ -362,6 +386,16 @@ const AccountDetailsDrawer = ({
 
   const handleFieldChange = (key, value) => {
     setValidationError('')
+    if (key === 'status') {
+      const nextStatus = String(value || '').trim().toLowerCase()
+      setForm((currentForm) => ({
+        ...currentForm,
+        status: nextStatus,
+        accountState: getAccountStatusLabel(nextStatus),
+      }))
+      return
+    }
+
     setForm((currentForm) => ({
       ...currentForm,
       [key]: value,
@@ -444,7 +478,6 @@ const AccountDetailsDrawer = ({
                   <strong>{fact.label}:</strong> {fact.value}
                 </span>
               ))}
-              <Badge variant={getStatusColor(account.status)} rounded>{account.status}</Badge>
             </div>
           </div>
 
@@ -478,6 +511,7 @@ const AccountDetailsDrawer = ({
                               state: {
                                 openGenerator: true,
                                 preselectedAccountId: account.id,
+                                preselectedCustomer: account,
                               },
                             })
                             return
@@ -535,7 +569,7 @@ const AccountDetailsDrawer = ({
               </div>
             ) : null}
             <div className="admin-accounts-workspace-flat-fields">
-              {flattenedAccountFields.map((field) => {
+              {visibleAccountFields.map((field) => {
                 const value = field.key === 'changeStatus' ? (form.stage || form.status || '') : (form[field.key] || '')
                 const displayValue = getDisplayFieldValue(field, value)
                 const isEditing = editingSection === field.sectionKey

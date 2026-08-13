@@ -21,13 +21,11 @@ const steps = [
   { id: 'contacts', label: 'Contacts' },
   { id: 'reminder', label: 'Reminder & Remark' },
 ]
-
-const owners = ACCOUNT_OWNER_OPTIONS
+import { userApi } from '../../services/userApi'
 
 const accountCategories = [
   { value: 'LUMOS', label: 'LUMOS' },
   { value: 'SWATI', label: 'SWATI' },
-  { value: 'SWATI EPC', label: 'SWATI EPC' },
 ]
 
 const accountSources = ACCOUNT_SOURCE_OPTIONS
@@ -92,17 +90,17 @@ const requiredMessages = {
 const fieldGroups = {
   basicLeft: [
     { name: 'accountName', label: 'Account Name', required: true },
-    { name: 'accountOwner', label: 'Account Owner', type: 'select', options: owners, required: true },
+    { name: 'accountCategory', label: 'Vertical Name', type: 'select', options: accountCategories, required: true },
+    { name: 'accountOwner', label: 'Account Owner', type: 'select', options: [], required: true },
     { name: 'state', label: 'State', type: 'select', options: states, required: true },
     { name: 'description', label: 'Remark', type: 'textarea', textareaRows: 3, fieldClassName: 'min-h-[88px]' },
     { name: 'address', label: 'Address', type: 'textarea', textareaRows: 3, fieldClassName: 'min-h-[88px]' },
-    { name: 'customerName', label: 'Customer Name' },
-    { name: 'consultantName', label: 'Consultant Name/AR' },
   ],
   basicRight: [
     { name: 'accountDate', label: 'Account Date', type: 'date', required: true },
-    { name: 'accountCategory', label: 'Vertical Name', type: 'select', options: accountCategories, required: true },
     { name: 'accountSource', label: 'Account Source', type: 'select', options: accountSources, required: true },
+    { name: 'customerName', label: 'Customer Name' },
+    { name: 'consultantName', label: 'Consultant/AR Name' },
     { name: 'customerType', label: 'Customer Type', type: 'select', options: customerTypes },
     { name: 'customerRefNo', label: 'Inquiry Ref No.' },
     { name: 'customerRefDate', label: 'Inquiry Ref Date', type: 'date' },
@@ -141,9 +139,27 @@ const AddAccountWizard = () => {
   const [errors, setErrors] = useState({})
   const [validationNotice, setValidationNotice] = useState([])
   const [saving, setSaving] = useState(false)
+  const [swatiUsers, setSwatiUsers] = useState([])
+  const [lumosUsers, setLumosUsers] = useState([])
+
+  React.useEffect(() => {
+    const loadOwners = async () => {
+      try {
+        const users = await userApi.listDirectory()
+        const formatUser = (u) => ({ value: u.name, label: u.name })
+        setSwatiUsers(users.filter((u) => u.company === 'swati' && u.ownerCode).map(formatUser))
+        setLumosUsers(users.filter((u) => u.company === 'lumos' && u.ownerCode).map(formatUser))
+      } catch (err) {
+        console.error('Failed to load owners:', err)
+      }
+    }
+    loadOwners()
+  }, [])
+
+  const activeOwners = formData.accountCategory === 'LUMOS' ? lumosUsers : formData.accountCategory === 'SWATI' ? swatiUsers : []
 
   const isAdmin = useMemo(() => location.pathname.startsWith('/admin'), [location.pathname])
-  const backPath = isAdmin ? '/admin/accounts' : '/accounts/my-group-accounts'
+  const backPath = isAdmin ? '/admin/accounts/my-accounts' : '/accounts/my-group-accounts'
   const categoryLogo = useMemo(
     () => getAccountCategoryLogo(formData.accountCategory),
     [formData.accountCategory]
@@ -364,29 +380,20 @@ const AddAccountWizard = () => {
           >
             <div className="add-account-landscape-field-grid add-account-landscape-field-grid-two">
               <div className="add-account-landscape-field-column">
-                {renderFieldGroup(fieldGroups.basicLeft, {
-                  layout: 'inline',
-                  rowClassName: '',
-                  inputWrapperClassName: 'w-full max-w-none',
-                })}
+                {renderFieldGroup(
+                  fieldGroups.basicLeft.map(f => f.name === 'accountOwner' ? { ...f, options: activeOwners } : f), 
+                  {
+                    layout: 'inline',
+                    rowClassName: '',
+                    inputWrapperClassName: 'w-full max-w-none',
+                  }
+                )}
               </div>
               <div className="add-account-landscape-field-column">
                 {renderFieldGroup(fieldGroups.basicRight, {
                   layout: 'inline',
                   inputWrapperClassName: 'w-full max-w-none',
                 })}
-                {categoryLogo ? (
-                  <div className="add-account-landscape-logo-preview">
-                    <img
-                      src={categoryLogo.src}
-                      alt={`${categoryLogo.alt} logo`}
-                    />
-                    <div>
-                      <div>{categoryLogo.alt} Account</div>
-                      <div>Logo is set automatically from the Account Category.</div>
-                    </div>
-                  </div>
-                ) : null}
               </div>
             </div>
           </LegacyFormSection>

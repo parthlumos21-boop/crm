@@ -20,11 +20,16 @@ const toLegacyUser = (record) => {
     authTokenVersion: record.authTokenVersion ?? record.auth_token_version ?? 0,
     email: record.email,
     role: record.role,
+    designation: record.designation ?? record.designation ?? '',
+    state: record.state ?? record.state ?? '',
+    city: record.city ?? record.city ?? '',
     actualRole: record.actualRole ?? record.actual_role ?? record.role,
     userRoleMode: record.userRoleMode ?? record.user_role_mode ?? '',
     canActAsUser: Boolean(record.canActAsUser ?? record.can_act_as_user ?? false),
     company_id: record.companyId ?? record.company_id ?? 1,
     companyId: record.companyId ?? record.company_id ?? 1,
+    company: record.company || record.companyName || '',
+    companyName: record.companyName || record.company || '',
     status: record.status,
     is_approved: record.isApproved ?? record.is_approved ?? false,
     isApproved: record.isApproved ?? record.is_approved ?? false,
@@ -50,10 +55,15 @@ const sanitizeUserRow = (row) => {
     authTokenVersion: user.authTokenVersion,
     email: user.email,
     role: user.role,
+    designation: user.designation,
+    state: user.state,
+    city: user.city,
     actualRole: user.actualRole,
     userRoleMode: user.userRoleMode,
     canActAsUser: user.canActAsUser,
     companyId: user.companyId,
+    company: user.company,
+    companyName: user.companyName,
     status: user.status,
     isApproved: user.isApproved,
     isOnline: user.isOnline,
@@ -322,7 +332,7 @@ const updateUserStatus = async (userId, status) => {
   return sanitizeUserRow(record)
 }
 
-const createUser = async ({ username, name, email, passwordHash, assignedPassword = '', role, companyId = 1, status = 'pending', isApproved = false }) => {
+const createUser = async ({ username, name, email, passwordHash, assignedPassword = '', role, companyId = 1, status = 'pending', isApproved = false, designation = '', state = '', city = '' }) => {
   const legacyId = await getNextLegacyId('users')
   const record = await User.create({
     legacyId,
@@ -332,6 +342,9 @@ const createUser = async ({ username, name, email, passwordHash, assignedPasswor
     passwordHash,
     assignedPassword,
     role,
+    designation,
+    state,
+    city,
     companyId,
     status,
     isApproved,
@@ -451,7 +464,17 @@ const findUsersByOwnerCodes = async (ownerCodes = [], companyId = null) => {
   return records.map(sanitizeUserRow)
 }
 
+
+const getDistinctDesignations = async (companyId = null) => {
+  const query = { status: 'approved' };
+  if (companyId !== null && companyId !== undefined) query.companyId = companyId;
+  const User = require('../models/mongoModels').getMongoModel('users');
+  const designations = await User.distinct('designation', query);
+  return designations.filter(Boolean).map(d => String(d).trim()).filter(d => d.length > 0);
+}
+
 module.exports = {
+  getDistinctDesignations,
   findUserByLogin,
   findUserById,
   findRawUserById,

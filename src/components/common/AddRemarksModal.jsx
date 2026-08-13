@@ -1,15 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { FaEdit } from 'react-icons/fa'
 import Modal from './Modal'
 import Button from './Button'
-import { authService } from '../../services/authService'
+import { userApi } from '../../services/userApi'
+import { getVisibleAccountStages } from '../../features/adminAccounts/config/accountStages'
 import './AddRemarksModal.css'
 
 const REMARK_CATEGORIES = [
   { value: 'feedback', label: 'FEEDBACK' },
   { value: 'general', label: 'GENERAL' },
-  { value: 'call_log', label: 'Call Log' },
-  { value: 'email', label: 'Email' },
-  { value: 'whatsapp', label: 'Whatsapp' }
 ]
 
 const FOLLOW_UP_TIMES = [
@@ -23,8 +22,6 @@ const REMINDER_ACTIONS = [
   'Site Visit',
   'Follow Up',
   'Demo',
-  'WhatsApp',
-  'Email',
   'Proposal',
   'Payment Followup',
   'Other',
@@ -32,7 +29,7 @@ const REMINDER_ACTIONS = [
 
 const REMINDER_PRIORITIES = ['High', 'Medium', 'Low']
 
-const FOLLOWUP_TYPES = ['Call', 'Visit', 'Email', 'WhatsApp']
+const FOLLOWUP_TYPES = ['Call', 'Visit']
 
 const ASSIGNMENT_MODES = [
   { key: 'user', label: 'User Wise' },
@@ -86,12 +83,62 @@ const getDisplayValue = (...values) => {
   return String(value || 'Not Available').trim()
 }
 
+const ACCOUNT_STAGE_OPTIONS = getVisibleAccountStages().map((stage) => ({
+  value: stage.key,
+  label: stage.label,
+}))
+
+const getStageOption = (value) => {
+  const normalizedValue = String(value || '').trim().toLowerCase()
+  return ACCOUNT_STAGE_OPTIONS.find((option) => (
+    option.value === value
+    || option.label.trim().toLowerCase() === normalizedValue
+    || option.value.replace(/_/g, ' ') === normalizedValue
+  ))
+}
+
+const getStageDisplayValue = (value) => getStageOption(value)?.label || getDisplayValue(value)
+
 const getAccountOwnerId = (accountData) => (
   accountData?.assignedUserId || accountData?.ownerId || accountData?.assigned_to || accountData?.assignedTo || ''
 )
 
-const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = false }) => {
-  const [category, setCategory] = useState('general')
+const getEditableAccountValue = (accountData, field) => {
+  switch (field) {
+    case 'accountName':
+      return getAccountName(accountData)
+    case 'accountNumber':
+      return getAccountNumber(accountData)
+    case 'industryType':
+      return getDisplayValue(accountData?.industryType, accountData?.industry)
+    case 'accountCategory':
+      return getDisplayValue(accountData?.accountCategory, accountData?.accountType, accountData?.customerType)
+    case 'accountSource':
+      return getDisplayValue(accountData?.accountSource, accountData?.source, accountData?.dealSource)
+    case 'status':
+      return getDisplayValue(accountData?.status, accountData?.accountStatus, accountData?.dealStatus)
+    case 'stage':
+      return (
+        getStageOption(accountData?.stage)?.value
+        || getStageOption(accountData?.stageLabel)?.value
+        || getDisplayValue(accountData?.stage, accountData?.stageLabel)
+      )
+    default:
+      return 'Not Available'
+  }
+}
+
+const getAccountInfoDisplayValue = (accountData, field, drafts = {}) => {
+  const draftValue = drafts[field.key]
+  if (field.key === 'stage') {
+    return draftValue ? getStageDisplayValue(draftValue) : getDisplayValue(accountData?.stageLabel, getStageDisplayValue(accountData?.stage))
+  }
+
+  return draftValue ?? getEditableAccountValue(accountData, field.key)
+}
+
+const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, onSaveAccountField, isLoading = false }) => {
+  const [category, setCategory] = useState('feedback')
   const [content, setContent] = useState('')
   const [hasReminder, setHasReminder] = useState(false)
   const [reminderDate, setReminderDate] = useState('')
@@ -99,16 +146,18 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
   const [reminderAction, setReminderAction] = useState('Call')
   const [reminderPriority, setReminderPriority] = useState('Medium')
   const [followupType, setFollowupType] = useState('Call')
-  const [reminderStatus, setReminderStatus] = useState('Pending')
+  const [reminderStatus] = useState('Pending')
   const [assignedTo, setAssignedTo] = useState('owner')
   const [otherUserId, setOtherUserId] = useState('')
   const [reminderNote, setReminderNote] = useState('')
-  const [closeOldReminders, setCloseOldReminders] = useState(false)
   const [assignmentMode, setAssignmentMode] = useState('user')
   const [selectedAssignmentUserIds, setSelectedAssignmentUserIds] = useState([])
   const [selectedAssignmentTypes, setSelectedAssignmentTypes] = useState([])
   const [selectedAssignmentGroups, setSelectedAssignmentGroups] = useState([])
-  const availableUsers = useMemo(() => authService.getAvailableUsers(), [isOpen])
+  const [availableUsers, setAvailableUsers] = useState([])
+  const [editingInfoField, setEditingInfoField] = useState('')
+  const [infoDrafts, setInfoDrafts] = useState({})
+  const [isSavingInfoField, setIsSavingInfoField] = useState(false)
   const assignmentUsers = useMemo(() => (
     availableUsers
       .filter((user) => user.id)
@@ -133,6 +182,44 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
 
   const [initialSelectDone, setInitialSelectDone] = useState(false)
 
+  const accountInfoFields = [
+    { key: 'accountName', label: 'Account Name:' },
+    { key: 'accountNumber', label: 'Account No.:' },
+    { key: 'industryType', label: 'Industry:' },
+    { key: 'accountCategory', label: 'Account Type:' },
+    { key: 'accountSource', label: 'Source:' },
+    { key: 'status', label: 'Status:' },
+    { key: 'stage', label: 'Stage:', options: ACCOUNT_STAGE_OPTIONS },
+  ]
+
+  useEffect(() => {
+    if (!isOpen) return undefined
+
+    let isMounted = true
+    userApi.listDirectory()
+      .then((users) => {
+        if (!isMounted) return
+        setAvailableUsers(Array.isArray(users) ? users : [])
+      })
+      .catch(() => {
+        if (isMounted) setAvailableUsers([])
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    setInfoDrafts(accountInfoFields.reduce((drafts, field) => ({
+      ...drafts,
+      [field.key]: getEditableAccountValue(accountData, field.key),
+    }), {}))
+    setEditingInfoField('')
+  }, [accountData, isOpen])
+
   useEffect(() => {
     if (isOpen && !initialSelectDone && allUserIds.length > 0) {
       setSelectedAssignmentUserIds(allUserIds)
@@ -141,6 +228,19 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
       setInitialSelectDone(false)
     }
   }, [allUserIds, isOpen, initialSelectDone])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    if (category === 'general') {
+      setHasReminder(true)
+      if (allUserIds.length > 0) {
+        setSelectedAssignmentUserIds(allUserIds)
+      }
+    } else {
+      setHasReminder(false)
+    }
+  }, [allUserIds, category, isOpen])
 
   const getExpandedAssignmentUserIds = () => {
     if (assignmentMode === 'type') {
@@ -197,7 +297,7 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
     const expandedAssignmentUserIds = getExpandedAssignmentUserIds()
     const expandedAssignmentUsers = getExpandedAssignmentUsers(expandedAssignmentUserIds)
 
-    if (expandedAssignmentUserIds.length === 0) {
+    if (category === 'general' && expandedAssignmentUserIds.length === 0) {
       alert('Please select at least one assignment user, type, or group')
       return
     }
@@ -223,7 +323,6 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
         assignedUserIds: expandedAssignmentUserIds,
         assignedUsers: expandedAssignmentUsers,
         note: reminderNote,
-        closeOldReminders
       } : null
     }
 
@@ -232,7 +331,7 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
   }
 
   const resetForm = () => {
-    setCategory('general')
+    setCategory('feedback')
     setContent('')
     setHasReminder(false)
     setReminderDate('')
@@ -240,15 +339,47 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
     setReminderAction('Call')
     setReminderPriority('Medium')
     setFollowupType('Call')
-    setReminderStatus('Pending')
     setAssignedTo('owner')
     setOtherUserId('')
     setReminderNote('')
-    setCloseOldReminders(false)
     setAssignmentMode('user')
     setSelectedAssignmentUserIds(allUserIds)
     setSelectedAssignmentTypes([])
     setSelectedAssignmentGroups([])
+    setEditingInfoField('')
+    setIsSavingInfoField(false)
+  }
+
+  const handleStartInfoEdit = (fieldKey) => {
+    setInfoDrafts((currentValue) => ({
+      ...currentValue,
+      [fieldKey]: currentValue[fieldKey] ?? getEditableAccountValue(accountData, fieldKey),
+    }))
+    setEditingInfoField(fieldKey)
+  }
+
+  const handleSaveInfoField = async (fieldKey) => {
+    if (!fieldKey) return
+
+    const nextValue = String(infoDrafts[fieldKey] || '').trim()
+    const previousValue = getEditableAccountValue(accountData, fieldKey)
+    if (nextValue === String(previousValue || '').trim()) {
+      setEditingInfoField('')
+      return
+    }
+
+    setIsSavingInfoField(true)
+    try {
+      if (onSaveAccountField) {
+        await onSaveAccountField(fieldKey, nextValue)
+      }
+      setInfoDrafts((currentValue) => ({ ...currentValue, [fieldKey]: nextValue }))
+      setEditingInfoField('')
+    } catch (error) {
+      setInfoDrafts((currentValue) => ({ ...currentValue, [fieldKey]: nextValue }))
+    } finally {
+      setIsSavingInfoField(false)
+    }
   }
 
   const getFollowUpDate = (daysOffset) => {
@@ -329,148 +460,188 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
       size="large"
     >
       <form onSubmit={handleSubmit} className="add-remarks-form">
-        {/* Account Information */}
-        <div className="remark-section">
-          <h3 className="section-title">Account Information</h3>
-          <div className="account-info-display">
-            <div className="info-item">
-              <span className="label">Account Name:</span>
-              <span className="value">{getAccountName(accountData)}</span>
-            </div>
-            <div className="info-item">
-              <span className="label">Account No.:</span>
-              <span className="value">{getAccountNumber(accountData)}</span>
-            </div>
-            <div className="info-item">
-              <span className="label">Industry:</span>
-              <span className="value">{getDisplayValue(accountData?.industryType, accountData?.industry)}</span>
-            </div>
-            <div className="info-item">
-              <span className="label">Account Type:</span>
-              <span className="value">{getDisplayValue(accountData?.accountCategory, accountData?.accountType, accountData?.customerType)}</span>
-            </div>
-            <div className="info-item">
-              <span className="label">Source:</span>
-              <span className="value">{getDisplayValue(accountData?.accountSource, accountData?.source, accountData?.dealSource)}</span>
-            </div>
-            <div className="info-item">
-              <span className="label">Status:</span>
-              <span className="value">{getDisplayValue(accountData?.status, accountData?.accountStatus, accountData?.dealStatus)}</span>
-            </div>
-            <div className="info-item">
-              <span className="label">Stage:</span>
-              <span className="value">{getDisplayValue(accountData?.stageLabel, accountData?.stage)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Remark Categories */}
-        <div className="remark-section">
-          <h3 className="section-title">Remark Category</h3>
-          <div className="category-tabs">
-            {REMARK_CATEGORIES.map((cat) => (
-              <button
-                key={cat.value}
-                type="button"
-                className={`category-tab ${category === cat.value ? 'active' : ''}`}
-                onClick={() => setCategory(cat.value)}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Assignment Section */}
-        <div className="remark-section">
-          <h3 className="section-title">Assignment</h3>
-          <div className="assignment-panel">
-            <div className="assignment-mode-list">
-              {ASSIGNMENT_MODES.map((mode) => {
-                const isActive = assignmentMode === mode.key
+        <div className="remark-top-grid">
+          <div className="remark-section remark-section--account-info">
+            <h3 className="section-title">Account Information</h3>
+            <div className="account-info-display">
+              {accountInfoFields.map((field) => {
+                const isEditing = editingInfoField === field.key
+                const displayValue = getAccountInfoDisplayValue(accountData, field, infoDrafts)
 
                 return (
-                  <div key={mode.key} className="assignment-mode-row">
-                    <span>{mode.label}</span>
-                    <div className="assignment-toggle" role="group" aria-label={mode.label}>
-                      <button
-                        type="button"
-                        className={isActive ? 'active' : ''}
-                        onClick={() => toggleAssignmentMode(mode.key)}
-                      >
-                        YES
-                      </button>
-                      <button
-                        type="button"
-                        className={!isActive ? 'active' : ''}
-                        onClick={() => {
-                          if (isActive) toggleAssignmentMode('user')
+                  <div
+                    key={field.key}
+                    className={`info-item ${isEditing ? 'info-item--editing' : ''}`}
+                    onDoubleClick={() => {
+                      if (!isEditing && !isSavingInfoField) {
+                        handleStartInfoEdit(field.key)
+                      }
+                    }}
+                  >
+                    <span className="label">{field.label}</span>
+                    {isEditing && field.options ? (
+                      <select
+                        className="info-item-input info-item-select"
+                        value={infoDrafts[field.key] || ''}
+                        onChange={(event) => setInfoDrafts((currentValue) => ({
+                          ...currentValue,
+                          [field.key]: event.target.value,
+                        }))}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault()
+                            handleSaveInfoField(field.key)
+                          }
+                          if (event.key === 'Escape') {
+                            setEditingInfoField('')
+                          }
                         }}
+                        disabled={isSavingInfoField}
+                        autoFocus
                       >
-                        NO
-                      </button>
-                    </div>
+                        <option value="">Select</option>
+                        {field.options.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : isEditing ? (
+                      <input
+                        className="info-item-input"
+                        value={infoDrafts[field.key] || ''}
+                        onChange={(event) => setInfoDrafts((currentValue) => ({
+                          ...currentValue,
+                          [field.key]: event.target.value,
+                        }))}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault()
+                            handleSaveInfoField(field.key)
+                          }
+                          if (event.key === 'Escape') {
+                            setEditingInfoField('')
+                          }
+                        }}
+                        disabled={isSavingInfoField}
+                        autoFocus
+                      />
+                    ) : (
+                      <>
+                        <span className="value">{displayValue}</span>
+                        <button
+                          type="button"
+                          className="info-item-edit-button"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            handleStartInfoEdit(field.key)
+                          }}
+                          aria-label={`Edit ${field.label.replace(':', '')}`}
+                        >
+                          <FaEdit className="info-item-edit-icon" aria-hidden="true" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 )
               })}
             </div>
+          </div>
 
-            {assignmentMode === 'user' ? (
-              <>
-                <label className="assignment-checkbox-option assignment-checkbox-option-strong">
-                  <input type="checkbox" checked={allUsersSelected} onChange={toggleAllAssignmentUsers} />
-                  <span>Select All</span>
-                </label>
-
-                {renderUserGrid(assignmentUsers)}
-
-                <div className="assignment-group-grid">
-                  {['Back Office', 'Field Staff'].map((groupLabel) => {
-                    const groupUsers = assignmentUsers.filter((user) => user.assignmentGroup === groupLabel)
-
-                    return (
-                      <section key={groupLabel} className="assignment-group-box">
-                        <h4>{groupLabel}</h4>
-                        {groupUsers.length > 0 ? renderUserGrid(groupUsers) : (
-                          <p className="assignment-empty">No users in this group.</p>
-                        )}
-                      </section>
-                    )
-                  })}
-                </div>
-              </>
-            ) : null}
-
-            {assignmentMode === 'type' ? (
-              <section className="assignment-group-box assignment-group-box-wide">
-                <h4>User Types</h4>
-                {renderLabelGrid(assignmentUserTypes, selectedTypeSet, setSelectedAssignmentTypes)}
-              </section>
-            ) : null}
-
-            {assignmentMode === 'group' ? (
-              <section className="assignment-group-box assignment-group-box-wide">
-                <h4>User Groups</h4>
-                {renderLabelGrid(assignmentUserGroups, selectedGroupSet, setSelectedAssignmentGroups)}
-              </section>
-            ) : null}
+          <div className="remark-section remark-section--category">
+            <h3 className="section-title">Remark Category</h3>
+            <div className="category-tabs">
+              {REMARK_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.value}
+                  type="button"
+                  className={`category-tab ${category === cat.value ? 'active' : ''}`}
+                  onClick={() => setCategory(cat.value)}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
+        {category === 'general' ? (
+          <div className="remark-section">
+            <h3 className="section-title">Assignment</h3>
+            <div className="assignment-panel">
+              <div className="assignment-mode-list">
+                {ASSIGNMENT_MODES.map((mode) => {
+                  const isActive = assignmentMode === mode.key
+
+                  return (
+                    <div key={mode.key} className="assignment-mode-row">
+                      <span>{mode.label}</span>
+                      <div className="assignment-toggle" role="group" aria-label={mode.label}>
+                        <button
+                          type="button"
+                          className={isActive ? 'active' : ''}
+                          onClick={() => toggleAssignmentMode(mode.key)}
+                        >
+                          YES
+                        </button>
+                        <button
+                          type="button"
+                          className={!isActive ? 'active' : ''}
+                          onClick={() => {
+                            if (isActive) toggleAssignmentMode('user')
+                          }}
+                        >
+                          NO
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {assignmentMode === 'user' ? (
+                <>
+                  <label className="assignment-checkbox-option assignment-checkbox-option-strong">
+                    <input type="checkbox" checked={allUsersSelected} onChange={toggleAllAssignmentUsers} />
+                    <span>Select All</span>
+                  </label>
+
+                  {renderUserGrid(assignmentUsers)}
+                </>
+              ) : null}
+
+              {assignmentMode === 'type' ? (
+                <section className="assignment-group-box assignment-group-box-wide">
+                  <h4>User Types</h4>
+                  {renderLabelGrid(assignmentUserTypes, selectedTypeSet, setSelectedAssignmentTypes)}
+                </section>
+              ) : null}
+
+              {assignmentMode === 'group' ? (
+                <section className="assignment-group-box assignment-group-box-wide">
+                  <h4>User Groups</h4>
+                  {renderLabelGrid(assignmentUserGroups, selectedGroupSet, setSelectedAssignmentGroups)}
+                </section>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
         {/* Remark Content */}
-        <div className="remark-section">
-          <label className="section-title">Remark Details *</label>
+        <div className={`remark-section${category === 'feedback' ? ' remark-section--compact-feedback' : ''}`}>
+          <label className="section-title">{category === 'feedback' ? 'Feedback *' : 'Remark Details *'}</label>
           <textarea
             className="remark-textarea"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Add remark here..."
-            rows={6}
+            placeholder={category === 'feedback' ? 'Add feedback here...' : 'Add remark here...'}
+            rows={category === 'feedback' ? 4 : 6}
             required
           />
         </div>
 
         {/* Follow-up Section */}
+        {category === 'general' ? (
         <div className="remark-section">
           <div className="followup-header">
             <label className="checkbox-label">
@@ -565,7 +736,7 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
                 </div>
               </div>
 
-              <div className="followup-grid-row">
+              <div className="followup-grid-row followup-grid-row--priority-only">
                 {/* Priority Selection */}
                 <div className="followup-subsection">
                   <h4>Priority</h4>
@@ -583,12 +754,6 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
                       </label>
                     ))}
                   </div>
-                </div>
-
-                {/* Reminder Status */}
-                <div className="followup-subsection">
-                  <h4>Reminder Status</h4>
-                  <div className="reminder-status-pill">{reminderStatus}</div>
                 </div>
               </div>
 
@@ -661,28 +826,17 @@ const AddRemarksModal = ({ isOpen, onClose, accountData, onSave, isLoading = fal
                   rows={3}
                 />
               </div>
-
-              {/* Close Old Reminders */}
-              <div className="followup-subsection">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={closeOldReminders}
-                    onChange={(e) => setCloseOldReminders(e.target.checked)}
-                  />
-                  <span>Close all older Reminders</span>
-                </label>
-              </div>
             </>
           )}
         </div>
+        ) : null}
 
         {/* Form Actions */}
         <div className="form-actions">
-          <Button type="submit" variant="primary" disabled={isLoading}>
+          <Button type="submit" variant="primary" className="btn-red-theme" disabled={isLoading}>
             {isLoading ? 'Saving...' : 'Add'}
           </Button>
-          <Button type="button" variant="outline" onClick={() => {
+          <Button type="button" variant="outline" className="btn-red-theme" onClick={() => {
             resetForm()
             onClose()
           }}>

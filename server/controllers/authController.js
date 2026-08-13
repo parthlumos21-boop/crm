@@ -1,4 +1,5 @@
 const authService = require('../services/authService')
+const passwordResetService = require('../services/passwordResetService')
 const { env } = require('../config/env')
 const { extractToken } = require('../middleware/authMiddleware')
 const { verifyJwt } = require('../utils/jwt')
@@ -246,6 +247,19 @@ const deleteSession = async (req, res, next) => {
   }
 }
 
+const submitPasswordResetRequest = async (req, res, next) => {
+  try {
+    const result = await passwordResetService.requestPasswordReset(req.body || {}, getRequestMeta(req))
+    res.status(201).json({
+      success: true,
+      message: result.message,
+      data: result.request,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const logoutAll = async (req, res, next) => {
   try {
     await authService.logoutAllSessions(req.user?.id)
@@ -279,7 +293,8 @@ module.exports = {
   sessions,
   deleteSession,
   logoutAll,
-  forgotPassword: notImplemented('Forgot password'),
+  forgotPassword: submitPasswordResetRequest,
+  submitPasswordResetRequest,
   resetPassword: notImplemented('Reset password'),
   changePassword: notImplemented('Change password'),
 }

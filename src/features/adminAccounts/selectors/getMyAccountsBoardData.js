@@ -40,26 +40,12 @@ const isOwnedByCurrentUser = (record, user) => {
 
   const raw = record.raw || {}
 
-  // 1) Match by owner code when both sides expose one.
-  const userOwnerCode = String(user.ownerCode || '').trim()
-  if (userOwnerCode && String(record.accountOwnerCode || '').trim() === userOwnerCode) {
-    return true
-  }
-
-  // 2) Match by id against any owner/creator id on the raw record.
+  // Match by id against creator id on the raw record.
   const userId = normalizeCompareValue(user.id)
   if (userId) {
     const matchingIds = [
       raw.userId,
-      raw.ownerId,
       raw.createdByUserId,
-      raw.assignedToUserId,
-      raw.assignedTo,
-      raw.assignedUserId,
-      record.ownerUserId,
-      record.ownerId,
-      record.assignedTo,
-      record.assignedUserId,
     ].map(normalizeCompareValue)
 
     if (matchingIds.includes(userId)) {
@@ -67,21 +53,10 @@ const isOwnedByCurrentUser = (record, user) => {
     }
   }
 
-  // 3) Match by owner / added-by name using CRM-aware comparison so codes,
-  //    code-prefixed names, and aliases all resolve to the same person.
-  const candidateOwners = [
-    record.accountOwner,
-    record.accountOwnerDisplay,
-    record.accountOwnerName,
-    record.ownerName,
-    record.assignedUserName,
+  // Match by added-by name using CRM-aware comparison
+  const candidateCreators = [
     record.addedBy,
     record.addedByDisplay,
-    raw.accountOwner,
-    raw.accountOwnerDisplay,
-    raw.accountOwnerName,
-    raw.ownerName,
-    raw.assignedUserName,
     raw.addedBy,
     raw.addedByName,
   ]
@@ -91,10 +66,9 @@ const isOwnedByCurrentUser = (record, user) => {
     user.ownerDisplayName,
     user.username,
     user.email,
-    user.ownerCode,
   ]
 
-  return candidateOwners.some((candidate) => (
+  return candidateCreators.some((candidate) => (
     userNames.some((userName) => isSameCrmOwner(candidate, userName))
   ))
 }

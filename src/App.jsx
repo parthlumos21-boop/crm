@@ -4,20 +4,18 @@ import Layout from './components/layout/Layout'
 import ProtectedRoute from './components/common/ProtectedRoute'
 import PublicOnlyRoute from './components/common/PublicOnlyRoute'
 import Spinner from './components/common/Spinner'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import { DataProvider } from './context/DataContext'
 import { ThemeProvider } from './context/ThemeContext'
 import Accounts from './pages/accounts/Accounts'
 import AddAccountWizard from './pages/accounts/AddAccountWizard'
 import AdminCalendarPage from './pages/admin/AdminCalendarPage'
 import AccountActionPlaceholderPage from './pages/admin/accounts/AccountActionPlaceholderPage'
-import CustomAdminViewPage from './pages/admin/accounts/CustomAdminViewPage'
-import CustomViewWizardPage from './pages/admin/accounts/CustomViewWizardPage'
+
 import AdminAddDealPage from './pages/admin/deals/AdminAddDealPage'
 import AdminDealDetailPage from './pages/admin/deals/AdminDealDetailPage'
 import AdminManageDealPage from './pages/admin/deals/AdminManageDealPage'
-import AdminDealCustomViewCreatePage from './pages/admin/deals/AdminDealCustomViewCreatePage'
-import AdminDealCustomViewPage from './pages/admin/deals/AdminDealCustomViewPage'
+
 import CustomerActionPage from './pages/admin/customers/CustomerActionPage'
 import AdminSettingsPage from './pages/admin/settings/AdminSettingsPage'
 import AdminWorkStatusPage from './pages/admin/work/AdminWorkStatusPage'
@@ -28,8 +26,7 @@ import SupportRequestDetailsPage from './pages/admin/support-requests/SupportReq
 import SupportRequestManagePage from './pages/admin/support-requests/SupportRequestManagePage'
 import SupportRequestActionPage from './pages/admin/support-requests/SupportRequestActionPage'
 import SupportRequestReportPage from './pages/admin/support-requests/SupportRequestReportPage'
-import SupportRequestCustomViewCreatePage from './pages/admin/support-requests/SupportRequestCustomViewCreatePage'
-import SupportRequestCustomViewPage from './pages/admin/support-requests/SupportRequestCustomViewPage'
+
 import SupportCentralPage from './pages/admin/support-requests/SupportCentralPage'
 import SupportRequestList from './pages/admin/support-requests/SupportRequestList'
 import SupportRequestSearch from './pages/admin/support-requests/SupportRequestSearch'
@@ -55,7 +52,7 @@ import AddQuotationReportPage from './pages/admin/reports/AddQuotationReportPage
 import AddRemarkReportPage from './pages/admin/reports/AddRemarkReportPage'
 import AddClosedSupportRequestReportPage from './pages/admin/reports/AddClosedSupportRequestReportPage'
 import AddSupportRequestReportPage from './pages/admin/reports/AddSupportRequestReportPage'
-import AnalyticsReportsPage from './pages/admin/reports/AnalyticsReportsPage'
+
 import CustomerMapViewPage from './pages/admin/reports/CustomerMapViewPage'
 import ChartsPage from './pages/admin/charts/ChartsPage'
 import ChartsListPage from './pages/admin/charts/ChartsListPage'
@@ -66,11 +63,12 @@ import ViewDealsViewPage from './pages/admin/view-settings/ViewDealsViewPage'
 import SearchViewSettingsPage from './pages/admin/view-settings/SearchViewSettingsPage'
 import MyViewsPage from './pages/admin/view-settings/MyViewsPage'
 import AdminMessagesPage from './pages/admin/messages/AdminMessagesPage'
+import PasswordResetRequestsPage from './pages/admin/users/PasswordResetRequestsPage'
 import AdminAdvancedSearchPage from './pages/admin/search/AdminAdvancedSearchPage'
 import ProjectDetailsPage from './pages/admin/projects/ProjectDetailsPage'
 import AdminLaunchpad from './pages/admin/launchpad/AdminLaunchpad'
 import DataManagerPage from './pages/admin/data-manager/DataManagerPage'
-import DatabaseManagerPage from './pages/admin/database/DatabaseManagerPage'
+
 import DocumentBasePage from './pages/admin/data-manager/DocumentBasePage'
 import ImageGalleryPage from './pages/admin/data-manager/ImageGalleryPage'
 import KnowledgeBasePage from './pages/admin/data-manager/KnowledgeBasePage'
@@ -90,6 +88,24 @@ import UserRemindersPage from './pages/user/UserRemindersPage'
 import UserDataManagerPage from './pages/user/UserDataManagerPage'
 import { ACCOUNT_OWNER_OPTIONS } from './features/accounts/config/accountDropdownOptions'
 import { DASHBOARD_ROUTES } from './utils/constants'
+
+const LAUNCHPAD_ALLOWED_EMAILS = new Set([
+  'keval@swatiswitchgears.com',
+  'keval@swatiswithgears.com',
+  'rushabh@support.com',
+  'parth@support.com',
+])
+
+const LaunchpadAccessRoute = () => {
+  const { user } = useAuth()
+  const email = String(user?.email || '').trim().toLowerCase()
+
+  if (!LAUNCHPAD_ALLOWED_EMAILS.has(email)) {
+    return <Navigate to={DASHBOARD_ROUTES.admin} replace />
+  }
+
+  return <AdminLaunchpad />
+}
 
 const AdminCustomersPage = React.lazy(() => import('./pages/admin/customers/AdminCustomersPage'))
 const AdminPanel = React.lazy(() => import('./pages/admin/AdminPanel'))
@@ -131,7 +147,7 @@ function App() {
                 path="/admin/launchpad"
                 element={(
                   <ProtectedRoute requireAdmin>
-                    <AdminLaunchpad />
+                    <LaunchpadAccessRoute />
                   </ProtectedRoute>
                 )}
               />
@@ -147,6 +163,7 @@ function App() {
                 <Route index element={<Navigate to={DASHBOARD_ROUTES.user} replace />} />
                 <Route path="home" element={<Navigate to={DASHBOARD_ROUTES.user} replace />} />
                 <Route path="dashboard" element={<UserDashboardPage />} />
+                <Route path="monitoring" element={<UserDashboardPage />} />
                 <Route path="accounts/new" element={<AddAccountWizard />} />
                 <Route path="accounts" element={<Accounts />} />
                 <Route path="accounts/search" element={<MyGroupAccountsPage variantKey="searchAccount" />} />
@@ -166,12 +183,15 @@ function App() {
                 <Route path="deals/add" element={<AdminAddDealPage basePath="/deals" customerBasePath="/customers" />} />
                 <Route path="deals/search" element={<Deals variantKey="search" />} />
                 <Route path="deals/view" element={<Deals variantKey="view" />} />
+                <Route path="deals/view/:dealId" element={<AdminDealDetailPage />} />
+                <Route path="deals/manage/:dealId" element={<AdminManageDealPage />} />
                 <Route path="deals/owner-wise" element={<Navigate to="/deals/view" replace />} />
                 <Route path="deals/project-details" element={<Deals variantKey="projectDetails" />} />
                 <Route path="deals/ahmadabad" element={<Deals variantKey="ahmadabad" />} />
                 <Route path="deals/vadodara" element={<Deals variantKey="vadodara" />} />
                 <Route path="deals/converted" element={<ConvertedDeals />} />
                 <Route path="tasks" element={<Tasks />} />
+                <Route path="team-view" element={<TeamViewPage isAdminView={false} />} />
                 <Route path="quotations" element={<Quotations />} />
                 <Route path="quotation-manager" element={<Navigate to="/quotation-manager/view" replace />} />
                 <Route path="quotation-manager/view" element={<AdminQuotationsPage allowUsers generatorPath="/quotations" />} />
@@ -190,10 +210,12 @@ function App() {
                 <Route path="reports/templates/closed-sr/new" element={<AddClosedSupportRequestReportPage />} />
                 <Route path="reports/summary" element={<SummaryReportsPage />} />
                 <Route path="reports/quotation-summary" element={<QuotationSummaryReportPage basePath="/reports" />} />
-                <Route path="reports/analytics" element={<AnalyticsReportsPage />} />
+
                 <Route path="reports/customer-map" element={<CustomerMapViewPage />} />
                 <Route path="tickets" element={<TicketPage basePath="/tickets" />} />
+                <Route path="ticket" element={<TicketPage basePath="/tickets" />} />
                 <Route path="tickets/add" element={<AddTicketPage basePath="/tickets" />} />
+                <Route path="calendar" element={<AdminCalendarPage isAdmin={false} />} />
                 <Route path="support-requests" element={<Navigate to="/support-requests/list" replace />} />
                 <Route path="support-requests/add" element={<AddSupportRequest />} />
                 <Route path="support-requests/new" element={<AddSupportRequest />} />
@@ -257,8 +279,7 @@ function App() {
                 <Route path="accounts/weekly-reports-all" element={<MyGroupAccountsPage variantKey="weeklyReportsAll" />} />
                 <Route path="accounts/sw-baroda-mum" element={<MyGroupAccountsPage variantKey="swBarodaMum" />} />
                 <Route path="accounts/user-wise-leads" element={<MyGroupAccountsPage variantKey="userWiseLeads" />} />
-                <Route path="accounts/custom-views/new" element={<CustomViewWizardPage />} />
-                <Route path="accounts/custom-views/:viewId" element={<CustomAdminViewPage />} />
+
                 <Route path="accounts/actions/:actionKey" element={<AccountActionPlaceholderPage />} />
                 <Route path="customers/add" element={<AdminCustomersPage variantKey="add" />} />
                 <Route path="customers/search" element={<AdminCustomersPage variantKey="search" />} />
@@ -278,10 +299,10 @@ function App() {
                 <Route path="deals/project-details" element={<Deals isAdmin variantKey="projectDetails" />} />
                 <Route path="deals/ahmadabad" element={<Deals isAdmin variantKey="ahmadabad" />} />
                 <Route path="deals/vadodara" element={<Deals isAdmin variantKey="vadodara" />} />
-                <Route path="deals/custom-views/new" element={<AdminDealCustomViewCreatePage />} />
-                <Route path="deals/custom-views/:viewId" element={<AdminDealCustomViewPage />} />
+
                 <Route path="deals/actions/:actionKey" element={<CRMActionPage />} />
                 <Route path="tickets" element={<TicketPage basePath="/admin/tickets" />} />
+                <Route path="ticket" element={<TicketPage basePath="/admin/tickets" />} />
                 <Route path="tickets/add" element={<AddTicketPage basePath="/admin/tickets" />} />
                 <Route path="support-requests/add" element={<AddSupportRequest />} />
                 <Route path="support-requests/list" element={<SupportRequestList />} />
@@ -294,8 +315,7 @@ function App() {
                 <Route path="support-requests/view" element={<SupportRequestView />} />
                 <Route path="support-requests/search" element={<SupportRequestSearch />} />
                 <Route path="support-requests/closed" element={<ClosedSupportRequest />} />
-                <Route path="support-requests/custom-views/new" element={<SupportRequestCustomViewCreatePage />} />
-                <Route path="support-requests/custom-views/:viewId" element={<SupportRequestCustomViewPage />} />
+
                 <Route path="search" element={<AdminAdvancedSearchPage />} />
                 <Route path="projects/:projectId" element={<ProjectDetailsPage />} />
                 <Route path="reminders" element={<Navigate to="/admin/reminders/active" replace />} />
@@ -321,7 +341,7 @@ function App() {
                 <Route path="quotations" element={<Quotations />} />
                 <Route path="quotation-manager" element={<Navigate to="/admin/quotation-manager/view" replace />} />
                 <Route path="quotation-manager/view" element={<AdminQuotationsPage />} />
-                <Route path="reports/analytics"    element={<AnalyticsReportsPage />} />
+
                 <Route path="reports/customer-map" element={<CustomerMapViewPage />} />
                 <Route path="charts" element={<ChartsListPage />} />
                 <Route path="charts/new" element={<ChartsPage />} />
@@ -338,6 +358,7 @@ function App() {
                 <Route path="user-management/manage-users" element={<AdminUserManagementPage />} />
                 <Route path="user-management/manage-user-groups" element={<AdminUserManagementPage />} />
                 <Route path="user-management/manage-user-types" element={<AdminUserManagementPage />} />
+                <Route path="password-reset-requests" element={<PasswordResetRequestsPage />} />
                 <Route path="messages" element={<AdminMessagesPage />} />
                 <Route path="integrations/outlook" element={<Navigate to="/admin/settings" replace />} />
                 <Route path="integrations" element={<IntegrationQrPage />} />
@@ -345,7 +366,7 @@ function App() {
                 <Route path="outlook" element={<OutlookMailPage />} />
                 <Route path="settings" element={<AdminSettingsPage />} />
                 <Route path="data-manager" element={<DataManagerPage />} />
-                <Route path="database-manager" element={<DatabaseManagerPage />} />
+
                 <Route path="data-manager/image-gallery" element={<ImageGalleryPage />} />
                 <Route path="data-manager/document-base" element={<DocumentBasePage />} />
                 <Route path="data-manager/knowledge-base" element={<KnowledgeBasePage />} />

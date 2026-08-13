@@ -140,6 +140,32 @@
   transform: translateY(-1px);
 }
 
+.aqp-btn--red,
+.aqp-btn--red:hover,
+.aqp-btn--generate,
+.aqp-btn--generate:hover {
+  border: 1px solid var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
+  background-color: var(--admin-red, #dc2626) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+.aqp-tab-actions .aqp-btn--gray,
+.aqp-tab-actions .aqp-btn--blue,
+.aqp-tab-actions .aqp-btn--red,
+.aqp-modal .aqp-btn--blue,
+.aqp-modal .aqp-btn--gray {
+  background: var(--admin-red, #dc2626) !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  color: #ffffff !important;
+}
+
+.aqp-tab-actions .aqp-btn svg,
+.aqp-modal .aqp-btn svg {
+  color: #ffffff !important;
+}
+
 .aqp-btn-icon { font-size: 0.75rem; }
 
 .aqp-report-controls {
@@ -819,11 +845,13 @@
   border: none;
   cursor: pointer;
   font-family: inherit;
+  background: var(--admin-red, #dc2626) !important;
+  color: #ffffff !important;
 }
 
 .aqp-num-badge--button:hover,
 .aqp-num-badge--button:focus-visible {
-  box-shadow: 0 0 0 2px rgba(77, 166, 200, 0.28);
+  box-shadow: 0 0 0 2px var(--admin-red-soft, rgba(220, 38, 38, 0.1));
   outline: none;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -2302,6 +2330,21 @@
   text-align: center;
 }
 
+.aqp-view-quotation-document .aqp-doc__brand-head,
+.aqp-view-quotation-document .aqp-doc__title {
+  border-color: var(--admin-red-border, #b91c1c);
+  background: var(--admin-red, #dc2626);
+  color: #ffffff;
+}
+
+.aqp-view-quotation-document .aqp-doc__brand-head h2,
+.aqp-view-quotation-document .aqp-doc__brand-head p,
+.aqp-view-quotation-document .aqp-doc__brand-head .aqp-doc__text-logo,
+.aqp-view-quotation-document .aqp-doc__title {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
 .aqp-doc__brand-head h2 {
   margin: 0;
   color: var(--text-primary);
@@ -2457,6 +2500,7 @@
 
 .aqp-doc__table {
   width: calc(100% - 2rem);
+  max-width: calc(100% - 2rem);
   margin: 0 1rem;
   border-collapse: collapse;
   table-layout: fixed;
@@ -2466,6 +2510,7 @@
 
 .aqp-doc__table th,
 .aqp-doc__table td {
+  box-sizing: border-box;
   padding: 0.55rem 0.5rem;
   border: 1px solid var(--border-subtle);
   font-size: 0.64rem;
@@ -2484,9 +2529,99 @@
   text-transform: uppercase;
 }
 
+.aqp-doc__table th:nth-child(1),
+.aqp-doc__table td:nth-child(1) {
+  width: 38px !important;
+}
+
+.aqp-doc__table th:nth-child(2),
+.aqp-doc__table td:nth-child(2) {
+  width: auto !important;
+}
+
+.aqp-doc__table th:nth-child(3),
+.aqp-doc__table td:nth-child(3) {
+  width: 52px !important;
+}
+
+.aqp-doc__table th:nth-child(4),
+.aqp-doc__table td:nth-child(4) {
+  width: 58px !important;
+}
+
+.aqp-doc__table th:nth-child(5),
+.aqp-doc__table td:nth-child(5) {
+  width: 84px !important;
+}
+
+.aqp-doc__table th:nth-child(6),
+.aqp-doc__table td:nth-child(6) {
+  width: 96px !important;
+}
+
 .aqp-doc__description {
   line-height: 1.45;
   overflow-wrap: anywhere;
+}
+
+.aqp-doc-editable {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.aqp-doc__field-row .aqp-doc-editable,
+.aqp-doc__kv-row .aqp-doc-editable,
+.aqp-doc__terms-card .aqp-doc-editable {
+  justify-content: flex-start;
+}
+
+.aqp-doc-editable-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.aqp-doc-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--admin-red, #dc2626);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.aqp-doc-editable:hover .aqp-doc-edit-btn,
+.aqp-doc-editable:focus-within .aqp-doc-edit-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.aqp-doc-edit-input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--admin-red-border, #b91c1c);
+  border-radius: 3px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: inherit;
+  padding: 0.2rem 0.25rem;
+}
+
+.aqp-doc-edit-input--textarea {
+  min-height: 2.4rem;
+  resize: vertical;
 }
 
 .aqp-doc__num {
@@ -3069,7 +3204,12 @@
 
   .aqp-doc__table {
     width: 100%;
+    max-width: 100%;
     margin: 0;
+  }
+
+  .aqp-doc-edit-btn {
+    display: none !important;
   }
 
   .aqp-doc__title,

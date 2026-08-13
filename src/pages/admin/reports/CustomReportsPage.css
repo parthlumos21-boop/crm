@@ -53,7 +53,7 @@
 .cr-list-caret-btn {
   min-height: 1.8rem;
   border: 1px solid var(--border-subtle);
-  background: var(--color-primary);
+  background: var(--admin-red, #dc2626);
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 800;
@@ -130,9 +130,15 @@
 }
 
 .cr-list-tabs button.active {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
   color: #ffffff;
+}
+
+.layout--admin .cr-list-tabs button:not(.active) {
+  border-color: var(--border-subtle) !important;
+  background: var(--surface-card) !important;
+  color: var(--text-primary) !important;
 }
 
 .cr-list-layout {
@@ -184,9 +190,14 @@
 }
 
 .cr-list-sidebar-items button.active {
-  background: linear-gradient(180deg, #59add5 0%, #2e91c3 100%);
+  background: var(--admin-red, #dc2626) !important;
   color: #ffffff;
   font-weight: 800;
+}
+
+.layout--admin .cr-list-sidebar-items button:not(.active) {
+  background: var(--surface-card) !important;
+  color: var(--text-primary) !important;
 }
 
 .cr-list-main {

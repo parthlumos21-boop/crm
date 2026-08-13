@@ -1,3 +1,4 @@
+import apiClient from './apiClient'
 import {
   CRM_FILTER_USERS,
   getCanonicalCrmUserName,
@@ -118,6 +119,14 @@ class AuthService {
       : []
 
     localStorage.setItem(this.usersStorageKey, JSON.stringify(safeUsers))
+  }
+  async getDesignations() {
+    try {
+      const { data } = await apiClient.get('/users/designations')
+      return data || []
+    } catch {
+      return []
+    }
   }
 }
 

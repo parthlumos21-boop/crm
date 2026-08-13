@@ -35,6 +35,7 @@ import Badge from '../../../components/common/Badge'
 import Button from '../../../components/common/Button'
 import Card from '../../../components/common/Card'
 import Input from '../../../components/common/Input'
+import Select from '../../../components/common/Select'
 import Modal from '../../../components/common/Modal'
 import Table from '../../../components/common/Table'
 import { useAuth } from '../../../context/AuthContext'
@@ -43,6 +44,8 @@ import { SOCKET_EVENTS } from '../../../constants/socketEvents'
 import { CRM_FILTER_USERS, normalizeCrmUserName, getCanonicalCrmUserName } from '../../../features/users/crmUserDirectory'
 import { userApi } from '../../../services/userApi'
 import ManageUserTypesModule from './ManageUserTypesModule'
+import { State, City } from 'country-state-city'
+import { userGroupApi } from '../../../services/userGroupApi'
 import './AdminUserManagementPage.css'
 
 const USER_SETTINGS_BASE_PATH = '/admin/user-management'
@@ -54,10 +57,21 @@ const initialFormState = {
   name: '',
   email: '',
   password: '',
+  company: '',
+  role: 'user',
+  designation: '',
+  state: '',
+  city: '',
 }
 
 const initialGroupFormState = {
   name: '',
+  company: '',
+  role: '',
+  designation: '',
+  state: '',
+  city: '',
+  selectedUsers: [],
   description: '',
 }
 
@@ -437,6 +451,8 @@ const ManageUserGroupsView = ({
   onSubmit,
   onDelete,
 }) => {
+  const [isUsersDropdownOpen, setUsersDropdownOpen] = useState(false)
+  
   const directoryGroupCount = groups.filter((entry) => entry.source === 'Directory').length
   const customGroupCount = groups.filter((entry) => entry.isCustom).length
 
@@ -510,6 +526,156 @@ const ManageUserGroupsView = ({
               onChange={(event) => onFormChange('name', event.target.value)}
               fullWidth
             />
+            
+            <Select
+              label="Company"
+              placeholder="Select"
+              options={[
+                { value: 'swati', label: 'Swati' },
+                { value: 'lumos', label: 'Lumos' }
+              ]}
+              value={form.company || ''}
+              onChange={(event) => onFormChange('company', event.target.value)}
+              fullWidth
+              className="admin-user-management-form-field"
+            />
+
+            <Select
+              label="Role"
+              placeholder="Select"
+              options={[
+                { value: 'user', label: 'User' },
+                { value: 'admin', label: 'Admin' }
+              ]}
+              value={form.role || ''}
+              onChange={(event) => onFormChange('role', event.target.value)}
+              fullWidth
+              className="admin-user-management-form-field"
+            />
+
+            <Select
+              label="Designation"
+              placeholder="Select"
+              options={[
+                { value: 'Manager', label: 'Manager' },
+                { value: 'Customer Support Field Staff', label: 'Customer Managed Support Staff' },
+                { value: 'Sales Team', label: 'Sales Team' },
+              ]}
+              value={form.designation || ''}
+              onChange={(event) => onFormChange('designation', event.target.value)}
+              fullWidth
+              className="admin-user-management-form-field"
+            />
+
+            <Select
+              label="State"
+              placeholder="Select"
+              options={[
+                ...State.getStatesOfCountry('IN').map(state => ({
+                  value: state.isoCode,
+                  label: state.name
+                }))
+              ]}
+              value={form.state || ''}
+              onChange={(event) => {
+                onFormChange('state', event.target.value)
+                onFormChange('city', '')
+              }}
+              fullWidth
+              className="admin-user-management-form-field"
+            />
+
+            <Select
+              label="City"
+              placeholder="Select"
+              options={[
+                ...(form.state ? City.getCitiesOfState('IN', form.state).map(city => ({
+                  value: city.name,
+                  label: city.name
+                })) : [])
+              ]}
+              value={form.city || ''}
+              onChange={(event) => onFormChange('city', event.target.value)}
+              fullWidth
+              disabled={!form.state}
+              className="admin-user-management-form-field"
+            />
+
+            <div className="admin-user-settings-textarea-field" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px', position: 'relative' }}>
+              <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#374151' }}>Users</span>
+              <div 
+                onClick={() => setUsersDropdownOpen(!isUsersDropdownOpen)}
+                style={{
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  padding: '8px',
+                  cursor: 'pointer',
+                  backgroundColor: '#fff',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}
+              >
+                <span>{form.selectedUsers?.length ? `${form.selectedUsers.length} user(s) selected` : 'Select Users'}</span>
+                <span style={{ fontSize: '10px' }}>▼</span>
+              </div>
+              
+              {isUsersDropdownOpen && (
+                <div style={{ 
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  zIndex: 10,
+                  marginTop: '4px',
+                  maxHeight: '200px', 
+                  overflowY: 'auto', 
+                  border: '1px solid #d1d5db', 
+                  borderRadius: '6px', 
+                  padding: '8px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '6px',
+                  backgroundColor: '#fff',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}>
+                  {(() => {
+                    const filtered = directoryUsers.filter(user => {
+                      if (form.company && String(user.company || '').toLowerCase() !== form.company.toLowerCase()) return false;
+                      if (form.role && String(user.role || '').toLowerCase() !== form.role.toLowerCase()) return false;
+                      if (form.designation && String(user.designation || '').toLowerCase() !== form.designation.toLowerCase()) return false;
+                      if (form.state && String(user.state || '').toLowerCase() !== form.state.toLowerCase()) return false;
+                      if (form.city && String(user.city || '').toLowerCase() !== form.city.toLowerCase()) return false;
+                      return true;
+                    });
+
+                    if (filtered.length === 0) {
+                      return <span style={{ color: '#6b7280', fontSize: '0.85rem' }}>No users match the selected criteria.</span>
+                    }
+
+                    return filtered.map(user => {
+                      const userId = user.id || user._id || user.legacyId;
+                      const isChecked = (form.selectedUsers || []).includes(userId);
+                      return (
+                        <label key={userId} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              const newSelected = e.target.checked
+                                ? [...(form.selectedUsers || []), userId]
+                                : (form.selectedUsers || []).filter(id => id !== userId);
+                              onFormChange('selectedUsers', newSelected);
+                            }}
+                          />
+                          {user.name}
+                        </label>
+                      );
+                    });
+                  })()}
+                </div>
+              )}
+            </div>
             <label className="admin-user-settings-textarea-field">
               <span>Description</span>
               <textarea
@@ -1370,7 +1536,7 @@ const AdminUserManagementPage = () => {
   const [typeForm, setTypeForm] = useState(initialTypeFormState)
   const [groupError, setGroupError] = useState('')
   const [typeError, setTypeError] = useState('')
-  const [customGroups, setCustomGroups] = useState(() => readStoredItems(USER_GROUPS_STORAGE_KEY))
+  const [customGroups, setCustomGroups] = useState([])
   const [customTypes, setCustomTypes] = useState(() => readStoredItems(USER_TYPES_STORAGE_KEY))
   const [userMenuVisibility, setUserMenuVisibility] = useState(() => readStoredMenuVisibility(USER_MENU_VISIBILITY_STORAGE_KEY))
   const [roundRobinFilter, setRoundRobinFilter] = useState('all')
@@ -1410,13 +1576,19 @@ const AdminUserManagementPage = () => {
     }
   }, [])
 
-  useEffect(() => {
-    loadUsers()
-  }, [loadUsers])
+  const loadGroups = useCallback(async () => {
+    try {
+      const data = await userGroupApi.listGroups()
+      setCustomGroups(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Failed to load user groups:', error)
+    }
+  }, [])
 
   useEffect(() => {
-    window.localStorage.setItem(USER_GROUPS_STORAGE_KEY, JSON.stringify(customGroups))
-  }, [customGroups])
+    loadUsers()
+    loadGroups()
+  }, [loadUsers, loadGroups])
 
   useEffect(() => {
     window.localStorage.setItem(USER_TYPES_STORAGE_KEY, JSON.stringify(customTypes))
@@ -1528,7 +1700,7 @@ const AdminUserManagementPage = () => {
       if (name) set.add(name)
     })
     customGroups.forEach((entry) => {
-      const name = String(entry.name || '').trim()
+      const name = String(entry.groupName || entry.name || '').trim()
       if (name) set.add(name)
     })
     return Array.from(set).sort((left, right) => left.localeCompare(right))
@@ -1658,13 +1830,14 @@ const AdminUserManagementPage = () => {
     })
 
     customGroups.forEach((entry) => {
-      const key = normalizeCrmUserName(entry.name)
+      const entryName = entry.groupName || entry.name
+      const key = normalizeCrmUserName(entryName)
       const previousEntry = mergedRows.get(key)
       mergedRows.set(key, {
         id: entry.id,
-        name: entry.name,
+        name: entryName,
         description: entry.description || previousEntry?.description || 'Custom group entry.',
-        members: previousEntry?.members || 0,
+        members: (entry.members || 0) + (previousEntry?.members || 0),
         source: previousEntry ? 'Directory' : 'Custom',
         isCustom: !previousEntry,
       })
@@ -1729,6 +1902,11 @@ const AdminUserManagementPage = () => {
       name: user.name || '',
       email: user.email || '',
       password: '',
+      company: user.company || '',
+      role: user.role || 'user',
+      designation: user.designation || '',
+      state: user.state || '',
+      city: user.city || '',
     })
     setFormError('')
     setPageSuccess('')
@@ -1950,7 +2128,7 @@ const AdminUserManagementPage = () => {
     }
   }
 
-  const handleAddGroup = () => {
+  const handleAddGroup = async () => {
     const normalizedName = normalizeCrmUserName(groupForm.name)
     setGroupError('')
 
@@ -1964,16 +2142,29 @@ const AdminUserManagementPage = () => {
       return
     }
 
-    setCustomGroups((currentValue) => [
-      ...currentValue,
-      {
-        id: `group-${Date.now()}`,
-        name: groupForm.name.trim(),
+    try {
+      const payload = {
+        groupName: groupForm.name.trim(),
+        companyId: groupForm.company === 'lumos' ? 2 : 1, // Assuming swati is 1, lumos is 2
+        companyName: groupForm.company === 'lumos' ? 'Lumos' : 'Swati',
+        role: groupForm.role,
+        designation: groupForm.designation,
+        state: groupForm.state,
+        city: groupForm.city,
         description: groupForm.description.trim(),
-      },
-    ])
-    setGroupForm(initialGroupFormState)
-    addNotification('success', 'User group added', 'The custom user group was added successfully.')
+        selectedUsers: groupForm.selectedUsers || [],
+      }
+      
+      await userGroupApi.createGroup(payload)
+      
+      setGroupForm(initialGroupFormState)
+      addNotification('success', 'User group added', 'The custom user group was added successfully.')
+      
+      // Reload groups to fetch the newly created one with correct ID
+      await loadGroups()
+    } catch (error) {
+      setGroupError(error.response?.data?.message || 'Unable to save this user group.')
+    }
   }
 
   const handleBack = () => {
@@ -2073,9 +2264,14 @@ const AdminUserManagementPage = () => {
             setGroupForm((currentValue) => ({ ...currentValue, [field]: value }))
           }}
           onSubmit={handleAddGroup}
-          onDelete={(groupId) => {
-            setCustomGroups((currentValue) => currentValue.filter((entry) => entry.id !== groupId))
-            addNotification('success', 'User group removed', 'The custom user group was removed successfully.')
+          onDelete={async (groupId) => {
+            try {
+              await userGroupApi.deleteGroup(groupId)
+              addNotification('success', 'User group removed', 'The custom user group was removed successfully.')
+              await loadGroups()
+            } catch (error) {
+              addNotification('error', 'Delete failed', 'Unable to delete user group.')
+            }
           }}
         />
       )
@@ -2141,14 +2337,88 @@ const AdminUserManagementPage = () => {
               : 'Create a standard user account. The user appears in Manage Users immediately.'}
           </div>
 
-          <Input
-            label="Full Name *"
-            value={formData.name}
-            onChange={(event) => handleUserFormChange('name', event.target.value)}
-            fullWidth
-            required
-            className="admin-user-management-form-field"
-          />
+          <div className="admin-user-management-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <Input
+              label="Full Name *"
+              value={formData.name}
+              onChange={(event) => handleUserFormChange('name', event.target.value)}
+              fullWidth
+              required
+              className="admin-user-management-form-field"
+            />
+            <Select
+              label="Company *"
+              options={[
+                { value: 'swati', label: 'Swati' },
+                { value: 'lumos', label: 'Lumos' }
+              ]}
+              value={formData.company}
+              onChange={(event) => handleUserFormChange('company', event.target.value)}
+              fullWidth
+              required
+              className="admin-user-management-form-field"
+            />
+            <Select
+              label="Role *"
+              options={[
+                { value: 'user', label: 'User' },
+                { value: 'admin', label: 'Admin' }
+              ]}
+              value={formData.role}
+              onChange={(event) => handleUserFormChange('role', event.target.value)}
+              fullWidth
+              required
+              className="admin-user-management-form-field"
+            />
+          </div>
+
+          <div className="admin-user-management-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <Select
+              label="Designation"
+              options={[
+                { value: '', label: 'Select Designation' },
+                { value: 'Manager', label: 'Manager' },
+                { value: 'Customer Support Field Staff', label: 'Customer Support Field Staff' },
+                { value: 'Sales Team', label: 'Sales Team' },
+              ]}
+              value={formData.designation || ''}
+              onChange={(event) => handleUserFormChange('designation', event.target.value)}
+              fullWidth
+              className="admin-user-management-form-field"
+            />
+            <Select
+              label="State"
+              options={[
+                { value: '', label: 'Select State' },
+                ...State.getStatesOfCountry('IN').map(state => ({
+                  value: state.isoCode,
+                  label: state.name
+                }))
+              ]}
+              value={formData.state || ''}
+              onChange={(event) => {
+                handleUserFormChange('state', event.target.value)
+                handleUserFormChange('city', '')
+              }}
+              fullWidth
+              className="admin-user-management-form-field"
+            />
+            <Select
+              label="City"
+              options={[
+                { value: '', label: 'Select City' },
+                ...(formData.state ? City.getCitiesOfState('IN', formData.state).map(city => ({
+                  value: city.name,
+                  label: city.name
+                })) : [])
+              ]}
+              value={formData.city || ''}
+              onChange={(event) => handleUserFormChange('city', event.target.value)}
+              fullWidth
+              disabled={!formData.state}
+              className="admin-user-management-form-field"
+            />
+          </div>
 
           <Input
             label="Email *"
@@ -2170,14 +2440,6 @@ const AdminUserManagementPage = () => {
             required={!editingUser}
             className="admin-user-management-form-field admin-user-management-form-field-wide"
           />
-
-          <div className="admin-user-management-fixed-role">
-            <span className="admin-user-management-fixed-role-label">Role</span>
-            <div className="admin-user-management-fixed-role-value">
-              <Badge variant="default">{roleOptions[1].label}</Badge>
-              <span>Admin accounts are not created from the frontend.</span>
-            </div>
-          </div>
 
           {formError ? (
             <div className="admin-user-management-error admin-user-management-error-inline">

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { FaChevronDown } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext'
 import './SupportRequestAdmin.css'
@@ -21,6 +22,8 @@ const SupportRequestRowActionMenu = ({
   compact = false,
   basePath = '/admin/support-requests',
   triggerLabel = 'Action',
+  className = '',
+  triggerClassName = '',
 }) => {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -52,10 +55,13 @@ const SupportRequestRowActionMenu = ({
   }
 
   return (
-    <div ref={menuRef} className={`support-request-row-menu ${compact ? 'support-request-row-menu-compact' : ''}`}>
+    <div
+      ref={menuRef}
+      className={`support-request-row-menu ${compact ? 'support-request-row-menu-compact' : ''} ${className}`.trim()}
+    >
       <button
         type="button"
-        className="support-request-row-menu-trigger"
+        className={`support-request-row-menu-trigger ${triggerClassName}`.trim()}
         onClick={() => {
           if (canUseActions) {
             setOpen((current) => !current)
@@ -66,7 +72,7 @@ const SupportRequestRowActionMenu = ({
         aria-expanded={open}
       >
         <span>{triggerLabel}</span>
-        <span className="support-request-row-menu-caret">v</span>
+        <FaChevronDown className="support-request-row-menu-caret" aria-hidden="true" />
       </button>
 
       {open ? (

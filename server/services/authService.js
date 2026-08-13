@@ -284,7 +284,7 @@ const register = async ({ name, email, password }) => {
   }
 }
 
-const createAdminManagedUser = async ({ name, email, password, companyId = 1, role = 'user' }) => {
+const createAdminManagedUser = async ({ name, email, password, companyId = 1, role = 'user', designation, state, city }) => {
   const { nameValue, emailValue, passwordValue } = validateUserPayload({ name, email, password })
 
   const existing = await userRepository.findUserByEmail(emailValue)
@@ -307,6 +307,9 @@ const createAdminManagedUser = async ({ name, email, password, companyId = 1, ro
     passwordHash,
     assignedPassword: passwordValue,
     role,
+    designation,
+    state,
+    city,
     companyId,
     status: 'pending',
     isApproved: false,

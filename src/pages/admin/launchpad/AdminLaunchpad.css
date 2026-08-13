@@ -721,15 +721,15 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
   gap: 1.05rem;
   min-height: 186px;
   padding: 1.2rem 1.12rem 1rem;
   border: none;
   cursor: pointer;
   color: var(--text-primary);
-  text-align: left;
+  text-align: center;
   overflow: hidden;
   background: transparent;
   transition: transform var(--dur-base) var(--ease-out);
@@ -815,11 +815,12 @@
 .lp-card-title {
   position: relative;
   z-index: 1;
-  max-width: 14ch;
+  max-width: none;
   font-size: 1.1rem;
   font-weight: 800;
   line-height: 1.18;
   letter-spacing: -0.02em;
+  text-align: center;
 }
 
 .lp-card:hover .lp-card-icon {
@@ -1210,4 +1211,47 @@
 
 [data-theme="dark"] .lp-brand-logo {
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+/* Lightweight launchpad overrides: keep the same layout, but remove the
+   expensive perpetual motion/blur effects so the page paints smoothly. */
+.lp-page::before,
+.lp-page::after,
+.lp-titlebar::before,
+.lp-titlebar-icon {
+  animation: none !important;
+}
+
+.lp-page::before,
+.lp-page::after {
+  filter: blur(28px);
+  opacity: 0.28;
+}
+
+.lp-card,
+.lp-module-card,
+.lp-titlebar,
+.lp-titlebar-stat,
+.lp-note,
+.lp-modules-shell,
+.lp-card-footer {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition-duration: 120ms !important;
+}
+
+.lp-card,
+.lp-module-card,
+.lp-modules-shell {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08) !important;
+}
+
+.lp-card:hover,
+[data-theme="dark"] .lp-card:hover,
+.lp-card-footer:hover,
+.lp-card:hover .lp-card-icon,
+[data-theme="dark"] .lp-card:hover .lp-card-icon,
+.lp-expiry-link:hover {
+  transform: none !important;
+  filter: none !important;
 }

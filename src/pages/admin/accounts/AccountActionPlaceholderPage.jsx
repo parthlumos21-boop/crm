@@ -230,6 +230,20 @@ const AccountActionPlaceholderPage = () => {
     }
   }
 
+  const handleSaveRemarkAccountField = async (fieldKey, value) => {
+    if (!selectedAccount) return { success: false }
+
+    const result = await handleSaveManagedAccount(selectedAccount.raw?.id || selectedAccount.id, {
+      [fieldKey]: value,
+    })
+
+    if (!result.success) {
+      throw new Error(result.message || 'Unable to update account field.')
+    }
+
+    return result
+  }
+
   const handleSaveAccountAction = async (event) => {
     event.preventDefault()
     if (!selectedAccount) return
@@ -258,10 +272,11 @@ const AccountActionPlaceholderPage = () => {
       }
 
       const selectedStatus = getAccountChangeStatusOption(stage)
+      const selectedStatusLabel = selectedStatus?.label || stage
       updates = {
         stage: selectedStatus?.stageKey || stage,
-        status: selectedStatus?.label || stage,
-        accountState: accountState || selectedAccount.accountState || '',
+        status: selectedStatusLabel,
+        accountState: accountState || selectedStatusLabel,
         latestRemark: statusNote.trim() || selectedAccount.latestRemark,
       }
 
@@ -606,6 +621,7 @@ const AccountActionPlaceholderPage = () => {
                 onClose={closeRemarkModal}
                 accountData={selectedAccount}
                 onSave={handleSaveRemark}
+                onSaveAccountField={handleSaveRemarkAccountField}
                 isLoading={isSavingRemark}
               />
             </>
@@ -664,14 +680,14 @@ const AccountActionPlaceholderPage = () => {
             {formError ? <div className="admin-accounts-action-error">{formError}</div> : null}
             <div className="admin-accounts-placeholder-actions">
               {accountDetailUrl ? (
-                <Button type="button" variant="outline" onClick={() => navigate(accountDetailUrl)}>
+                  <Button type="button" variant="outline" className="btn-red-theme" onClick={() => navigate(accountDetailUrl)}>
                   {isReminderAction ? 'Close' : 'Back To Account'}
                 </Button>
               ) : null}
               {!isReminderAction ? (
-                <Button type="button" variant="outline" onClick={() => navigate(boardUrl)}>Return To Board</Button>
+                <Button type="button" variant="outline" className="btn-red-theme" onClick={() => navigate(boardUrl)}>Return To Board</Button>
               ) : null}
-              <Button type="submit" disabled={isSavingAction}>{actionKey === 'send-mail' ? 'Open Mail' : 'Save'}</Button>
+              <Button type="submit" className="btn-red-theme" disabled={isSavingAction}>{actionKey === 'send-mail' ? 'Open Mail' : 'Save'}</Button>
             </div>
           </form>
         ) : (

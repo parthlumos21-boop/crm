@@ -261,6 +261,8 @@ if (!zod) {
     customerName: optionalString.optional(),
     customerEmail: z.preprocess((value) => normalizeTrimmedValue(value), z.union([z.string().trim().email(), z.null()])).optional(),
     assignedTo: integerInput.optional(),
+    requestType: optionalString.optional(),
+    userEmail: z.preprocess((value) => normalizeTrimmedValue(value), z.union([z.string().trim().email(), z.null()])).optional(),
   }).passthrough()
 
   const supportBulk = z.object({

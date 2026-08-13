@@ -94,7 +94,7 @@ const AccountsLegacyBoard = ({
 
     if (action.behavior === 'quotationGenerator' || action.key === 'generate-quotation') {
       navigate('/admin/quotations', {
-        state: { openGenerator: true, preselectedAccountId: row.id }
+        state: { openGenerator: true, preselectedAccountId: row.id, preselectedCustomer: row }
       })
       return
     }

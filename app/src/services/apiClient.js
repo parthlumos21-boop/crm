@@ -92,9 +92,11 @@ apiClient.interceptors.response.use(
       const requestHadToken = Boolean(error.config?.__authToken)
       const isInitialSessionProbe = requestUrl.includes('/auth/me') && !requestHadToken
       const isLoginRequest = requestUrl.includes('/auth/login')
+      const isPasswordResetRequest = requestUrl.includes('/auth/password-reset-requests')
+        || requestUrl.includes('/auth/forgot-password')
       const isRefreshRequest = requestUrl.includes('/auth/refresh')
       const isLogoutRequest = requestUrl.includes('/auth/logout')
-      if (isInitialSessionProbe || isLoginRequest || isRefreshRequest || isLogoutRequest) {
+      if (isInitialSessionProbe || isLoginRequest || isPasswordResetRequest || isRefreshRequest || isLogoutRequest) {
         return Promise.reject(error)
       }
 

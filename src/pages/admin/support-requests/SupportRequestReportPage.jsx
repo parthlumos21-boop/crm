@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../../../components/common/Button'
 import { useData } from '../../../context/DataContext'
-import SupportRequestLocationMap from './SupportRequestLocationMap'
 import {
   formatDateTime,
   formatShortDate,
@@ -68,33 +67,47 @@ const SupportRequestReportPage = () => {
           </div>
         </div>
 
-        <div className="support-request-admin-grid">
-          <div><span>Customer Name</span><strong>{supportRequest.customerName || '-'}</strong></div>
-          <div><span>Owner</span><strong>{supportRequest.ownerName || '-'}</strong></div>
-          <div><span>SR Type / Complaint Type</span><strong>{formatSupportRequestType(supportRequest.requestType)}</strong></div>
-          <div><span>Service Date</span><strong>{formatShortDate(supportRequest.srDate)}</strong></div>
-          <div><span>Status</span><strong>{supportRequest.status || '-'}</strong></div>
-          <div><span>Priority</span><strong>{supportRequest.priority || '-'}</strong></div>
-          <div><span>Closed On</span><strong>{formatDateTime(supportRequest.closedOn)}</strong></div>
-          <div><span>Closed By</span><strong>{supportRequest.closedByName || '-'}</strong></div>
-        </div>
-
-        <div className="support-request-admin-section">
-          <h2>Description</h2>
-          <p>{supportRequest.description || '-'}</p>
-        </div>
-
-        <div className="support-request-admin-section">
-          <h2>Contact</h2>
-          <p><strong>{supportRequest.contactPerson || '-'}</strong></p>
-          <p>{supportRequest.contactDesignation || '-'}</p>
-          <p>{supportRequest.contactMobile || supportRequest.contactPhone || '-'}</p>
-          <p>{supportRequest.contactEmail || '-'}</p>
-        </div>
-
-        <div className="support-request-admin-section">
-          <h2>Live Location</h2>
-          <SupportRequestLocationMap supportRequest={supportRequest} />
+        <div className="support-request-report-table-container">
+          <table className="support-request-report-table">
+            <tbody>
+              <tr>
+                <th>SR Number</th>
+                <td>{supportRequest.srNumber || '-'}</td>
+              </tr>
+              <tr>
+                <th>Customer Number</th>
+                <td>{supportRequest.customerNumber || supportRequest.customerNo || '-'}</td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td>{supportRequest.description || supportRequest.issueDescription || '-'}</td>
+              </tr>
+              <tr>
+                <th>Request Date</th>
+                <td>{formatShortDate(supportRequest.srDate || supportRequest.requestDate || supportRequest.createdAt)}</td>
+              </tr>
+              <tr>
+                <th>End Date</th>
+                <td>{formatShortDate(supportRequest.endDate || supportRequest.closedOn)}</td>
+              </tr>
+              <tr>
+                <th>Owner</th>
+                <td>{supportRequest.ownerName || supportRequest.addedByName || '-'}</td>
+              </tr>
+              <tr>
+                <th>Request Type</th>
+                <td>{formatSupportRequestType(supportRequest.requestType) || '-'}</td>
+              </tr>
+              <tr>
+                <th>Status</th>
+                <td>{supportRequest.status || '-'}</td>
+              </tr>
+              <tr>
+                <th>Note</th>
+                <td>{supportRequest.note || supportRequest.notes || supportRequest.remark || supportRequest.remarks || '-'}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div className="support-request-admin-actions support-request-admin-actions-print">

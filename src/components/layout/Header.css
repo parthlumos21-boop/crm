@@ -300,6 +300,102 @@
     color var(--dur-fast) var(--ease-out);
 }
 
+.header--admin .hdr-theme-toggle,
+.header--admin .hdr-user-btn {
+  background: var(--admin-red, #dc2626) !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  color: #ffffff !important;
+}
+
+.header--admin .hdr-icon-btn {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  color: var(--admin-red, #dc2626) !important;
+  -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
+}
+
+.header--admin .hdr-user-btn,
+.header--admin .hdr-user-btn:hover {
+  background: #ffffff !important;
+  border-color: var(--border-subtle) !important;
+  color: #111827 !important;
+}
+
+.header--admin .hdr-user-btn .hdr-avatar-icon {
+  color: var(--admin-red, #dc2626) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.header--admin .hdr-user-btn .hdr-username,
+.header--admin .hdr-user-btn .hdr-caret,
+.header--admin .hdr-user-btn .hdr-caret svg {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.header--admin .hdr-theme-toggle:hover,
+.header--admin .hdr-user-btn:hover {
+  background: var(--admin-red-hover, #b91c1c) !important;
+  color: #ffffff !important;
+}
+
+.header--admin .hdr-theme-toggle svg,
+.header--admin .hdr-theme-toggle span,
+.header--admin .hdr-avatar-icon,
+.header--admin .hdr-username,
+.header--admin .hdr-caret,
+.header--admin .hdr-caret svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.header--admin .hdr-icon-btn:hover,
+.header--admin .hdr-icon-btn:focus-visible,
+.header--admin .hdr-icon-btn:active {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  color: var(--admin-red, #dc2626) !important;
+  -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
+}
+
+.header--admin .hdr-icon-btn svg,
+.header--admin .hdr-icon-btn svg * {
+  color: var(--admin-red, #dc2626) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.header--admin .hdr-user-btn,
+.header--admin .hdr-user-btn:hover,
+.header--admin .hdr-user-btn:focus-visible {
+  background: #ffffff !important;
+  border-color: var(--border-subtle) !important;
+  color: #111827 !important;
+}
+
+.header--admin .hdr-user-btn .hdr-avatar-icon {
+  color: var(--admin-red, #dc2626) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.header--admin .hdr-user-btn .hdr-username,
+.header--admin .hdr-user-btn .hdr-caret,
+.header--admin .hdr-user-btn .hdr-caret svg {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
 .hdr-icon-btn svg,
 .hdr-search-submit-btn svg,
 .hdr-quick-add-icon-wrap svg,
@@ -449,7 +545,7 @@
   height: 1.14rem;
   padding: 0 0.3rem;
   border-radius: 9999px;
-  background: var(--surface-app);
+  background: var(--admin-red, #dc2626);
   color: #ffffff;
   font-size: 0.64rem;
   font-weight: 800;
@@ -759,11 +855,88 @@
   padding: 0.9rem 0.95rem 0.75rem;
   margin-bottom: 0.4rem;
   border-radius: 16px;
-  background: var(--surface-card);
-  color: var(--color-primary-strong);
+  background: #ffffff;
+  color: #111827;
   font-size: 0.88rem;
   font-weight: 800;
   line-height: 1.35;
+}
+
+.header--admin .hdr-dropdown {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+.header--admin .hdr-dropdown-name {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+.header--admin .hdr-dropdown-item {
+  color: #111827 !important;
+}
+
+.header--admin .hdr-dropdown-icon {
+  color: var(--admin-red, #dc2626) !important;
+}
+
+.header--admin .hdr-user-menu .hdr-user-btn,
+.header--admin .hdr-user-menu .hdr-user-btn:hover,
+.header--admin .hdr-user-menu .hdr-user-btn:focus-visible,
+.header--admin .hdr-user-menu .hdr-user-btn[aria-expanded='true'] {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: var(--border-subtle) !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+.header--admin .hdr-user-menu .hdr-user-btn .hdr-avatar-icon {
+  color: var(--admin-red, #dc2626) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
+}
+
+.header--admin .hdr-user-menu .hdr-user-btn .hdr-username,
+.header--admin .hdr-user-menu .hdr-user-btn .hdr-caret,
+.header--admin .hdr-user-menu .hdr-user-btn .hdr-caret svg {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+.header--admin .hdr-user-menu .hdr-dropdown,
+.header--admin .hdr-user-menu .hdr-dropdown-name,
+.header--admin .hdr-user-menu .hdr-dropdown-item {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+.header--admin .hdr-back-btn {
+  order: 999;
+}
+
+.header--admin .header-action-cluster > .hdr-message-wrap .hdr-icon-btn,
+.header--admin .header-action-cluster > .hdr-message-wrap .hdr-icon-btn:hover,
+.header--admin .header-action-cluster > .hdr-message-wrap .hdr-icon-btn:focus-visible,
+.header--admin .header-action-cluster > .hdr-message-wrap .hdr-icon-btn:active {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  color: var(--admin-red, #dc2626) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.header--admin .header-action-cluster > .hdr-message-wrap .hdr-icon-btn svg {
+  color: var(--admin-red, #dc2626) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
 }
 
 .hdr-dropdown-item {
@@ -1095,6 +1268,7 @@
 :root {
   --scallop-scale: 0.75;
 }
+
 @media (min-width: 768px) {
   :root { --scallop-scale: 0.9; }
 }
@@ -1156,4 +1330,40 @@
   0% { transform: scale(0) rotate(-180deg); opacity: 0; }
   60% { transform: scale(1.1) rotate(10deg); opacity: 1; }
   100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* Final admin light-mode utility icon treatment. */
+html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn,
+html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn:hover,
+html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn:focus-visible,
+html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn:active {
+  border: 1px solid var(--admin-red-border, #b91c1c) !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: var(--admin-red, #dc2626) !important;
+  -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn svg,
+html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn svg * {
+  display: block !important;
+  color: var(--admin-red, #dc2626) !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hdr-message-wrap > button.hdr-icon-btn .hdr-badge {
+  border-color: #ffffff !important;
+  background: var(--admin-red, #dc2626) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }

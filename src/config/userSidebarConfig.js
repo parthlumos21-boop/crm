@@ -30,9 +30,9 @@ export const USER_SIDEBAR_TOOLBAR = [
   },
   {
     key: 'calendar',
-    to: '/reminders',
-    title: 'Reminders',
-    ariaLabel: 'Reminders',
+    to: '/calendar',
+    title: 'Calendar',
+    ariaLabel: 'Calendar',
     icon: FaCalendarAlt,
   },
 ]
@@ -84,8 +84,6 @@ export const USER_SIDEBAR_GROUPS = [
       { label: 'View Deal', to: '/deals/view' },
       { label: 'Search Deal', to: '/deals/search' },
       { label: 'Project Details', to: '/deals/project-details' },
-      { label: 'Ahmedabad Deal', to: '/deals/ahmadabad' },
-      { label: 'Vadodara Deal', to: '/deals/vadodara' },
     ],
   },
   {

@@ -54,7 +54,7 @@
 .summary-reports-primary-btn {
   min-height: 2rem;
   border: 1px solid var(--border-subtle);
-  background: linear-gradient(180deg, #3c73b8 0%, #254d7f 100%);
+  background: var(--admin-red, #dc2626);
   color: #ffffff;
   font-size: 0.82rem;
   font-weight: 700;
@@ -148,9 +148,15 @@
 }
 
 .summary-reports-sidebar-item-active {
-  background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-primary-strong) 100%);
+  background: var(--admin-red, #dc2626) !important;
   color: #ffffff;
   font-weight: 700;
+}
+
+.layout--admin .summary-reports-sidebar-item:not(.summary-reports-sidebar-item-active) {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--text-primary) !important;
 }
 
 .summary-reports-content {
@@ -618,8 +624,8 @@
 
 .monthly-status-toggle-chip--active,
 .monthly-status-chip--active {
-  border-color: var(--text-primary);
-  background: linear-gradient(180deg, #2ca6e0 0%, #1f84be 100%);
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  background: var(--admin-red, #dc2626) !important;
   color: #ffffff;
 }
 

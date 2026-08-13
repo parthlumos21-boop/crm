@@ -229,3 +229,91 @@
   font-style: italic;
   font-size: 0.9rem;
 }
+
+.ud-todo-list {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.75rem;
+}
+
+.ud-todo-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.18rem 0.45rem;
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  padding: 0.48rem 0.55rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ud-todo-item:hover,
+.ud-todo-item:focus-visible {
+  background: var(--surface-muted);
+  outline: none;
+}
+
+.ud-todo-kicker {
+  padding: 0.08rem 0.32rem;
+  border-radius: 4px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.58rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.ud-todo-title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ud-todo-meta {
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ud-todo-message {
+  grid-column: 2 / -1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ud-todo-actions {
+  grid-column: 2 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.12rem;
+}
+
+.ud-todo-mini-btn {
+  min-height: 1.2rem;
+  border: 1px solid #b91c1c;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #e55b55 0%, #cc3e3e 100%);
+  color: #ffffff;
+  padding: 0 0.42rem;
+  font-size: 0.58rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.ud-todo-mini-btn--close {
+  background: linear-gradient(180deg, #8b1f1f 0%, #6f1717 100%);
+}

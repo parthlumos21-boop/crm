@@ -19,6 +19,7 @@ export const CUSTOMER_QUOTATION_STATUS_OPTIONS = [
 export const normalizeDealCity = (value) => {
   const normalizedValue = normalizeTextInput(value).toLowerCase()
   if (normalizedValue === 'ahmadabad' || normalizedValue === 'ahmedabad') return 'Ahmedabad'
+  if (normalizedValue === 'vadodara' || normalizedValue === 'baroda') return 'Vadodara'
   return normalizeTextInput(value)
 }
 

@@ -40,14 +40,19 @@ import './Header.css'
 const ADMIN_USER_MENU = [
   { label: 'Dashboard', icon: FaDesktop, route: '/admin/monitoring' },
   { label: 'Sales Dashboard', icon: FaDesktop, route: '/admin/sales-dashboard' },
-  { label: 'My CRM', icon: FaUserCog, route: '/admin/monitoring?view=myCrm' },
   { label: 'My Profile', icon: FaUserCircle, route: '/admin/user-management' },
   { label: 'LaunchPad', icon: FaTh, route: '/admin/launchpad' },
   { label: 'Settings', icon: FaCog, route: '/admin/settings' },
   { label: 'Quotation Summary', icon: FaCreditCard, route: '/admin/reports/quotation-summary' },
-  { label: 'Geo Tracking', icon: FaMapMarkerAlt, route: '/admin/reports/customer-map' },
   { label: 'Connect Outlook', icon: FaEnvelope, action: 'CONNECT_OUTLOOK' },
 ]
+
+const LAUNCHPAD_ALLOWED_EMAILS = new Set([
+  'keval@swatiswitchgears.com',
+  'keval@swatiswithgears.com',
+  'rushabh@support.com',
+  'parth@support.com',
+])
 
 const STANDARD_USER_MENU = [
   { label: 'Dashboard', icon: FaDesktop, route: '/dashboard' },
@@ -107,7 +112,10 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
   const displayName = user?.name || 'Demo User'
   const firstName = displayName.split(' ')[0]
   const quickAddItems = isAdmin ? ADMIN_QUICK_ADD_ITEMS : STANDARD_QUICK_ADD_ITEMS
-  const dropdownItems = isAdmin ? ADMIN_USER_MENU : STANDARD_USER_MENU
+  const canUseLaunchpad = LAUNCHPAD_ALLOWED_EMAILS.has(String(user?.email || '').trim().toLowerCase())
+  const dropdownItems = isAdmin
+    ? ADMIN_USER_MENU.filter((item) => item.route !== '/admin/launchpad' || canUseLaunchpad)
+    : STANDARD_USER_MENU
   const profileRoute = '/admin/user-management'
   const salesDashboardRoute = '/admin/sales-dashboard'
   const legacySalesDashboardRoute = '/admin/monitoring?view=salesDashboard'
@@ -195,7 +203,9 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
 
   const handleOpenReminderPanel = () => {
     closeHeaderPanels()
-    navigate(isAdmin ? '/admin/reminders/my' : '/reminders/my')
+    navigate(isAdmin ? '/admin/reminders/my' : '/reminders/my', {
+      state: { activeMyReminderTab: 'notifications' },
+    })
   }
 
   const handleOpenQuickAdd = () => {
@@ -284,42 +294,6 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
   const handleViewPastMessages = () => {
     setMessagePanelOpen(false)
     navigate(isAdmin ? '/admin/messages' : '/messages')
-  }
-
-  const isProfileBookmarked = useMemo(() => (
-    bookmarks.some((entry) => entry.route === profileRoute)
-  ), [bookmarks, profileRoute])
-
-  const isSalesDashboardBookmarked = useMemo(() => (
-    bookmarks.some((entry) => [salesDashboardRoute, legacySalesDashboardRoute].includes(entry.route))
-  ), [bookmarks, legacySalesDashboardRoute, salesDashboardRoute])
-
-  const isMyCrmBookmarked = useMemo(() => (
-    bookmarks.some((entry) => entry.route === myCrmRoute)
-  ), [bookmarks, myCrmRoute])
-
-  const handleToggleBookmark = (bookmark, routeAliases = [bookmark.route]) => {
-    const alreadyBookmarked = bookmarks.some((entry) => routeAliases.includes(entry.route))
-    const nextBookmarks = alreadyBookmarked
-      ? bookmarks.filter((entry) => !routeAliases.includes(entry.route))
-      : [...bookmarks.filter((entry) => !routeAliases.includes(entry.route)), bookmark]
-
-    setBookmarks(saveAdminBookmarks(user, nextBookmarks))
-    addNotification(
-      'success',
-      alreadyBookmarked ? 'Bookmark removed' : 'Bookmark saved',
-      `${bookmark.label} ${alreadyBookmarked ? 'removed from' : 'added to'} bookmarks.`
-    )
-    setMenuOpen(false)
-  }
-
-  const handleToggleProfileBookmark = () => {
-    handleToggleBookmark({
-      id: 'bookmark-my-profile',
-      label: 'My Profile',
-      route: profileRoute,
-      iconKey: 'profile',
-    })
   }
 
   const routeLabel = useMemo(
@@ -507,44 +481,6 @@ const Header = ({ isAdmin = false, isSidebarOpen = false, onToggleSidebar }) => 
                     </button>
                     )
                   })}
-                  {isAdmin && (
-                    <>
-                      <button
-                        type="button"
-                        className="hdr-dropdown-item"
-                        onClick={handleToggleProfileBookmark}
-                      >
-                        <FaStar className={`hdr-dropdown-icon ${isProfileBookmarked ? 'hdr-dropdown-icon--accent' : ''}`} />
-                        <span>{isProfileBookmarked ? 'Remove My Profile Bookmark' : 'Bookmark My Profile'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="hdr-dropdown-item"
-                        onClick={() => handleToggleBookmark({
-                          id: 'bookmark-sales-dashboard',
-                          label: 'Sales Dashboard',
-                          route: salesDashboardRoute,
-                          iconKey: 'dashboard',
-                        }, [salesDashboardRoute, legacySalesDashboardRoute])}
-                      >
-                        <FaStar className={`hdr-dropdown-icon ${isSalesDashboardBookmarked ? 'hdr-dropdown-icon--accent' : ''}`} />
-                        <span>{isSalesDashboardBookmarked ? 'Remove Sales Dashboard Bookmark' : 'Bookmark Sales Dashboard'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="hdr-dropdown-item"
-                        onClick={() => handleToggleBookmark({
-                          id: 'bookmark-my-crm',
-                          label: 'My CRM',
-                          route: myCrmRoute,
-                          iconKey: 'profile',
-                        })}
-                      >
-                        <FaStar className={`hdr-dropdown-icon ${isMyCrmBookmarked ? 'hdr-dropdown-icon--accent' : ''}`} />
-                        <span>{isMyCrmBookmarked ? 'Remove My CRM Bookmark' : 'Bookmark My CRM'}</span>
-                      </button>
-                    </>
-                  )}
                   <button
                     type="button"
                     className="hdr-dropdown-item hdr-dropdown-item--logout"

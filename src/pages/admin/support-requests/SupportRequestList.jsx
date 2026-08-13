@@ -20,7 +20,6 @@ const CLOSED_COLUMNS = [
   { key: 'customerName', label: 'Customer Name' },
   { key: 'requestType', label: 'Service Type' },
   { key: 'requestDate', label: 'Request Date' },
-  { key: 'endDate', label: 'End Date' },
   { key: 'ownerName', label: 'Owner' },
   { key: 'closedOn', label: 'Closed On', type: 'datetime' },
   { key: 'closedBy', label: 'Closed By' },
@@ -60,7 +59,7 @@ const SupportRequestList = ({
             <div className="support-ticket-toolbar-actions">
               <button
                 type="button"
-                className="support-ticket-new-btn"
+                className="support-ticket-new-btn btn-red-theme"
                 onClick={() => setIsCreatePanelOpen(true)}
               >
                 Add CRM Support
@@ -69,7 +68,7 @@ const SupportRequestList = ({
           ) : null}
         </div>
 
-        <div className="support-ticket-content support-ticket-content--legacy">
+        <div className="support-ticket-content support-ticket-content--legacy support-ticket-content--sr-list">
           <SupportRequestTable
             title={closedOnly ? 'Closed SR' : 'SR List'}
             rows={visibleRequests}
