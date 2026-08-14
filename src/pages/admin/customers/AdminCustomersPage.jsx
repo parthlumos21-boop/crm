@@ -106,19 +106,7 @@ const tableColumnKeys = [
   'latestRemark',
 ]
 
-const myCustomersTableColumnKeys = [
-  'customerNumber',
-  'customerName',
-  'addedDate',
-  'email',
-  'phone',
-  'customerCategory',
-  'customerOwner',
-  'customerStatus',
-]
-
 const tableSearchColumns = tableColumnKeys.map((key) => searchColumns.find((column) => column.key === key)).filter(Boolean)
-const myCustomersTableSearchColumns = myCustomersTableColumnKeys.map((key) => searchColumns.find((column) => column.key === key)).filter(Boolean)
 
 const CUSTOMER_GRID_ACTION_KEYS = [
   'add-note-remarks',
@@ -223,10 +211,31 @@ const isCustomerOwnedByUser = (customer = {}, user = null) => {
     customer.customerOwner,
     customer.customerOwnerDisplay,
     customer.customerOwnerName,
+    customer.customerOwnerCode,
+    customer.ownerCode,
     customer.ownerName,
     customer.assignedUserName,
+    customer.assignedToName,
     customer.addedBy,
     customer.addedByName,
+    customer.raw?.customerOwner,
+    customer.raw?.customerOwnerDisplay,
+    customer.raw?.customerOwnerName,
+    customer.raw?.customerOwnerCode,
+    customer.raw?.ownerCode,
+    customer.raw?.ownerName,
+    customer.raw?.assignedToName,
+    customer.raw?.addedBy,
+    customer.raw?.addedByName,
+    customer.data?.customerOwner,
+    customer.data?.customerOwnerDisplay,
+    customer.data?.customerOwnerName,
+    customer.data?.customerOwnerCode,
+    customer.data?.ownerCode,
+    customer.data?.ownerName,
+    customer.data?.assignedToName,
+    customer.data?.addedBy,
+    customer.data?.addedByName,
   ]
 
   const userNames = [
@@ -235,6 +244,7 @@ const isCustomerOwnedByUser = (customer = {}, user = null) => {
     user.username,
     user.email,
     user.ownerCode,
+    user.owner_code,
   ]
 
   return ownerNames.some((ownerName) => (
@@ -1184,9 +1194,7 @@ const AdminCustomersPage = ({
       return 0
     })
   }, [filteredRows, orderRules])
-  const activeTableSearchColumns = variantKey === 'myCustomers'
-    ? myCustomersTableSearchColumns
-    : tableSearchColumns
+  const activeTableSearchColumns = tableSearchColumns
 
   const handleExportCustomers = () => {
     const exportRows = orderedRows.map((row) => ({
@@ -1571,6 +1579,7 @@ const AdminCustomersPage = ({
     const title = variantKey === 'myCustomers'
       ? `My Customers - ${filteredRows.length} records`
       : `Customers - ${filteredRows.length} records`
+    const showGridSelection = false
     const actionMenuPortal = showActionMenu && openActionMenuCustomerId && actionMenuPosition && typeof document !== 'undefined'
       ? createPortal((
         <div
@@ -1818,23 +1827,18 @@ const AdminCustomersPage = ({
             </div>
           ) : null}
 
-          {showActionMenu && selectedCount > 0 ? (
+          {showGridSelection && selectedCount > 0 ? (
             <div className="admin-customers-bulk-selection-bar">
               Selected customers: <strong>{selectedCount}</strong>
             </div>
           ) : null}
 
-          {filteredRows.length === 0 ? (
-            <div className="admin-customers-empty-state">
-              {isCustomersLoading ? 'Loading customers from MongoDB...' : 'No customer records match the current search filters.'}
-            </div>
-          ) : (
-            <div className={`admin-customers-grid-shell ${compactGrid ? 'admin-customers-grid-shell-compact' : ''}`}>
+          <div className={`admin-customers-grid-shell ${compactGrid ? 'admin-customers-grid-shell-compact' : ''}`}>
               <div className="admin-customers-grid-table-wrap">
                 <table className="admin-customers-grid-table">
                   <thead>
                     <tr className="admin-customers-grid-head-row">
-                      {showActionMenu ? (
+                      {showGridSelection ? (
                         <th className="admin-customers-grid-checkbox-head">
                           <input
                             type="checkbox"
@@ -1851,7 +1855,7 @@ const AdminCustomersPage = ({
                     </tr>
                     {showFilters && (
                       <tr className="admin-customers-grid-filter-row">
-                        {showActionMenu ? <th className="admin-customers-grid-filter-spacer" /> : null}
+                        {showGridSelection ? <th className="admin-customers-grid-filter-spacer" /> : null}
                         {activeTableSearchColumns.map((column) => (
                           <th key={column.key}>
                             <input
@@ -1867,7 +1871,16 @@ const AdminCustomersPage = ({
                     )}
                   </thead>
                   <tbody>
-                    {paginatedRows.map((row) => {
+                    {paginatedRows.length === 0 ? (
+                      <tr className="admin-customers-grid-row admin-customers-grid-empty-row">
+                        <td
+                          className="admin-customers-grid-empty-cell"
+                          colSpan={activeTableSearchColumns.length + (showGridSelection ? 1 : 0)}
+                        >
+                          {isCustomersLoading ? 'Loading customers from MongoDB...' : 'No customer records match the current search filters.'}
+                        </td>
+                      </tr>
+                    ) : paginatedRows.map((row) => {
                       const isHighlighted = highlightedCustomerId === row.id
 
                       return (
@@ -1876,7 +1889,7 @@ const AdminCustomersPage = ({
                           ref={isHighlighted ? highlightedRowRef : null}
                           className={isHighlighted ? 'admin-customers-grid-row admin-customers-grid-row-highlighted' : 'admin-customers-grid-row'}
                         >
-                          {showActionMenu ? (
+                          {showGridSelection ? (
                             <td className="admin-customers-grid-checkbox-cell">
                               <input
                                 type="checkbox"
@@ -1970,7 +1983,6 @@ const AdminCustomersPage = ({
                 </div>
               </div>
             </div>
-          )}
 
           {customersError ? <div className="admin-customers-save-message">{customersError}</div> : null}
         </section>

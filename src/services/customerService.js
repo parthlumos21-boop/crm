@@ -51,8 +51,13 @@ const normalizeCustomer = (customer = {}) => {
   }
   const customerOwner = getCanonicalCrmUserName(
     mergedCustomer.customerOwner
+    || mergedCustomer.customerOwnerName
+    || mergedCustomer.customerOwnerDisplay
+    || mergedCustomer.customerOwnerCode
     || mergedCustomer.ownerName
     || mergedCustomer.assignedToName
+    || mergedCustomer.addedBy
+    || mergedCustomer.addedByName
   ) || String(mergedCustomer.customerOwner || mergedCustomer.ownerName || '').trim()
   const contacts = normalizeContacts(
     mergedCustomer.contacts?.length
@@ -77,6 +82,13 @@ const normalizeCustomer = (customer = {}) => {
     customerOwnerName: customerOwner,
     customerOwnerCode: getCrmOwnerCode(customerOwner),
     customerOwnerDisplay: getCrmOwnerDisplay(customerOwner),
+    ownerUserId: customer.ownerUserId ?? mergedCustomer.ownerUserId ?? customer.owner_user_id ?? mergedCustomer.owner_user_id ?? '',
+    ownerId: customer.ownerId ?? mergedCustomer.ownerId ?? customer.owner_id ?? mergedCustomer.owner_id ?? '',
+    assignedTo: customer.assignedTo ?? mergedCustomer.assignedTo ?? customer.assigned_to ?? mergedCustomer.assigned_to ?? '',
+    assignedUserId: customer.assignedUserId ?? mergedCustomer.assignedUserId ?? customer.assigned_user_id ?? mergedCustomer.assigned_user_id ?? '',
+    userId: customer.userId ?? mergedCustomer.userId ?? customer.user_id ?? mergedCustomer.user_id ?? '',
+    addedBy: mergedCustomer.addedBy || customer.addedBy || '',
+    addedByName: mergedCustomer.addedByName || customer.addedByName || '',
     customerCategory: mergedCustomer.customerCategory || '',
     customerStatus: mergedCustomer.customerStatus || customer.status || mergedCustomer.status || 'New',
     customerType: mergedCustomer.customerType || '',
@@ -106,9 +118,11 @@ const normalizePayload = (customer = {}) => {
   const customerName = String(customer.customerName || customer.name || '').trim()
   const email = primaryContact.email || customer.email || null
   const phone = primaryContact.mobile || primaryContact.phone || customer.phone || null
-  const assignedTo = /^\d+$/.test(String(customer.assignedTo || '').trim())
-    ? Number.parseInt(String(customer.assignedTo).trim(), 10)
-    : null
+  const selectedOwner = customer.customerOwner || customer.customerOwnerName || customer.customerOwnerDisplay || ''
+  const assignedToSource = customer.assignedTo || selectedOwner
+  const assignedTo = /^\d+$/.test(String(assignedToSource || '').trim())
+    ? Number.parseInt(String(assignedToSource).trim(), 10)
+    : String(assignedToSource || '').trim() || null
 
   return {
     ...customer,
@@ -119,6 +133,10 @@ const normalizePayload = (customer = {}) => {
     company: customer.company || customerName,
     status: customer.customerStatus || customer.status || 'active',
     assignedTo,
+    customerOwner: selectedOwner,
+    customerOwnerName: selectedOwner,
+    customerOwnerCode: getCrmOwnerCode(selectedOwner),
+    customerOwnerDisplay: getCrmOwnerDisplay(selectedOwner),
     contacts: normalizedContacts,
     documents: normalizeDocuments(customer.documents),
   }

@@ -1,3 +1,0 @@
-{"level":30,"time":1786703308642,"service":"crm-server","port":5000,"msg":"Server running"}
-{"level":30,"time":1786703308643,"service":"crm-server","msg":"Socket.IO ready for connections"}
-{"level":30,"time":1786703308804,"service":"crm-server","msg":"MongoDB connection and indexes are ready."}

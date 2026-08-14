@@ -1816,17 +1816,17 @@ body:not([data-theme="dark"]) .btn-red-theme:hover {
    Admin red action theme
    ============================================================ */
 :root {
-  --admin-red: #740A03;
-  --admin-red-hover: #920d04;
-  --admin-red-soft: rgba(116, 10, 3, 0.12);
-  --admin-red-border: #920d04;
+  --admin-red: #b91c1c;
+  --admin-red-hover: #991b1b;
+  --admin-red-soft: rgba(185, 28, 28, 0.12);
+  --admin-red-border: #991b1b;
 }
 
 [data-theme="dark"] {
-  --admin-red: #740A03;
-  --admin-red-hover: #920d04;
-  --admin-red-soft: rgba(116, 10, 3, 0.18);
-  --admin-red-border: #920d04;
+  --admin-red: #b91c1c;
+  --admin-red-hover: #991b1b;
+  --admin-red-soft: rgba(185, 28, 28, 0.18);
+  --admin-red-border: #991b1b;
 }
 
 .layout--admin :where(
@@ -2287,20 +2287,20 @@ html:not([data-theme="dark"]) .layout--admin .right-panel button.rp-action-card.
 
 /* User CRM red skin. Scoped away from /admin/* by Layout's html.is-user and .layout--user hooks. */
 html.is-user:not([data-theme="dark"]) body {
-  --user-crm-red: #E51F25;
-  --user-crm-red-dark: #C9151B;
-  --user-crm-red-soft: #FDEBEC;
+  --user-crm-red: #b91c1c;
+  --user-crm-red-dark: #991b1b;
+  --user-crm-red-soft: #fff5f5;
   --user-crm-bg: #F4F8FA;
   --user-crm-border: #DCE3E8;
   --user-crm-text: #111827;
   --user-crm-muted: #667085;
-  --color-primary: #E51F25;
-  --color-primary-hover: #C9151B;
-  --color-primary-soft: #FDEBEC;
-  --color-primary-border: rgba(229, 31, 37, 0.32);
-  --color-primary-strong: #C9151B;
-  --color-accent-user: #E51F25;
-  --color-accent-user-soft: #FDEBEC;
+  --color-primary: #b91c1c;
+  --color-primary-hover: #991b1b;
+  --color-primary-soft: #fff5f5;
+  --color-primary-border: rgba(185, 28, 28, 0.32);
+  --color-primary-strong: #991b1b;
+  --color-accent-user: #b91c1c;
+  --color-accent-user-soft: #fff5f5;
   --surface-app: #F4F8FA;
   --body-bg: #F4F8FA;
   --surface-card: #FFFFFF;
@@ -4113,4 +4113,612 @@ html.is-user:not([data-theme="dark"]) .layout--user .support-request-view-page :
   fill: currentColor !important;
   stroke: currentColor !important;
   -webkit-text-fill-color: #111827 !important;
+}
+
+/* Final light-mode SR board screenshot override. Dark mode intentionally uses its own rules. */
+html:not([data-theme="dark"]) body #root .layout .support-request-view-page :is(.sr-status-filter-trigger, .sr-status-filter-load, .sr-status-board-column-header) {
+  border-color: #E31B23 !important;
+  background: #E31B23 !important;
+  background-color: #E31B23 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .support-request-view-page :is(.sr-status-filter-trigger, .sr-status-filter-load, .sr-status-board-column-header) :is(svg, span, strong) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .support-request-view-page :is(.sr-status-board-toolbar, .sr-status-board-column, .sr-status-board-column-body, .sr-status-board-card) {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .support-request-view-page .sr-status-board-shell {
+  border: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .support-request-view-page .sr-status-board-wrap {
+  background: #f5f6f8 !important;
+  background-color: #f5f6f8 !important;
+  background-image: none !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .support-request-view-page :is(.sr-status-board-column-body, .sr-status-board-empty, .sr-status-board-card, .sr-status-board-card:hover) {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .support-request-view-page .sr-status-board-edge {
+  border-color: #E31B23 !important;
+  background: #E31B23 !important;
+  background-color: #E31B23 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .support-request-view-page .sr-status-board-edge svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Active reminders user cards: light mode only, keep all users visible like the Keval card. */
+html:not([data-theme="dark"]) body #root .layout .active-reminders-page .active-reminders-user-row,
+html:not([data-theme="dark"]) body #root .layout .active-reminders-page .active-reminders-user-row:hover,
+html:not([data-theme="dark"]) body #root .layout .active-reminders-page .active-reminders-user-row-selected,
+html:not([data-theme="dark"]) body #root .layout .active-reminders-page .active-reminders-user-row-selected:hover {
+  border: 1px solid #E51F25 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .active-reminders-page .active-reminders-user-name {
+  display: inline-flex !important;
+  min-width: 0 !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  font-weight: 800 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .active-reminders-page .active-reminders-user-icon {
+  box-sizing: content-box !important;
+  width: 12px !important;
+  height: 12px !important;
+  padding: 6px !important;
+  border-radius: 999px !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root .layout .active-reminders-page .active-reminders-user-badge {
+  border-color: #C9151B !important;
+  background: #E51F25 !important;
+  background-color: #E51F25 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  font-weight: 900 !important;
+}
+
+/* User deals tables: light mode, matching the red Keval-style controls without touching admin. */
+html.is-user:not([data-theme="dark"]) body #root .layout--user .deals-page :is(
+  .deals-crm-table-wrap,
+  .deals-ownerwise-table-wrap,
+  .deals-search-table.table-container,
+  .table-container:not(.deals-search-table)
+) {
+  border: 1px solid #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .deals-page :is(
+  .deals-crm-table,
+  .deals-ownerwise-table,
+  .deals-table,
+  .deals-search-table
+) {
+  border: 1px solid #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .deals-page :is(
+  .deals-crm-table th,
+  .deals-ownerwise-table th,
+  .deals-table th,
+  .deals-search-table .table-header-cell
+) {
+  border: 1px solid #991b1b !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .deals-page :is(
+  .deals-crm-table th,
+  .deals-ownerwise-table th,
+  .deals-table th,
+  .deals-search-table .table-header-cell
+) :is(span, strong, button, svg) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .deals-page :is(
+  .deals-crm-table td,
+  .deals-ownerwise-table td,
+  .deals-table td,
+  .deals-search-table .table-cell
+) {
+  border: 1px solid #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .deals-page :is(
+  .deals-crm-table td,
+  .deals-ownerwise-table td,
+  .deals-table td,
+  .deals-search-table .table-cell
+) :is(span, strong, small, p, a, button:not(.deals-crm-number-button), svg) {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .deals-page :is(
+  .deals-crm-number-button,
+  .deals-crm-number-button:hover,
+  .deals-crm-number-button:focus-visible,
+  .deals-crm-toolbar-icon,
+  .deals-crm-toolbar-icon:hover,
+  .deals-crm-toolbar-icon:focus-visible,
+  .deals-ownerwise-toolbar-icon,
+  .deals-ownerwise-toolbar-icon:hover,
+  .deals-ownerwise-toolbar-icon:focus-visible,
+  .deals-action-button,
+  .deals-action-button:hover,
+  .deals-action-button:focus-visible,
+  .deals-icon-button,
+  .deals-icon-button:hover,
+  .deals-icon-button:focus-visible,
+  .deals-crm-pagination-button,
+  .deals-crm-pagination-button:hover,
+  .deals-crm-pagination-button:focus-visible,
+  .deals-crm-page-number-active
+):not(:disabled) {
+  border-color: #991b1b !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .deals-page :is(
+  .deals-crm-number-button,
+  .deals-crm-toolbar-icon,
+  .deals-ownerwise-toolbar-icon,
+  .deals-action-button,
+  .deals-icon-button,
+  .deals-crm-pagination-button,
+  .deals-crm-page-number-active
+) :is(svg, span, strong) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* User deals tables: dark mode, Keval-style deep red with all text/icons visible. */
+html.is-user[data-theme="dark"] body #root .layout--user .deals-page :is(
+  .deals-crm-table-wrap,
+  .deals-ownerwise-table-wrap,
+  .deals-search-table.table-container,
+  .table-container:not(.deals-search-table)
+) {
+  border: 1px solid #740A03 !important;
+  background: #111827 !important;
+  background-color: #111827 !important;
+  background-image: none !important;
+}
+
+html.is-user[data-theme="dark"] body #root .layout--user .deals-page :is(
+  .deals-crm-table,
+  .deals-ownerwise-table,
+  .deals-table,
+  .deals-search-table
+) {
+  border: 1px solid #740A03 !important;
+  background: #111827 !important;
+  background-color: #111827 !important;
+  color: #f9fafb !important;
+  -webkit-text-fill-color: #f9fafb !important;
+}
+
+html.is-user[data-theme="dark"] body #root .layout--user .deals-page :is(
+  .deals-crm-table th,
+  .deals-ownerwise-table th,
+  .deals-table th,
+  .deals-search-table .table-header-cell
+) {
+  border: 1px solid #8f1208 !important;
+  background: #740A03 !important;
+  background-color: #740A03 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user[data-theme="dark"] body #root .layout--user .deals-page :is(
+  .deals-crm-table th,
+  .deals-ownerwise-table th,
+  .deals-table th,
+  .deals-search-table .table-header-cell
+) :is(span, strong, button, svg) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user[data-theme="dark"] body #root .layout--user .deals-page :is(
+  .deals-crm-table td,
+  .deals-ownerwise-table td,
+  .deals-table td,
+  .deals-search-table .table-cell
+) {
+  border: 1px solid #740A03 !important;
+  background: #111827 !important;
+  background-color: #111827 !important;
+  background-image: none !important;
+  color: #f9fafb !important;
+  -webkit-text-fill-color: #f9fafb !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user[data-theme="dark"] body #root .layout--user .deals-page :is(
+  .deals-crm-table td,
+  .deals-ownerwise-table td,
+  .deals-table td,
+  .deals-search-table .table-cell
+) :is(span, strong, small, p, a, button:not(.deals-crm-number-button), svg) {
+  color: #f9fafb !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #f9fafb !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user[data-theme="dark"] body #root .layout--user .deals-page :is(
+  .deals-crm-number-button,
+  .deals-crm-number-button:hover,
+  .deals-crm-number-button:focus-visible,
+  .deals-crm-toolbar-icon,
+  .deals-crm-toolbar-icon:hover,
+  .deals-crm-toolbar-icon:focus-visible,
+  .deals-ownerwise-toolbar-icon,
+  .deals-ownerwise-toolbar-icon:hover,
+  .deals-ownerwise-toolbar-icon:focus-visible,
+  .deals-action-button,
+  .deals-action-button:hover,
+  .deals-action-button:focus-visible,
+  .deals-icon-button,
+  .deals-icon-button:hover,
+  .deals-icon-button:focus-visible,
+  .deals-crm-pagination-button,
+  .deals-crm-pagination-button:hover,
+  .deals-crm-pagination-button:focus-visible,
+  .deals-crm-page-number-active
+):not(:disabled) {
+  border-color: #8f1208 !important;
+  background: #740A03 !important;
+  background-color: #740A03 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html.is-user[data-theme="dark"] body #root .layout--user .deals-page :is(
+  .deals-crm-number-button,
+  .deals-crm-toolbar-icon,
+  .deals-ownerwise-toolbar-icon,
+  .deals-action-button,
+  .deals-icon-button,
+  .deals-crm-pagination-button,
+  .deals-crm-page-number-active
+) :is(svg, span, strong) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* User customer grids: light mode only, keep Keval/admin logic untouched. */
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page :is(
+  .admin-customers-grid-shell,
+  .admin-customers-grid-table-wrap,
+  .admin-customers-grid-table
+) {
+  border: 1px solid #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page .admin-customers-grid-head-row th,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page .admin-customers-grid-checkbox-head {
+  border: 1px solid #991b1b !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page .admin-customers-grid-head-row th :is(span, strong, svg, button),
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page .admin-customers-grid-checkbox-head :is(span, strong, svg, button) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page :is(
+  .admin-customers-grid-filter-spacer,
+  .admin-customers-grid-filter-row th
+) {
+  border: 1px solid #f3b6b6 !important;
+  background: #fff5f5 !important;
+  background-color: #fff5f5 !important;
+  background-image: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page .admin-customers-grid-row td {
+  border: 1px solid #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page .admin-customers-grid-row td :is(span, strong, small, p, a, button:not(.admin-customers-grid-number-button), svg) {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page :is(
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button:hover,
+  .admin-customers-grid-number-button:focus-visible,
+  .admin-customers-grid-pagination-button,
+  .admin-customers-grid-pagination-button:hover,
+  .admin-customers-grid-pagination-button:focus-visible,
+  .admin-customers-grid-page-number-active,
+  .admin-customers-toolbar-button,
+  .admin-customers-toolbar-button:hover,
+  .admin-customers-toolbar-button:focus-visible,
+  .admin-customers-filter-action-btn,
+  .admin-customers-filter-action-btn:hover,
+  .admin-customers-filter-action-btn:focus-visible,
+  .admin-customers-icon-button,
+  .admin-customers-icon-button:hover,
+  .admin-customers-icon-button:focus-visible
+):not(:disabled) {
+  border-color: #991b1b !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .admin-customers-page :is(
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-pagination-button,
+  .admin-customers-grid-page-number-active,
+  .admin-customers-toolbar-button,
+  .admin-customers-filter-action-btn,
+  .admin-customers-icon-button
+) :is(svg, span, strong) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Customer search/my-customer grids: light mode red skin for admin and user tables. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page :is(
+  .admin-customers-grid-shell,
+  .admin-customers-grid-table-wrap,
+  .admin-customers-grid-table
+) {
+  border: 1px solid #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-grid-head-row th {
+  border: 1px solid #991b1b !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-grid-head-row th :is(span, strong, svg, button) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-grid-filter-row th {
+  border: 1px solid #f3b6b6 !important;
+  background: #fff5f5 !important;
+  background-color: #fff5f5 !important;
+  background-image: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-grid-row td {
+  border: 1px solid #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-grid-empty-cell {
+  height: 4.5rem !important;
+  padding: 1rem !important;
+  border: 1px solid #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-grid-row td :is(span, strong, small, p, a, button:not(.admin-customers-grid-number-button), svg) {
+  color: #111827 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page :is(
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button:hover,
+  .admin-customers-grid-number-button:focus-visible,
+  .admin-customers-grid-pagination-button,
+  .admin-customers-grid-pagination-button:hover,
+  .admin-customers-grid-pagination-button:focus-visible,
+  .admin-customers-grid-page-number-active,
+  .admin-customers-toolbar-button,
+  .admin-customers-toolbar-button:hover,
+  .admin-customers-toolbar-button:focus-visible,
+  .admin-customers-toolbar-icon,
+  .admin-customers-toolbar-icon:hover,
+  .admin-customers-toolbar-icon:focus-visible,
+  .admin-customers-toolbar-icon-active,
+  .admin-customers-filter-btn,
+  .admin-customers-filter-btn:hover,
+  .admin-customers-filter-btn:focus-visible
+):not(:disabled) {
+  border-color: #991b1b !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page :is(
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-pagination-button,
+  .admin-customers-grid-page-number-active,
+  .admin-customers-toolbar-button,
+  .admin-customers-toolbar-icon,
+  .admin-customers-toolbar-icon-active,
+  .admin-customers-filter-btn
+) :is(svg, span, strong) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
