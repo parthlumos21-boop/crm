@@ -5467,10 +5467,8 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .adm
 /* Screenshot-matched light-mode icon buttons: white fill, red border, red icon. */
 html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
   .hdr-icon-btn,
-  .hdr-theme-toggle,
   .account-board-header-icon-btn,
   .account-board-header-export-trigger,
-  .admin-accounts-toolbar-refresh-btn,
   .admin-accounts-drawer-toolbar-icon,
   .admin-accounts-workspace-icon-btn,
   .admin-customers-toolbar-icon,
@@ -5541,10 +5539,8 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
 
 html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
   .hdr-icon-btn,
-  .hdr-theme-toggle,
   .account-board-header-icon-btn,
   .account-board-header-export-trigger,
-  .admin-accounts-toolbar-refresh-btn,
   .admin-accounts-drawer-toolbar-icon,
   .admin-accounts-workspace-icon-btn,
   .admin-customers-toolbar-icon,
@@ -5593,10 +5589,8 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
 
 html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
   .hdr-icon-btn,
-  .hdr-theme-toggle,
   .account-board-header-icon-btn,
   .account-board-header-export-trigger,
-  .admin-accounts-toolbar-refresh-btn,
   .admin-accounts-drawer-toolbar-icon,
   .admin-accounts-workspace-icon-btn,
   .admin-customers-toolbar-icon,
@@ -5735,12 +5729,10 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .adm
 }
 
 html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
-  .header .hdr-icon-btn,
-  .header .hdr-theme-toggle
+  .header .hdr-icon-btn
 ):not(:disabled),
 html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
-  .header .hdr-icon-btn,
-  .header .hdr-theme-toggle
+  .header .hdr-icon-btn
 ):not(:disabled):is(:hover, :focus-visible, :active) {
   width: 40px !important;
   min-width: 40px !important;
@@ -5760,8 +5752,7 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
 }
 
 html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
-  .header .hdr-icon-btn,
-  .header .hdr-theme-toggle
+  .header .hdr-icon-btn
 ) :is(svg, path, circle, rect, line, polyline, polygon) {
   color: #b91c1c !important;
   fill: currentColor !important;
