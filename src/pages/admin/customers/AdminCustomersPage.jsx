@@ -499,9 +499,10 @@ const createCustomerRouteHelpers = (basePath = '/admin/customers') => {
     const [pathname, rawQuery = ''] = normalizedReturnTo.split('?')
     const searchParams = new URLSearchParams(rawQuery)
 
-    if (customerId) {
-      searchParams.set('customerId', customerId)
-    }
+    // Removed customerId from return URL as requested so the side card doesn't open on back
+    // if (customerId) {
+    //   searchParams.set('customerId', customerId)
+    // }
 
     const queryString = searchParams.toString()
     return `${pathname}${queryString ? `?${queryString}` : ''}`

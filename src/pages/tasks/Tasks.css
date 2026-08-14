@@ -12,6 +12,18 @@
   gap: 1rem;
 }
 
+.tasks-top-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .tasks-top-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Reminders section on Tasks page ── */
 .tasks-reminders-section {
   background: var(--surface-card);

@@ -28,7 +28,7 @@ const Logout = () => {
       <section className="logout-confirm-card">
         <h1 className="login-title">Are you sure logout?</h1>
         <div className="logout-confirm-actions">
-          <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
+          <Button type="button" variant="secondary" className="logout-confirm-cancel-btn" onClick={() => navigate(-1)}>
             Cancel
           </Button>
           <Button type="button" variant="primary" className="btn-red-theme" onClick={handleLogout}>

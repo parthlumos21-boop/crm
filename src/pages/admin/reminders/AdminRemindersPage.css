@@ -68,6 +68,22 @@
   box-shadow: inset 0 -2px 0 #111827;
 }
 
+.admin-my-reminders-tab,
+.admin-my-reminders-tab:not(.admin-my-reminders-tab-active),
+.admin-my-reminders-tab-blue,
+.admin-my-reminders-tab-orange {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+[data-theme="dark"] .admin-my-reminders-tab,
+[data-theme="dark"] .admin-my-reminders-tab:not(.admin-my-reminders-tab-active),
+[data-theme="dark"] .admin-my-reminders-tab-blue,
+[data-theme="dark"] .admin-my-reminders-tab-orange {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
 .admin-my-reminders-panel {
   min-height: 28rem;
   margin: 1.2rem 1.4rem 1.6rem;
@@ -245,7 +261,7 @@
   min-height: 2.35rem;
   border: 1px solid var(--border-subtle);
   border-radius: 4px;
-  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
   padding: 0 1rem;
   font-size: 0.82rem;
@@ -281,7 +297,7 @@
 
 .active-reminders-users-panel-header {
   padding: 0.7rem 1rem;
-  background: linear-gradient(180deg, #55bae8 0%, #3499cf 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
   font-size: 0.9rem;
   font-weight: 700;
@@ -342,9 +358,14 @@
   font-weight: 700;
   font-family: inherit;
   text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+}
+
+html:not([data-theme="dark"]) .active-reminders-user-name,
+html:not([data-theme="dark"]) .active-reminders-user-icon {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
 }
 
 /* Orange count badge */
@@ -454,7 +475,7 @@
 .active-reminders-detail-tab {
   padding: 0.55rem 0.5rem;
   border: none;
-  background: linear-gradient(180deg, #55bae8 0%, #3499cf 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
   font-size: 0.8rem;
   font-weight: 700;
@@ -737,8 +758,25 @@
 
 .active-reminders-filter-pill-active {
   border-color: var(--text-primary);
-  background: linear-gradient(180deg, #55bae8 0%, #3499cf 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
+}
+
+.support-request-legacy-footer-pagination button:not(:disabled),
+.support-request-legacy-footer-pagination span {
+  border-color: #920d04 !important;
+  background: #740A03 !important;
+  background-color: #740A03 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.support-request-legacy-footer-pagination button:disabled {
+  border-color: #f3b8b5 !important;
+  background: rgba(116, 10, 3, 0.14) !important;
+  color: #740A03 !important;
+  -webkit-text-fill-color: #740A03 !important;
 }
 
 @media (max-width: 840px) {

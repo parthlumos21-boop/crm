@@ -238,7 +238,7 @@ const Sidebar = ({ isAdmin = false }) => {
       { label: 'Add Deal', to: '/admin/deals/add' },
       { label: 'View Deal', to: '/admin/deals/view' },
       { label: 'Search Deal', to: '/admin/deals/search' },
-      { label: 'Project Details', to: '/admin/deals/project-details' },
+
     ]
   }, [])
 

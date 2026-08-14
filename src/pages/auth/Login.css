@@ -132,6 +132,25 @@
   padding-top: 8px;
 }
 
+.logout-confirm-actions .logout-confirm-cancel-btn {
+  border-color: #b91c1c !important;
+  background: #dc2626 !important;
+  background-color: #dc2626 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.logout-confirm-actions .logout-confirm-cancel-btn:hover,
+.logout-confirm-actions .logout-confirm-cancel-btn:focus-visible {
+  border-color: #920d04 !important;
+  background: #740A03 !important;
+  background-color: #740A03 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
 .login-panel {
   position: relative;
   z-index: 1;
@@ -301,7 +320,8 @@
 }
 
 .login-brand-mark--button:hover .login-brand-hint,
-.login-brand-mark--button:focus-visible .login-brand-hint {
+.login-brand-mark--button:focus-visible .login-brand-hint,
+.login-brand-hint.login-brand-hint--force {
   opacity: 1;
 }
 

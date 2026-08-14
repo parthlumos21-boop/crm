@@ -42,9 +42,10 @@
 
 /* ── Individual card ────────────────────────────────────── */
 .vs-card {
+  appearance: none;
   background: var(--surface-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 3px;
+  border-radius: 4px;
   padding: 1.4rem 1rem;
   text-align: left;
   cursor: pointer;
@@ -53,6 +54,14 @@
   align-items: center;
   justify-content: center;
   min-height: 5.5rem;
+  box-shadow: none;
+  outline: none;
+}
+
+.vs-card-header,
+.vs-card-title,
+.vs-card-icon {
+  background: transparent;
 }
 
 .vs-card:hover {

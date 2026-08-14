@@ -4431,7 +4431,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                   <div className="deals-crm-pagination">
                     <button
                       type="button"
-                      className="deals-crm-pagination-button"
+                      className="deals-crm-pagination-button btn-red-theme"
                       disabled={ownerScopedCurrentPageSafe === 1}
                       onClick={() => setOwnerScopedPage((currentValue) => Math.max(1, currentValue - 1))}
                     >
@@ -4451,7 +4451,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
                     <button
                       type="button"
-                      className="deals-crm-pagination-button"
+                      className="deals-crm-pagination-button btn-red-theme"
                       disabled={ownerScopedCurrentPageSafe === ownerScopedTotalPages}
                       onClick={() => setOwnerScopedPage((currentValue) => Math.min(ownerScopedTotalPages, currentValue + 1))}
                     >
@@ -5302,7 +5302,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
                   <div className="deals-crm-pagination">
                     <button
                       type="button"
-                      className="deals-crm-pagination-button"
+                      className="deals-crm-pagination-button btn-red-theme"
                       disabled={currentPageSafe === 1}
                       onClick={() => setCurrentPage((currentValue) => Math.max(1, currentValue - 1))}
                     >
@@ -5322,7 +5322,7 @@ const Deals = ({ isAdmin = false, variantKey = 'default', customViewDefinition =
 
                     <button
                       type="button"
-                      className="deals-crm-pagination-button"
+                      className="deals-crm-pagination-button btn-red-theme"
                       disabled={currentPageSafe === totalPages}
                       onClick={() => setCurrentPage((currentValue) => Math.min(totalPages, currentValue + 1))}
                     >

@@ -1235,7 +1235,7 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
           rowActionsEnabled={rowActionsEnabled}
           rowActions={rowActions}
           mainButtonBehavior={view.mainButtonBehavior}
-          selectable={!useExactAccountListTable}
+          selectable={!useExactAccountListTable && activeStage !== 'daily_fresh_leads' && activeStage !== 'no_follow_leads' && variantKey !== 'dailyFreshLeads' && variantKey !== 'noFollowLeads'}
           showSerialNumber={!useExactAccountListTable}
           selectedRowIds={selectedAccountIds}
           onSelectionChange={setSelectedAccountIds}

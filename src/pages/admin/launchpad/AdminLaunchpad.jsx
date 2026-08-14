@@ -187,11 +187,7 @@ const AdminLaunchpad = () => {
             </section>
           </div>
 
-          <div className="lp-expiry-bar">
-            <span>Your CRM account has expired. Kindly process the payment.</span>
-            {' '}
-            <a href="#renew" className="lp-expiry-link">Renew CRM Account!</a>
-          </div>
+          {/* Expiry bar removed as requested */}
         </main>
 
         <RightPanel />

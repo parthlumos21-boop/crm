@@ -184,7 +184,7 @@
 }
 
 .summary-report-card-accent {
-  background: linear-gradient(180deg, #39b7d6 0%, #279bbc 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
 }
 
 .summary-report-card--accounts {
@@ -192,8 +192,10 @@
   background: var(--surface-app);
 }
 
-.summary-report-card--accounts .summary-report-card-accent {
-  background: linear-gradient(180deg, #64b77a 0%, #3f965b 100%);
+.summary-report-card--accounts .summary-report-card-accent,
+.summary-report-card--customers .summary-report-card-accent,
+.summary-report-card--deals .summary-report-card-accent {
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
 }
 
 .summary-report-card--accounts .summary-report-card-header h2 {
@@ -456,7 +458,7 @@
 
 .monthly-status-icon-btn--save {
   border-color: var(--text-primary);
-  background: linear-gradient(180deg, #2ca6e0 0%, #1f84be 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
 }
 
@@ -496,7 +498,7 @@
 
 .monthly-status-action-btn--save {
   border-color: var(--text-primary);
-  background: linear-gradient(180deg, #2ca6e0 0%, #1f84be 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
 }
 
@@ -643,7 +645,7 @@
 
 .monthly-status-subpanel-title {
   padding: 0.75rem 0.95rem;
-  background: linear-gradient(180deg, #2ca6e0 0%, #1f84be 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
   font-size: 0.82rem;
   font-weight: 800;
@@ -706,7 +708,7 @@
 
 .monthly-status-summary-banner {
   padding: 0.7rem 1rem;
-  background: linear-gradient(180deg, #cbe39d 0%, #a9cf67 100%);
+  background: linear-gradient(180deg, #fca5a5 0%, #ef4444 100%);
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -755,7 +757,7 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: linear-gradient(180deg, #44a6d6 0%, #2f90c1 100%);
+  background: #740A03;
   color: #ffffff;
   font-weight: 700;
   min-width: 92px;
@@ -773,7 +775,7 @@
 
 .monthly-status-summary-table thead th:first-child {
   z-index: 3;
-  background: linear-gradient(180deg, #44a6d6 0%, #2f90c1 100%);
+  background: #740A03;
 }
 
 .monthly-status-summary-row-total td {
@@ -1234,7 +1236,7 @@
 }
 
 [data-theme="dark"] .summary-reports-page :is(th, .monthly-status-summary-table th) {
-  background: linear-gradient(180deg, #43a9d1 0%, #2a8eb8 100%) !important;
+  background: #740A03 !important;
   border-color: var(--text-primary) !important;
   color: #f8fcff !important;
 }

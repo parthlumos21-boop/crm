@@ -32,6 +32,7 @@ const LoginBrandHeader = ({
   fallbackText = 'SWATI',
   logoClassName = '',
   markClassName = '',
+  forceShowHint = false,
 }) => {
   const LogoWrapper = onLogoClick ? 'button' : 'div'
   const wrapperProps = onLogoClick ? {
@@ -58,7 +59,7 @@ const LoginBrandHeader = ({
           ) : (
             <div className="login-brand-fallback">{fallbackText}</div>
           )}
-          {logoHint ? <span className="login-brand-hint">{logoHint}</span> : null}
+          {logoHint ? <span className={`login-brand-hint ${forceShowHint ? 'login-brand-hint--force' : ''}`.trim()}>{logoHint}</span> : null}
         </LogoWrapper>
       )}
       <div className="login-brand-crm" style={glowColor ? { '--crm-glow-color': glowColor } : undefined}>CRM</div>
@@ -71,6 +72,14 @@ const Login = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+  const [showAdminHint, setShowAdminHint] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAdminHint(false)
+    }, 60000)
+    return () => clearTimeout(timer)
+  }, [])
   
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -258,6 +267,7 @@ const Login = () => {
               markClassName={isLumosLogo ? 'login-brand-mark--lumos' : ''}
               onLogoClick={() => navigate('/admin/login')}
               logoHint="Click for admin login"
+              forceShowHint={showAdminHint}
               glowColor={setupStatus?.loginBrandGlowColor}
             />
             <h2>User Login</h2>

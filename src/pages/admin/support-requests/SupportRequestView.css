@@ -55,8 +55,8 @@
   gap: 0.65rem;
   min-width: 132px;
   min-height: 2.2rem;
-  border: 1px solid var(--border-subtle);
-  background: linear-gradient(180deg, #55c66f 0%, #2f9b49 100%);
+  border: 1px solid #E31B23;
+  background: #E31B23;
   color: #ffffff;
   padding: 0 0.8rem;
   font: inherit;
@@ -121,8 +121,8 @@
   min-height: 2.6rem;
   border: 0;
   border-top: 1px solid var(--border-subtle);
-  background: linear-gradient(180deg, #bde18d 0%, #9dcc65 100%);
-  color: var(--text-primary);
+  background: #E31B23;
+  color: #ffffff;
   font: inherit;
   font-size: 1rem;
   font-weight: 800;
@@ -144,7 +144,7 @@
 .sr-status-board-columns {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(300px, 1fr);
+  grid-auto-columns: minmax(250px, 250px);
   grid-template-columns: none;
   gap: 0.75rem;
   width: max-content;
@@ -152,21 +152,24 @@
 }
 
 .sr-status-board-column {
-  min-width: 300px;
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-card);
+  min-width: 250px;
+  border: 1px solid #E1E4E8;
+  background: #ffffff !important;
 }
 
 .sr-status-board-column-header {
-  min-height: 2.2rem;
-  padding: 0.55rem 0.8rem;
-  border: 1px solid var(--border-subtle);
+  height: 34px;
+  padding: 0 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #E1E4E8;
   color: #ffffff;
-  background: linear-gradient(180deg, #4fc0de 0%, #28a5ca 100%);
+  background: #E31B23;
   text-align: center;
-  font-size: 0.95rem;
-  font-weight: 800;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  font-size: 13px;
+  font-weight: bold;
+  box-shadow: none;
 }
 
 .sr-status-board-column-body {
@@ -176,6 +179,7 @@
   flex-direction: column;
   overflow-y: auto;
   gap: 0.5rem;
+  background: #ffffff !important;
 }
 
 .sr-status-board-card {
@@ -251,15 +255,15 @@
   position: absolute;
   top: 1rem;
   z-index: 5;
-  width: 2rem;
-  height: 2.25rem;
+  width: 34px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-subtle);
-  color: #ffffff;
-  background: var(--surface-app);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid #E1E4E8;
+  color: #9CA3AF;
+  background: #ffffff;
+  box-shadow: none;
   cursor: pointer;
 }
 
@@ -1061,11 +1065,7 @@
   border-color: var(--glass-border) !important;
 }
 
-.sr-status-board-column-header {
-  border-color: var(--admin-red-border, #b91c1c) !important;
-  background: var(--admin-red, #dc2626) !important;
-  color: #ffffff !important;
-}
+
 
 .sr-status-board-card,
 .sr-status-board-card:hover {
@@ -1095,3 +1095,209 @@
   border: 0;
   padding: 0;
 }
+
+
+
+
+/* Light Mode Overrides for Kanban Board to prevent index.css global poisoning */
+html.is-user:not([data-theme="dark"]) body #root .layout--user .support-request-view-page,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .sr-status-board-toolbar,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .sr-status-board-column,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .sr-status-board-column-body,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .sr-status-board-card {
+  background: #0d1117 !important;
+  background-color: #0d1117 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f0f6fc !important;
+  box-shadow: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .sr-status-board-shell {
+  background: #161b27 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .sr-status-board-column-header {
+  background: #161b27 !important;
+  border-top: 3px solid #E31B23 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .sr-status-board-column-header h3,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .sr-status-board-column-header span,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .sr-status-board-column-header strong {
+  color: #f0f6fc !important;
+  -webkit-text-fill-color: #f0f6fc !important;
+}
+
+/* Final requested SR board skin: red headers/dropdowns, white bodies, flat enterprise board. */
+.support-request-view-page {
+  background: #f5f6f8 !important;
+}
+
+.support-request-view-page .sr-status-board-shell {
+  min-height: auto !important;
+  border: 1px solid #E1E4E8 !important;
+  border-radius: 0 0 6px 6px !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.support-request-view-page .sr-status-board-toolbar {
+  margin: 0 !important;
+  padding: 10px 14px !important;
+  border: 1px solid #E1E4E8 !important;
+  border-top: 0 !important;
+  border-radius: 0 0 6px 6px !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.support-request-view-page .sr-status-board-toolbar h1 {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+}
+
+.support-request-view-page .sr-status-board-toolbar p {
+  color: #374151 !important;
+  -webkit-text-fill-color: #374151 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.support-request-view-page :is(.sr-status-filter-trigger, .sr-status-filter-load) {
+  border-color: #E31B23 !important;
+  background: #E31B23 !important;
+  background-color: #E31B23 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.support-request-view-page :is(.sr-status-filter-trigger, .sr-status-filter-load) :is(svg, span) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+.support-request-view-page .sr-status-board-wrap {
+  padding: 10px 40px 12px !important;
+  background: #f5f6f8 !important;
+}
+
+.support-request-view-page .sr-status-board-scroll {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.support-request-view-page .sr-status-board-columns {
+  grid-auto-columns: minmax(250px, 250px) !important;
+  gap: 12px !important;
+  min-width: max-content !important;
+}
+
+.support-request-view-page .sr-status-board-column {
+  min-width: 250px !important;
+  border: 1px solid #E1E4E8 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.support-request-view-page .sr-status-board-column-header {
+  height: 34px !important;
+  min-height: 34px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #E1E4E8 !important;
+  background: #E31B23 !important;
+  background-color: #E31B23 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-family: Arial, Roboto, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+
+.support-request-view-page .sr-status-board-column-body {
+  min-height: 184px !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+.support-request-view-page .sr-status-board-empty {
+  min-height: 184px !important;
+}
+
+.support-request-view-page .sr-status-board-card {
+  margin: 8px !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+.support-request-view-page .sr-status-board-edge {
+  top: 10px !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 1px solid #E1E4E8 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #9CA3AF !important;
+  -webkit-text-fill-color: #9CA3AF !important;
+  box-shadow: none !important;
+}
+
+.support-request-view-page .sr-status-board-edge svg {
+  color: #9CA3AF !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .support-request-view-page,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .support-request-view-page :is(
+  .sr-status-board-shell,
+  .sr-status-board-toolbar,
+  .sr-status-board-column,
+  .sr-status-board-column-body
+) {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  border-color: #E1E4E8 !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .support-request-view-page .sr-status-board-column-header,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .support-request-view-page :is(.sr-status-filter-trigger, .sr-status-filter-load) {
+  border-color: #E31B23 !important;
+  background: #E31B23 !important;
+  background-color: #E31B23 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html.is-user:not([data-theme="dark"]) body #root .layout--user .support-request-view-page .sr-status-board-column-header *,
+html.is-user:not([data-theme="dark"]) body #root .layout--user .support-request-view-page :is(.sr-status-filter-trigger, .sr-status-filter-load) :is(svg, span) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+

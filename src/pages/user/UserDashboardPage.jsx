@@ -215,7 +215,36 @@ const UserDashboardPage = () => {
         </div>
       </div>
 
-      <div className="ud-content-grid">
+      <div className="ud-content-grid ud-content-grid--3col">
+        <div className="ud-card">
+          <div className="ud-card-header">
+            <h3>Recent Deals</h3>
+            <button type="button" className="ud-view-all-btn" onClick={() => navigate('/deals')}>
+              View All &rarr;
+            </button>
+          </div>
+          <div className="ud-list">
+            {recentDeals.length > 0 ? recentDeals.map((deal) => (
+              <div key={deal.id} className="ud-list-item">
+                <div className="ud-item-info">
+                  <div className="ud-item-title">{deal.name || '-'}</div>
+                  <div className="ud-item-desc">
+                    <Badge variant={getStatusColor(deal.status)}>
+                      {deal.status || '-'}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="ud-item-meta">
+                  <div className="ud-item-value">{formatCurrency(deal.value || 0)}</div>
+                  <div className="ud-item-date">{formatDate(deal.createdAt)}</div>
+                </div>
+              </div>
+            )) : (
+              <div className="ud-empty-state">No deals available</div>
+            )}
+          </div>
+        </div>
+
         <div className="ud-card">
           <div className="ud-card-header">
             <h3>To Do List</h3>
@@ -261,35 +290,6 @@ const UserDashboardPage = () => {
 
         <div className="ud-card">
           <div className="ud-card-header">
-            <h3>Recent Deals</h3>
-            <button type="button" className="ud-view-all-btn" onClick={() => navigate('/deals')}>
-              View All &rarr;
-            </button>
-          </div>
-          <div className="ud-list">
-            {recentDeals.length > 0 ? recentDeals.map((deal) => (
-              <div key={deal.id} className="ud-list-item">
-                <div className="ud-item-info">
-                  <div className="ud-item-title">{deal.name || '-'}</div>
-                  <div className="ud-item-desc">
-                    <Badge variant={getStatusColor(deal.status)}>
-                      {deal.status || '-'}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="ud-item-meta">
-                  <div className="ud-item-value">{formatCurrency(deal.value || 0)}</div>
-                  <div className="ud-item-date">{formatDate(deal.createdAt)}</div>
-                </div>
-              </div>
-            )) : (
-              <div className="ud-empty-state">No deals available</div>
-            )}
-          </div>
-        </div>
-
-        <div className="ud-card">
-          <div className="ud-card-header">
             <h3>Upcoming Tasks</h3>
           </div>
           <div className="ud-list">
@@ -313,30 +313,6 @@ const UserDashboardPage = () => {
         </div>
       </div>
 
-      <div className="ud-card">
-        <div className="ud-card-header">
-          <h3>Live Notifications</h3>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{latestNotifications.length} items</span>
-        </div>
-        <div className="ud-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-          {latestNotifications.length > 0 ? latestNotifications.map((notification) => (
-            <div key={notification.id} className="ud-list-item">
-              <div className="ud-item-info">
-                <div className="ud-item-title">{notification.title || 'Notification'}</div>
-                <div className="ud-item-desc">{notification.message || '-'}</div>
-              </div>
-              <div className="ud-item-meta">
-                <Badge variant={getStatusColor(notification.type === 'error' ? 'lost' : notification.type)}>
-                  {notification.type || 'info'}
-                </Badge>
-                <div className="ud-item-date">{formatDate(notification.timestamp)}</div>
-              </div>
-            </div>
-          )) : (
-            <div className="ud-empty-state" style={{ gridColumn: '1 / -1' }}>No notifications yet</div>
-          )}
-        </div>
-      </div>
     </div>
   )
 }

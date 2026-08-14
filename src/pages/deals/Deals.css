@@ -3441,3 +3441,28 @@
 [data-theme="dark"] .deals-ownerwise-table td {
   color: var(--text-primary) !important;
 }
+
+/* Deals Table Red Theme */
+html.is-user:not([data-theme="dark"]) .deals-page .deals-crm-table,
+html.is-user:not([data-theme="dark"]) .deals-page .deals-search-table {
+  border: 1px solid #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .deals-page .deals-crm-table th,
+html.is-user:not([data-theme="dark"]) .deals-page .deals-crm-table td,
+html.is-user:not([data-theme="dark"]) .deals-page .deals-search-table th,
+html.is-user:not([data-theme="dark"]) .deals-page .deals-search-table td {
+  border: 1px solid #E51F25 !important;
+  color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .deals-page .deals-crm-table .deals-crm-number-button-label,
+html.is-user:not([data-theme="dark"]) .deals-page .deals-crm-table .deals-crm-number-button-content {
+  color: #E51F25 !important;
+}
+
+html.is-user:not([data-theme="dark"]) .deals-page .deals-crm-page-number.deals-crm-page-number-active {
+  background-color: #E51F25 !important;
+  border-color: #C9151B !important;
+  color: #FFFFFF !important;
+}

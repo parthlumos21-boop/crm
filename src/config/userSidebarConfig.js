@@ -83,7 +83,6 @@ export const USER_SIDEBAR_GROUPS = [
       { label: 'Add Deal', to: '/deals/add' },
       { label: 'View Deal', to: '/deals/view' },
       { label: 'Search Deal', to: '/deals/search' },
-      { label: 'Project Details', to: '/deals/project-details' },
     ],
   },
   {

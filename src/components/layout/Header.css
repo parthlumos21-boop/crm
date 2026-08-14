@@ -1367,3 +1367,58 @@ html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hd
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
+
+/* Final admin night header pass: username and utility icons must remain visible. */
+[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn,
+[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn:hover,
+[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn:focus-visible,
+[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn[aria-expanded='true'] {
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  background: rgba(116, 10, 3, 0.18) !important;
+  background-color: rgba(116, 10, 3, 0.18) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn :is(.hdr-avatar-icon, .hdr-username, .hdr-caret, svg),
+[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn svg * {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+[data-theme="dark"] .header.header--admin .header-action-cluster .hdr-icon-btn {
+  border: 1px solid rgba(239, 68, 68, 0.36) !important;
+  background: rgba(116, 10, 3, 0.2) !important;
+  background-color: rgba(116, 10, 3, 0.2) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+[data-theme="dark"] .header.header--admin .header-action-cluster .hdr-icon-btn:hover,
+[data-theme="dark"] .header.header--admin .header-action-cluster .hdr-icon-btn:focus-visible {
+  border-color: #920d04 !important;
+  background: #740A03 !important;
+  background-color: #740A03 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+[data-theme="dark"] .header.header--admin .header-action-cluster .hdr-icon-btn svg,
+[data-theme="dark"] .header.header--admin .header-action-cluster .hdr-icon-btn svg * {
+  display: block !important;
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}

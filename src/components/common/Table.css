@@ -248,3 +248,18 @@
   background: rgba(0, 0, 0, 0.4) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
+
+/* Final CRM table header skin: all shared tables use the requested maroon header. */
+.layout table th,
+.layout .table-header-cell,
+.layout [class*="table"] th,
+[data-theme="dark"] .layout table th,
+[data-theme="dark"] .layout .table-header-cell,
+[data-theme="dark"] .layout [class*="table"] th {
+  border-color: #5f0803 !important;
+  background: #740A03 !important;
+  background-color: #740A03 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}

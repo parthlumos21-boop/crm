@@ -1197,7 +1197,7 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
             <ExcelExportActionButton
               label="Download Excel"
               title="Download all reminders as Excel"
-              className="active-reminders-header-download"
+              className="active-reminders-header-download btn-red-theme"
               onClick={handleExportAllActiveRows}
               disabled={reminders.length === 0}
             />
@@ -1361,7 +1361,7 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
                         <ExcelExportActionButton
                           label="Export"
                           title="Download selected user's active reminders Excel"
-                          className="active-reminders-detail-btn active-reminders-detail-btn-orange"
+                          className="active-reminders-detail-btn btn-red-theme"
                           onClick={handleExportSelectedOwnerRows}
                           disabled={detailBaseRows.length === 0}
                         />
@@ -1539,9 +1539,9 @@ const AdminRemindersPage = ({ variantKey = 'active' }) => {
         <div className="support-request-legacy-footer">
           <div className="support-request-legacy-footer-total">Total records: {filteredRows.length}</div>
           <div className="support-request-legacy-footer-pagination">
-            <button type="button" onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage === 1}>prev</button>
+            <button type="button" className="btn-red-theme" onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage === 1}>prev</button>
             <span>{currentPage}</span>
-            <button type="button" onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} disabled={currentPage === totalPages}>next</button>
+            <button type="button" className="btn-red-theme" onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} disabled={currentPage === totalPages}>next</button>
           </div>
         </div>
       </div>

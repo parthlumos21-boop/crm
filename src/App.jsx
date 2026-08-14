@@ -186,7 +186,7 @@ function App() {
                 <Route path="deals/view/:dealId" element={<AdminDealDetailPage />} />
                 <Route path="deals/manage/:dealId" element={<AdminManageDealPage />} />
                 <Route path="deals/owner-wise" element={<Navigate to="/deals/view" replace />} />
-                <Route path="deals/project-details" element={<Deals variantKey="projectDetails" />} />
+
                 <Route path="deals/ahmadabad" element={<Deals variantKey="ahmadabad" />} />
                 <Route path="deals/vadodara" element={<Deals variantKey="vadodara" />} />
                 <Route path="deals/converted" element={<ConvertedDeals />} />
@@ -296,7 +296,7 @@ function App() {
                 <Route path="deals/view" element={<Deals isAdmin variantKey="view" />} />
                 <Route path="deals/converted" element={<ConvertedDeals isAdmin />} />
                 <Route path="deals/owner-wise" element={<Navigate to="/admin/deals/view" replace />} />
-                <Route path="deals/project-details" element={<Deals isAdmin variantKey="projectDetails" />} />
+
                 <Route path="deals/ahmadabad" element={<Deals isAdmin variantKey="ahmadabad" />} />
                 <Route path="deals/vadodara" element={<Deals isAdmin variantKey="vadodara" />} />
 

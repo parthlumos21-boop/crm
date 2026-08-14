@@ -55,16 +55,17 @@
   margin: 0.95rem 1rem 0;
   padding: 0.6rem 0.8rem;
   border: 1px solid var(--border-subtle);
-  background: linear-gradient(180deg, rgba(234, 247, 255, 0.95) 0%, rgba(228, 244, 255, 0.88) 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
 }
 
 .customer-map-view-summary-item {
-  color: var(--text-primary);
+  color: #ffffff;
   font-size: 0.82rem;
   font-weight: 700;
 }
 
 .customer-map-view-summary-item-right {
+  color: #ffffff;
   text-align: right;
   margin-left: auto;
 }

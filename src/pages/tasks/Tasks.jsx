@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { FaBell, FaCheck, FaEnvelope, FaExternalLinkAlt, FaRedo, FaTimes } from 'react-icons/fa'
+import { FaBell, FaEnvelope, FaExternalLinkAlt } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
@@ -15,9 +15,6 @@ import AddReminderModal from '../../components/common/AddReminderModal'
 import {
   getStandaloneReminders,
   subscribeStandaloneReminders,
-  closeStandaloneReminder,
-  reopenStandaloneReminder,
-  deleteStandaloneReminder,
 } from '../../features/standaloneReminders/standaloneReminderStorage'
 import { exportExcelWorkbook } from '../../utils/excelExport'
 import { formatDate, getPriorityColor } from '../../utils/helpers'
@@ -33,8 +30,6 @@ const Tasks = () => {
     createTask,
     updateTask,
     deleteTask,
-    updateReminder,
-    deleteReminder,
     addNotification,
     clearNotification,
   } = useData()
@@ -158,47 +153,6 @@ const Tasks = () => {
     })
   }
 
-  const handleCloseReminder = async (reminder) => {
-    if (reminder.sourceKind === 'mongo') {
-      const result = await updateReminder(reminder.id, { status: 'closed' })
-      if (!result.success) {
-        addNotification('error', 'Close reminder', result.message || 'Unable to close reminder.')
-        return
-      }
-    } else {
-      closeStandaloneReminder(reminder.id, user?.name || '')
-    }
-    addNotification('success', 'Reminder closed', 'Reminder moved to closed list.')
-  }
-
-  const handleReopenReminder = async (reminder) => {
-    if (reminder.sourceKind === 'mongo') {
-      const result = await updateReminder(reminder.id, { status: 'scheduled' })
-      if (!result.success) {
-        addNotification('error', 'Reopen reminder', result.message || 'Unable to reopen reminder.')
-        return
-      }
-    } else {
-      reopenStandaloneReminder(reminder.id)
-    }
-    addNotification('info', 'Reminder active', 'Reminder reopened in your to-do list.')
-  }
-
-  const handleDeleteReminder = async (reminder) => {
-    if (window.confirm('Delete this reminder?')) {
-      if (reminder.sourceKind === 'mongo') {
-        const result = await deleteReminder(reminder.id)
-        if (!result.success) {
-          addNotification('error', 'Delete reminder', result.message || 'Unable to delete reminder.')
-          return
-        }
-      } else {
-        deleteStandaloneReminder(reminder.id)
-      }
-      addNotification('success', 'Reminder deleted', 'Reminder removed from your to-do list.')
-    }
-  }
-
   const rememberDismissedMessage = (id) => {
     const nextIds = Array.from(new Set([String(id), ...dismissedMessageIds])).slice(0, 300)
     setDismissedMessageIds(nextIds)
@@ -277,6 +231,7 @@ const Tasks = () => {
   return (
     <div className="tasks-page">
       {/* ── Linked Reminders Panel ── */}
+      <div className="tasks-top-grid">
       <div className="tasks-reminders-section tasks-communications-section">
         <div className="tasks-reminders-header">
           <div className="tasks-reminders-title">
@@ -320,30 +275,12 @@ const Tasks = () => {
                 <div className="tasks-reminder-actions">
                   <button
                     type="button"
-                    className="tasks-reminder-btn tasks-reminder-btn--close"
-                    onClick={() => handleCompleteCommunicationItem(item)}
-                    title="Mark as done"
-                    aria-label="Mark as done"
-                  >
-                    <FaCheck />
-                  </button>
-                  <button
-                    type="button"
                     className="tasks-reminder-btn tasks-reminder-btn--open"
                     onClick={() => navigate(item.route)}
                     title="Open linked page"
                     aria-label="Open linked page"
                   >
                     <FaExternalLinkAlt />
-                  </button>
-                  <button
-                    type="button"
-                    className="tasks-reminder-btn tasks-reminder-btn--delete"
-                    onClick={() => handleCloseCommunicationItem(item)}
-                    title="Close"
-                    aria-label="Close"
-                  >
-                    <FaTimes />
                   </button>
                 </div>
               </div>
@@ -394,42 +331,11 @@ const Tasks = () => {
                     {reminder.status === 'closed' && ' · Closed'}
                   </div>
                 </div>
-                <div className="tasks-reminder-actions">
-                  {reminder.status === 'active' ? (
-                    <button
-                      type="button"
-                      className="tasks-reminder-btn tasks-reminder-btn--close"
-                      onClick={() => handleCloseReminder(reminder)}
-                      title="Close reminder"
-                      aria-label="Close reminder"
-                    >
-                      <FaCheck />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="tasks-reminder-btn tasks-reminder-btn--reopen"
-                      onClick={() => handleReopenReminder(reminder)}
-                      title="Reopen reminder"
-                      aria-label="Reopen reminder"
-                    >
-                      <FaRedo />
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="tasks-reminder-btn tasks-reminder-btn--delete"
-                    onClick={() => handleDeleteReminder(reminder)}
-                    title="Delete reminder"
-                    aria-label="Delete reminder"
-                  >
-                    <FaTimes />
-                  </button>
-                </div>
               </div>
             ))
           )}
         </div>
+      </div>
       </div>
 
       <Card

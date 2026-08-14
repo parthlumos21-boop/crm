@@ -433,15 +433,15 @@
   width: 100%;
   min-height: 3.2rem;
   margin-top: 0.1rem;
-  border: 1px solid rgba(47, 111, 165, 0.28);
+  border: 1px solid rgba(220, 38, 38, 0.4);
   border-radius: 16px;
-  background: linear-gradient(180deg, #4f97d1 0%, #2f75b3 100%);
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
   padding: 0.62rem 0.78rem;
   text-align: left;
   cursor: pointer;
   box-shadow:
-    0 14px 24px rgba(47, 117, 179, 0.18),
+    0 14px 24px rgba(220, 38, 38, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
@@ -480,7 +480,7 @@
 .rp-ticket-add-btn:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 18px 28px rgba(47, 117, 179, 0.22),
+    0 18px 28px rgba(220, 38, 38, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 

@@ -114,8 +114,15 @@
   margin-bottom: 1.5rem;
 }
 
+.ud-content-grid.ud-content-grid--3col {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 @media (max-width: 1024px) {
   .ud-content-grid {
+    grid-template-columns: 1fr;
+  }
+  .ud-content-grid.ud-content-grid--3col {
     grid-template-columns: 1fr;
   }
 }

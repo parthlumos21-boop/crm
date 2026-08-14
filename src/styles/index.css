@@ -1751,8 +1751,11 @@ html.is-user[data-theme="dark"] *::after {
 
 .layout :where(table th, .table-header-cell, [class*="table"] th) {
   border-color: var(--crm-shell-border) !important;
-  background: color-mix(in srgb, var(--surface-muted) 82%, var(--surface-card)) !important;
-  color: var(--text-primary) !important;
+  background: #740A03 !important;
+  background-color: #740A03 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 .layout :where(table td, .table-cell, [class*="table"] td) {
@@ -1813,10 +1816,10 @@ body:not([data-theme="dark"]) .btn-red-theme:hover {
    Admin red action theme
    ============================================================ */
 :root {
-  --admin-red: #dc2626;
-  --admin-red-hover: #b91c1c;
-  --admin-red-soft: rgba(220, 38, 38, 0.1);
-  --admin-red-border: #b91c1c;
+  --admin-red: #740A03;
+  --admin-red-hover: #920d04;
+  --admin-red-soft: rgba(116, 10, 3, 0.12);
+  --admin-red-border: #920d04;
 }
 
 [data-theme="dark"] {
