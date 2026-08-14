@@ -4722,3 +4722,1236 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .adm
   opacity: 1 !important;
   visibility: visible !important;
 }
+
+/* ============================================================
+   Light mode #b91c1c table/action unification for admin + user.
+   Covers account, customer, deal, support, reminder, quotation,
+   right-panel CRM Support, and Outlook entry points.
+   ============================================================ */
+html:not([data-theme="dark"]) body {
+  --admin-red: #b91c1c;
+  --admin-red-hover: #991b1b;
+  --admin-red-border: #b91c1c;
+  --admin-red-soft: rgba(185, 28, 28, 0.12);
+  --user-crm-red: #b91c1c;
+  --user-crm-red-dark: #991b1b;
+  --user-crm-red-soft: #fff5f5;
+  --color-primary: #b91c1c;
+  --color-primary-hover: #991b1b;
+  --color-primary-border: rgba(185, 28, 28, 0.32);
+  --color-primary-soft: #fff5f5;
+  --color-danger: #b91c1c;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-board-table,
+  .admin-customers-grid-table,
+  .deals-crm-table,
+  .deals-table,
+  .support-request-legacy-table,
+  .aqp-support-table,
+  .aqp-quotation-table,
+  .quotation-manager-table,
+  .quotations-table,
+  table
+) {
+  border-color: #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-board-table,
+  .admin-customers-grid-table,
+  .deals-crm-table,
+  .deals-table,
+  .support-request-legacy-table,
+  .aqp-support-table,
+  .aqp-quotation-table,
+  .quotation-manager-table,
+  .quotations-table
+) :is(thead th, thead td, .table-header-cell),
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-board-table,
+  .admin-customers-grid-table,
+  .deals-crm-table,
+  .support-request-legacy-table,
+  .aqp-support-table,
+  .aqp-quotation-table
+) .support-request-legacy-th-content {
+  border-color: #b91c1c !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-board-table,
+  .admin-customers-grid-table,
+  .deals-crm-table,
+  .deals-table,
+  .support-request-legacy-table,
+  .aqp-support-table,
+  .aqp-quotation-table,
+  .quotation-manager-table,
+  .quotations-table
+) :is(thead th, thead td, .table-header-cell) :is(span, strong, small, button, svg, path, circle, rect, line, polyline, polygon),
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .support-request-legacy-th-content :is(span, strong, small, button, svg) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-filter-row th,
+  .admin-customers-grid-filter-row th,
+  .deals-crm-filter-row th,
+  .deals-filter-row th,
+  .support-request-legacy-filter-row th,
+  .support-request-legacy-filter-row td,
+  .aqp-support-search-cell,
+  .quotation-filter-row th
+) {
+  border-color: #f3b6b6 !important;
+  background: #fff5f5 !important;
+  background-color: #fff5f5 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-board-table tbody td,
+  .admin-customers-grid-table tbody td,
+  .deals-crm-table tbody td,
+  .support-request-legacy-table tbody td,
+  .aqp-support-table tbody td,
+  .aqp-quotation-table tbody td,
+  .quotation-manager-table tbody td,
+  .quotations-table tbody td
+) {
+  border-color: #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-cell-link,
+  .admin-accounts-cell-link:hover,
+  .admin-accounts-cell-link:focus-visible,
+  .admin-accounts-cell-menu-trigger,
+  .admin-accounts-cell-menu-trigger:hover,
+  .admin-accounts-cell-menu-trigger:focus-visible,
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button:hover,
+  .admin-customers-grid-number-button:focus-visible,
+  .deals-crm-number-button,
+  .deals-crm-number-button:hover,
+  .deals-crm-number-button:focus-visible,
+  .deals-deal-number-link,
+  .deals-deal-number-link:hover,
+  .deals-deal-number-link:focus-visible,
+  .support-request-row-menu-trigger,
+  .support-request-row-menu-trigger:hover,
+  .support-request-row-menu-trigger:focus-visible,
+  .support-request-related-number-button,
+  .support-request-related-number-button:hover,
+  .support-request-related-number-button:focus-visible,
+  .support-request-sr-number-chip,
+  .support-request-sr-number-chip:hover,
+  .support-request-sr-number-chip:focus-visible,
+  .sr-list-sr-number,
+  .sr-list-sr-number:hover,
+  .sr-list-sr-number:focus-visible,
+  .aqp-support-number-btn,
+  .aqp-support-number-btn:hover,
+  .aqp-support-number-btn:focus-visible,
+  .aqp-quotation-number-btn,
+  .aqp-quotation-number-btn:hover,
+  .aqp-quotation-number-btn:focus-visible
+) {
+  border-color: #b91c1c !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-cell-link,
+  .admin-accounts-cell-menu-trigger,
+  .admin-customers-grid-number-button,
+  .deals-crm-number-button,
+  .deals-deal-number-link,
+  .support-request-row-menu-trigger,
+  .support-request-related-number-button,
+  .support-request-sr-number-chip,
+  .sr-list-sr-number,
+  .aqp-support-number-btn,
+  .aqp-quotation-number-btn
+) :is(span, strong, small, svg, path, circle, rect, line, polyline, polygon) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-pag-btn,
+  .admin-accounts-pag-btn:hover,
+  .admin-accounts-pag-btn:focus-visible,
+  .admin-accounts-pag-btn--active,
+  .admin-customers-grid-pagination-button,
+  .admin-customers-grid-pagination-button:hover,
+  .admin-customers-grid-pagination-button:focus-visible,
+  .admin-customers-grid-page-number,
+  .admin-customers-grid-page-number:hover,
+  .admin-customers-grid-page-number:focus-visible,
+  .admin-customers-grid-page-number-active,
+  .deals-crm-pagination-button,
+  .deals-crm-pagination-button:hover,
+  .deals-crm-pagination-button:focus-visible,
+  .deals-crm-page-number,
+  .deals-crm-page-number:hover,
+  .deals-crm-page-number:focus-visible,
+  .deals-crm-page-number-active,
+  .support-request-legacy-footer-pagination button,
+  .support-request-legacy-footer-pagination button:hover,
+  .support-request-legacy-footer-pagination button:focus-visible,
+  .support-request-legacy-footer-pagination span,
+  .aqp-support-paging-btn,
+  .aqp-support-paging-btn:hover,
+  .aqp-support-paging-btn:focus-visible,
+  .aqp-support-paging-num,
+  .aqp-support-paging-num:hover,
+  .aqp-support-paging-num:focus-visible,
+  .aqp-support-paging-num--active
+):not(:disabled) {
+  border-color: #b91c1c !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-pag-btn,
+  .admin-customers-grid-pagination-button,
+  .admin-customers-grid-page-number,
+  .deals-crm-pagination-button,
+  .deals-crm-page-number,
+  .support-request-legacy-footer-pagination button,
+  .support-request-legacy-footer-pagination span,
+  .aqp-support-paging-btn,
+  .aqp-support-paging-num
+) :is(span, strong, svg, path, circle, rect, line, polyline, polygon) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .mga-view-btn--active,
+  .admin-accounts-stage-tab-active,
+  .admin-customers-toolbar-button,
+  .admin-customers-toolbar-icon,
+  .admin-customers-filter-btn,
+  .deals-crm-toolbar-button,
+  .deals-crm-toolbar-icon,
+  .deals-ownerwise-toolbar-icon,
+  .deals-action-button,
+  .deals-icon-button,
+  .support-request-view-toolbar-button-red,
+  .active-reminders-filter-action-icon,
+  .active-reminders-filter-apply,
+  .admin-reminders-action-button,
+  .admin-my-reminders-item-action,
+  .aqp-support-toolbar-btn,
+  .aqp-support-icon-btn,
+  .aqp-action-btn,
+  .quotation-action-btn,
+  .btn-red-theme
+):not(:disabled) {
+  border-color: #b91c1c !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-page,
+  .admin-customers-page,
+  .deals-page,
+  .deals-crm-page,
+  .support-request-legacy-page,
+  .support-request-view-page,
+  .admin-my-reminders-page,
+  .active-reminders-page,
+  .aqp-page,
+  .quotations-page
+) :is(svg) {
+  color: #b91c1c;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  button,
+  .btn,
+  [role="button"]
+):not(:disabled) :is(svg, path, circle, rect, line, polyline, polygon) {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel :is(
+  .rp-action-card,
+  .rp-action-card:hover,
+  .rp-action-card:focus-visible,
+  .rp-action-card--outlook,
+  .rp-action-card--outlook:hover,
+  .rp-action-card--outlook:focus-visible
+) {
+  border-color: #b91c1c !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel :is(
+  .rp-action-card,
+  .rp-action-card--outlook
+) :is(.rp-action-card__icon, .rp-action-card__label, .rp-action-card__cta, .rp-integration-status, strong, small, span, svg, path, circle, rect, line, polyline, polygon) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Corrective light-mode table controls: keep search/filter fields readable. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-filter-input,
+  .admin-customers-grid-filter-input,
+  .deals-crm-filter-input,
+  .support-request-legacy-filter-row input,
+  .aqp-search-input,
+  .aqp-support-search-input,
+  .aqp-account-list-search-input,
+  .quotation-report-builder-filter-row input,
+  table input[type="search"],
+  table input[type="text"]
+) {
+  min-height: 1.85rem;
+  border: 1px solid #f3b6b6 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #b91c1c !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-filter-input,
+  .admin-customers-grid-filter-input,
+  .deals-crm-filter-input,
+  .support-request-legacy-filter-row input,
+  .aqp-search-input,
+  .aqp-support-search-input,
+  .aqp-account-list-search-input,
+  .quotation-report-builder-filter-row input,
+  table input[type="search"],
+  table input[type="text"]
+)::placeholder {
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-filter-input,
+  .admin-customers-grid-filter-input,
+  .deals-crm-filter-input,
+  .support-request-legacy-filter-row input,
+  .aqp-search-input,
+  .aqp-support-search-input,
+  .aqp-account-list-search-input,
+  .quotation-report-builder-filter-row input,
+  table input[type="search"],
+  table input[type="text"]
+):focus {
+  border-color: #b91c1c !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-accounts-filter-row th,
+  .admin-customers-grid-filter-row th,
+  .deals-crm-filter-row th,
+  .support-request-legacy-filter-row th,
+  .support-request-legacy-filter-row td,
+  .aqp-support-search-cell,
+  .quotation-filter-row th
+) :is(span, strong, small, label) {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+/* Customer number/account number buttons stay solid red with white readable text. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-customers-grid-number-cell,
+  .admin-customers-grid-number-menu,
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button *,
+  .admin-accounts-cell-action-wrap,
+  .admin-accounts-cell-link,
+  .admin-accounts-cell-link *,
+  .admin-accounts-cell-menu-trigger,
+  .admin-accounts-cell-menu-trigger *
+) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button:hover,
+  .admin-customers-grid-number-button:focus-visible,
+  .admin-accounts-cell-link,
+  .admin-accounts-cell-link:hover,
+  .admin-accounts-cell-link:focus-visible,
+  .admin-accounts-cell-menu-trigger,
+  .admin-accounts-cell-menu-trigger:hover,
+  .admin-accounts-cell-menu-trigger:focus-visible
+) {
+  border-color: #b91c1c !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+}
+
+/* Right-panel Outlook is border-only in light mode; CRM Support remains readable. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel :is(
+  .rp-action-card--outlook,
+  .rp-action-card--outlook:hover,
+  .rp-action-card--outlook:focus-visible
+) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel .rp-action-card--outlook :is(
+  .rp-action-card__icon,
+  .rp-action-card__label,
+  .rp-action-card__cta,
+  .rp-integration-status,
+  strong,
+  small,
+  span,
+  svg,
+  path,
+  circle,
+  rect,
+  line,
+  polyline,
+  polygon
+) {
+  color: #b91c1c !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #b91c1c !important;
+}
+
+/* Final light-mode icon corrections: integration/mail icons are border-only. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .hdr-icon-btn,
+  .hdr-icon-btn:hover,
+  .hdr-icon-btn:focus-visible,
+  .hdr-icon-btn:active,
+  .hdr-theme-toggle,
+  .hdr-theme-toggle:hover,
+  .hdr-theme-toggle:focus-visible,
+  .account-board-header-icon-btn,
+  .account-board-header-icon-btn:hover,
+  .account-board-header-icon-btn:focus-visible,
+  .admin-customers-toolbar-icon,
+  .admin-customers-toolbar-icon:hover,
+  .admin-customers-toolbar-icon:focus-visible,
+  .deals-crm-toolbar-icon,
+  .deals-crm-toolbar-icon:hover,
+  .deals-crm-toolbar-icon:focus-visible,
+  .deals-ownerwise-toolbar-icon,
+  .deals-ownerwise-toolbar-icon:hover,
+  .deals-ownerwise-toolbar-icon:focus-visible,
+  .deals-icon-button,
+  .deals-icon-button:hover,
+  .deals-icon-button:focus-visible,
+  .aqp-support-icon-btn,
+  .aqp-support-icon-btn:hover,
+  .aqp-support-icon-btn:focus-visible
+):not(:disabled) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .hdr-icon-btn,
+  .hdr-theme-toggle,
+  .account-board-header-icon-btn,
+  .admin-customers-toolbar-icon,
+  .deals-crm-toolbar-icon,
+  .deals-ownerwise-toolbar-icon,
+  .deals-icon-button,
+  .aqp-support-icon-btn
+) :is(svg, path, circle, rect, line, polyline, polygon, span) {
+  color: #b91c1c !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .hdr-icon-btn .hdr-badge {
+  border-color: #ffffff !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .hdr-dropdown-item,
+  .hdr-dropdown-item:hover,
+  .hdr-dropdown-item:focus-visible,
+  .hdr-quick-add-item,
+  .hdr-quick-add-item:hover,
+  .hdr-quick-add-item:focus-visible
+) :is(.hdr-dropdown-icon, .hdr-quick-add-icon-wrap, svg, path, circle, rect, line, polyline, polygon) {
+  border-color: #b91c1c !important;
+  color: #b91c1c !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #b91c1c !important;
+}
+
+/* Customer number buttons: force white label in customer search and my-customer grids. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page td.admin-customers-grid-number-cell :is(
+  .admin-customers-grid-number-menu,
+  .admin-customers-grid-number-button,
+  .admin-customers-grid-number-button-label,
+  .admin-customers-grid-number-button-arrow,
+  .admin-customers-grid-number-button span,
+  .admin-customers-grid-number-button svg,
+  .admin-customers-grid-number-button svg *
+) {
+  border-color: #b91c1c !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Add Support Request: headings/steps use red border accents, not red fill. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .sr-new-page :is(
+  .sr-new-header,
+  .sr-new-steps,
+  .sr-new-panel,
+  .sr-new-step,
+  .sr-new-step.is-active,
+  .sr-new-step.is-complete
+) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .sr-new-page :is(
+  .sr-new-header h1,
+  .sr-new-header p,
+  .sr-new-step-copy,
+  .sr-new-step.is-active .sr-new-step-copy,
+  .sr-new-step.is-complete .sr-new-step-copy,
+  .sr-new-field > span
+) {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .sr-new-page :is(
+  .sr-new-step-index,
+  .sr-new-step.is-active .sr-new-step-index,
+  .sr-new-step.is-complete .sr-new-step-index
+) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .sr-new-page :is(
+  .sr-new-field input,
+  .sr-new-field select,
+  .sr-new-field textarea,
+  .sr-new-searchable-select input
+) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .sr-new-page :is(
+  .sr-new-field input:focus,
+  .sr-new-field select:focus,
+  .sr-new-field textarea:focus,
+  .sr-new-searchable-select input:focus
+) {
+  border-color: #b91c1c !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+}
+
+/* Final requested light-mode CRM icon pass: red border cards, visible white icons. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel :is(
+  .rp-action-card,
+  .rp-action-card:hover,
+  .rp-action-card:focus-visible,
+  .rp-action-card:active,
+  .rp-action-card--outlook,
+  .rp-action-card--outlook:hover,
+  .rp-action-card--outlook:focus-visible,
+  .rp-ticket-add-btn,
+  .rp-ticket-add-btn:hover,
+  .rp-ticket-add-btn:focus-visible,
+  .rp-ticket-add-btn:active
+) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel :is(
+  .rp-action-card__icon,
+  .rp-action-card--outlook .rp-action-card__icon,
+  .rp-ticket-add-btn__icon
+) {
+  border: 1px solid #b91c1c !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel :is(
+  .rp-action-card__icon,
+  .rp-action-card--outlook .rp-action-card__icon,
+  .rp-ticket-add-btn__icon
+) :is(svg, path, circle, rect, line, polyline, polygon) {
+  color: #ffffff !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel :is(
+  .right-panel-section-head span,
+  .right-panel-section-head small,
+  .rp-action-card__label,
+  .rp-action-card__cta,
+  .rp-action-card__cta svg,
+  .rp-action-card__cta svg *,
+  .rp-integration-status,
+  .rp-ticket-add-btn strong,
+  .rp-ticket-add-btn small
+) {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel .rp-action-card__cta {
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .right-panel .rp-action-card__orb {
+  display: none !important;
+}
+
+/* Customer add page: headings and process steps use red borders only, no red fill. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-wizard-card :is(
+  .admin-customers-header-row,
+  .admin-customers-stepper,
+  .admin-customers-step,
+  .admin-customers-step-active
+) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-wizard-card :is(
+  .admin-customers-header-row h1,
+  .admin-customers-header-row p,
+  .admin-customers-step-label
+) {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-wizard-card :is(
+  .admin-customers-step-count,
+  .admin-customers-step-active .admin-customers-step-count
+) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-wizard-card .admin-customers-step-arrow {
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+}
+
+/* Screenshot-matched light-mode icon buttons: white fill, red border, red icon. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .hdr-icon-btn,
+  .hdr-theme-toggle,
+  .account-board-header-icon-btn,
+  .account-board-header-export-trigger,
+  .admin-accounts-toolbar-refresh-btn,
+  .admin-accounts-drawer-toolbar-icon,
+  .admin-accounts-workspace-icon-btn,
+  .admin-customers-toolbar-icon,
+  .admin-customers-toolbar-icon-active,
+  .admin-customers-icon-button,
+  .admin-customers-filter-action-btn,
+  .admin-customers-filter-btn,
+  .deals-crm-toolbar-icon,
+  .deals-crm-toolbar-icon-active,
+  .deals-crm-toolbar-icon-orange,
+  .deals-crm-toolbar-icon-green,
+  .deals-crm-toolbar-icon-panel,
+  .deals-crm-toolbar-icon-cyan,
+  .deals-crm-toolbar-icon-excel,
+  .deals-ownerwise-toolbar-icon,
+  .deals-ownerwise-toolbar-icon-active,
+  .deals-ownerwise-toolbar-icon-orange,
+  .deals-ownerwise-toolbar-icon-green,
+  .deals-ownerwise-toolbar-icon-panel,
+  .deals-ownerwise-toolbar-icon-cyan,
+  .deals-ownerwise-toolbar-icon-excel,
+  .deals-board-toolbar-icon,
+  .deals-board-toolbar-icon-active,
+  .deals-icon-button,
+  .active-reminders-filter-action-icon,
+  .active-reminders-filter-action-btn,
+  .quotation-report-icon-btn,
+  .quotation-report-icon-btn--active,
+  .quotation-builder-icon-button,
+  .aqp-report-icon-btn,
+  .aqp-report-icon-btn--active,
+  .aqp-pdf-icon-btn,
+  .aqp-pdf-icon-btn--active,
+  .aqp-support-icon-btn,
+  .qsr-icon-tool-btn,
+  .summary-report-icon-btn,
+  .monthly-status-icon-btn,
+  .mv-icon-btn,
+  .vc-icon-btn,
+  .md-icon-btn,
+  .ug-refresh-btn,
+  .sr-location-icon-btn,
+  .crm-workspace-refresh,
+  .admin-manage-deal-icon-button,
+  .cc-filter-action-btn
+):not(:disabled):not([class*="delete"]):not([class*="remove"]):not([class*="danger"]):not([class*="cancel"]):not([class*="close"]) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  border: 1px solid #b91c1c !important;
+  border-radius: 6px !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .hdr-icon-btn,
+  .hdr-theme-toggle,
+  .account-board-header-icon-btn,
+  .account-board-header-export-trigger,
+  .admin-accounts-toolbar-refresh-btn,
+  .admin-accounts-drawer-toolbar-icon,
+  .admin-accounts-workspace-icon-btn,
+  .admin-customers-toolbar-icon,
+  .admin-customers-toolbar-icon-active,
+  .admin-customers-icon-button,
+  .admin-customers-filter-action-btn,
+  .admin-customers-filter-btn,
+  .deals-crm-toolbar-icon,
+  .deals-crm-toolbar-icon-active,
+  .deals-ownerwise-toolbar-icon,
+  .deals-ownerwise-toolbar-icon-active,
+  .deals-board-toolbar-icon,
+  .deals-board-toolbar-icon-active,
+  .deals-icon-button,
+  .active-reminders-filter-action-icon,
+  .active-reminders-filter-action-btn,
+  .quotation-report-icon-btn,
+  .quotation-report-icon-btn--active,
+  .quotation-builder-icon-button,
+  .aqp-report-icon-btn,
+  .aqp-report-icon-btn--active,
+  .aqp-pdf-icon-btn,
+  .aqp-pdf-icon-btn--active,
+  .aqp-support-icon-btn,
+  .qsr-icon-tool-btn,
+  .summary-report-icon-btn,
+  .monthly-status-icon-btn,
+  .mv-icon-btn,
+  .vc-icon-btn,
+  .md-icon-btn,
+  .ug-refresh-btn,
+  .sr-location-icon-btn,
+  .crm-workspace-refresh,
+  .admin-manage-deal-icon-button,
+  .cc-filter-action-btn
+):not(:disabled):not([class*="delete"]):not([class*="remove"]):not([class*="danger"]):not([class*="cancel"]):not([class*="close"]):is(:hover, :focus-visible, :active) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .hdr-icon-btn,
+  .hdr-theme-toggle,
+  .account-board-header-icon-btn,
+  .account-board-header-export-trigger,
+  .admin-accounts-toolbar-refresh-btn,
+  .admin-accounts-drawer-toolbar-icon,
+  .admin-accounts-workspace-icon-btn,
+  .admin-customers-toolbar-icon,
+  .admin-customers-toolbar-icon-active,
+  .admin-customers-icon-button,
+  .admin-customers-filter-action-btn,
+  .admin-customers-filter-btn,
+  .deals-crm-toolbar-icon,
+  .deals-crm-toolbar-icon-active,
+  .deals-ownerwise-toolbar-icon,
+  .deals-ownerwise-toolbar-icon-active,
+  .deals-board-toolbar-icon,
+  .deals-board-toolbar-icon-active,
+  .deals-icon-button,
+  .active-reminders-filter-action-icon,
+  .active-reminders-filter-action-btn,
+  .quotation-report-icon-btn,
+  .quotation-report-icon-btn--active,
+  .quotation-builder-icon-button,
+  .aqp-report-icon-btn,
+  .aqp-report-icon-btn--active,
+  .aqp-pdf-icon-btn,
+  .aqp-pdf-icon-btn--active,
+  .aqp-support-icon-btn,
+  .qsr-icon-tool-btn,
+  .summary-report-icon-btn,
+  .monthly-status-icon-btn,
+  .mv-icon-btn,
+  .vc-icon-btn,
+  .md-icon-btn,
+  .ug-refresh-btn,
+  .sr-location-icon-btn,
+  .crm-workspace-refresh,
+  .admin-manage-deal-icon-button,
+  .cc-filter-action-btn
+):not(:disabled):not([class*="delete"]):not([class*="remove"]):not([class*="danger"]):not([class*="cancel"]):not([class*="close"]) :is(
+  svg,
+  path,
+  circle,
+  rect,
+  line,
+  polyline,
+  polygon,
+  .excel-export-button__icon,
+  .excel-export-button__chevron,
+  .account-board-header-icon-btn-shell
+) {
+  width: 16px;
+  height: 16px;
+  color: #b91c1c !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .account-board-header-export-trigger :is(
+  .excel-export-button__label,
+  .excel-export-button__chevron
+) {
+  display: none !important;
+}
+
+/* Final account search/header polish: frontend UI only. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page .admin-accounts-filter-row :is(th, td) {
+  border-color: #b91c1c !important;
+  background: #fff5f5 !important;
+  background-color: #fff5f5 !important;
+  background-image: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page .admin-accounts-filter-input {
+  display: block !important;
+  width: 100% !important;
+  min-width: 120px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 0.5rem !important;
+  border: 1px solid #b91c1c !important;
+  border-radius: 4px !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #b91c1c !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page .admin-accounts-filter-input::placeholder {
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page .admin-accounts-filter-input:focus {
+  border-color: #b91c1c !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.12) !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-wizard-card :is(
+  .admin-customers-card,
+  .admin-customers-header-row,
+  .admin-customers-stepper-wrap,
+  .admin-customers-stepper,
+  .admin-customers-step,
+  .admin-customers-step-active
+) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-wizard-card :is(
+  h1,
+  h2,
+  h3,
+  p,
+  span,
+  label,
+  .admin-customers-step-label
+):not(.admin-customers-step-count):not(.admin-customers-step-arrow) {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .header .hdr-icon-btn,
+  .header .hdr-theme-toggle
+):not(:disabled),
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .header .hdr-icon-btn,
+  .header .hdr-theme-toggle
+):not(:disabled):is(:hover, :focus-visible, :active) {
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  border: 1px solid #b91c1c !important;
+  border-radius: 6px !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
+  .header .hdr-icon-btn,
+  .header .hdr-theme-toggle
+) :is(svg, path, circle, rect, line, polyline, polygon) {
+  color: #b91c1c !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Account action/detail icons: border-only in light mode, no solid red fill. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page :is(
+  .admin-accounts-actions-trigger,
+  .admin-accounts-actions-trigger:hover,
+  .admin-accounts-actions-trigger:focus-visible,
+  .admin-accounts-actions-trigger:active,
+  .admin-accounts-actions-trigger-label,
+  .admin-accounts-actions-trigger-caret,
+  .admin-accounts-actions-trigger:hover .admin-accounts-actions-trigger-label,
+  .admin-accounts-actions-trigger:hover .admin-accounts-actions-trigger-caret,
+  .admin-accounts-workspace-icon-btn,
+  .admin-accounts-workspace-icon-btn:hover,
+  .admin-accounts-workspace-icon-btn:focus-visible,
+  .admin-accounts-drawer-toolbar-icon,
+  .admin-accounts-drawer-toolbar-icon:hover,
+  .admin-accounts-drawer-toolbar-icon:focus-visible,
+  .admin-accounts-workspace-field-edit-btn,
+  .admin-accounts-workspace-field-edit-btn:hover,
+  .admin-accounts-workspace-field-edit-btn:focus-visible,
+  .contact-integration-action,
+  .contact-integration-action:hover,
+  .contact-integration-action:focus-visible,
+  .contact-integration-action--outlook,
+  .contact-integration-action--outlook:hover,
+  .contact-integration-action--outlook:focus-visible
+) {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page .admin-accounts-actions-trigger {
+  min-height: 40px !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page .admin-accounts-actions-trigger-label {
+  min-height: 38px !important;
+  padding: 0 0.85rem !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page .admin-accounts-actions-trigger-caret {
+  min-width: 38px !important;
+  min-height: 38px !important;
+  border-left-color: #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page :is(
+  .admin-accounts-workspace-icon-btn,
+  .admin-accounts-drawer-toolbar-icon,
+  .admin-accounts-workspace-field-edit-btn,
+  .contact-integration-action,
+  .contact-integration-action--outlook
+) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  border: 1px solid #b91c1c !important;
+  border-radius: 6px !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page :is(
+  .admin-accounts-actions-trigger,
+  .admin-accounts-actions-menu-button,
+  .admin-accounts-workspace-icon-btn,
+  .admin-accounts-drawer-toolbar-icon,
+  .admin-accounts-workspace-field-edit-btn,
+  .contact-integration-action
+) :is(svg, path, circle, rect, line, polyline, polygon) {
+  color: #b91c1c !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page .admin-accounts-actions-menu {
+  border-color: #b91c1c !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12) !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page :is(
+  .admin-accounts-actions-menu-button,
+  .admin-accounts-actions-menu-button:hover,
+  .admin-accounts-actions-menu-button:focus-visible
+) {
+  border-color: #f3b6b6 !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page .admin-accounts-actions-menu-button:hover {
+  background: #fff5f5 !important;
+  background-color: #fff5f5 !important;
+}
+
+/* Text buttons must not use fixed icon-only sizing. */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .header .hdr-theme-toggle,
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .header .hdr-theme-toggle:hover,
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .header .hdr-theme-toggle:focus-visible,
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .header .hdr-theme-toggle:active {
+  width: auto !important;
+  min-width: 76px !important;
+  max-width: none !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 0.85rem !important;
+  gap: 0.42rem !important;
+  border: 1px solid #b91c1c !important;
+  border-radius: 6px !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .header .hdr-theme-toggle span {
+  display: inline-flex !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page--myGroup .admin-accounts-toolbar-refresh-btn,
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page--myGroup .admin-accounts-toolbar-refresh-btn:hover,
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page--myGroup .admin-accounts-toolbar-refresh-btn:focus-visible,
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page--myGroup .admin-accounts-toolbar-refresh-btn:active {
+  width: auto !important;
+  min-width: 82px !important;
+  max-width: none !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 0.95rem !important;
+  border: 1px solid #b91c1c !important;
+  border-radius: 6px !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #b91c1c !important;
+  -webkit-text-fill-color: #b91c1c !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+  transform: none !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-accounts-page--myGroup .admin-accounts-toolbar-refresh-btn :is(span, svg) {
+  color: #b91c1c !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  -webkit-text-fill-color: #b91c1c !important;
+}

@@ -387,12 +387,58 @@ const buildInitialFilters = (columns) =>
     return filters
   }, {})
 
+const getAccountFilterTextValue = (column, row = {}) => {
+  const displayValue = getColumnTextValue(column, row)
+  const fallbackValues = [
+    displayValue,
+    row[column.key],
+    row.raw?.[column.key],
+    row.raw?.formData?.[column.key],
+  ]
+
+  if (column.key === 'accountNumber') {
+    fallbackValues.push(
+      row.accountNumber,
+      row.raw?.accountNumber,
+      row.raw?.formData?.accountNumber,
+      row.ownerCode,
+      row.accountOwnerCode,
+      row.employeeId,
+      row.raw?.ownerCode,
+      row.raw?.accountOwnerCode,
+      row.raw?.employeeId,
+      row.raw?.formData?.ownerCode,
+      row.raw?.formData?.accountOwnerCode,
+      row.raw?.formData?.employeeId
+    )
+  }
+
+  if (column.key === 'name') {
+    fallbackValues.push(
+      row.name,
+      row.accountName,
+      row.customerName,
+      row.raw?.name,
+      row.raw?.accountName,
+      row.raw?.customerName,
+      row.raw?.formData?.name,
+      row.raw?.formData?.accountName,
+      row.raw?.formData?.customerName
+    )
+  }
+
+  return fallbackValues
+    .filter((value) => value !== null && value !== undefined && value !== '')
+    .map((value) => String(value).toLowerCase())
+    .join(' ')
+}
+
 const matchesColumnFilters = (row, filters, columns) =>
   columns.every((column) => {
     if (!column.searchable) return true
     const filterValue = (filters[column.key] || '').trim().toLowerCase()
     if (!filterValue) return true
-    return getColumnTextValue(column, row).toLowerCase().includes(filterValue)
+    return getAccountFilterTextValue(column, row).includes(filterValue)
   })
 
 const normalizeDropdownValue = (value) =>
@@ -459,7 +505,7 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const addAccountPath = location.pathname.startsWith('/admin') ? '/admin/accounts/new' : '/accounts/new'
-  const { accounts, convertedDeals, loading, refreshData, refreshAccounts, addNotification, updateAccount, convertAccountToDeal } = useData()
+  const { accounts, convertedDeals, loading, refreshData, addNotification, updateAccount, convertAccountToDeal } = useData()
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const view = getAdminAccountsBoardView(variantKey)
@@ -565,6 +611,35 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
   const convertedColumnDefinitions = useMemo(() => (
     isConvertedAccountsView ? CONVERTED_ACCOUNT_COLUMN_DEFINITIONS : columns
   ), [columns, isConvertedAccountsView])
+  const filterColumnDefinitions = useMemo(() => {
+    if (isConvertedAccountsView) return convertedColumnDefinitions
+
+    const currentUserOwnerCode = getCurrentUserOwnerCode(user)
+    return convertedColumnDefinitions.map((col) => {
+      if (variantKey === 'myAccounts' && col.key === 'accountNumber') {
+        return {
+          ...col,
+          exportFormatter: (_value, row) => currentUserOwnerCode || getCreatorOwnerCode(row) || row.accountNumber || '',
+        }
+      }
+
+      if (variantKey === 'searchAccount' && col.key === 'accountNumber') {
+        return {
+          ...col,
+          exportFormatter: (_value, row) => getCreatorOwnerCode(row) || row.accountNumber || '',
+        }
+      }
+
+      if (PLAIN_ACCOUNT_OWNER_VARIANTS.has(variantKey) && col.key === 'accountOwner') {
+        return {
+          ...col,
+          exportFormatter: getPlainAccountOwnerName,
+        }
+      }
+
+      return col
+    })
+  }, [convertedColumnDefinitions, isConvertedAccountsView, user, variantKey])
   const defaultConvertedVisibleColumnKeys = useMemo(
     () => getAccountColumnKeysWithRequiredFields(columns.map((column) => column.key), columns),
     [columns]
@@ -599,23 +674,23 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
   }, [appliedConvertedFilterEnabled, appliedConvertedFilterRules, supportsAdvancedFilter])
   const filteredRows = useMemo(
     () => boardRows
-      .filter((row) => matchesColumnFilters(row, filters, convertedColumnDefinitions))
+      .filter((row) => matchesColumnFilters(row, filters, filterColumnDefinitions))
       .filter(matchesConvertedFilterRules)
       .filter((row) => {
         if (variantKey !== 'viewAll') return true
         return matchesViewAllDropdownFilters(row, cityFilter, ownerFilter)
       }),
-    [boardRows, convertedColumnDefinitions, filters, matchesConvertedFilterRules, variantKey, cityFilter, ownerFilter]
+    [boardRows, filterColumnDefinitions, filters, matchesConvertedFilterRules, variantKey, cityFilter, ownerFilter]
   )
   const filteredAllStageRows = useMemo(
     () => convertedBoardRecords
-      .filter((row) => matchesColumnFilters(row, filters, convertedColumnDefinitions))
+      .filter((row) => matchesColumnFilters(row, filters, filterColumnDefinitions))
       .filter(matchesConvertedFilterRules)
       .filter((row) => {
         if (variantKey !== 'viewAll') return true
         return matchesViewAllDropdownFilters(row, cityFilter, ownerFilter)
       }),
-    [convertedBoardRecords, convertedColumnDefinitions, filters, matchesConvertedFilterRules, variantKey, cityFilter, ownerFilter]
+    [convertedBoardRecords, filterColumnDefinitions, filters, matchesConvertedFilterRules, variantKey, cityFilter, ownerFilter]
   )
 
   const rowsPerPage = SIX_ROW_ACCOUNT_VARIANTS.has(variantKey) ? 6 : DEFAULT_ROWS_PER_PAGE
@@ -716,16 +791,6 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
   useEffect(() => {
     setAvailableUsers(authService.getAvailableUsers())
   }, [user])
-
-  useEffect(() => {
-    if (!useExactAccountListTable) return undefined
-
-    const timer = window.setTimeout(() => {
-      refreshAccounts(filters).catch(() => {})
-    }, 250)
-
-    return () => window.clearTimeout(timer)
-  }, [filters, refreshAccounts, useExactAccountListTable])
 
   const handleStageChange = (stageKey) => {
     updateUrlState({ stage: stageKey, page: 1, accountId: null })
@@ -1235,7 +1300,7 @@ const MyGroupAccountsPage = ({ variantKey = 'myGroup' }) => {
           rowActionsEnabled={rowActionsEnabled}
           rowActions={rowActions}
           mainButtonBehavior={view.mainButtonBehavior}
-          selectable={!useExactAccountListTable && activeStage !== 'daily_fresh_leads' && activeStage !== 'no_follow_leads' && variantKey !== 'dailyFreshLeads' && variantKey !== 'noFollowLeads'}
+          selectable={!useExactAccountListTable && activeStage !== 'daily_fresh_leads' && activeStage !== 'no_follow_leads' && variantKey !== 'dailyFreshLeads' && variantKey !== 'noFollowLeads' && variantKey !== 'weeklyReportsAll'}
           showSerialNumber={!useExactAccountListTable}
           selectedRowIds={selectedAccountIds}
           onSelectionChange={setSelectedAccountIds}
