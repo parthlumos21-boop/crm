@@ -21,6 +21,7 @@
 .admin-customers-wizard-card {
   padding: 0;
   overflow: visible;
+  border-color: var(--admin-red-border, #b91c1c) !important;
 }
 
 .admin-customers-search-card {
@@ -44,7 +45,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.9rem 1.4rem;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--admin-red-border, #b91c1c);
 }
 
 .admin-customers-header-row h1,
@@ -153,16 +154,20 @@
 
 .admin-customers-form-label {
   padding-top: 0.8rem;
-  color: var(--text-primary);
+  color: #ffffff !important;
   font-weight: 500;
   text-align: right;
 }
 
 .admin-customers-form-label span {
-  color: var(--color-danger);
+  color: #ffffff !important;
 }
 
 label.admin-customers-form-label[for="customerCategory"] {
+  color: #FFFFFF !important;
+}
+
+label.admin-customers-form-label[for="customerOwner"] {
   color: #FFFFFF !important;
 }
 

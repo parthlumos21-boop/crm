@@ -391,7 +391,6 @@ const SummaryReportCard = ({
             className="summary-report-export-menu"
             buttonClassName="summary-report-icon-btn summary-report-icon-btn--export"
             menuClassName="summary-report-export-dropdown"
-            responsiveHideLabel
             items={[
               {
                 key: `${report.id}-excel`,

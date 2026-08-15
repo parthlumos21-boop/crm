@@ -2551,8 +2551,6 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
                   label="Export"
                   title="Export quotation manager"
                   className="aqp-report-export"
-                  buttonClassName="aqp-report-icon-btn aqp-report-icon-btn--blue aqp-report-icon-btn--export"
-                  menuClassName="aqp-report-export-menu"
                   items={[
                     {
                       key: 'quotation-manager-excel',
@@ -2576,7 +2574,6 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
                 </th>
               ))}
             </tr>
-            {activeTab === 'deal' && (
             <tr className="aqp-search-row">
               {selectedFieldDefinitions.map((field) => (
                 <th key={field.key} className={`aqp-search-th aqp-field--${field.key}`}>
@@ -2592,7 +2589,6 @@ const AdminQuotationsPage = ({ allowUsers = false, generatorPath = '/admin/quota
                 </th>
               ))}
             </tr>
-            )}
           </thead>
           <tbody>
             {quotationsLoading && paginatedRows.length === 0 ? (

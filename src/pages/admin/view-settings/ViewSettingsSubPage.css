@@ -402,10 +402,17 @@
   align-items: center;
   gap: 0.45rem;
   padding: 0.58rem 0.95rem;
-  background: linear-gradient(180deg, #4da6d7 0%, #238dc9 100%);
+  background: #dc2626;
+  background-image: none;
   color: #ffffff;
   font-size: 0.84rem;
   font-weight: 700;
+}
+
+.vc-config-card-header svg,
+.vc-panel-header svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
 }
 
 .vc-config-card-body {

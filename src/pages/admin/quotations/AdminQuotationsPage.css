@@ -659,7 +659,7 @@
 
 /* Header row */
 .aqp-thead-row { 
-  background: linear-gradient(180deg, #6bb8e0 0%, #4092c4 100%);
+  background: #dc2626;
 }
 
 .aqp-th {
@@ -670,10 +670,7 @@
   text-align: left;
   white-space: normal;
   overflow-wrap: anywhere;
-  border-right: 1px solid #7bc6eb;
-  border-bottom: 1px solid #2f7ba8;
   position: relative;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
   height: auto;
   min-height: 2.4rem;
   vertical-align: middle;
@@ -687,6 +684,20 @@
   color: #ffffff;
   opacity: 0.9;
   vertical-align: middle;
+}
+
+.aqp-table .aqp-thead-row,
+.aqp-table .aqp-thead-row .aqp-th {
+  background: #dc2626 !important;
+  background-image: none !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+
+.aqp-table .aqp-thead-row .aqp-th svg,
+.aqp-table .aqp-thead-row .aqp-sort-icon {
+  color: #ffffff !important;
+  fill: currentColor !important;
 }
 
 /* Field-based width hints keep dynamic columns aligned without leaving

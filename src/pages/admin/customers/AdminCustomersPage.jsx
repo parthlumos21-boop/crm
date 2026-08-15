@@ -2568,6 +2568,7 @@ const AdminCustomersPage = ({
                 onChange={handleChange}
                 options={ownerOptions}
                 error={errors.customerOwner}
+                selectVariant="customer-category"
                 disabled={disableCustomerOwnerField}
               />
             </div>
