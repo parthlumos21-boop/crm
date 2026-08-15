@@ -3473,3 +3473,20 @@
 [data-theme="dark"] .aqp-field-option strong {
   color: #c7dae6;
 }
+
+/* Force quotation table column search row and inputs background to be #c7475e */
+html body #root .aqp-search-row,
+html body #root .aqp-search-th,
+html body #root .aqp-search-input {
+  background: #c7475e !important;
+  background-color: #c7475e !important;
+}
+html body #root .aqp-search-input {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.38) !important;
+}
+html body #root .aqp-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.72) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.72) !important;
+}

@@ -406,7 +406,7 @@ const SupportRequestTable = ({
         <h1>{title} - {sortedRows.length} records</h1>
         <button
           type="button"
-          className="support-request-export-btn btn-red-theme"
+          className="support-request-export-btn"
           onClick={handleExport}
           disabled={sortedRows.length === 0}
           title="Download Excel"

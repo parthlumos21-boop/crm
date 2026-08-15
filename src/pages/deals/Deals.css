@@ -3497,3 +3497,36 @@ html.is-user:not([data-theme="dark"]) .deals-page .deals-crm-page-number.deals-c
   border-color: #C9151B !important;
   color: #FFFFFF !important;
 }
+
+/* Highly specific rules to force visibility of text inside the Role Selection and Deal Selection dropdowns */
+html body .deals-ownerwise-owner-filter select,
+html body .deals-crm-owner-filter select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1px solid #b91c1c !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html body .deals-ownerwise-owner-filter select option,
+html body .deals-crm-owner-filter select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Dark mode compatibility */
+[data-theme="dark"] html body .deals-ownerwise-owner-filter select,
+[data-theme="dark"] html body .deals-crm-owner-filter select {
+  background: #22313d !important;
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] html body .deals-ownerwise-owner-filter select option,
+[data-theme="dark"] html body .deals-crm-owner-filter select option {
+  background: #22313d !important;
+  color: var(--text-primary) !important;
+}

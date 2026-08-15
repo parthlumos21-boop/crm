@@ -1387,3 +1387,33 @@ html:not([data-theme="dark"]) body #root .layout .support-request-view-page .sr-
   box-shadow: none !important;
 }
 
+/* Light mode specific select visibility overrides for Support Request search page */
+html:not([data-theme="dark"]) body .support-request-search-page select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+html:not([data-theme="dark"]) body .support-request-search-page select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* White text theme for pagination buttons in Closed Support Requests page */
+html:not([data-theme="dark"]) body .support-request-legacy-footer-pagination button {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-color: #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) body .support-request-legacy-footer-pagination button:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-color: #b91c1c !important;
+}
+

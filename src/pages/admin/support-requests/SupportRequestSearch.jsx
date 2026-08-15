@@ -293,7 +293,7 @@ const SupportRequestSearch = () => {
                       className="support-request-search-input support-request-search-input-value"
                       value={condition.value}
                       onChange={(event) => handleConditionChange(condition.id, 'value', event.target.value)}
-                      placeholder="Enter value"
+                      placeholder=""
                       disabled={!condition.fieldKey}
                     />
                   )

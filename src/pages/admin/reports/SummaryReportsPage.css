@@ -1318,3 +1318,52 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Light mode only button and export button overrides for summary reports page */
+html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn {
+  border: 1px solid #d1d5db !important;
+  background: #ffffff !important;
+  color: #374151 !important;
+}
+
+html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn svg {
+  color: currentColor !important;
+  fill: currentColor !important;
+}
+
+/* Red border for delete button in light mode */
+html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn-delete {
+  border: 1px solid #dc2626 !important;
+  color: #dc2626 !important;
+  background: #ffffff !important;
+}
+html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn-delete svg {
+  color: #dc2626 !important;
+  fill: currentColor !important;
+}
+
+/* Compact red-bordered Excel Export button in light mode with proper alignment */
+html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn--export {
+  background: #ffffff !important;
+  color: #dc2626 !important;
+  border: 1px solid #b91c1c !important;
+  border-radius: 0.45rem !important;
+  height: 2rem !important;
+  width: 2rem !important;
+  min-width: 2rem !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn--export .excel-export-button__label,
+html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn--export .excel-export-button__chevron {
+  display: none !important;
+}
+
+html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn--export :is(svg, .excel-export-button__icon) {
+  color: #dc2626 !important;
+  fill: currentColor !important;
+}

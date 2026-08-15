@@ -650,17 +650,52 @@
   }
 }
 
-.vc-back-btn,
-.vc-save-btn,
-.vc-all-btn,
-.vc-sort-btn,
-.vc-icon-btn,
-.vc-icon-btn--add,
-.vc-icon-btn--remove {
+/* Red borders for buttons and icons in light mode only */
+html:not([data-theme="dark"]) body .vc-back-btn,
+html:not([data-theme="dark"]) body .vc-save-btn,
+html:not([data-theme="dark"]) body .vc-all-btn,
+html:not([data-theme="dark"]) body .vc-sort-btn,
+html:not([data-theme="dark"]) body .vc-icon-btn,
+html:not([data-theme="dark"]) body .vc-icon-btn--add,
+html:not([data-theme="dark"]) body .vc-icon-btn--remove {
   border: 1px solid #b91c1c !important;
 }
 
 .vc-toggle--on, .vc-mini-toggle--on, .vc-chip--on .vc-chip-state {
   background: #dc2626 !important;
   border-color: #dc2626 !important;
+}
+
+/* Light mode specific select visibility overrides for view settings page */
+html:not([data-theme="dark"]) body .vc-page select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+html:not([data-theme="dark"]) body .vc-page select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Light mode specific OFF toggles and OFF chips styling */
+html:not([data-theme="dark"]) body .vc-mini-toggle--off,
+html:not([data-theme="dark"]) body .vc-chip--off .vc-chip-state {
+  border: 1px solid #b91c1c !important;
+  color: #dc2626 !important;
+  background: #ffffff !important;
+}
+
+/* Light mode specific Add buttons (+ icons) styling */
+html:not([data-theme="dark"]) body :is(.vc-plus-tile, .vc-icon-btn--add) {
+  background: #ffffff !important;
+  color: #dc2626 !important;
+  border: 1px solid #b91c1c !important;
+}
+html:not([data-theme="dark"]) body :is(.vc-plus-tile, .vc-icon-btn--add) svg {
+  color: #dc2626 !important;
+  fill: currentColor !important;
 }
