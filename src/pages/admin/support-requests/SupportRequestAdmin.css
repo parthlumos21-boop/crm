@@ -1426,14 +1426,22 @@
   justify-content: center;
   gap: 0.45rem;
   min-height: 2.1rem;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--admin-red-border, #b91c1c) !important;
   border-radius: 0.15rem;
-  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
-  color: #ffffff;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: var(--admin-red, #dc2626) !important;
   padding: 0 0.85rem;
   font-size: 0.82rem;
   font-weight: 800;
   cursor: pointer;
+}
+
+.support-request-export-btn svg,
+.support-request-export-btn span {
+  color: var(--admin-red, #dc2626) !important;
+  fill: currentColor !important;
+  opacity: 1 !important;
 }
 
 .support-request-export-btn:disabled {

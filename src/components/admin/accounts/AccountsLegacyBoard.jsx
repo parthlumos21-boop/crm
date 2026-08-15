@@ -111,9 +111,15 @@ const AccountsLegacyBoard = ({
     // Anchor the menu to the viewport so it is never clipped by the board's
     // overflow:hidden/auto ancestors (.admin-accounts-board-shell / -scroll).
     const rect = event.currentTarget.getBoundingClientRect()
+    const row = rows.find((entry) => entry.id === rowId)
+    const actionCount = row ? getVisibleRowActions(row).length : rowActions.length
+    const estimatedMenuHeight = Math.max(48, Math.min(360, (actionCount * 46) + 12))
+    const spaceBelow = window.innerHeight - rect.bottom
+    const openUpward = spaceBelow < estimatedMenuHeight + 12 && rect.top > estimatedMenuHeight
+
     setMenuStyle({
       position: 'fixed',
-      top: rect.bottom + 4,
+      top: openUpward ? Math.max(8, rect.top - estimatedMenuHeight - 4) : rect.bottom + 4,
       right: Math.max(8, window.innerWidth - rect.right),
       left: 'auto',
     })

@@ -315,7 +315,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  color: var(--text-primary);
+  color: #111827 !important;
   font-size: 0.78rem;
   font-weight: 700;
   white-space: nowrap;
@@ -328,12 +328,20 @@
   padding: 0.32rem 0.55rem;
   border: 1px solid var(--border-subtle);
   border-radius: 0.12rem;
-  background: var(--surface-card);
-  color: var(--text-primary);
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
   font-size: 0.8rem;
   font-weight: 600;
   outline: none;
   cursor: pointer;
+}
+
+.admin-accounts-stage-dropdown-select option,
+.mga-view-all-filter-select option,
+.admin-accounts-bulk-field select option {
+  background: #ffffff;
+  color: #111827;
 }
 
 .admin-accounts-stage-dropdown-select:focus {
@@ -799,7 +807,7 @@
   background: var(--surface-card);
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.15);
   border-radius: 0.8rem;
-  z-index: 1000;
+  z-index: 3000;
   text-align: left;
   overflow: hidden;
 }
@@ -894,6 +902,33 @@
 .admin-accounts-pag-btn:hover:not(:disabled) {
   background: var(--admin-red-soft, rgba(220, 38, 38, 0.1));
   border-color: var(--admin-red-border, #b91c1c);
+}
+
+.admin-accounts-board-table,
+.admin-accounts-board-table tbody,
+.admin-accounts-board-table tr,
+.admin-accounts-board-table td {
+  overflow: visible;
+}
+
+.admin-accounts-page .admin-accounts-stage-dropdown-label,
+.mga-page .admin-accounts-stage-dropdown-label {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+.admin-accounts-page .admin-accounts-stage-dropdown-select,
+.mga-page .admin-accounts-stage-dropdown-select,
+.admin-accounts-page .mga-view-all-filter-select,
+.mga-page .mga-view-all-filter-select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+}
+
+.admin-accounts-row-menu {
+  z-index: 3000 !important;
 }
 
 .admin-accounts-pag-btn:disabled {

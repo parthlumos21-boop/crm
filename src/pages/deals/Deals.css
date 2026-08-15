@@ -459,7 +459,13 @@
   gap: 0.55rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #111827 !important;
+}
+
+.deals-ownerwise-owner-filter span,
+.deals-crm-owner-filter span {
+  color: #111827 !important;
+  opacity: 1 !important;
 }
 
 .deals-ownerwise-owner-filter select,
@@ -468,11 +474,36 @@
   min-height: 2.2rem;
   border: 1px solid #b91c1c !important;
   border-radius: 6px;
-  background: var(--surface-card);
-  color: var(--text-primary);
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
   padding: 0.35rem 0.7rem;
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.deals-ownerwise-owner-filter select option,
+.deals-crm-owner-filter select option,
+.deals-tool-ownerwise-select option,
+.deals-tool-filter-field-compact select option {
+  background: #ffffff;
+  color: #111827;
+}
+
+.deals-page :is(.deals-ownerwise-owner-filter, .deals-crm-owner-filter) span,
+.deals-crm-page :is(.deals-ownerwise-owner-filter, .deals-crm-owner-filter) span,
+.deals-ownerwise-page :is(.deals-ownerwise-owner-filter, .deals-crm-owner-filter) span {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+.deals-page :is(.deals-ownerwise-owner-filter, .deals-crm-owner-filter) select,
+.deals-crm-page :is(.deals-ownerwise-owner-filter, .deals-crm-owner-filter) select,
+.deals-ownerwise-page :is(.deals-ownerwise-owner-filter, .deals-crm-owner-filter) select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
 }
 
 .deals-ownerwise-toolbar-icon-active,

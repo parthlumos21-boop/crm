@@ -264,8 +264,11 @@ label.admin-customers-form-label[for="customerOwner"] {
 .admin-customers-custom-select-button-category:hover,
 .admin-customers-custom-select-button-category:focus,
 .admin-customers-custom-select-button-category:active,
-.admin-customers-custom-select-button-category.admin-customers-custom-select-open {
+.admin-customers-custom-select-button-category.admin-customers-custom-select-open,
+.admin-customers-custom-select-button-category:disabled {
   color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
 }
 
 .admin-customers-custom-select-button:hover {
@@ -2568,6 +2571,13 @@ select[name='customerCategory'] {
 }
 
 html body .admin-customers-page .admin-customers-form-input-wrap button.admin-customers-custom-select-button-category span.admin-customers-select-label-text {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html body .admin-customers-page .admin-customers-form-input-wrap button.admin-customers-custom-select-button-category span,
+html body .admin-customers-page .admin-customers-form-input-wrap button.admin-customers-custom-select-button-category:disabled span,
+html body .admin-customers-page .admin-customers-form-input-wrap button.admin-customers-custom-select-button-category:disabled .admin-customers-select-label-text {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
