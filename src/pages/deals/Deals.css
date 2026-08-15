@@ -466,7 +466,7 @@
 .deals-crm-owner-filter select {
   min-width: 220px;
   min-height: 2.2rem;
-  border: 1px solid var(--glass-border);
+  border: 1px solid #b91c1c !important;
   border-radius: 6px;
   background: var(--surface-card);
   color: var(--text-primary);

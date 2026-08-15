@@ -5728,6 +5728,11 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .adm
   -webkit-text-fill-color: #111827 !important;
 }
 
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .admin-customers-page .admin-customers-wizard-card .admin-customers-custom-select-button-category span {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
 html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) :is(
   .header .hdr-icon-btn
 ):not(:disabled),
@@ -5945,4 +5950,9 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .adm
   fill: currentColor !important;
   stroke: currentColor !important;
   -webkit-text-fill-color: #b91c1c !important;
+}
+
+select, select option {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }

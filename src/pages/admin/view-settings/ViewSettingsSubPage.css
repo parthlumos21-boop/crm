@@ -642,3 +642,18 @@
     min-width: 0;
   }
 }
+
+.vc-back-btn,
+.vc-save-btn,
+.vc-all-btn,
+.vc-sort-btn,
+.vc-icon-btn,
+.vc-icon-btn--add,
+.vc-icon-btn--remove {
+  border: 1px solid #b91c1c !important;
+}
+
+.vc-toggle--on, .vc-mini-toggle--on, .vc-chip--on .vc-chip-state {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+}

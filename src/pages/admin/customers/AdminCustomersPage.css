@@ -162,6 +162,10 @@
   color: var(--color-danger);
 }
 
+label.admin-customers-form-label[for="customerCategory"] {
+  color: #FFFFFF !important;
+}
+
 .admin-customers-form-input-wrap {
   display: flex;
   flex-direction: column;
@@ -229,7 +233,8 @@
 
 .admin-customers-select-label-text {
   font-weight: 500;
-  color: var(--text-primary);
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
   font-size: 1rem;
   transition: none;
 }
@@ -2550,4 +2555,19 @@ html:not([data-theme="dark"]) :is(.admin-customers-page, .admin-customers-search
   color: var(--text-primary) !important;
   -webkit-text-fill-color: currentColor !important;
   font-weight: 500 !important;
+}
+
+select[name='customerCategory'] {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html body .admin-customers-page .admin-customers-form-input-wrap button.admin-customers-custom-select-button-category span.admin-customers-select-label-text {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html body .admin-customers-page .admin-customers-form-input-wrap button.admin-customers-custom-select-button-category svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
 }

@@ -288,11 +288,14 @@
   width: auto;
   min-height: 2rem;
   padding: 0 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid #b91c1c !important;
   border-radius: 0.65rem;
-  background: linear-gradient(180deg, #4f9fe8 0%, #2d72bd 100%);
-  color: #ffffff;
+  background: transparent !important;
+  color: var(--text-primary) !important;
   box-shadow: 0 10px 22px rgba(45, 114, 189, 0.2);
 }
 

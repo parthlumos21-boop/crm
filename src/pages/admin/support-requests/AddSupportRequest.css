@@ -284,6 +284,7 @@
 
 .sr-new-searchable-select input {
   padding-right: 3rem;
+  border: 1px solid #b91c1c !important;
 }
 
 .sr-new-searchable-select--error input,
@@ -358,9 +359,9 @@
 }
 
 .sr-new-customer-search-btn {
-  border: 1px solid var(--border-subtle);
-  background: linear-gradient(180deg, #55c66f 0%, #2f9b49 100%);
-  color: #ffffff;
+  border: 1px solid #b91c1c !important;
+  background: transparent !important;
+  color: var(--text-primary);
   cursor: pointer;
 }
 

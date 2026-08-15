@@ -72,8 +72,9 @@
 .admin-my-reminders-tab:not(.admin-my-reminders-tab-active),
 .admin-my-reminders-tab-blue,
 .admin-my-reminders-tab-orange {
-  color: #111827 !important;
-  -webkit-text-fill-color: #111827 !important;
+  background: #b91c1c !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
 }
 
 [data-theme="dark"] .admin-my-reminders-tab,
@@ -464,7 +465,9 @@ html:not([data-theme="dark"]) .active-reminders-user-icon {
 }
 
 .active-reminders-detail-btn-green {
-  background: linear-gradient(180deg, #475569 0%, #334155 100%);
+  background: transparent !important;
+  border: 1px solid #b91c1c !important;
+  color: var(--text-primary);
 }
 
 .active-reminders-detail-tabs {
@@ -900,4 +903,9 @@ html:not([data-theme="dark"]) .active-reminders-user-icon {
 [data-theme="dark"] .active-reminders-select-prompt,
 [data-theme="dark"] .active-reminders-select-icon {
   color: var(--text-primary);
+}
+
+
+.support-request-legacy-table th {
+  white-space: nowrap !important;
 }
