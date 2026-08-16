@@ -2146,12 +2146,14 @@ html:not([data-theme="dark"]) .quotation-panel-btn {
   color: #ffffff !important;
 }
 
-/* Ensure the search icon has a white background in light mode */
+/* Keep quotation search actions consistent with the red light-mode action style. */
 html:not([data-theme="dark"]) .quotation-builder-icon-button,
 html:not([data-theme="dark"]) .quotation-account-list-search-icon,
 html:not([data-theme="dark"]) .quotation-form-search-icon {
-  background-color: #ffffff !important;
-  color: #111827 !important;
+  background-color: var(--admin-red, #dc2626) !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 /* 2. Generate Quotation [Company] New Popup Icon (Icon border but no background) */
