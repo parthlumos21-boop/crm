@@ -1139,8 +1139,8 @@
 }
 
 [data-theme="dark"] .performance-table th {
-  background: linear-gradient(180deg, #2f6078 0%, #244b61 100%) !important;
-  color: #f4fbff !important;
+  background: #8B0904 !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .performance-table td {
@@ -1149,6 +1149,7 @@
 
 [data-theme="dark"] :where(.metric-icon, .overview-icon, .forecast-icon, .detail-icon, .empty-icon) {
   color: #ffffff !important;
+  background-color: #8B0904 !important;
   opacity: 1 !important;
 }
 

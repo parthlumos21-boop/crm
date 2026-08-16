@@ -1097,6 +1097,13 @@
 }
 
 /* Light mode only Team View Tree and Sub-tab overrides (Phase 15) */
+html:not([data-theme="dark"]) .team-view-select-row label,
+html:not([data-theme="dark"]) .team-view-select-row select,
+html:not([data-theme="dark"]) .team-view-select-row select option {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  background-color: #ffffff !important;
+}
 html:not([data-theme="dark"]) .team-view-company-pill,
 html:not([data-theme="dark"]) .team-view-tree-node-pill {
   background: #dc2626 !important;
@@ -1114,4 +1121,35 @@ html:not([data-theme="dark"]) .ug-btn:hover,
 html:not([data-theme="dark"]) .ug-btn--active {
   background: #b91c1c !important;
   color: #ffffff !important;
+}
+
+/* Dark mode Team View Tree and Sub-tab overrides to use new #8B0904 red */
+[data-theme="dark"] .team-view-company-pill,
+[data-theme="dark"] .team-view-tree-node-pill {
+  background: #8B0904 !important;
+  color: #ffffff !important;
+  border: 1px solid #A00B05 !important;
+}
+
+[data-theme="dark"] .ug-btn {
+  background: #8B0904 !important;
+  color: #ffffff !important;
+  border: 1px solid #A00B05 !important;
+}
+
+[data-theme="dark"] .ug-btn:hover,
+[data-theme="dark"] .ug-btn--active {
+  background: #A00B05 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .team-view-page h1,
+[data-theme="dark"] .team-view-page h2,
+[data-theme="dark"] .team-view-page h3,
+[data-theme="dark"] .team-view-page h4,
+[data-theme="dark"] .team-view-page h5,
+[data-theme="dark"] .team-view-page h6,
+[data-theme="dark"] .team-view-page .team-section-header,
+[data-theme="dark"] .team-view-page .team-heading {
+  color: #8B0904 !important;
 }

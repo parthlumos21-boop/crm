@@ -1373,16 +1373,19 @@ html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hd
 [data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn:hover,
 [data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn:focus-visible,
 [data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn[aria-expanded='true'] {
-  border-color: rgba(255, 255, 255, 0.24) !important;
-  background: rgba(116, 10, 3, 0.18) !important;
-  background-color: rgba(116, 10, 3, 0.18) !important;
+  border-color: #8B0904 !important;
+  background: #8B0904 !important;
+  background-color: #8B0904 !important;
   background-image: none !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
 
 [data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn :is(.hdr-avatar-icon, .hdr-username, .hdr-caret, svg),
-[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn svg * {
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn svg *,
+[data-theme="dark"] .header--admin .hdr-user-btn .hdr-username,
+[data-theme="dark"] .header--admin .hdr-user-btn .hdr-caret,
+[data-theme="dark"] body #root .header--admin .hdr-user-btn .hdr-username {
   color: #ffffff !important;
   fill: currentColor !important;
   stroke: currentColor !important;
@@ -1403,16 +1406,17 @@ html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hd
   -webkit-text-fill-color: #ffffff !important;
   fill: currentColor !important;
 }
-[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown {
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown-name {
   background: var(--surface-card) !important; 
   background-color: var(--surface-card) !important; 
   background-image: none !important;
 }
 
 [data-theme="dark"] .header.header--admin .header-action-cluster .hdr-icon-btn {
-  border: 1px solid rgba(239, 68, 68, 0.36) !important;
-  background: rgba(116, 10, 3, 0.2) !important;
-  background-color: rgba(116, 10, 3, 0.2) !important;
+  border: 1px solid #8B0904 !important;
+  background: #8B0904 !important;
+  background-color: #8B0904 !important;
   background-image: none !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
@@ -1423,9 +1427,9 @@ html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hd
 
 [data-theme="dark"] .header.header--admin .header-action-cluster .hdr-icon-btn:hover,
 [data-theme="dark"] .header.header--admin .header-action-cluster .hdr-icon-btn:focus-visible {
-  border-color: #920d04 !important;
-  background: #740A03 !important;
-  background-color: #740A03 !important;
+  border-color: #A00B05 !important;
+  background: #A00B05 !important;
+  background-color: #A00B05 !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }

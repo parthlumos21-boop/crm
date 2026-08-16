@@ -2133,3 +2133,33 @@
   background: #1d2b36 !important;
   color: #f0fffd !important;
 }
+
+/* UI Refinements for Generate Quotation Popups (Light Mode & Specifics) */
+
+/* 1. Generate Quotation Popup (Light Mode) */
+html:not([data-theme="dark"]) .quotation-panel-btn-success,
+html:not([data-theme="dark"]) .quotation-panel-btn-primary,
+html:not([data-theme="dark"]) .quotation-item-modal-btn--save,
+html:not([data-theme="dark"]) .quotation-panel-btn {
+  background: var(--admin-red, #dc2626) !important;
+  border-color: var(--admin-red-border, #b91c1c) !important;
+  color: #ffffff !important;
+}
+
+/* Ensure the search icon has a white background in light mode */
+html:not([data-theme="dark"]) .quotation-builder-icon-button,
+html:not([data-theme="dark"]) .quotation-account-list-search-icon,
+html:not([data-theme="dark"]) .quotation-form-search-icon {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* 2. Generate Quotation [Company] New Popup Icon (Icon border but no background) */
+html:not([data-theme="dark"]) .quotation-builder-blue-title .quotation-builder-icon-button,
+html:not([data-theme="dark"]) .quotation-builder-blue-title svg,
+html:not([data-theme="dark"]) .quotation-modal-title-icon,
+.quotation-builder-blue-title .quotation-builder-icon-button,
+.quotation-builder-header-icon {
+  background-color: transparent !important;
+  border: 1px solid var(--border-subtle, #d1d5db) !important;
+}

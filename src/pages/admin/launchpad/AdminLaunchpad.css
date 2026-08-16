@@ -1188,9 +1188,9 @@
 }
 
 [data-theme="dark"] .lp-card-icon {
-  background: linear-gradient(135deg, rgba(var(--lp-accent-strong-rgb), 0.5), rgba(var(--lp-accent-strong-rgb), 0.8));
-  border-color: rgba(var(--lp-accent-soft-rgb), 0.25);
-  color: #ffffff;
+  background: #8B0904 !important;
+  border-color: #A00B05 !important;
+  color: #ffffff !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
     0 8px 24px rgba(0, 0, 0, 0.4);
@@ -1211,6 +1211,14 @@
 
 [data-theme="dark"] .lp-brand-logo {
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
+
+[data-theme="dark"] .lp-card-title,
+[data-theme="dark"] .lp-modules-title,
+[data-theme="dark"] .lp-modules-subtitle,
+[data-theme="dark"] .lp-setup-title,
+[data-theme="dark"] .lp-titlebar-text {
+  color: #ffffff !important;
 }
 
 /* Lightweight launchpad overrides: keep the same layout, but remove the

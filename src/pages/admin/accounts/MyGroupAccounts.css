@@ -3388,13 +3388,13 @@ html body .admin-accounts-page .admin-accounts-stage-dropdown-select option {
 [data-theme="dark"] html body .admin-accounts-page .admin-accounts-stage-dropdown-select {
   background: #22313d !important;
   background-color: #22313d !important;
-  color: var(--text-primary) !important;
-  -webkit-text-fill-color: var(--text-primary) !important;
-  border-color: var(--text-primary) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 [data-theme="dark"] html body .admin-accounts-page .admin-accounts-stage-dropdown-select option {
   background: #22313d !important;
-  color: var(--text-primary) !important;
+  color: #ffffff !important;
 }
 

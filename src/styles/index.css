@@ -155,49 +155,120 @@
   color-scheme: dark;
   --body-bg: var(--surface-app);
 
-  --color-primary: #4fe0d8;
-  --color-primary-hover: #84efe8;
-  --color-primary-soft: rgba(79, 224, 216, 0.16);
-  --color-primary-border: rgba(79, 224, 216, 0.34);
-  --color-primary-strong: #dcfffb;
+  --color-primary: #8B0904;
+  --color-primary-hover: #A00B05;
+  --color-primary-soft: rgba(139, 9, 4, 0.16);
+  --color-primary-border: rgba(139, 9, 4, 0.34);
+  --color-primary-strong: #bf0e07;
 
-  --color-gray-50: #000000;
-  --color-gray-100: #0a0a0a;
-  --color-gray-200: #141414;
-  --color-gray-300: #1f1f1f;
-  --color-gray-400: #292929;
-  --color-gray-500: #525252;
-  --color-gray-600: #7a7a7a;
-  --color-gray-700: #a3a3a3;
-  --color-gray-800: #d4d4d4;
+  --color-gray-50: #330000;
+  --color-gray-100: #4d0000;
+  --color-gray-200: #660000;
+  --color-gray-300: #800000;
+  --color-gray-400: #990000;
+  --color-gray-500: #b30000;
+  --color-gray-600: #cc0000;
+  --color-gray-700: #e60000;
+  --color-gray-800: #ff1a1a;
   --color-gray-900: #ffffff;
 
-  --surface-app: #0d1117;
-  --surface-card: #161b27;
-  --surface-raised: #1a2035;
-  --surface-muted: #131825;
-  --surface-sunken: #090e18;
+  --surface-app: #8B0000;
+  --surface-card: #660000;
+  --surface-raised: #7a0000;
+  --surface-muted: #4d0000;
+  --surface-sunken: #330000;
   --surface-inverse: #ffffff;
 
-  --glass-surface: #1e1e1e;
-  --glass-surface-strong: #252525;
-  --glass-surface-soft: #161616;
-  --glass-border: #333333;
-  --glass-border-strong: #444444;
+  --glass-surface: rgba(139, 0, 0, 0.6);
+  --glass-surface-strong: rgba(139, 0, 0, 0.8);
+  --glass-surface-soft: rgba(139, 0, 0, 0.4);
+  --glass-border: #990000;
+  --glass-border-strong: #b30000;
   --glass-shadow-soft: 0 1px 2px rgba(0,0,0,0.5);
   --glass-shadow: 0 2px 4px rgba(0,0,0,0.5);
   --glass-shadow-lg: 0 4px 8px rgba(0,0,0,0.5);
 
-  --border-subtle: #333333;
-  --border-default: #444444;
-  --border-strong: #666666;
+  --border-subtle: #b30000;
+  --border-default: #cc0000;
+  --border-strong: #e60000;
 
   --text-primary: #ffffff;
-  --text-secondary: #d4d4d4;
-  --text-muted: #a3a3a3;
+  --text-secondary: #ffcccc;
+  --text-muted: #ff9999;
   --text-inverse: #000000;
 
-  --shadow-focus: 0 0 0 4px rgba(79, 224, 216, 0.24);
+  --shadow-focus: 0 0 0 4px rgba(255, 255, 255, 0.24);
+}
+
+[data-theme="dark"] button,
+[data-theme="dark"] .btn,
+[data-theme="dark"] select,
+[data-theme="dark"] option,
+[data-theme="dark"] input {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .table-action-btn,
+[data-theme="dark"] button.btn-primary {
+  background-color: #8B0904 !important;
+  border-color: #8B0904 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .table-action-btn:hover,
+[data-theme="dark"] button.btn-primary:hover {
+  background-color: #A00B05 !important;
+  border-color: #A00B05 !important;
+}
+
+/* Fix Labels visibility for Deals Search, Accounts View, etc. */
+[data-theme="dark"] label,
+[data-theme="dark"] .filter-label,
+[data-theme="dark"] .form-label {
+  color: #ffffff !important;
+}
+
+/* Master override for Accounts Dropdown text visibility */
+[data-theme="dark"] body #root select.admin-accounts-stage-dropdown-select,
+[data-theme="dark"] body #root .admin-accounts-stage-dropdown-select {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Fix Support Requests View & Search text visibility */
+[data-theme="dark"] .support-request-view-page,
+[data-theme="dark"] .support-request-view-shell,
+[data-theme="dark"] .support-request-search-page,
+[data-theme="dark"] .support-request-search-shell,
+[data-theme="dark"] .support-request-details {
+  color: #ffffff !important;
+}
+
+/* Prevent pagination buttons from becoming solid red */
+[data-theme="dark"] button[class*="pagination"],
+[data-theme="dark"] [class*="pagination"] button,
+[data-theme="dark"] .pagination button,
+[data-theme="dark"] .sr-list-pagination-button,
+[data-theme="dark"] .deals-crm-pagination-button,
+[data-theme="dark"] .admin-customers-grid-pagination-button,
+[data-theme="dark"] .support-request-legacy-footer-pagination button {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] button[class*="pagination"]:hover,
+[data-theme="dark"] [class*="pagination"] button:hover,
+[data-theme="dark"] .pagination button:hover,
+[data-theme="dark"] .sr-list-pagination-button:hover,
+[data-theme="dark"] .deals-crm-pagination-button:hover,
+[data-theme="dark"] .admin-customers-grid-pagination-button:hover,
+[data-theme="dark"] .support-request-legacy-footer-pagination button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* ============================================================
@@ -5968,6 +6039,45 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .adm
 }
 
 select, select option {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Fix for Generate Quotation buttons */
+html:not([data-theme="dark"]) .quotation-item-modal-btn--save,
+html:not([data-theme="dark"]) .quotation-panel-btn-primary,
+html:not([data-theme="dark"]) .quotation-panel-btn-success {
+  background: #dc2626 !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Fix for Search Icon Background */
+html:not([data-theme="dark"]) .quotation-builder-icon-button,
+html:not([data-theme="dark"]) .quotation-account-list-search-icon {
+  background: #dc2626 !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+}
+html:not([data-theme="dark"]) .quotation-builder-icon-button svg,
+html:not([data-theme="dark"]) .quotation-account-list-search-icon svg {
+  color: #ffffff !important;
+}
+
+/* Restore Excel Export button styling in Light Mode */
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .aqp-report-export .excel-export-button {
+  background: #217346 !important; /* Excel Green */
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border: 1px solid #1e663e !important;
+  width: auto !important;
+  min-width: 8rem !important;
+  padding: 0 1.05rem !important;
+}
+
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .aqp-report-export .excel-export-button span,
+html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .aqp-report-export .excel-export-button svg {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
