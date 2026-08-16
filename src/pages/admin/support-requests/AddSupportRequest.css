@@ -1298,3 +1298,18 @@
     text-align: left;
   }
 }
+
+/* Light mode select dropdown visibility in ticket wizard only */
+html:not([data-theme="dark"]) body .ticket-new-page select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+html:not([data-theme="dark"]) body .ticket-new-page select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}

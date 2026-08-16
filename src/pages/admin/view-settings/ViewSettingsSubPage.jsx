@@ -432,9 +432,6 @@ const ViewSettingsSubPage = ({
                         <button type="button" className="vc-all-btn" onClick={toggleAllClassificationOptions}>
                           All
                         </button>
-                        <button type="button" className="vc-sort-btn" title="Sort values alphabetically">
-                          <FaSortAlphaDown />
-                        </button>
                       </div>
 
                       <div className="vc-chips">
@@ -527,9 +524,6 @@ const ViewSettingsSubPage = ({
                       </button>
                       <button type="button" className="vc-all-btn" onClick={toggleAllClassificationOptions}>
                         All
-                      </button>
-                      <button type="button" className="vc-sort-btn" title="Sort values alphabetically">
-                        <FaSortAlphaDown />
                       </button>
                     </div>
 

@@ -699,3 +699,30 @@ html:not([data-theme="dark"]) body :is(.vc-plus-tile, .vc-icon-btn--add) svg {
   color: #dc2626 !important;
   fill: currentColor !important;
 }
+
+/* Light mode specific remove button styling */
+html:not([data-theme="dark"]) body .vc-icon-btn--remove {
+  background: #ffffff !important;
+  color: #dc2626 !important;
+  border: 1px solid #b91c1c !important;
+}
+html:not([data-theme="dark"]) body .vc-icon-btn--remove svg {
+  color: #dc2626 !important;
+  fill: currentColor !important;
+}
+
+/* Light mode toggle overrides for accounts & customers views */
+html:not([data-theme="dark"]) .vc-chip--on .vc-chip-state {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}
+html:not([data-theme="dark"]) .vc-chip-square {
+  background: #dc2626 !important;
+}
+html:not([data-theme="dark"]) .vc-chip--off .vc-chip-square {
+  background: #b91c1c !important;
+}
+html:not([data-theme="dark"]) .vc-mini-toggle--on {
+  background: #dc2626 !important;
+  border-color: #b91c1c !important;
+}

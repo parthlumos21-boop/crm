@@ -1396,12 +1396,13 @@
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  white-space: normal;
+  white-space: nowrap !important;
 }
 
 .support-request-legacy-th-content > span {
-  word-break: break-word;
-  overflow-wrap: anywhere;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  white-space: nowrap !important;
 }
 
 .support-request-legacy-filter-row th,
@@ -1426,11 +1427,11 @@
   justify-content: center;
   gap: 0.45rem;
   min-height: 2.1rem;
-  border: 1px solid var(--admin-red-border, #b91c1c) !important;
+  border: 1px solid var(--admin-red-border, #b91c1c);
   border-radius: 0.15rem;
-  background: #ffffff !important;
-  background-image: none !important;
-  color: var(--admin-red, #dc2626) !important;
+  background: var(--admin-red, #dc2626);
+  background-image: none;
+  color: #ffffff;
   padding: 0 0.85rem;
   font-size: 0.82rem;
   font-weight: 800;
@@ -1439,9 +1440,31 @@
 
 .support-request-export-btn svg,
 .support-request-export-btn span {
-  color: var(--admin-red, #dc2626) !important;
+  color: #ffffff;
+  fill: currentColor;
+  opacity: 1;
+}
+
+/* Light mode only overrides (Applies to both User and Admin layouts) */
+html:not([data-theme="dark"]) body .support-request-export-btn {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+html:not([data-theme="dark"]) body .support-request-export-btn :is(span, svg) {
+  color: #ffffff !important;
   fill: currentColor !important;
-  opacity: 1 !important;
+}
+
+/* Dark mode only overrides (Applies to both User and Admin layouts) */
+[data-theme="dark"] body .support-request-export-btn {
+  background: #8B0B06 !important;
+  color: #ffffff !important;
+  border: 1px solid #8B0B06 !important;
+}
+[data-theme="dark"] body .support-request-export-btn :is(span, svg) {
+  color: #ffffff !important;
+  fill: currentColor !important;
 }
 
 .support-request-export-btn:disabled {

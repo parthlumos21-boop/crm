@@ -454,3 +454,36 @@
   .vdv-fields-row { grid-template-columns: 1fr; }
   .vdv-field-panel { border-right: none; border-bottom: 1px solid var(--border-subtle); }
 }
+
+/* Light mode specific select visibility overrides for deals view settings page */
+html:not([data-theme="dark"]) body .vdv-page select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+html:not([data-theme="dark"]) body .vdv-page select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Light mode toggle overrides for deals view settings */
+html:not([data-theme="dark"]) .vdv-chip--on .vdv-chip-state {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #b91c1c !important;
+}
+html:not([data-theme="dark"]) .vdv-chip-square {
+  background: #dc2626 !important;
+}
+html:not([data-theme="dark"]) .vdv-chip--off .vdv-chip-square {
+  background: #b91c1c !important;
+}
+html:not([data-theme="dark"]) .vdv-chip--off .vdv-chip-state {
+  border-color: #d1d5db !important;
+  background: #ffffff !important;
+  color: #dc2626 !important;
+}

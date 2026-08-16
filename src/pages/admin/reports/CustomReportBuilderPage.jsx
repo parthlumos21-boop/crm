@@ -753,7 +753,6 @@ const CustomReportBuilderPage = ({ basePath }) => {
       <div className="cr-topbar">
         <div>
           <h1 className="cr-topbar-title">Custom Reports</h1>
-          <p className="cr-topbar-subtitle">Create, save, share, run, and export custom CRM reports.</p>
         </div>
         <div className="cr-topbar-actions">
           <button type="button" className="cr-btn cr-btn-light" onClick={() => navigate(customReportListPath)}>
@@ -964,14 +963,6 @@ const CustomReportBuilderPage = ({ basePath }) => {
           <section className="cr-section cr-output-section" ref={reportOutputRef}>
             <div className="cr-section-heading cr-section-heading--output">
               <h2>Report</h2>
-              <div className="cr-output-actions">
-                <button type="button" className="cr-output-action cr-output-action--preview" onClick={handlePreviewReport}><FaEye /> Preview Report</button>
-                <button type="button" className="cr-output-action cr-output-action--excel" onClick={() => exportRows('excel')}><FaFileExcel /> Export Excel</button>
-                <button type="button" className="cr-output-action cr-output-action--csv" onClick={() => exportRows('csv')}><FaFileCsv /> Export CSV</button>
-                <button type="button" className="cr-output-action cr-output-action--pdf" onClick={() => exportRows('pdf')}><FaFilePdf /> Export PDF</button>
-                <button type="button" className="cr-output-action cr-output-action--print" onClick={() => exportRows('print')}><FaPrint /> Print</button>
-                <button type="button" className="cr-output-action cr-output-action--download" onClick={() => exportRows('excel')}><FaDownload /> Export</button>
-              </div>
             </div>
             <div className="cr-output-wrap">
               {!hasRun ? (

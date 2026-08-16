@@ -377,3 +377,8 @@
   .svs-actions-grid { grid-template-columns: repeat(2, 1fr); }
   .svs-sidebar { width: 110px; }
 }
+
+/* Light mode only Additional Filters toggle override */
+html:not([data-theme="dark"]) .svs-toggle {
+  background: #dc2626 !important;
+}

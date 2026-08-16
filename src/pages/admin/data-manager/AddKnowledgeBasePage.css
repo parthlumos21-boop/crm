@@ -522,3 +522,23 @@
   background: #17232d !important;
   border-color: var(--text-primary) !important;
 }
+
+/* Light mode only knowledge base creation top bar overrides */
+html:not([data-theme="dark"]) .akb-topbar {
+  background: #dc2626 !important;
+}
+html:not([data-theme="dark"]) .akb-topbar-title {
+  color: #ffffff !important;
+}
+
+/* Light mode only action buttons overrides for Add Knowledge Base */
+html:not([data-theme="dark"]) .akb-btn--green,
+html:not([data-theme="dark"]) .akb-btn--red {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #b91c1c !important;
+}
+html:not([data-theme="dark"]) :where(.akb-btn--green, .akb-btn--red) .akb-btn-icon {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}

@@ -311,3 +311,88 @@
 .mv-content::-webkit-scrollbar { width: 4px; }
 .mv-content::-webkit-scrollbar-track { background: var(--surface-card); }
 .mv-content::-webkit-scrollbar-thumb { background: var(--surface-muted); border-radius: 2px; }
+
+/* Light mode only custom overrides for My Views Page (Phase 14) */
+html:not([data-theme="dark"]) .mv-topbar {
+  background: #dc2626 !important;
+  border-bottom: 1px solid #b91c1c !important;
+}
+html:not([data-theme="dark"]) .mv-back-btn {
+  color: #ffffff !important;
+}
+html:not([data-theme="dark"]) .mv-back-btn:hover {
+  color: #fca5a5 !important;
+}
+html:not([data-theme="dark"]) .mv-add-btn {
+  background: #b91c1c !important;
+  color: #ffffff !important;
+  border: 1px solid #991b1b !important;
+}
+html:not([data-theme="dark"]) .mv-add-btn:hover {
+  background: #991b1b !important;
+}
+html:not([data-theme="dark"]) .mv-add-icon {
+  color: #ffffff !important;
+}
+
+/* Left Panel Category Lists Override */
+html:not([data-theme="dark"]) .mv-category {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #b91c1c !important;
+  opacity: 0.7 !important;
+}
+html:not([data-theme="dark"]) .mv-category:hover {
+  background: #b91c1c !important;
+  opacity: 0.85 !important;
+}
+html:not([data-theme="dark"]) .mv-category--active,
+html:not([data-theme="dark"]) .mv-category--active:hover {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+  border-left: 4px solid #ffffff !important;
+}
+
+/* Card Headers styling Override */
+html:not([data-theme="dark"]) .mv-card-header {
+  background: #dc2626 !important;
+  border-bottom: 1px solid #b91c1c !important;
+}
+html:not([data-theme="dark"]) .mv-card-title,
+html:not([data-theme="dark"]) .mv-view-type,
+html:not([data-theme="dark"]) .mv-hdr-divider {
+  color: #ffffff !important;
+}
+html:not([data-theme="dark"]) .mv-toggle-btn {
+  background: #ffffff !important;
+  color: #dc2626 !important;
+}
+html:not([data-theme="dark"]) .mv-toggle-btn:hover {
+  background: #fee2e2 !important;
+}
+html:not([data-theme="dark"]) .mv-icon-btn {
+  color: #ffffff !important;
+  opacity: 0.8 !important;
+}
+html:not([data-theme="dark"]) .mv-icon-btn:hover {
+  background: #b91c1c !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Column Badges, Filter Row Labels, and Condition Item Tiles Overrides */
+html:not([data-theme="dark"]) .mv-col-badge {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+html:not([data-theme="dark"]) .mv-condition-item {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+html:not([data-theme="dark"]) .mv-cond-check {
+  color: #ffffff !important;
+}

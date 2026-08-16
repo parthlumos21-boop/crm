@@ -366,3 +366,40 @@
     width: 100%;
   }
 }
+
+/* Light mode specific select visibility overrides for bulk uploads page */
+html:not([data-theme="dark"]) body .bua-page select {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) body .bua-page select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+/* Light mode only custom overrides for bulk uploads wizard steps */
+html:not([data-theme="dark"]) .bua-step-inline {
+  background: #dc2626 !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 4px !important;
+  border: 1px solid #b91c1c !important;
+}
+html:not([data-theme="dark"]) .bua-step-number {
+  background: #ffffff !important;
+  color: #dc2626 !important;
+}
+html:not([data-theme="dark"]) .bua-step-text {
+  color: #ffffff !important;
+}
+
+/* Handle inactive vs active step states visually via opacity */
+html:not([data-theme="dark"]) .bua-step-inline:not(.bua-step-inline--active) {
+  opacity: 0.65 !important;
+}

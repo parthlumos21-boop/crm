@@ -683,3 +683,65 @@
   color: inherit;
   opacity: 1;
 }
+
+/* Light mode only custom overrides for Custom Reports Builder (Phase 10) */
+html:not([data-theme="dark"]) .cr-section-heading,
+html:not([data-theme="dark"]) .cr-field-box-head,
+html:not([data-theme="dark"]) .cr-field-group-title,
+html:not([data-theme="dark"]) .cr-topbar-title {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+html:not([data-theme="dark"]) .cr-section-heading h2,
+html:not([data-theme="dark"]) .cr-section-heading span,
+html:not([data-theme="dark"]) .cr-field-box-head span,
+html:not([data-theme="dark"]) .cr-field-box-head label,
+html:not([data-theme="dark"]) .cr-field-group-title,
+html:not([data-theme="dark"]) .cr-topbar-title {
+  color: #ffffff !important;
+}
+
+/* Style all buttons (Back to Reports, New, Save, Save As, Run, row actions, delete, tabs, pagination, transfer, and output actions) red with white text */
+html:not([data-theme="dark"]) .cr-page button,
+html:not([data-theme="dark"]) .cr-page .cr-btn,
+html:not([data-theme="dark"]) .cr-page .cr-output-action,
+html:not([data-theme="dark"]) .cr-page .cr-mini-btn,
+html:not([data-theme="dark"]) .cr-page .cr-field-transfer button,
+html:not([data-theme="dark"]) .cr-page :is(.cr-tabs, .cr-pagination) button,
+html:not([data-theme="dark"]) .cr-page .cr-row-actions button,
+html:not([data-theme="dark"]) .cr-page .cr-icon-danger {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) .cr-page button svg,
+html:not([data-theme="dark"]) .cr-page .cr-btn svg,
+html:not([data-theme="dark"]) .cr-page .cr-output-action svg,
+html:not([data-theme="dark"]) .cr-page .cr-mini-btn svg,
+html:not([data-theme="dark"]) .cr-page .cr-field-transfer button svg,
+html:not([data-theme="dark"]) .cr-page :is(.cr-tabs, .cr-pagination) button svg,
+html:not([data-theme="dark"]) .cr-page .cr-row-actions button svg,
+html:not([data-theme="dark"]) .cr-page .cr-icon-danger svg {
+  color: #ffffff !important;
+  fill: currentColor !important;
+}
+
+/* Light mode only simple Report Fields Selection list override */
+html:not([data-theme="dark"]) .cr-field-box {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+}
+html:not([data-theme="dark"]) .cr-field-list button {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 0.25rem !important;
+}
+html:not([data-theme="dark"]) .cr-field-list button.active {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}

@@ -357,11 +357,6 @@ const AddAccountReportPage = () => {
           </div>
         </section>
 
-        <ReportOutputPreview
-          reportName={formState.reportName || 'Account Report'}
-          selectedFields={formState.selectedFields}
-        />
-
         {pageError && (
           <div className="account-report-builder-error">{pageError}</div>
         )}

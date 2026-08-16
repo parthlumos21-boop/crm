@@ -1633,3 +1633,25 @@
 [data-theme="dark"] .qsr-field-column-empty {
   color: #c7dae6;
 }
+
+/* Light mode toggle pill overrides */
+html:not([data-theme="dark"]) .qsr-pill--on {
+  background: #dc2626 !important;
+}
+html:not([data-theme="dark"]) .qsr-pill--off {
+  background: #d1d5db !important;
+}
+
+/* Dark mode toggle pill overrides */
+[data-theme="dark"] .qsr-pill--on {
+  background: #b91c1c !important;
+}
+[data-theme="dark"] .qsr-pill--off {
+  background: #334155 !important;
+}
+
+/* Light mode only date range toggle OFF override */
+html:not([data-theme="dark"]) .qsr-sq-toggle--off {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}

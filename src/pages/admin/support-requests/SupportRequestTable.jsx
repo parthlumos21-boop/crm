@@ -409,10 +409,9 @@ const SupportRequestTable = ({
           className="support-request-export-btn"
           onClick={handleExport}
           disabled={sortedRows.length === 0}
-          title="Download Excel"
+          title="Export"
         >
-          <FaFileExcel />
-          <span>Excel</span>
+          <span>Export</span>
         </button>
       </header>
 

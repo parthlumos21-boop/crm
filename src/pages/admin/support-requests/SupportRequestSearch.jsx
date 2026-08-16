@@ -237,66 +237,66 @@ const SupportRequestSearch = () => {
                   ))}
                 </select>
 
-                <span className="support-request-search-operator-label">is</span>
+                {condition.fieldKey ? (
+                  <>
+                    <span className="support-request-search-operator-label">is</span>
 
-                <label className="support-request-search-negate">
-                  <input
-                    type="checkbox"
-                    checked={condition.negated}
-                    onChange={(event) => handleConditionChange(condition.id, 'negated', event.target.checked)}
-                  />
-                  <span>not</span>
-                </label>
+                    <label className="support-request-search-negate">
+                      <input
+                        type="checkbox"
+                        checked={condition.negated}
+                        onChange={(event) => handleConditionChange(condition.id, 'negated', event.target.checked)}
+                      />
+                      <span>not</span>
+                    </label>
 
-                <select
-                  className="support-request-search-select support-request-search-select-operator"
-                  value={condition.operator}
-                  onChange={(event) => handleConditionChange(condition.id, 'operator', event.target.value)}
-                  disabled={!condition.fieldKey}
-                >
-                  {operatorOptions.map((operator) => (
-                    <option key={operator.value} value={operator.value}>
-                      {operator.label}
-                    </option>
-                  ))}
-                </select>
-
-                {!shouldHideValue ? (
-                  selectedField?.type === 'date' ? (
-                    <input
-                      type="date"
-                      className="support-request-search-input support-request-search-input-value"
-                      value={condition.value}
-                      onChange={(event) => handleConditionChange(condition.id, 'value', event.target.value)}
-                      disabled={!condition.fieldKey}
-                    />
-                  ) : selectedField?.type === 'select' ? (
                     <select
-                      className="support-request-search-select support-request-search-select-value"
-                      value={condition.value}
-                      onChange={(event) => handleConditionChange(condition.id, 'value', event.target.value)}
-                      disabled={!condition.fieldKey}
+                      className="support-request-search-select support-request-search-select-operator"
+                      value={condition.operator}
+                      onChange={(event) => handleConditionChange(condition.id, 'operator', event.target.value)}
                     >
-                      <option value="">All</option>
-                      {selectedField.options.map((option) => {
-                        const optionValue = typeof option === 'object' ? option.value : option
-                        return (
-                          <option key={optionValue} value={optionValue}>
-                            {typeof option === 'object' ? option.label : formatSupportRequestType(option)}
-                          </option>
-                        )
-                      })}
+                      {operatorOptions.map((operator) => (
+                        <option key={operator.value} value={operator.value}>
+                          {operator.label}
+                        </option>
+                      ))}
                     </select>
-                  ) : (
-                    <input
-                      type="text"
-                      className="support-request-search-input support-request-search-input-value"
-                      value={condition.value}
-                      onChange={(event) => handleConditionChange(condition.id, 'value', event.target.value)}
-                      placeholder=""
-                      disabled={!condition.fieldKey}
-                    />
-                  )
+
+                    {!shouldHideValue ? (
+                      selectedField?.type === 'date' ? (
+                        <input
+                          type="date"
+                          className="support-request-search-input support-request-search-input-value"
+                          value={condition.value}
+                          onChange={(event) => handleConditionChange(condition.id, 'value', event.target.value)}
+                        />
+                      ) : selectedField?.type === 'select' ? (
+                        <select
+                          className="support-request-search-select support-request-search-select-value"
+                          value={condition.value}
+                          onChange={(event) => handleConditionChange(condition.id, 'value', event.target.value)}
+                        >
+                          <option value="">All</option>
+                          {selectedField.options.map((option) => {
+                            const optionValue = typeof option === 'object' ? option.value : option
+                            return (
+                              <option key={optionValue} value={optionValue}>
+                                {typeof option === 'object' ? option.label : formatSupportRequestType(option)}
+                              </option>
+                            )
+                          })}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          className="support-request-search-input support-request-search-input-value"
+                          value={condition.value}
+                          onChange={(event) => handleConditionChange(condition.id, 'value', event.target.value)}
+                          placeholder=""
+                        />
+                      )
+                    ) : null}
+                  </>
                 ) : null}
 
                 <button

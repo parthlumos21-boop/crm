@@ -1321,13 +1321,17 @@
 
 /* Light mode only button and export button overrides for summary reports page */
 html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn {
-  border: 1px solid #d1d5db !important;
+  border: 1px solid #dc2626 !important;
   background: #ffffff !important;
-  color: #374151 !important;
+  color: #dc2626 !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  border-radius: 0.45rem !important;
+  box-sizing: border-box !important;
 }
 
 html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn svg {
-  color: currentColor !important;
+  color: #dc2626 !important;
   fill: currentColor !important;
 }
 
@@ -1346,7 +1350,7 @@ html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-bt
 html:not([data-theme="dark"]) body .summary-reports-page .summary-report-icon-btn--export {
   background: #ffffff !important;
   color: #dc2626 !important;
-  border: 1px solid #b91c1c !important;
+  border: 1px solid #dc2626 !important;
   border-radius: 0.45rem !important;
   height: 2rem !important;
   width: 2rem !important;
