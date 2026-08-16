@@ -2604,10 +2604,12 @@ html body .admin-customers-page .admin-customers-form-input-wrap button.admin-cu
 html:not([data-theme="dark"]) label.admin-customers-form-label[for="customerCategory"],
 html:not([data-theme="dark"]) label.admin-customers-form-label[for="customerOwner"] {
   color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 html:not([data-theme="dark"]) label.admin-customers-form-label[for="customerCategory"] span,
 html:not([data-theme="dark"]) label.admin-customers-form-label[for="customerOwner"] span {
   color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 /* Dark mode specific red theme override to #8B0A05 for Customer Add wizard */
@@ -2617,7 +2619,8 @@ html:not([data-theme="dark"]) label.admin-customers-form-label[for="customerOwne
   --admin-red-hover: #720804 !important;
 }
 
-[data-theme="dark"] label.admin-customers-form-label[for="customerCategory"],
-[data-theme="dark"] label.admin-customers-form-label[for="customerOwner"] {
-  background-color: #8B0A05 !important;
+[data-theme="dark"] body .admin-customers-page label.admin-customers-form-label[for="customerCategory"],
+[data-theme="dark"] body .admin-customers-page label.admin-customers-form-label[for="customerOwner"] {
+  background-color: transparent !important;
+  padding: 0 !important;
 }

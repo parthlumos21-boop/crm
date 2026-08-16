@@ -1095,3 +1095,23 @@
   color: #9fb8c4 !important;
   opacity: 1 !important;
 }
+
+/* Light mode only Team View Tree and Sub-tab overrides (Phase 15) */
+html:not([data-theme="dark"]) .team-view-company-pill,
+html:not([data-theme="dark"]) .team-view-tree-node-pill {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) .ug-btn {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) .ug-btn:hover,
+html:not([data-theme="dark"]) .ug-btn--active {
+  background: #b91c1c !important;
+  color: #ffffff !important;
+}

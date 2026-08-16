@@ -1310,3 +1310,123 @@
   color: #f0fffd !important;
   opacity: 1 !important;
 }
+
+/* Light mode only Dashboard Tab override (Phase 15) */
+html:not([data-theme="dark"]) .ap-tab-add {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) .ap-tab-add:hover {
+  background: #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) .ap-tab-add svg {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Light mode only Dashboard Tab Modal buttons override (Phase 16 - Revised) */
+html:not([data-theme="dark"]) .ap-modal-btn.ap-modal-btn-primary,
+html:not([data-theme="dark"]) .ap-modal-btn.ap-modal-btn-secondary {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: 1px solid #b91c1c !important;
+}
+
+html:not([data-theme="dark"]) .ap-modal-btn.ap-modal-btn-primary:hover,
+html:not([data-theme="dark"]) .ap-modal-btn.ap-modal-btn-secondary:hover {
+  background: #b91c1c !important;
+  color: #ffffff !important;
+}
+
+/* Light mode only explicitly guarantee dropdown visibility */
+html:not([data-theme="dark"]) .ap-modal-form .ap-modal-field:nth-child(2) {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+html:not([data-theme="dark"]) .ap-modal-form .ap-modal-field:nth-child(2) select {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Light mode only explicitly guarantee dropdown OPTIONS visibility */
+html:not([data-theme="dark"]) .ap-modal-form .ap-modal-field select,
+html:not([data-theme="dark"]) .ap-modal-form .ap-modal-field select option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important; /* Solid dark text to guarantee visibility */
+}
+
+/* Light mode only guarantee dropdown OPTIONS visibility for Sales Performance (Phase 17) */
+html:not([data-theme="dark"]) .ap-performance-select select,
+html:not([data-theme="dark"]) .ap-performance-select option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important; /* Solid dark text to guarantee visibility */
+}
+
+/* Light mode only My Profile avatar red theme (Phase 17) */
+html:not([data-theme="dark"]) .ap-mycrm-profile-avatar {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+/* Light mode guarantee for Sales Performance 'Metric:' label visibility (Phase 17 - Updated) */
+html:not([data-theme="dark"]) .ap-performance-select-label {
+  color: #1f2937 !important; /* Solid dark text so the label is clearly displayed */
+  visibility: visible !important;
+}
+
+/* Light mode guarantee dropdown OPTIONS visibility for Sales Performance */
+html:not([data-theme="dark"]) .ap-performance-select select,
+html:not([data-theme="dark"]) .ap-performance-select option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important; /* Solid dark text to guarantee visibility */
+}
+
+/* Light mode only My Profile avatar red theme (replacing blue) */
+html:not([data-theme="dark"]) .ap-mycrm-profile-avatar {
+  background-color: #dc2626 !important; /* Forces red background, replacing blue */
+  color: #ffffff !important; /* Forces white text */
+}
+
+/* Light mode guarantee dropdown SELECT BOX visibility for Sales Performance (Phase 17 - Final Fix) */
+html:not([data-theme="dark"]) select.ap-performance-select,
+html:not([data-theme="dark"]) .ap-performance-select option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important; /* Solid dark text to guarantee visibility */
+}
+
+/* Light mode only My Profile avatar red theme (forces override of linear-gradient) */
+html:not([data-theme="dark"]) .ap-mycrm-profile-avatar {
+  background: #dc2626 !important; /* 'background' overrides 'background-image' (gradient) */
+  color: #ffffff !important;
+}
+
+/* Light mode guarantee for Sales Performance 'Metric:' label text visibility */
+html:not([data-theme="dark"]) .ap-performance-select-label {
+  color: #1f2937 !important; /* Solid dark text so the label is clearly displayed */
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Light mode ULTIMATE guarantee for Sales Performance dropdown text and clickability */
+html:not([data-theme="dark"]) select.ap-performance-select {
+  background-color: #ffffff !important;
+  color: #1f2937 !important; 
+  -webkit-text-fill-color: #1f2937 !important; /* Defeats transparent text fills so text shows! */
+  appearance: menulist !important; /* Forces the dropdown arrow to display */
+  -webkit-appearance: menulist !important;
+  opacity: 1 !important;
+  pointer-events: auto !important; /* Guarantees you can touch/click it */
+}
+
+html:not([data-theme="dark"]) select.ap-performance-select option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  -webkit-text-fill-color: #1f2937 !important;
+}

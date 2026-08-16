@@ -880,10 +880,10 @@
   color: var(--admin-red, #dc2626) !important;
 }
 
-.header--admin .hdr-user-menu .hdr-user-btn,
-.header--admin .hdr-user-menu .hdr-user-btn:hover,
-.header--admin .hdr-user-menu .hdr-user-btn:focus-visible,
-.header--admin .hdr-user-menu .hdr-user-btn[aria-expanded='true'] {
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-user-btn,
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-user-btn:hover,
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-user-btn:focus-visible,
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-user-btn[aria-expanded='true'] {
   background: #ffffff !important;
   background-image: none !important;
   border-color: var(--border-subtle) !important;
@@ -898,18 +898,18 @@
   -webkit-text-fill-color: var(--admin-red, #dc2626) !important;
 }
 
-.header--admin .hdr-user-menu .hdr-user-btn .hdr-username,
-.header--admin .hdr-user-menu .hdr-user-btn .hdr-caret,
-.header--admin .hdr-user-menu .hdr-user-btn .hdr-caret svg {
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-user-btn .hdr-username,
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-user-btn .hdr-caret,
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-user-btn .hdr-caret svg {
   color: #111827 !important;
   fill: currentColor !important;
   stroke: currentColor !important;
   -webkit-text-fill-color: #111827 !important;
 }
 
-.header--admin .hdr-user-menu .hdr-dropdown,
-.header--admin .hdr-user-menu .hdr-dropdown-name,
-.header--admin .hdr-user-menu .hdr-dropdown-item {
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-dropdown,
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-dropdown-name,
+html:not([data-theme="dark"]) .header--admin .hdr-user-menu .hdr-dropdown-item {
   background: #ffffff !important;
   background-image: none !important;
   color: #111827 !important;
@@ -1368,11 +1368,11 @@ html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hd
   -webkit-text-fill-color: #ffffff !important;
 }
 
-/* Final admin night header pass: username and utility icons must remain visible. */
-[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn,
-[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn:hover,
-[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn:focus-visible,
-[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn[aria-expanded='true'] {
+/* Final universal night header pass: username, utility icons, and dropdowns must remain visible for ALL users and admins. */
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn:hover,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn:focus-visible,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn[aria-expanded='true'] {
   border-color: rgba(255, 255, 255, 0.24) !important;
   background: rgba(116, 10, 3, 0.18) !important;
   background-color: rgba(116, 10, 3, 0.18) !important;
@@ -1381,14 +1381,32 @@ html:not([data-theme="dark"]) .header.header--admin .header-action-cluster > .hd
   -webkit-text-fill-color: #ffffff !important;
 }
 
-[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn :is(.hdr-avatar-icon, .hdr-username, .hdr-caret, svg),
-[data-theme="dark"] .header.header--admin .hdr-user-menu .hdr-user-btn svg * {
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn :is(.hdr-avatar-icon, .hdr-username, .hdr-caret, svg),
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-user-menu .hdr-user-btn svg * {
   color: #ffffff !important;
   fill: currentColor !important;
   stroke: currentColor !important;
   -webkit-text-fill-color: #ffffff !important;
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+/* Ensure dropdown text and icons are perfectly visible in Dark Mode for ALL users and admins */
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown-name,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown-item,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown-icon,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown p,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown span,
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown strong {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  fill: currentColor !important;
+}
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) .header .hdr-dropdown {
+  background: var(--surface-card) !important; 
+  background-color: var(--surface-card) !important; 
+  background-image: none !important;
 }
 
 [data-theme="dark"] .header.header--admin .header-action-cluster .hdr-icon-btn {

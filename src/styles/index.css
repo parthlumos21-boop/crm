@@ -1823,10 +1823,25 @@ body:not([data-theme="dark"]) .btn-red-theme:hover {
 }
 
 [data-theme="dark"] {
-  --admin-red: #b91c1c;
-  --admin-red-hover: #991b1b;
-  --admin-red-soft: rgba(185, 28, 28, 0.18);
-  --admin-red-border: #991b1b;
+  --admin-red: #8B0A05;
+  --admin-red-hover: #720804;
+  --admin-red-soft: rgba(139, 10, 5, 0.18);
+  --admin-red-border: #8B0A05;
+}
+
+/* Force perfect text contrast on primary action buttons in Dark Mode */
+[data-theme="dark"] body #root :is(.layout--admin, .layout--user) :where(
+  .btn-primary,
+  .btn-red-theme,
+  button[class*="primary"],
+  button[class*="submit"],
+  button[class*="save"],
+  button[class*="add"],
+  button[class*="action"],
+  button[class*="export"]
+) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 .layout--admin :where(
