@@ -17,7 +17,26 @@ const panelMotion = {
   ease: [0.22, 1, 0.36, 1],
 }
 
-const isLumosLoginValue = (value = '') => String(value).trim().toLowerCase().includes('@lumossolution.com')
+const LUMOS_ONLY_USERS = [
+  "sahana prasenjit",
+  "kuldeep nayi",
+  "manish patel",
+  "vishal vandra",
+  "amiha purohit",
+  "vihal memaria",
+  "jaydip chavda",
+  "dhara"
+]
+
+const isLumosLoginValue = (value = '') => {
+  const normalized = String(value).trim().toLowerCase()
+  if (normalized === 'keval v shah' || normalized === 'keval@swatiswitchgears.com') {
+    return false
+  }
+  return LUMOS_ONLY_USERS.includes(normalized) || 
+         normalized.includes('@lumossolution.com') ||
+         normalized.includes('@gmail.com')
+}
 
 const LoginBrandHeader = ({
   title = '',

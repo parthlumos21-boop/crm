@@ -13,7 +13,37 @@ import { adminModules } from '../../../features/adminLaunchpad/adminModules'
 import { buildAdminDealCustomViewUrl } from '../../../features/adminDeals/config/adminDealViews'
 import { getAdminDealCustomViews, subscribeAdminDealCustomViews } from '../../../features/adminDeals/customViews/dealCustomViewStorage'
 import swatiLogo from '../../../assets/swati-logo.png'
+import lumosLogo from '../../../assets/lumos-logo.svg'
 import './AdminLaunchpad.css'
+
+const LUMOS_ONLY_USERS = [
+  "sahana prasenjit",
+  "kuldeep nayi",
+  "manish patel",
+  "vishal vandra",
+  "amiha purohit",
+  "vihal memaria",
+  "jaydip chavda",
+  "dhara"
+]
+
+const getMonitoringCardLogos = (user) => {
+  const username = String(user?.name || user?.email || '').trim().toLowerCase()
+  
+  if (username === 'keval v shah' || username === 'keval@swatiswitchgears.com') {
+    return { showSwati: true, showLumos: true }
+  }
+  
+  if (
+    LUMOS_ONLY_USERS.includes(username) || 
+    username.includes('@lumossolution.com') ||
+    username.includes('@gmail.com')
+  ) {
+    return { showSwati: false, showLumos: true }
+  }
+
+  return { showSwati: true, showLumos: false }
+}
 
 const chunkModules = (modules, chunkSize) => (
   Array.from({ length: Math.ceil(modules.length / chunkSize) }, (_, index) => (
@@ -45,6 +75,7 @@ const AdminLaunchpad = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
   const isKeval = isKevalVShah(user)
+  const { showSwati, showLumos } = getMonitoringCardLogos(user)
   const [defaultRoute, setDefaultRoute] = useState(() => getAdminDefaultModuleRoute(user))
   const [dealCustomViews, setDealCustomViews] = useState(() => getAdminDealCustomViews())
 
@@ -92,7 +123,10 @@ const AdminLaunchpad = () => {
             <section className="lp-modules-shell">
               <div className="lp-modules-header">
                 <div className="lp-modules-copy" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <img src={swatiLogo} alt="Swati Logo" style={{ height: '120px', marginBottom: '24px' }} />
+                  <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', alignItems: 'center' }}>
+                    {showSwati && <img src={swatiLogo} alt="Swati Logo" style={{ height: '120px' }} />}
+                    {showLumos && <img src={lumosLogo} alt="Lumos Logo" style={{ height: '120px' }} />}
+                  </div>
                   <span className="lp-modules-kicker">Admin Workspace</span>
                   <h1 className="lp-modules-title">LaunchPad</h1>
                   <p className="lp-modules-subtitle">
