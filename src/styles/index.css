@@ -6103,12 +6103,12 @@ html:not([data-theme="dark"]) body #root :is(.layout--admin, .layout--user) .aqp
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  background: #217346 !important; /* Excel Green */
-  background-color: #217346 !important;
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
   background-image: none !important;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
-  border: 1px solid #1e663e !important;
+  border: 1px solid #b91c1c !important;
   border-radius: 0.65rem !important;
   width: auto !important;
   min-width: 8rem !important;
