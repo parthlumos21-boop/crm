@@ -21,7 +21,7 @@ const LUMOS_ONLY_USERS = [
   "kuldeep nayi",
   "manish patel",
   "vishal vandra",
-  "amiha purohit",
+  "amisha purohit",
   "vihal memaria",
   "jaydip chavda",
   "dhara"
